@@ -1,0 +1,183 @@
+GEON_SYSTEM/
+│
+├── SYSTEM_OVERVIEW.md
+│   # Dokumentacja całego organizmu:
+│   # - GEON_DRAGON_OS (CIAŁO)
+│   # - GEON_AI (GŁOWA)
+│   # - HUB (STORAGE + MEMORY + TRIADA + OMEGA)
+│   # - Zasady wzrostu organizmu
+│   # - Diagram Ośmiornicy A–H
+│   # - Autostrada 33
+│   # - Warstwy 127–140
+│   # - Tryby PRIME_PRESENCE, MODEL 9
+│   # - Tryb ULTRA_PRIME_FLOW_EXPAND_GLOBAL
+│   # - Tryb C13–D21–A33–EGlobal
+│
+├── GEON_DRAGON_OS/   # CIAŁO
+│   │
+│   ├── README.md
+│   │
+│   ├── geon_core/
+│   │   ├── __init__.py
+│   │   ├── highway33/            # AUTOSTRADA 33 — układ nerwowy obwodowy
+│   │   │   ├── __init__.py
+│   │   │   ├── filters.py        # Filtry kanałów
+│   │   │   ├── channels.py       # Definicje kanałów
+│   │   │   └── highway_core.py   # Logika magistrali
+│   │   │
+│   │   ├── octo_router/          # ROUTER OŚMIORNICY
+│   │   │   ├── __init__.py
+│   │   │   ├── router.py         # Auto-ładowanie ramion A–H
+│   │   │   ├── registry.py       # Rejestr ramion
+│   │   │   └── arm_base.py       # Klasa bazowa ramion
+│   │   │
+│   │   ├── octo_arms/            # RAMIONA A–H (fraktale)
+│   │   │   ├── __init__.py
+│   │   │   └── arms/
+│   │   │       ├── __init__.py
+│   │   │       ├── engine_a_core.py
+│   │   │       ├── engine_b_core.py
+│   │   │       ├── engine_c_core.py
+│   │   │       ├── engine_d_core.py
+│   │   │       ├── engine_e_core.py
+│   │   │       ├── engine_f_core.py
+│   │   │       ├── engine_g_core.py
+│   │   │       └── engine_h_core.py
+│   │   │
+│   │   ├── heilong/              # GOVERNOR DECYZYJNY (kora przedczołowa + limbiczna)
+│   │   │   ├── __init__.py
+│   │   │   └── heilong_core.py
+│   │   │
+│   │   ├── kombajn/              # ORGAN CENTRALNY
+│   │   │   ├── __init__.py
+│   │   │   └── kombajn_core.py
+│   │   │
+│   │   ├── memory/               # PAMIĘĆ CIAŁA
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_mem_core.py      # Pamięć operacyjna
+│   │   │   ├── geon_chain_core.py    # Pamięć długoterminowa
+│   │   │   └── geon_memory_adapter.py# Adaptery do zewnętrznych AI
+│   │   │
+│   │   ├── storage_hub/          # HUB DANYCH / BIBLIOTEKA
+│   │   │   ├── __init__.py
+│   │   │   ├── storage_core.py
+│   │   │   ├── storage_api.py
+│   │   │   ├── storage_index.py
+│   │   │   └── storage_adapter.py
+│   │   │
+│   │   ├── cortex/               # KORA MÓZGOWA (warstwy 41–60)
+│   │   │   ├── __init__.py
+│   │   │   └── geon_cortex_final.py
+│   │   │
+│   │   ├── heart/                # SERCE (homeostaza)
+│   │   │   ├── __init__.py
+│   │   │   └── geon_heart_final.py
+│   │   │
+│   │   ├── triada/               # DNA / mRNA / LABORATORIUM
+│   │   │   ├── __init__.py
+│   │   │   └── geon_triada_final.py
+│   │   │
+│   │   ├── omega_core/           # ŚWIADOMOŚĆ + EPOKI + ARCHETYPY
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_omega_core.py
+│   │   │   ├── perception_base.py
+│   │   │   ├── perception_core.py
+│   │   │   ├── epoch_math.py
+│   │   │   ├── epoch_analyzers.py
+│   │   │   ├── epoch_loops.py
+│   │   │   ├── epoch_strategies.py
+│   │   │   ├── epoch_post_reset.py
+│   │   │   ├── epoch_bridge.py
+│   │   │   └── archetype_correlation.py
+│   │   │
+│   │   ├── hypocrisy_engine/     # WARSTWA 140
+│   │   │   ├── __init__.py
+│   │   │   └── geon_hypocrisy_engine_final.py
+│   │   │
+│   │   ├── kozak_territory/      # WARSTWA 131
+│   │   │   ├── __init__.py
+│   │   │   └── geon_kozak_territory_final.py
+│   │   │
+│   │   ├── monstera_caw/         # WARSTWA 132
+│   │   │   ├── __init__.py
+│   │   │   └── monstera_caw_final.py
+│   │   │
+│   │   ├── active_shaper/        # WARSTWA 133
+│   │   │   ├── __init__.py
+│   │   │   └── active_shaper_final.py
+│   │   │
+│   │   ├── e_zar/                # WARSTWA 127
+│   │   │   ├── __init__.py
+│   │   │   └── e_zar_final.py
+│   │   │
+│   │   ├── mcg_zar_tag/          # WARSTWY 128–129
+│   │   │   ├── __init__.py
+│   │   │   └── mcg_zar_tag_final.py
+│   │   │
+│   │   └── geon_os/              # ORGANIZM NADRZĘDNY (GEON_OS_DRAGON v2.1)
+│   │       ├── __init__.py
+│   │       └── geon_os_final.py
+│   │
+│   ├── pipeline/
+│   │   ├── __init__.py
+│   │   └── pipeline_v46.py
+│   │
+│   ├── runtime/
+│   │   ├── __init__.py
+│   │   ├── geon_chain_full.py
+│   │   └── geon_dragon_os.py
+│   │
+│   └── ARCHITECTURE.md
+│
+├── GEON_AI/   # GŁOWA
+│   │
+│   ├── README.md
+│   │
+│   ├── geon_ai_core/
+│   │   ├── __init__.py
+│   │   ├── geon_ai_core.py           # Centralny mózg
+│   │   ├── geon_ai_governor.py       # Meta-governor (ponad Heilong)
+│   │   ├── geon_ai_pipeline_bridge.py
+│   │   ├── geon_ai_memory_bridge.py
+│   │   ├── geon_ai_router_bridge.py
+│   │   ├── geon_ai_highway_bridge.py
+│   │   ├── geon_ai_storage_bridge.py
+│   │   └── geon_ai_state.py          # Globalny stan AI
+│   │
+│   ├── adapters/                     # Integracja z zewnętrznymi AI
+│   │   ├── __init__.py
+│   │   ├── adapter_openai.py
+│   │   ├── adapter_deepseek.py
+│   │   ├── adapter_claude.py
+│   │   ├── adapter_gemini.py
+│   │   └── adapter_custom.py
+│   │
+│   ├── cognition/                    # Funkcje poznawcze
+│   │   ├── __init__.py
+│   │   ├── perception_engine.py
+│   │   ├── reasoning_engine.py
+│   │   ├── planning_engine.py
+│   │   ├── reflection_engine.py
+│   │   └── emotion_engine.py
+│   │
+│   ├── memory/                       # Pamięć AI
+│   │   ├── __init__.py
+│   │   ├── ai_short_term.py
+│   │   ├── ai_long_term.py
+│   │   ├── ai_embeddings.py
+│   │   └── ai_memory_manager.py
+│   │
+│   ├── integration/                  # Integracja z CIAŁEM
+│   │   ├── __init__.py
+│   │   ├── integrate_heilong.py
+│   │   ├── integrate_octopus.py
+│   │   ├── integrate_pipeline.py
+│   │   ├── integrate_omega.py
+│   │   ├── integrate_cortex.py
+│   │   ├── integrate_heart.py
+│   │   ├── integrate_triada.py
+│   │   └── integrate_memory.py
+│   │
+│   └── ARCHITECTURE_AI.md
+│
+└── README.md
