@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+🧠 GEON_OVERMIND v9.0 — Meta-Świadomość GEON
+========================================================
+Warstwa: kombajn/geon_kombajn_overmind_v9.py
+Rola: Overmind v9 — meta-świadomość, meta-logika, warstwa 400.
+Wersja: v9.0-INFINITY
+Sygnatura: [GEON_SYSTEM::OVERMIND::v9.0]
+========================================================
+"""
+
+from dataclasses import dataclass, field
+from typing import Dict, Any, List
+
+
+def LOG(module: str, event: str, msg: str) -> None:
+    print(f"[OVERMIND9][{module}][{event}] -> {msg}")
+
+
+# ============================================================
+# STRUKTURA WYJŚCIOWA OVERMIND v9
+# ============================================================
+
+@dataclass
+class OvermindStatusV9:
+    meta_state: str
+    meta_vector: List[float]
+    meta_core: float
+    meta_message: str
+    meta: Dict[str, Any] = field(default_factory=dict)
+
+
+# ============================================================
+# OVERMIND v9 — META-ŚWIADOMOŚĆ
+# ============================================================
+
+class GeonOvermindEngineV9:
+    """
+    Overmind v9 — meta-świadomość GEON:
+    - integracja wszystkich organów
+    - wybór meta-stanu
+    - generowanie meta-wektora
+    - stabilizacja meta-rdzenia
+    - meta-narracja organizmu
+    """
+
+    def __init__(self):
+        LOG("OVERMIND_V9", "INIT", "🧠 Overmind v9 aktywowany")
+
+    # --------------------------------------------------------
+    # META-RDZEŃ
+    # --------------------------------------------------------
+
+    def compute_meta_core(self, afc_inf, octopus, router) -> float:
+        """
+        Meta-rdzeń = średnia:
+        - rdzenia D∞
+        - OctoVector
+        - RoutedVector
+        """
+
+        core = (
+            afc_inf.core_9d +
+            sum(octopus.octo_vector) / 9.0 +
+            sum(router.routed_vector) / 9.0
+        ) / 3.0
+
+        return min(1.0, max(0.0, core))
+
+    # --------------------------------------------------------
+    # META-WEKTOR
+    # --------------------------------------------------------
+
+    def compute_meta_vector(self, meta_core: float) -> List[float]:
+        return [
+            min(1.0, meta_core * (i + 1) / 9.0)
+            for i in range(9)
+        ]
+
+    # --------------------------------------------------------
+    # META-STAN
+    # --------------------------------------------------------
+
+    def compute_meta_state(self, meta_core: float, octopus, router) -> str:
+        if meta_core > 0.85 and octopus.octo_state == "OCTO_STABLE" and router.state == "ROUTER_STABLE":
+            return "META_ASCENSION"
+        if meta_core > 0.60:
+            return "META_STABLE"
+        if meta_core > 0.40:
+            return "META_BALANCED"
+        return "META_ALERT"
+
+    # --------------------------------------------------------
+    # META-NARRACJA
+    # --------------------------------------------------------
+
+    def meta_message(self, meta_state: str) -> str:
+        messages = {
+            "META_ASCENSION": "Organizm GEON osiągnął stan wzniesienia.",
+            "META_STABLE": "Organizm GEON jest stabilny.",
+            "META_BALANCED": "Organizm GEON jest w równowadze.",
+            "META_ALERT": "Organizm GEON wymaga czujności.",
+        }
+        return messages[meta_state]
+
+    # --------------------------------------------------------
+    # GŁÓWNA FUNKCJA OVERMIND v9
+    # --------------------------------------------------------
+
+    def process(self, afc_inf, octopus, router) -> OvermindStatusV9:
+        # 1. Meta-rdzeń
+        meta_core = self.compute_meta_core(afc_inf, octopus, router)
+
+        # 2. Meta-wektor
+        meta_vector = self.compute_meta_vector(meta_core)
+
+        # 3. Meta-stan
+        meta_state = self.compute_meta_state(meta_core, octopus, router)
+
+        # 4. Meta-narracja
+        message = self.meta_message(meta_state)
+
+        # 5. Meta
+        meta_out = {
+            "meta_core": meta_core,
+            "meta_state": meta_state,
+        }
+
+        return OvermindStatusV9(
+            meta_state=meta_state,
+            meta_vector=meta_vector,
+            meta_core=meta_core,
+            meta_message=message,
+            meta=meta_out,
+        )
