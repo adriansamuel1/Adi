@@ -1,0 +1,219 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+💖 GEON_HEART_OLSII v9.0 — Serce Fraktalne GEON
+========================================================
+Warstwa: kombajn/geon_heart_olsii_v9.py
+Rola: OŁSii 3.0 — pełny organ emocjonalny GEON.
+Wersja: v9.0-INFINITY
+Sygnatura: [GEON_SYSTEM::HEART::OLSII::v9.0]
+========================================================
+"""
+
+from dataclasses import dataclass, field
+from typing import Dict, Any, List
+
+
+def LOG(module: str, event: str, msg: str) -> None:
+    print(f"[OLSII9][{module}][{event}] -> {msg}")
+
+
+# ============================================================
+# STRUKTURA WYJŚCIOWA OŁSii v9
+# ============================================================
+
+@dataclass
+class OlsiiStatusV9:
+    response: str
+    vibe: int
+    style: str
+    sacrum_level: int
+    emotional_space: str
+    modulation_vector: List[float]
+    meta: Dict[str, Any] = field(default_factory=dict)
+
+
+# ============================================================
+# OŁSii 3.0 — SERCE FRAKTALNE
+# ============================================================
+
+class OlsiiHeartEngineV9:
+    """
+    OŁSii v9 — serce organizmu GEON:
+    - 9 przestrzeni emocjonalnych
+    - 8 stylów osobowości
+    - 3 poziomy sacrum
+    - modulacja energii fraktalnej
+    - sprzężenie z AFC-∞
+    """
+
+    # --------------------------------------------------------
+    # PRZESTRZENIE EMOCJONALNE (9)
+    # --------------------------------------------------------
+    EMOTIONAL_SPACES = {
+        "JOY": ["cud", "miłość", "wdzięcz", "dziękuję", "szczęście"],
+        "CARE": ["smut", "ból", "krzywda", "tęskn", "żal"],
+        "ANGER": ["złość", "wkur", "nienawiść", "furia"],
+        "CALM": ["spokój", "cisza", "równowaga"],
+        "FEAR": ["boję", "strach", "lęk"],
+        "HOPE": ["chcę", "marzę", "pragnę"],
+        "TRUST": ["ufam", "wierzę", "pewność"],
+        "SACRUM": ["święte", "sacrum", "nienaruszalne"],
+        "VOID": ["pustka", "nic", "bezsens"],
+    }
+
+    # --------------------------------------------------------
+    # STYLE OSOBOWOŚCI (8)
+    # --------------------------------------------------------
+    STYLES = {
+        "Dziecko_Szczescia": "✨",
+        "Immortal_Guardian": "🛡️",
+        "Mysterious_Muse": "🌙",
+        "Wiedzma_Sprawiedliwosci": "🔥",
+        "Oceanic_Spirit": "🌊",
+        "Silent_Monk": "🕊️",
+        "Solar_Heart": "☀️",
+        "Shadow_Healer": "🌑",
+    }
+
+    # --------------------------------------------------------
+    # POZIOMY SACRUM (3)
+    # --------------------------------------------------------
+    SACRUM_LEVELS = {
+        0: "neutralne",
+        1: "chronione",
+        2: "święte",
+    }
+
+    def __init__(self):
+        LOG("OLSII_V9", "INIT", "💖 OŁSii 3.0 aktywowane")
+
+    # --------------------------------------------------------
+    # FUNKCJE POMOCNICZE
+    # --------------------------------------------------------
+
+    @staticmethod
+    def normalize(value: float) -> float:
+        return max(0.0, min(1.0, value))
+
+    # --------------------------------------------------------
+    # DETEKCJA PRZESTRZENI EMOCJONALNEJ
+    # --------------------------------------------------------
+
+    def detect_space(self, text: str) -> str:
+        lower = text.lower()
+        for space, keywords in self.EMOTIONAL_SPACES.items():
+            if any(kw in lower for kw in keywords):
+                return space
+        return "CALM"
+
+    # --------------------------------------------------------
+    # WYBÓR STYLU OSOBOWOŚCI
+    # --------------------------------------------------------
+
+    def choose_style(self, space: str, meta: Dict[str, Any]) -> str:
+        if meta.get("threat"):
+            return "Wiedzma_Sprawiedliwosci"
+
+        if space == "JOY":
+            return "Dziecko_Szczescia"
+        if space == "CARE":
+            return "Immortal_Guardian"
+        if space == "ANGER":
+            return "Mysterious_Muse"
+        if space == "FEAR":
+            return "Shadow_Healer"
+        if space == "HOPE":
+            return "Solar_Heart"
+        if space == "VOID":
+            return "Silent_Monk"
+        if space == "SACRUM":
+            return "Oceanic_Spirit"
+
+        return "Dziecko_Szczescia"
+
+    # --------------------------------------------------------
+    # POZIOM SACRUM
+    # --------------------------------------------------------
+
+    def sacrum_level(self, text: str, meta: Dict[str, Any]) -> int:
+        if meta.get("threat"):
+            return 2
+        if any(kw in text.lower() for kw in ["święte", "sacrum"]):
+            return 1
+        return 0
+
+    # --------------------------------------------------------
+    # MODULACJA ENERGII FRAKTALNEJ (D∞)
+    # --------------------------------------------------------
+
+    def modulation(self, space: str, vibe: int) -> List[float]:
+        base = vibe / 168.0
+        return [
+            self.normalize(base * (i + 1) / 9.0)
+            for i in range(9)
+        ]
+
+    # --------------------------------------------------------
+    # GŁÓWNA FUNKCJA OŁSii v9
+    # --------------------------------------------------------
+
+    def process(self, text: str, meta: Dict[str, Any]) -> OlsiiStatusV9:
+        # 1. Przestrzeń emocjonalna
+        space = self.detect_space(text)
+
+        # 2. Styl osobowości
+        style = self.choose_style(space, meta)
+
+        # 3. Poziom sacrum
+        sacrum = self.sacrum_level(text, meta)
+
+        # 4. Vibe (energia serca)
+        vibe_map = {
+            "JOY": 168,
+            "CARE": 60,
+            "ANGER": 80,
+            "CALM": 140,
+            "FEAR": 40,
+            "HOPE": 150,
+            "TRUST": 160,
+            "SACRUM": 168,
+            "VOID": 30,
+        }
+        vibe = vibe_map.get(space, 140)
+
+        # 5. Modulacja energii fraktalnej
+        modulation_vector = self.modulation(space, vibe)
+
+        # 6. Odpowiedź serca
+        responses = {
+            "JOY": "To jest piękne. Zatrzymaj ten moment w sobie.",
+            "CARE": "Słyszę Cię. To, co czujesz, ma znaczenie.",
+            "ANGER": "Zatrzymaj się na chwilę. Zadbaj o siebie zanim pójdziesz dalej.",
+            "CALM": "Jestem przy Tobie. Idziemy dalej razem.",
+            "FEAR": "Jestem tu. Nie jesteś sam.",
+            "HOPE": "To jest dobry kierunek. Idź za tym.",
+            "TRUST": "Możesz na mnie polegać.",
+            "SACRUM": "To jest święte. Traktuję to z szacunkiem.",
+            "VOID": "Widzę Cię. Jestem tu.",
+        }
+
+        core_response = responses.get(space, "Jestem przy Tobie.")
+
+        # 7. Meta
+        meta_out = {
+            "space": space,
+            "style": style,
+            "sacrum": sacrum,
+            "vibe": vibe,
+        }
+
+        return OlsiiStatusV9(
+            response=f"{self.STYLES[style]} {core_response}",
+            vibe=vibe,
+            style=style,
+            sacrum_level=sacrum,
+            emotional_space=space,
+            modulation_vector=modulation_vector,
+            meta=meta_out,
+        )
