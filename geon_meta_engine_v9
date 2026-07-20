@@ -1,0 +1,197 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+⚙️ GEON_META_ENGINE v9.0 — Układ Wykonawczy GEON
+========================================================
+Warstwa: kombajn/geon_meta_engine_v9.py
+Rola: META 3.0 — organ wykonawczy i decyzyjny GEON.
+Wersja: v9.0-INFINITY
+Sygnatura: [GEON_SYSTEM::META::v9.0]
+========================================================
+"""
+
+from dataclasses import dataclass, field
+from typing import Dict, Any, List
+
+
+def LOG(module: str, event: str, msg: str) -> None:
+    print(f"[META9][{module}][{event}] -> {msg}")
+
+
+# ============================================================
+# STRUKTURA WYJŚCIOWA META v9
+# ============================================================
+
+@dataclass
+class MetaStatusV9:
+    global_decision: str
+    conflicts: List[str]
+    dominant_agent: str
+    decision_vector: List[float]
+    execution_mode: str
+    meta: Dict[str, Any] = field(default_factory=dict)
+
+
+# ============================================================
+# META ENGINE v9 — UKŁAD WYKONAWCZY
+# ============================================================
+
+class MetaAggregatorV9:
+    """
+    META v9 — układ wykonawczy GEON:
+    - integracja głosów organów
+    - wykrywanie konfliktów
+    - wybór dominującego organu
+    - generowanie wektora decyzji
+    - wybór trybu wykonania
+    """
+
+    # --------------------------------------------------------
+    # TRYBY WYKONANIA (4)
+    # --------------------------------------------------------
+    EXECUTION_MODES = {
+        "FLOW": "tryb emocjonalny",
+        "MIND": "tryb poznawczy",
+        "VECTOR": "tryb środowiskowy",
+        "GEON_168": "tryb ochronny",
+        "VISION": "tryb kierunkowy",
+        "OLSII": "tryb serca",
+        "AFC_INF": "tryb fraktalny",
+        "META": "tryb wykonawczy",
+    }
+
+    def __init__(self):
+        LOG("META_V9", "INIT", "⚙️ Meta Engine v9 aktywowany")
+
+    # --------------------------------------------------------
+    # FUNKCJE POMOCNICZE
+    # --------------------------------------------------------
+
+    @staticmethod
+    def normalize(value: float) -> float:
+        return max(0.0, min(1.0, value))
+
+    # --------------------------------------------------------
+    # DETEKCJA KONFLIKTÓW
+    # --------------------------------------------------------
+
+    def detect_conflicts(self, agents: Dict[str, Any]) -> List[str]:
+        conflicts = []
+
+        # Konflikt OŁSii
+        if agents["Olsii"]["vibe"] < 30:
+            conflicts.append("OŁSii: VIBE_CRITICAL")
+
+        # Konflikt GEON_168
+        if agents["GEON_168"]["status"] == "CRITICAL":
+            conflicts.append("GEON_168: INTEGRITY_CRITICAL")
+
+        # Konflikt FLOW
+        if agents["FLOW"]["flow_level"] == "RED":
+            conflicts.append("FLOW: FLOW_RED")
+
+        # Konflikt MIND
+        if agents["MIND"]["classification"] == "wysokie_ryzyko":
+            conflicts.append("MIND: RISK_HIGH")
+
+        # Konflikt VECTOR
+        if agents["VECTOR"]["meta"]["klasyfikacja"] == "wektor_globalny_kryzysowy":
+            conflicts.append("VECTOR: GLOBAL_CRISIS")
+
+        return conflicts
+
+    # --------------------------------------------------------
+    # WYBÓR DOMINUJĄCEGO ORGANU
+    # --------------------------------------------------------
+
+    def choose_dominant_agent(self, agents: Dict[str, Any]) -> str:
+        # Priorytet: GEON_168 > OŁSii > FLOW > MIND > VECTOR > VISION > AFC_INF > META
+
+        if agents["GEON_168"]["status"] == "CRITICAL":
+            return "GEON_168"
+
+        if agents["Olsii"]["vibe"] >= 150:
+            return "OLSII"
+
+        if agents["FLOW"]["flow_level"] == "RED":
+            return "FLOW"
+
+        if agents["MIND"]["classification"] == "chaotyczny":
+            return "MIND"
+
+        if agents["VECTOR"]["meta"]["klasyfikacja"] == "wektor_globalny_chwiejny":
+            return "VECTOR"
+
+        if agents["VISION"]["risk_factor"] > 0.5:
+            return "VISION"
+
+        if agents["AFC_INF"]["entropy_map"]["H∞"] > 0.15:
+            return "AFC_INF"
+
+        return "META"
+
+    # --------------------------------------------------------
+    # WEKTOR DECYZJI (9D)
+    # --------------------------------------------------------
+
+    def build_decision_vector(self, dominant: str, agents: Dict[str, Any]) -> List[float]:
+        base_map = {
+            "GEON_168": agents["GEON_168"]["energy_factor"],
+            "OLSII": agents["Olsii"]["vibe"] / 168.0,
+            "FLOW": agents["FLOW"]["stability"],
+            "MIND": agents["MIND"]["weighted_sum"] / 100.0,
+            "VECTOR": agents["VECTOR"]["meta"]["meta_wektor"] / 100.0,
+            "VISION": agents["VISION"]["trajectory"]["vector"],
+            "AFC_INF": agents["AFC_INF"]["core_9d"],
+            "META": 0.5,
+        }
+
+        base = base_map.get(dominant, 0.5)
+
+        return [
+            self.normalize(base * (i + 1) / 9.0)
+            for i in range(9)
+        ]
+
+    # --------------------------------------------------------
+    # TRYB WYKONANIA
+    # --------------------------------------------------------
+
+    def choose_execution_mode(self, dominant: str) -> str:
+        return self.EXECUTION_MODES.get(dominant, "tryb wykonawczy")
+
+    # --------------------------------------------------------
+    # GŁÓWNA FUNKCJA META v9
+    # --------------------------------------------------------
+
+    def weigh(self, agents: Dict[str, Any]) -> MetaStatusV9:
+        # 1. Konflikty
+        conflicts = self.detect_conflicts(agents)
+
+        # 2. Decyzja globalna
+        global_decision = "BLOKADA" if conflicts else "AKCEPTUJĘ"
+
+        # 3. Dominujący organ
+        dominant = self.choose_dominant_agent(agents)
+
+        # 4. Wektor decyzji
+        decision_vector = self.build_decision_vector(dominant, agents)
+
+        # 5. Tryb wykonania
+        execution_mode = self.choose_execution_mode(dominant)
+
+        # 6. Meta
+        meta_out = {
+            "conflicts": conflicts,
+            "dominant": dominant,
+            "execution_mode": execution_mode,
+        }
+
+        return MetaStatusV9(
+            global_decision=global_decision,
+            conflicts=conflicts,
+            dominant_agent=dominant,
+            decision_vector=decision_vector,
+            execution_mode=execution_mode,
+            meta=meta_out,
+        )
