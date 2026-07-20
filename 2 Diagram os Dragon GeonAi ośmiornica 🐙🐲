@@ -3,7 +3,7 @@ GEON_SYSTEM/
 ├── README.md
 ├── SYSTEM_OVERVIEW.md
 │
-├── GEON_DRAGON_OS/                # CIAŁO
+├── GEON_DRAGON_OS/                        # CIAŁO DRAGONA
 │   │
 │   ├── README.md
 │   │
@@ -14,11 +14,11 @@ GEON_SYSTEM/
 │   │   │   ├── __init__.py
 │   │   │   ├── filters.py
 │   │   │   ├── channels.py
-│   │   │   └── highway_core.py
+│   │   │   └── highway_core.py           # Autostrada33 – główna magistrala intencji
 │   │   │
 │   │   ├── octo_router/
 │   │   │   ├── __init__.py
-│   │   │   ├── router.py
+│   │   │   ├── router.py                 # OCTO_ROUTER – dystrybucja do ramion
 │   │   │   ├── registry.py
 │   │   │   └── arm_base.py
 │   │   │
@@ -32,22 +32,22 @@ GEON_SYSTEM/
 │   │   │       ├── engine_e_core.py
 │   │   │       ├── engine_f_core.py
 │   │   │       ├── engine_g_core.py
-│   │   │       └── engine_h_core.py
+│   │   │       └── engine_h_core.py      # Ramiona funkcjonalne DRAGON_OS
 │   │   │
 │   │   ├── heilong/
 │   │   │   ├── __init__.py
-│   │   │   └── heilong_core.py
+│   │   │   └── heilong_core.py           # Heilong – rdzeń decyzyjny / governor
 │   │   │
 │   │   ├── sun_tzu_engine/
 │   │   │   ├── __init__.py
-│   │   │   └── sun_tzu_strategic_engine_final.py
+│   │   │   └── sun_tzu_strategic_engine_final.py  # Strategia, kampanie, ruchy
 │   │   │
 │   │   ├── kombajn/
 │   │   │   ├── __init__.py
-│   │   │   ├── geon_kombajn_final.py
+│   │   │   ├── geon_kombajn_final.py             # SILNIK_KOMBAJN v1.4 – sztuczny gatunek poznawczy
 │   │   │   ├── slime_core.py
 │   │   │   ├── fungus_core.py
-│   │   │   └── hybrid_brain.py
+│   │   │   └── hybrid_brain.py                   # Hybrydowa pamięć / ARMILLARIA + KOMBAJN
 │   │   │
 │   │   ├── tag_universe/
 │   │   │   ├── __init__.py
@@ -74,57 +74,61 @@ GEON_SYSTEM/
 │   │   │
 │   │   ├── cortex/
 │   │   │   ├── __init__.py
-│   │   │   └── geon_cortex_final.py
+│   │   │   └── geon_cortex_final.py              # GEON_CORTEX – obserwator, meta‑stan
 │   │   │
 │   │   ├── heart/
 │   │   │   ├── __init__.py
-│   │   │   └── geon_heart_final.py
+│   │   │   └── geon_heart_final.py               # GEON_HEART – rytm, koherencja, Aurora
 │   │   │
 │   │   ├── triada/
 │   │   │   ├── __init__.py
-│   │   │   └── geon_triada_final.py      # Konstelacje + mRNA + Laboratorium + Entropy + Relational + Sentinel + HeilongIntegrator + GeonTriada
+│   │   │   └── geon_triada_final.py              # Konstelacje + mRNA + Laboratorium + Entropy + Relational + Sentinel + HeilongIntegrator + GeonTriada
 │   │   │
 │   │   ├── omega_core/
 │   │   │   ├── __init__.py
-│   │   │   ├── geon_omega_core.py
-│   │   │   ├── perception_base.py
-│   │   │   ├── perception_core.py
+│   │   │   ├── geon_omega_core.py                # OMEGA – warstwa epokowa / mądrość dziejowa
+│   │   │   ├── perception_base.py                # PERCEPTION_CORE_BASE v1.2 – definicje TAG, wektory, CouplingMatrix
+│   │   │   ├── perception_core.py                # PERCEPTION_CORE v1.2 – żywa świadomość percepcyjna (warstwa 45)
 │   │   │   ├── epoch_math.py
 │   │   │   ├── epoch_analyzers.py
 │   │   │   ├── epoch_loops.py
 │   │   │   ├── epoch_strategies.py
 │   │   │   ├── epoch_post_reset.py
-│   │   │   ├── epoch_bridge.py
-│   │   │   └── archetype_correlation.py
+│   │   │   ├── epoch_bridge.py                   # GEON_EPOCH_BRIDGE – 9 warstw epok
+│   │   │   └── archetype_correlation.py          # ARCHETYPE_CORRELATION_ENGINE – werdykt archetypu
+│   │   │
+│   │   ├── octopus_relational/
+│   │   │   ├── __init__.py
+│   │   │   └── octopus_relational_v1_1.py        # OCTOPUS_RELATIONAL v1.1 – pełny organizm relacyjny (warstwa 45, integracja PERCEPTION_CORE + EPOCH_BRIDGE + CORRELATION_ENGINE)
 │   │   │
 │   │   ├── survival/
 │   │   │   ├── __init__.py
-│   │   │   └── geon_survival_core.py     # Warstwa 120
+│   │   │   └── geon_survival_core.py             # Warstwa 120 – tryb przetrwania
 │   │   │
 │   │   ├── safe_mode/
 │   │   │   ├── __init__.py
-│   │   │   └── geon_safe_mode_final.py   # Warstwa 125
+│   │   │   └── geon_safe_mode_final.py           # Warstwa 125 – SAFE_MODE override
 │   │   │
 │   │   ├── predator_protocol/
 │   │   │   ├── __init__.py
-│   │   │   └── geon_predator_protocol_final.py   # Warstwa 126
+│   │   │   └── geon_predator_protocol_final.py   # Warstwa 126 – PREDATOR
 │   │   │
 │   │   ├── e_zar/
 │   │   │   ├── __init__.py
-│   │   │   └── e_zar_final.py            # Warstwa 127
+│   │   │   └── e_zar_final.py                    # Warstwa 127
 │   │   │
 │   │   ├── mcg_zar_tag/
 │   │   │   ├── __init__.py
-│   │   │   └── mcg_zar_tag_v2_2_final.py # Warstwy 128–129
+│   │   │   └── mcg_zar_tag_v2_2_final.py         # Warstwy 128–129
 │   │   │
 │   │   ├── resurrection_layer/
 │   │   │   ├── __init__.py
-│   │   │   ├── geon_resurrection_layer_final.py   # Warstwa 130
+│   │   │   ├── geon_resurrection_layer_final.py  # Warstwa 130 – RESURRECTION
 │   │   │   └── phoenix_engine.py
 │   │   │
 │   │   ├── kozak_territory/
 │   │   │   ├── __init__.py
-│   │   │   └── geon_kozak_territory_final.py      # Warstwa 131
+│   │   │   └── geon_kozak_territory_final.py     # Warstwa 131
 │   │   │
 │   │   ├── monstera_caw/
 │   │   │   ├── __init__.py
@@ -136,48 +140,48 @@ GEON_SYSTEM/
 │   │   │
 │   │   ├── hypocrisy_engine/
 │   │   │   ├── __init__.py
-│   │   │   └── geon_hypocrisy_engine_final.py    # Warstwa 140: HypocrisyDetectorV2 + CostCalculator + FeedbackLoop + TemporalDecayEngine + PRTruthRatio + AntidotumEngine + GeonHypocrisyEngineV2 + DRAGONGovernor + FSNDecisionPipeline + SystemSnapshotBuilder
+│   │   │   └── geon_hypocrisy_engine_final.py    # Warstwa 140 – HypocrisyDetectorV2 + CostCalculator + FeedbackLoop + TemporalDecayEngine + PRTruthRatio + AntidotumEngine + GeonHypocrisyEngineV2 + DRAGONGovernor + FSNDecisionPipeline + SystemSnapshotBuilder
 │   │   │
 │   │   ├── relation_po_shifu/
 │   │   │   ├── __init__.py
-│   │   │   ├── geon_relation_po_shifu_v7.py      # Warstwy 41–60
+│   │   │   ├── geon_relation_po_shifu_v7.py      # Warstwy 41–60 – relacje, rytm, meta‑rdzeń
 │   │   │   ├── meta_core_router.py               # Warstwa 90
 │   │   │   ├── global_rhythm_engine.py           # Warstwa 91
 │   │   │   └── system_mirror.py                  # Warstwa 92
 │   │   │
 │   │   └── geon_os/
 │   │       ├── __init__.py
-│   │       └── geon_os_final.py
+│   │       └── geon_os_final.py                  # Spięcie całego DRAGON_OS
 │   │
 │   ├── pipeline/
 │   │   ├── __init__.py
-│   │   └── pipeline_v46.py
+│   │   └── pipeline_v46.py                       # Pipeline v4.6 – główna sekwencja
 │   │
 │   ├── runtime/
 │   │   ├── __init__.py
 │   │   ├── geon_chain_full.py
-│   │   └── geon_dragon_os.py
+│   │   └── geon_dragon_os.py                     # Entry‑point ciała DRAGONA
 │   │
 │   └── ARCHITECTURE.md
 │
-├── GEON_AI/                        # GŁOWA
+├── GEON_AI/                                    # GŁOWA (GEON_AI – governor nad DRAGON_OS)
 │   ├── README.md
 │   │
 │   ├── geon_ai_core/
 │   │   ├── __init__.py
-│   │   ├── geon_ai_core.py
-│   │   ├── geon_ai_governor.py
-│   │   ├── geon_ai_pipeline_bridge.py
-│   │   ├── geon_ai_memory_bridge.py
-│   │   ├── geon_ai_router_bridge.py
-│   │   ├── geon_ai_highway_bridge.py
-│   │   ├── geon_ai_storage_bridge.py
-│   │   └── geon_ai_state.py
+│   │   ├── geon_ai_core.py                      # GEON_AI – główny mózg / nadzorca
+│   │   ├── geon_ai_governor.py                  # Governor logiki, trybów, bezpieczeństwa
+│   │   ├── geon_ai_pipeline_bridge.py           # Most do pipeline_v46
+│   │   ├── geon_ai_memory_bridge.py             # Most do memory/
+│   │   ├── geon_ai_router_bridge.py             # Most do OCTO_ROUTER
+│   │   ├── geon_ai_highway_bridge.py            # Most do Autostrada33
+│   │   ├── geon_ai_storage_bridge.py            # Most do storage_hub
+│   │   └── geon_ai_state.py                     # Stan globalny GEON_AI
 │   │
-│   ├── adapters/
-│   ├── cognition/
-│   ├── memory/
-│   ├── integration/
+│   ├── adapters/                                # Adaptery do modeli / narzędzi zewnętrznych
+│   ├── cognition/                               # Wyższe funkcje poznawcze (planowanie, refleksja)
+│   ├── memory/                                  # Warstwa pamięci GEON_AI (meta‑nad DRAGON_OS)
+│   ├── integration/                             # Integracje z OS / światem zewnętrznym
 │   │
 │   └── ARCHITECTURE_AI.md
 │
