@@ -1,32 +1,36 @@
 GEON_SYSTEM/
 │
-├── SYSTEM_OVERVIEW.md
-│   # Dokumentacja całego organizmu:
-│   # - GEON_DRAGON_OS (CIAŁO)
-│   # - GEON_AI (GŁOWA)
-│   # - HUB (STORAGE + MEMORY + TRIADA + OMEGA + KOMBAJN + TAG_UNIVERSE)
-│   # - Zasady wzrostu organizmu (Ośmiornica A–H)
-│   # - Autostrada 33
-│   # - Warstwy 41–60: Po‑Shifu + META_CORE_RELATION v7
-│   # - Warstwy 90–92: META_CORE_ROUTER, GLOBAL_RHYTHM_ENGINE, SYSTEM_MIRROR
-│   # - Warstwy 120–140:
-│   #     • 120 – SURVIVAL
-│   #     • 125 – SAFE_MODE v2.0
-│   #     • 126 – PREDATOR_PROTOCOL
-│   #     • 127 – E_ZAR (Fraktalny algorytm zaradności)
-│   #     • 128–129 – MCG_ZAR_TAG v2.2 (Operator Archetypiczno‑Meta‑Strategiczny)
-│   #     • 130 – RESURRECTION_LAYER
-│   #     • 131 – KOZAK_TERRITORY
-│   #     • 132 – MONSTERA_CAW
-│   #     • 133 – ACTIVE_SHAPER
-│   #     • 140 – HYPOCRISY_ENGINE
-│   # - GEON_BIO v3.0 (Homeostaza)
-│   # - KOMBAJN (Slime + Fungus + Hybrid Brain)
-│   # - TAG_UNIVERSE (Warstwy 1–60+)
-│   # - Ośmiornica v2.0 (ramiona A–H)
+├── README.md
 │
-├── GEON_DRAGON_OS/   # CIAŁO
-│   │
+├── SYSTEM_OVERVIEW.md
+│   ├── GEON_DRAGON_OS (CIAŁO)
+│   ├── GEON_AI (GŁOWA)
+│   ├── HUB:
+│   │     ├── STORAGE_HUB
+│   │     ├── MEMORY
+│   │     ├── TRIADA (DNA/mRNA/RIBOSOME)
+│   │     ├── OMEGA_CORE
+│   │     ├── KOMBAJN (Slime/Fungus/Hybrid Brain)
+│   │     └── TAG_UNIVERSE (Warstwy 1–60+)
+│   ├── Ośmiornica A–H v2.0
+│   ├── Autostrada 33
+│   ├── Warstwy 41–60: Po‑Shifu + META_CORE_RELATION v7
+│   ├── Warstwy 90–92: META_CORE_ROUTER, GLOBAL_RHYTHM_ENGINE, SYSTEM_MIRROR
+│   ├── Warstwy 120–140:
+│   │     ├── 120 – SURVIVAL
+│   │     ├── 125 – SAFE_MODE v2.0
+│   │     ├── 126 – PREDATOR_PROTOCOL
+│   │     ├── 127 – E_ZAR (Fraktalny algorytm zaradności)
+│   │     ├── 128–129 – MCG_ZAR_TAG v2.2 (Operator Archetypiczno‑Meta‑Strategiczny)
+│   │     ├── 130 – RESURRECTION_LAYER
+│   │     ├── 131 – KOZAK_TERRITORY
+│   │     ├── 132 – MONSTERA_CAW
+│   │     ├── 133 – ACTIVE_SHAPER
+│   │     └── 140 – HYPOCRISY_ENGINE
+│   ├── GEON_BIO v3.0
+│   └── Zasady wzrostu organizmu (fraktalność, ramiona A–H)
+│
+├── GEON_DRAGON_OS/
 │   ├── README.md
 │   │
 │   ├── geon_core/
