@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+🧬 GEON_KOMBAJN_MEMORY v9.0 — Pamięć Fraktalna Organizmu GEON
+=============================================================
+Warstwa: kombajn/geon_kombajn_memory_v9.py
+Rola: Memory v9 — pamięć fraktalna, trendy, historia, meta-pamięć.
+Wersja: v9.0-INFINITY
+Sygnatura: [GEON_SYSTEM::MEMORY::v9.0]
+=============================================================
+"""
+
+import time
+from dataclasses import dataclass, field
+from typing import Dict, Any, List
+
+
+def LOG(module: str, event: str, msg: str) -> None:
+    print(f"[MEMORY9][{module}][{event}] -> {msg}")
+
+
+# ============================================================
+# STRUKTURA PAMIĘCI v9
+# ============================================================
+
+@dataclass
+class MemorySnapshotV9:
+    timestamp: float
+    energy_inf: float
+    entropy_inf: float
+    vibe: int
+    decision: str
+    dominant_agent: str
+    direction_vector: List[float]
+    stability: float
+    heartbeat: float
+    meta: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class MemoryStateV9:
+    snapshots: List[MemorySnapshotV9] = field(default_factory=list)
+    trends: Dict[str, float] = field(default_factory=dict)
+    last_snapshot: Dict[str, Any] = field(default_factory=dict)
+    timestamp: float = field(default_factory=time.time)
+
+
+# ============================================================
+# MEMORY v9 — HIPOKAMP ORGANIZMU GEON
+# ============================================================
+
+class GeonKombajnMemoryV9:
+    """
+    Memory v9 — pamięć fraktalna GEON:
+    - zapis snapshotów
+    - analiza trendów
+    - meta-pamięć
+    - sprzężenie z runtime
+    """
+
+    def __init__(self):
+        LOG("MEMORY_V9", "INIT", "🧬 Pamięć fraktalna GEON v9 aktywowana")
+        self.state = MemoryStateV9()
+
+    # --------------------------------------------------------
+    # TWORZENIE SNAPSHOTA
+    # --------------------------------------------------------
+
+    def create_snapshot(self, runtime_result: Dict[str, Any]) -> MemorySnapshotV9:
+        afc_inf = runtime_result["afc_inf"]
+        olsii = runtime_result["olsii"]
+        meta = runtime_result["meta"]
+        vision = runtime_result["vision"]
+        flow = runtime_result["flow"]
+        homeo = runtime_result["homeostasis"]
+
+        return MemorySnapshotV9(
+            timestamp=time.time(),
+            energy_inf=afc_inf["energy_map"]["E∞"],
+            entropy_inf=afc_inf["entropy_map"]["H∞"],
+            vibe=olsii["vibe"],
+            decision=meta["global_decision"],
+            dominant_agent=meta["dominant_agent"],
+            direction_vector=vision["direction_vector"],
+            stability=flow["stability"],
+            heartbeat=homeo["heartbeat"],
+            meta={
+                "trajectory": vision["trajectory"],
+                "critical_points": vision["critical_points"],
+                "environment": {
+                    "dom": runtime_result["vector"]["dom"],
+                    "wspolnota": runtime_result["vector"]["wspolnota"],
+                    "planeta": runtime_result["vector"]["planeta"],
+                },
+            },
+        )
+
+    # --------------------------------------------------------
+    # ZAPIS SNAPSHOTA
+    # --------------------------------------------------------
+
+    def store_snapshot(self, snapshot: MemorySnapshotV9):
+        self.state.snapshots.append(snapshot)
+        if len(self.state.snapshots) > 500:
+            self.state.snapshots.pop(0)
+        self.state.last_snapshot = snapshot.__dict__
+
+    # --------------------------------------------------------
+    # ANALIZA TRENDÓW
+    # --------------------------------------------------------
+
+    def compute_trends(self):
+        if len(self.state.snapshots) < 2:
+            self.state.trends = {
+                "energy_trend": 0.0,
+                "entropy_trend": 0.0,
+                "vibe_trend": 0.0,
+                "stability_trend": 0.0,
+                "heartbeat_trend": 0.0,
+            }
+            return self.state.trends
+
+        last = self.state.snapshots[-1]
+        prev = self.state.snapshots[-2]
+
+        self.state.trends = {
+            "energy_trend": last.energy_inf - prev.energy_inf,
+            "entropy_trend": last.entropy_inf - prev.entropy_inf,
+            "vibe_trend": last.vibe - prev.vibe,
+            "stability_trend": last.stability - prev.stability,
+            "heartbeat_trend": last.heartbeat - prev.heartbeat,
+        }
+
+        return self.state.trends
+
+    # --------------------------------------------------------
+    # GŁÓWNA FUNKCJA MEMORY v9
+    # --------------------------------------------------------
+
+    def update(self, runtime_result: Dict[str, Any]) -> Dict[str, Any]:
+        snapshot = self.create_snapshot(runtime_result)
+        self.store_snapshot(snapshot)
+        trends = self.compute_trends()
+
+        LOG("MEMORY_V9", "UPDATE", f"Snapshot zapisany | energia={snapshot.energy_inf:.3f}")
+
+        return {
+            "snapshot": snapshot.__dict__,
+            "trends": trends,
+            "history_length": len(self.state.snapshots),
+        }
