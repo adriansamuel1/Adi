@@ -4,15 +4,27 @@ GEON_SYSTEM/
 │   # Dokumentacja całego organizmu:
 │   # - GEON_DRAGON_OS (CIAŁO)
 │   # - GEON_AI (GŁOWA)
-│   # - HUB (STORAGE + MEMORY + TRIADA + OMEGA)
+│   # - HUB (STORAGE + MEMORY + TRIADA + OMEGA + KOMBAJN)
 │   # - Zasady wzrostu organizmu
 │   # - Diagram Ośmiornicy A–H
 │   # - Autostrada 33
-│   # - Warstwy 120–140 (SURVIVAL + SAFE_MODE + PREDATOR + RESURRECTION + KOZAK + MONSTERA + ACTIVE_SHAPER + HYPOCRISY)
+│   # - Warstwy 120–140:
+│   #     • 120 – SURVIVAL
+│   #     • 125 – SAFE_MODE v2.0
+│   #     • 126 – PREDATOR_PROTOCOL
+│   #     • 127 – E_ZAR
+│   #     • 128–129 – MCG_ZAR_TAG
+│   #     • 130 – RESURRECTION_LAYER
+│   #     • 131 – KOZAK_TERRITORY
+│   #     • 132 – MONSTERA_CAW
+│   #     • 133 – ACTIVE_SHAPER
+│   #     • 140 – HYPOCRISY_ENGINE
+│   # - META_CORE_RELATION v7 (warstwa 90)
+│   # - GLOBAL_RHYTHM_ENGINE (warstwa 91)
+│   # - SYSTEM_MIRROR (warstwa 92)
 │   # - Organ strategiczny SUN_TZU_STRATEGIC_ENGINE
-│   # - Organ hybrydowy KOMBAJN (SLIME + FUNGUS + HYBRID_BRAIN)
-│   # - Warstwa BIO v3.0 – homeostaza systemu
-│   # - META_CORE_RELATION v7 (Po–Shifu)
+│   # - KOMBAJN (Slime + Fungus + Hybrid Brain)
+│   # - GEON_BIO v3.0 – CRITICAL_RECOVERY_LAYER
 │
 ├── GEON_DRAGON_OS/   # CIAŁO
 │   │
@@ -49,61 +61,102 @@ GEON_SYSTEM/
 │   │   │   ├── __init__.py
 │   │   │   └── heilong_core.py
 │   │   │
-│   │   ├── sun_tzu_engine/        # ORGAN STRATEGICZNY
+│   │   ├── sun_tzu_engine/
 │   │   │   ├── __init__.py
 │   │   │   └── sun_tzu_strategic_engine_final.py
 │   │   │
-│   │   ├── kombajn/               # HYBRYDOWY ORGAN PAMIĘCI (SLIME + FUNGUS + HYBRID_BRAIN)
+│   │   ├── kombajn/               # HYBRYDOWY ORGAN PAMIĘCI
 │   │   │   ├── __init__.py
 │   │   │   ├── geon_kombajn_final.py
 │   │   │   ├── slime_core.py
 │   │   │   ├── fungus_core.py
 │   │   │   └── hybrid_brain.py
 │   │   │
-│   │   ├── bio_layer/             # WARSTWA BIO v3.0 – HOMEOSTAZA
+│   │   ├── memory/
 │   │   │   ├── __init__.py
-│   │   │   └── geon_bio_final.py
+│   │   │   ├── geon_mem_core.py
+│   │   │   ├── geon_chain_core.py
+│   │   │   └── geon_memory_adapter.py
 │   │   │
-│   │   ├── survival/              # WARSTWA 120
+│   │   ├── storage_hub/
+│   │   │   ├── __init__.py
+│   │   │   ├── storage_core.py
+│   │   │   ├── storage_api.py
+│   │   │   ├── storage_index.py
+│   │   │   └── storage_adapter.py
+│   │   │
+│   │   ├── cortex/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_cortex_final.py
+│   │   │
+│   │   ├── heart/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_heart_final.py
+│   │   │
+│   │   ├── triada/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_triada_final.py
+│   │   │
+│   │   ├── omega_core/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_omega_core.py
+│   │   │   ├── perception_base.py
+│   │   │   ├── perception_core.py
+│   │   │   ├── epoch_math.py
+│   │   │   ├── epoch_analyzers.py
+│   │   │   ├── epoch_loops.py
+│   │   │   ├── epoch_strategies.py
+│   │   │   ├── epoch_post_reset.py
+│   │   │   ├── epoch_bridge.py
+│   │   │   └── archetype_correlation.py
+│   │   │
+│   │   ├── survival/             # WARSTWA 120
 │   │   │   ├── __init__.py
 │   │   │   └── geon_survival_core.py
 │   │   │
-│   │   ├── safe_mode/             # WARSTWA 125 – SAFE_MODE v2.0
+│   │   ├── safe_mode/            # WARSTWA 125 – SAFE_MODE v2.0
 │   │   │   ├── __init__.py
 │   │   │   └── geon_safe_mode_final.py
 │   │   │
-│   │   ├── predator_protocol/     # WARSTWA 126 – PREDATOR MODE
+│   │   ├── predator_protocol/    # WARSTWA 126 – PREDATOR
 │   │   │   ├── __init__.py
 │   │   │   └── geon_predator_protocol_final.py
 │   │   │
-│   │   ├── e_zar/                 # WARSTWA 127
+│   │   ├── e_zar/                # WARSTWA 127
 │   │   │   ├── __init__.py
 │   │   │   └── e_zar_final.py
 │   │   │
-│   │   ├── mcg_zar_tag/           # WARSTWY 128–129
+│   │   ├── mcg_zar_tag/          # WARSTWY 128–129
 │   │   │   ├── __init__.py
 │   │   │   └── mcg_zar_tag_final.py
 │   │   │
-│   │   ├── resurrection_layer/    # WARSTWA 130 – RESURRECTION
+│   │   ├── resurrection_layer/   # WARSTWA 130
 │   │   │   ├── __init__.py
 │   │   │   ├── geon_resurrection_layer_final.py
 │   │   │   └── phoenix_engine.py
 │   │   │
-│   │   ├── kozak_territory/       # WARSTWA 131
+│   │   ├── kozak_territory/      # WARSTWA 131
 │   │   │   ├── __init__.py
 │   │   │   └── geon_kozak_territory_final.py
 │   │   │
-│   │   ├── monstera_caw/          # WARSTWA 132
+│   │   ├── monstera_caw/         # WARSTWA 132
 │   │   │   ├── __init__.py
 │   │   │   └── monstera_caw_final.py
 │   │   │
-│   │   ├── active_shaper/         # WARSTWA 133
+│   │   ├── active_shaper/        # WARSTWA 133
 │   │   │   ├── __init__.py
 │   │   │   └── active_shaper_final.py
 │   │   │
-│   │   ├── hypocrisy_engine/      # WARSTWA 140
+│   │   ├── hypocrisy_engine/     # WARSTWA 140
 │   │   │   ├── __init__.py
 │   │   │   └── geon_hypocrisy_engine_final.py
+│   │   │
+│   │   ├── relation_po_shifu/    # WARSTWY 41–60 + META_CORE_RELATION v7
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_relation_po_shifu_v7.py
+│   │   │   ├── meta_core_router.py      # warstwa 90
+│   │   │   ├── global_rhythm_engine.py  # warstwa 91
+│   │   │   └── system_mirror.py         # warstwa 92
 │   │   │
 │   │   └── geon_os/
 │   │       ├── __init__.py
@@ -132,7 +185,6 @@ GEON_SYSTEM/
 │   │   ├── geon_ai_highway_bridge.py
 │   │   ├── geon_ai_storage_bridge.py
 │   │   └── geon_ai_state.py
-│   │
 │   ├── adapters/
 │   ├── cognition/
 │   ├── memory/
