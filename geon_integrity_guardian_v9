@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+🛡️ GEON_INTEGRITY_GUARDIAN v9.0 — Układ Odpornościowy GEON
+===========================================================
+Warstwa: kombajn/geon_integrity_guardian_v9.py
+Rola: GEON_168 v9 — pełny system odpornościowy organizmu GEON.
+Wersja: v9.0-INFINITY
+Sygnatura: [GEON_SYSTEM::GEON_168::v9.0]
+===========================================================
+"""
+
+from dataclasses import dataclass, field
+from typing import Dict, Any, List
+
+
+def LOG(module: str, event: str, msg: str) -> None:
+    print(f"[GEON168v9][{module}][{event}] -> {msg}")
+
+
+# ============================================================
+# STRUKTURA WYJŚCIOWA GEON_168 v9
+# ============================================================
+
+@dataclass
+class Geon168StatusV9:
+    status: str
+    score: int
+    issues: List[str]
+    immunity_level: int
+    reaction_mode: str
+    stability_factor: float
+    entropy_factor: float
+    energy_factor: float
+    meta: Dict[str, Any] = field(default_factory=dict)
+
+
+# ============================================================
+# GEON_168 v9 — UKŁAD ODPORNOŚCIOWY
+# ============================================================
+
+class Geon168GuardianV9:
+    """
+    GEON_168 v9 — układ odpornościowy GEON:
+    - ocena integralności D9 i D∞
+    - 9 poziomów odporności
+    - 3 tryby reakcji
+    - analiza energii fraktalnej
+    - analiza entropii
+    - stabilizacja organizmu
+    """
+
+    # --------------------------------------------------------
+    # 9 POZIOMÓW ODPORNOŚCI
+    # --------------------------------------------------------
+    IMMUNITY_LEVELS = {
+        0: "BRAK",
+        1: "NISKA",
+        2: "CZĘŚCIOWA",
+        3: "STANDARDOWA",
+        4: "WZMOCNIONA",
+        5: "WYSOKA",
+        6: "BARDZO_WYSOKA",
+        7: "EKSTREMALNA",
+        8: "ABSOLUTNA",
+        9: "TRANSCENDENTNA",
+    }
+
+    # --------------------------------------------------------
+    # 3 TRYBY REAKCJI
+    # --------------------------------------------------------
+    REACTION_MODES = {
+        "NORMAL": "normalna regulacja",
+        "GUARD": "ochrona rdzenia",
+        "SHIELD": "pełna blokada",
+    }
+
+    def __init__(self):
+        LOG("GEON_168_V9", "INIT", "🛡️ GEON_168 v9 aktywowany")
+
+    # --------------------------------------------------------
+    # FUNKCJE POMOCNICZE
+    # --------------------------------------------------------
+
+    @staticmethod
+    def normalize(value: float) -> float:
+        return max(0.0, min(1.0, value))
+
+    # --------------------------------------------------------
+    # GŁÓWNA FUNKCJA GEON_168 v9
+    # --------------------------------------------------------
+
+    def analyze(self, d9: List[float], d_inf: List[float], vibe: int) -> Geon168StatusV9:
+        issues = []
+        score = 168
+
+        # ----------------------------------------------------
+        # 1. Sprawdzenie długości wektora
+        # ----------------------------------------------------
+        if len(d9) != 9:
+            issues.append(f"Wektor D9 ma długość {len(d9)}, oczekiwano 9")
+            score -= 40
+
+        if len(d_inf) != 9:
+            issues.append(f"Wektor D∞ ma długość {len(d_inf)}, oczekiwano 9")
+            score -= 40
+
+        # ----------------------------------------------------
+        # 2. Energia fraktalna
+        # ----------------------------------------------------
+        energy_d9 = sum(d9)
+        energy_inf = sum(d_inf)
+
+        if energy_d9 < 0.1:
+            issues.append("Energia D9 zbyt niska")
+            score -= 30
+
+        if energy_inf < 0.1:
+            issues.append("Energia D∞ zbyt niska")
+            score -= 30
+
+        # ----------------------------------------------------
+        # 3. Entropia fraktalna
+        # ----------------------------------------------------
+        def entropy(values: List[float]) -> float:
+            mean = sum(values) / len(values)
+            var = sum((v - mean) ** 2 for v in values) / len(values)
+            return var
+
+        entropy_d9 = entropy(d9)
+        entropy_inf = entropy(d_inf)
+
+        if entropy_d9 > 0.15:
+            issues.append("Entropia D9 wysoka")
+            score -= 20
+
+        if entropy_inf > 0.15:
+            issues.append("Entropia D∞ wysoka")
+            score -= 20
+
+        # ----------------------------------------------------
+        # 4. Vibe (energia serca)
+        # ----------------------------------------------------
+        if vibe < 30:
+            issues.append("Vibe bardzo niski — możliwa destabilizacja")
+            score -= 30
+
+        # ----------------------------------------------------
+        # 5. Poziom odporności (9 poziomów)
+        # ----------------------------------------------------
+        immunity_level = min(9, max(0, int(score / 20)))
+
+        # ----------------------------------------------------
+        # 6. Tryb reakcji (3 tryby)
+        # ----------------------------------------------------
+        if score >= 140:
+            reaction_mode = "NORMAL"
+        elif score >= 90:
+            reaction_mode = "GUARD"
+        else:
+            reaction_mode = "SHIELD"
+
+        # ----------------------------------------------------
+        # 7. Stabilność organizmu
+        # ----------------------------------------------------
+        stability_factor = self.normalize(1.0 - entropy_d9 * 2.0)
+
+        # ----------------------------------------------------
+        # 8. Meta-stan odpornościowy
+        # ----------------------------------------------------
+        meta_out = {
+            "energy_d9": energy_d9,
+            "energy_inf": energy_inf,
+            "entropy_d9": entropy_d9,
+            "entropy_inf": entropy_inf,
+            "vibe": vibe,
+            "immunity_level": immunity_level,
+            "reaction_mode": reaction_mode,
+        }
+
+        return Geon168StatusV9(
+            status=self._status(score),
+            score=max(0, min(168, score)),
+            issues=issues,
+            immunity_level=immunity_level,
+            reaction_mode=self.REACTION_MODES[reaction_mode],
+            stability_factor=stability_factor,
+            entropy_factor=entropy_inf,
+            energy_factor=energy_inf,
+            meta=meta_out,
+        )
+
+    # --------------------------------------------------------
+    # STATUS KOŃCOWY
+    # --------------------------------------------------------
+
+    @staticmethod
+    def _status(score: int) -> str:
+        if score >= 140:
+            return "OK"
+        elif score >= 90:
+            return "WARNING"
+        return "CRITICAL"
