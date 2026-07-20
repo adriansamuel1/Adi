@@ -1,0 +1,227 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+💧 GEON_FLOW_ENGINE v9.0 — Układ Limbiczny GEON
+========================================================
+Warstwa: kombajn/geon_flow_engine_v9.py
+Rola: Emocjonalno-relacyjny układ przepływu (FLOW) dla GEON v9.
+Wersja: v9.0-INFINITY
+Sygnatura: [GEON_SYSTEM::FLOW::v9.0]
+========================================================
+"""
+
+import math
+import time
+from dataclasses import dataclass, field
+from typing import Dict, Any, List
+from enum import Enum
+
+
+def LOG(module: str, event: str, msg: str) -> None:
+    print(f"[FLOW9D][{module}][{event}] -> {msg}")
+
+
+# ============================================================
+# ENUMY
+# ============================================================
+
+class FlowRisk(Enum):
+    GREEN = "GREEN"
+    YELLOW = "YELLOW"
+    RED = "RED"
+
+
+# ============================================================
+# STRUKTURA WYJŚCIOWA FLOW
+# ============================================================
+
+@dataclass
+class FlowStatusV9:
+    risk_level: FlowRisk
+    flow_level: FlowRisk
+    stability: float
+    shadow_score: int
+    message: str
+    d1: List[float]
+    d1_entropy: float
+    d1_energy: float
+    emotional_vector_9d: List[float]
+    meta: Dict[str, Any] = field(default_factory=dict)
+
+
+# ============================================================
+# KOMBAJN ALARM — CIEŃ
+# ============================================================
+
+class FlowShadowDetectorV9:
+    """Wykrywanie cienia — układ odpornościowy emocji."""
+
+    def __init__(self):
+        self.history: List[Dict[str, Any]] = []
+        LOG("SHADOW_V9", "INIT", "🛡️ ShadowDetector v9 aktywowany")
+
+    def score(self, text: str) -> int:
+        lower = text.lower()
+        score = 0
+
+        shadow_map = {
+            "empathy_absent": ["bez empatii", "nie czuje", "obojętny", "zimny"],
+            "reflexion_absent": ["bez refleksji", "nie myśli", "impulsywny", "bezkrytyczny"],
+            "uses_people": ["wykorzystuje", "zasób ludzki", "narzędzie", "instrument"],
+            "breaks_promises": ["łamie obietnice", "nie dotrzymuje", "zdradza"],
+            "avoids_care": ["unika opieki", "porzuca", "nie troszczy się"],
+            "cold_procedural": ["proceduralny", "bez uczuć", "chłodny", "automatyczny"],
+        }
+
+        for category, keywords in shadow_map.items():
+            if any(kw in lower for kw in keywords):
+                score += 2 if category in [
+                    "empathy_absent", "reflexion_absent",
+                    "uses_people", "avoids_care"
+                ] else 1
+
+        return min(10, score)
+
+    def classify(self, score: int) -> FlowRisk:
+        if score <= 1:
+            return FlowRisk.GREEN
+        elif score <= 4:
+            return FlowRisk.YELLOW
+        return FlowRisk.RED
+
+    def scan(self, text: str) -> Dict[str, Any]:
+        score = self.score(text)
+        level = self.classify(score)
+
+        messages = {
+            FlowRisk.GREEN: "Bezpieczna integracja.",
+            FlowRisk.YELLOW: "Ostrożnie. Obserwuj.",
+            FlowRisk.RED: "Dystans. Zero oczekiwań.",
+        }
+
+        icons = {
+            FlowRisk.GREEN: "🟢",
+            FlowRisk.YELLOW: "🟡",
+            FlowRisk.RED: "🔴",
+        }
+
+        entry = {
+            "timestamp": time.time(),
+            "score": score,
+            "level": level.value
+        }
+        self.history.append(entry)
+        if len(self.history) > 200:
+            self.history.pop(0)
+
+        return {
+            "score": score,
+            "level": level,
+            "icon": icons[level],
+            "message": messages[level],
+        }
+
+
+# ============================================================
+# FLOW ENGINE v9 — GŁÓWNY UKŁAD LIMBICZNY
+# ============================================================
+
+class EmotionalFlowEngineV9:
+    """
+    FLOW v9 — układ limbiczny GEON:
+    - wykrywa cień
+    - buduje D1 (fundament emocjonalny)
+    - generuje stabilność przepływu
+    - tworzy 9D sygnał emocjonalny
+    - sprzęga się z AFC-∞
+    """
+
+    def __init__(self):
+        self.shadow = FlowShadowDetectorV9()
+        self.core_history: List[float] = []
+        LOG("FLOW_V9", "INIT", "💧 Flow Engine v9 aktywowany")
+
+    # --------------------------------------------------------
+    # FUNKCJE POMOCNICZE
+    # --------------------------------------------------------
+
+    @staticmethod
+    def avg(values: List[float]) -> float:
+        return sum(values) / len(values) if values else 0.0
+
+    @staticmethod
+    def entropy(values: List[float]) -> float:
+        if not values:
+            return 0.0
+        mean = sum(values) / len(values)
+        var = sum((v - mean) ** 2 for v in values) / len(values)
+        return var
+
+    @staticmethod
+    def energy(values: List[float]) -> float:
+        return sum(values)
+
+    # --------------------------------------------------------
+    # D1 — fundament emocjonalny
+    # --------------------------------------------------------
+
+    def build_d1(self, text: str) -> List[float]:
+        base = sum(ord(c) for c in text[:200]) or 1
+        return [min(1.0, (base * (i + 1) % 168) / 168.0) for i in range(9)]
+
+    # --------------------------------------------------------
+    # GŁÓWNA FUNKCJA FLOW v9
+    # --------------------------------------------------------
+
+    def evaluate(self, text: str, meta: Dict[str, Any]) -> FlowStatusV9:
+        # 1. Shadow
+        shadow = self.shadow.scan(text)
+        risk_level = shadow["level"]
+        shadow_score = shadow["score"]
+
+        # 2. D1 — fundament emocjonalny
+        d1 = self.build_d1(text)
+        d1_entropy = self.entropy(d1)
+        d1_energy = self.energy(d1)
+
+        # 3. Stabilność przepływu
+        stability = max(0.0, min(1.0, 1.0 - d1_entropy * 2.5))
+
+        # 4. Flow level
+        if risk_level == FlowRisk.RED or stability < 0.3:
+            flow_level = FlowRisk.RED
+            message = "Przepływ zaburzony — tryb ochrony rdzenia."
+        elif risk_level == FlowRisk.YELLOW or stability < 0.6:
+            flow_level = FlowRisk.YELLOW
+            message = "Przepływ częściowo stabilny — zalecana czujność."
+        else:
+            flow_level = FlowRisk.GREEN
+            message = "Przepływ stabilny, cień niski — bezpieczna integracja."
+
+        # 5. Emotional 9D vector (bazowy)
+        emotional_vector_9d = [
+            (d1[i] * stability + (1 - stability) * 0.5)
+            for i in range(9)
+        ]
+
+        # 6. Meta
+        meta_out = {
+            "text": text[:80],
+            "shadow": shadow,
+            "d1_entropy": d1_entropy,
+            "d1_energy": d1_energy,
+            "emotional_vector_9d": emotional_vector_9d,
+        }
+
+        return FlowStatusV9(
+            risk_level=risk_level,
+            flow_level=flow_level,
+            stability=stability,
+            shadow_score=shadow_score,
+            message=message,
+            d1=d1,
+            d1_entropy=d1_entropy,
+            d1_energy=d1_energy,
+            emotional_vector_9d=emotional_vector_9d,
+            meta=meta_out,
+        )
