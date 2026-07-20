@@ -4,12 +4,12 @@ GEON_SYSTEM/
 │   # Dokumentacja całego organizmu:
 │   # - GEON_DRAGON_OS (CIAŁO)
 │   # - GEON_AI (GŁOWA)
-│   # - HUB (STORAGE + MEMORY + TRIADA + OMEGA + KOMBAJN)
+│   # - HUB (STORAGE + MEMORY + TRIADA + OMEGA + KOMBAJN + TAG_UNIVERSE)
 │   # - Zasady wzrostu organizmu
 │   # - Diagram Ośmiornicy A–H
 │   # - Autostrada 33
-│   # - Warstwy 120–140:
-│   #     • 120 – SURVIVAL
+│   # - Warstwy krytyczne 120–140:
+│   #     • 120 – SURVIVAL_CORE
 │   #     • 125 – SAFE_MODE v2.0
 │   #     • 126 – PREDATOR_PROTOCOL
 │   #     • 127 – E_ZAR
@@ -24,7 +24,8 @@ GEON_SYSTEM/
 │   # - SYSTEM_MIRROR (warstwa 92)
 │   # - Organ strategiczny SUN_TZU_STRATEGIC_ENGINE
 │   # - KOMBAJN (Slime + Fungus + Hybrid Brain)
-│   # - GEON_BIO v3.0 – CRITICAL_RECOVERY_LAYER
+│   # - GEON_BIO v3.0 (homeostaza)
+│   # - GEON_TAG_UNIVERSE v2.0 (pamięć TAG)
 │
 ├── GEON_DRAGON_OS/   # CIAŁO
 │   │
@@ -71,6 +72,16 @@ GEON_SYSTEM/
 │   │   │   ├── slime_core.py
 │   │   │   ├── fungus_core.py
 │   │   │   └── hybrid_brain.py
+│   │   │
+│   │   ├── tag_universe/          # GEON_TAG_UNIVERSE v2.0
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_tag_universe_final.py
+│   │   │   ├── tag_memory_buffer.py
+│   │   │   ├── tag_decision_engine.py
+│   │   │   ├── tag_autostrada.py
+│   │   │   ├── tag_cortex.py
+│   │   │   ├── tag_ultima.py
+│   │   │   └── tag_garbage_collector.py
 │   │   │
 │   │   ├── memory/
 │   │   │   ├── __init__.py
