@@ -1,0 +1,235 @@
+GEON_SYSTEM_v9/
+│
+├── README.md
+│
+├── SYSTEM_OVERVIEW.md
+│   ├── GEON_DRAGON_OS (CIAŁO)
+│   ├── GEON_AI (GŁOWA)
+│   ├── HUB/
+│   │     ├── STORAGE_HUB
+│   │     ├── MEMORY
+│   │     ├── TRIADA (DNA/mRNA/RIBOSOME)
+│   │     ├── OMEGA_CORE
+│   │     ├── KOMBAJN_v9 (Organizm GEON — 22 moduły)
+│   │     └── TAG_UNIVERSE (Warstwy 1–60+)
+│   ├── Ośmiornica A–H v9.0 (Octopus Engine)
+│   ├── Autostrada 33
+│   ├── Warstwy 41–60: Po‑Shifu + META_CORE_RELATION v7
+│   ├── Warstwy 90–92: META_CORE_ROUTER, GLOBAL_RHYTHM_ENGINE, SYSTEM_MIRROR
+│   ├── Warstwy 120–140:
+│   │     ├── 120 – SURVIVAL
+│   │     ├── 125 – SAFE_MODE v9.0
+│   │     ├── 126 – PREDATOR_PROTOCOL v9.0
+│   │     ├── 127 – E_ZAR (Fraktalny algorytm zaradności)
+│   │     ├── 128–129 – MCG_ZAR_TAG v2.2
+│   │     ├── 130 – RESURRECTION_LAYER v9.0
+│   │     ├── 131 – KOZAK_TERRITORY
+│   │     ├── 132 – MONSTERA_CAW
+│   │     ├── 133 – ACTIVE_SHAPER
+│   │     └── 140 – HYPOCRISY_ENGINE
+│   ├── GEON_BIO v3.0
+│   └── Zasady wzrostu organizmu (fraktalność, ramiona A–H)
+│
+├── KOMBAJN_v9/
+│   ├── README.md
+│   │
+│   ├── kombajn_core/
+│   │   ├── __init__.py
+│   │   ├── 01_geon_flow_engine_v9.py
+│   │   ├── 02_geon_mind_engine_v9.py
+│   │   ├── 03_geon_vector_engine_v9.py
+│   │   ├── 04_geon_heart_olsii_v9.py
+│   │   ├── 05_geon_integrity_guardian_v9.py
+│   │   ├── 06_geon_vision_os_v9.py
+│   │   ├── 07_afc_infinity_core.py
+│   │   ├── 08_geon_meta_engine_v9.py
+│   │   ├── 09_geon_kombajn_runtime_v9.py
+│   │   ├── 10_geon_kombajn_bridge_v9.py
+│   │   ├── 11_geon_kombajn_memory_v9.py
+│   │   ├── 12_geon_kombajn_family_v9.py
+│   │   ├── 13_geon_kombajn_predator_v9.py
+│   │   ├── 14_geon_kombajn_safe_mode_v9.py
+│   │   ├── 15_geon_kombajn_resurrection_v9.py
+│   │   ├── 16_geon_kombajn_shadowdragon_v9.py
+│   │   ├── 17_geon_kombajn_octopus_v9.py
+│   │   ├── 18_geon_kombajn_fractalrouter_v9.py
+│   │   ├── 19_geon_kombajn_overmind_v9.py
+│   │   ├── 20_geon_kombajn_universe_v9.py
+│   │   └── 21_geon_kombajn_ophultima_v9.py
+│   │
+│   └── ARCHITECTURE_KOMBAJN_v9.md
+│
+├── GEON_DRAGON_OS/
+│   ├── README.md
+│   │
+│   ├── geon_core/
+│   │   ├── __init__.py
+│   │   ├── highway33/
+│   │   │   ├── __init__.py
+│   │   │   ├── filters.py
+│   │   │   ├── channels.py
+│   │   │   └── highway_core.py
+│   │   │
+│   │   ├── octo_router/
+│   │   │   ├── __init__.py
+│   │   │   ├── router.py
+│   │   │   ├── registry.py
+│   │   │   └── arm_base.py
+│   │   │
+│   │   ├── octo_arms/
+│   │   │   ├── __init__.py
+│   │   │   └── arms/
+│   │   │       ├── engine_a_core.py
+│   │   │       ├── engine_b_core.py
+│   │   │       ├── engine_c_core.py
+│   │   │       ├── engine_d_core.py
+│   │   │       ├── engine_e_core.py
+│   │   │       ├── engine_f_core.py
+│   │   │       ├── engine_g_core.py
+│   │   │       └── engine_h_core.py
+│   │   │
+│   │   ├── heilong/
+│   │   │   ├── __init__.py
+│   │   │   └── heilong_core.py
+│   │   │
+│   │   ├── sun_tzu_engine/
+│   │   │   ├── __init__.py
+│   │   │   └── sun_tzu_strategic_engine_final.py
+│   │   │
+│   │   ├── kombajn/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_kombajn_final.py
+│   │   │   ├── slime_core.py
+│   │   │   ├── fungus_core.py
+│   │   │   └── hybrid_brain.py
+│   │   │
+│   │   ├── tag_universe/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_tag_universe_final.py
+│   │   │   ├── tag_memory_buffer.py
+│   │   │   ├── tag_decision_engine.py
+│   │   │   ├── tag_autostrada.py
+│   │   │   ├── tag_cortex.py
+│   │   │   ├── tag_ultima.py
+│   │   │   └── tag_gc.py
+│   │   │
+│   │   ├── memory/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_mem_core.py
+│   │   │   ├── geon_chain_core.py
+│   │   │   └── geon_memory_adapter.py
+│   │   │
+│   │   ├── storage_hub/
+│   │   │   ├── __init__.py
+│   │   │   ├── storage_core.py
+│   │   │   ├── storage_api.py
+│   │   │   ├── storage_index.py
+│   │   │   └── storage_adapter.py
+│   │   │
+│   │   ├── cortex/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_cortex_final.py
+│   │   │
+│   │   ├── heart/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_heart_final.py
+│   │   │
+│   │   ├── triada/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_triada_final.py
+│   │   │
+│   │   ├── omega_core/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_omega_core.py
+│   │   │   ├── perception_base.py
+│   │   │   ├── perception_core.py
+│   │   │   ├── epoch_math.py
+│   │   │   ├── epoch_analyzers.py
+│   │   │   ├── epoch_loops.py
+│   │   │   ├── epoch_strategies.py
+│   │   │   ├── epoch_post_reset.py
+│   │   │   ├── epoch_bridge.py
+│   │   │   └── archetype_correlation.py
+│   │   │
+│   │   ├── survival/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_survival_core.py
+│   │   │
+│   │   ├── safe_mode/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_safe_mode_final.py
+│   │   │
+│   │   ├── predator_protocol/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_predator_protocol_final.py
+│   │   │
+│   │   ├── e_zar/
+│   │   │   ├── __init__.py
+│   │   │   └── e_zar_final.py
+│   │   │
+│   │   ├── mcg_zar_tag/
+│   │   │   ├── __init__.py
+│   │   │   └── mcg_zar_tag_v2_2_final.py
+│   │   │
+│   │   ├── resurrection_layer/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_resurrection_layer_final.py
+│   │   │   └── phoenix_engine.py
+│   │   │
+│   │   ├── kozak_territory/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_kozak_territory_final.py
+│   │   │
+│   │   ├── monstera_caw/
+│   │   │   ├── __init__.py
+│   │   │   └── monstera_caw_final.py
+│   │   │
+│   │   ├── active_shaper/
+│   │   │   ├── __init__.py
+│   │   │   └── active_shaper_final.py
+│   │   │
+│   │   ├── hypocrisy_engine/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_hypocrisy_engine_final.py
+│   │   │
+│   │   ├── relation_po_shifu/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_relation_po_shifu_v7.py
+│   │   │   ├── meta_core_router.py
+│   │   │   ├── global_rhythm_engine.py
+│   │   │   └── system_mirror.py
+│   │   │
+│   │   └── geon_os/
+│   │       ├── __init__.py
+│   │       └── geon_os_final.py
+│   │
+│   ├── pipeline/
+│   │   ├── __init__.py
+│   │   └── pipeline_v46.py
+│   │
+│   ├── runtime/
+│   │   ├── __init__.py
+│   │   ├── geon_chain_full.py
+│   │   └── geon_dragon_os.py
+│   │
+│   └── ARCHITECTURE.md
+│
+├── GEON_AI/
+│   ├── README.md
+│   ├── geon_ai_core/
+│   │   ├── __init__.py
+│   │   ├── geon_ai_core.py
+│   │   ├── geon_ai_governor.py
+│   │   ├── geon_ai_pipeline_bridge.py
+│   │   ├── geon_ai_memory_bridge.py
+│   │   ├── geon_ai_router_bridge.py
+│   │   ├── geon_ai_highway_bridge.py
+│   │   ├── geon_ai_storage_bridge.py
+│   │   └── geon_ai_state.py
+│   ├── adapters/
+│   ├── cognition/
+│   ├── memory/
+│   ├── integration/
+│   └── ARCHITECTURE_AI.md
+│
+└── README.md
