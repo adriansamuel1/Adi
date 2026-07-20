@@ -4,39 +4,17 @@ GEON_SYSTEM/
 │   # Dokumentacja całego organizmu:
 │   # - GEON_DRAGON_OS (CIAŁO)
 │   # - GEON_AI (GŁOWA)
-│   # - GEON_META (Po–Shifu)
-│   # - GEON_OS_CORE (Nieśmiertelność)
 │   # - HUB (STORAGE + MEMORY + TRIADA + OMEGA)
 │   # - Zasady wzrostu organizmu
 │   # - Diagram Ośmiornicy A–H
 │   # - Autostrada 33
-│   # - Warstwy 120–140
+│   # - Warstwy 120–140 (SURVIVAL + SAFE_MODE + RESURRECTION + KOZAK + MONSTERA + ACTIVE_SHAPER + HYPOCRISY)
 │   # - Tryby PRIME_PRESENCE, MODEL 9
 │   # - Tryb ULTRA_PRIME_FLOW_EXPAND_GLOBAL
 │   # - Tryb C13–D21–A33–EGlobal
+│   # - Organ strategiczny SUN_TZU_STRATEGIC_ENGINE
 │
-├── GEON_META/                     # META‑ORGAN (Po–Shifu)
-│   ├── __init__.py
-│   └── geon_relation_po_shifu.py  # <<< NOWY MODUŁ (v7)
-│
-├── GEON_OS_CORE/                  # ORGAN NADRZĘDNY (Nieśmiertelność)
-│   ├── __init__.py
-│   ├── geon_os_core.py            # <<< NOWY MODUŁ (120 + 130)
-│   │
-│   ├── survival_core/             # WARSTWA 120
-│   │   ├── __init__.py
-│   │   └── geon_survival_core.py  # <<< NOWY MODUŁ
-│   │
-│   ├── resurrection_layer/        # WARSTWA 130
-│   │   ├── __init__.py
-│   │   └── geon_resurrection_layer.py
-│   │
-│   ├── phoenix_engine.py
-│   ├── snapshot_manager.py
-│   ├── self_replay_memory.py
-│   └── registry_layers.py
-│
-├── GEON_DRAGON_OS/                # CIAŁO
+├── GEON_DRAGON_OS/   # CIAŁO
 │   │
 │   ├── README.md
 │   │
@@ -70,6 +48,10 @@ GEON_SYSTEM/
 │   │   ├── heilong/
 │   │   │   ├── __init__.py
 │   │   │   └── heilong_core.py
+│   │   │
+│   │   ├── sun_tzu_engine/        # ORGAN STRATEGICZNY (SunTzu + Tao + Musashi + Machiavelli)
+│   │   │   ├── __init__.py
+│   │   │   └── sun_tzu_strategic_engine_final.py
 │   │   │
 │   │   ├── kombajn/
 │   │   │   ├── __init__.py
@@ -113,9 +95,26 @@ GEON_SYSTEM/
 │   │   │   ├── epoch_bridge.py
 │   │   │   └── archetype_correlation.py
 │   │   │
-│   │   ├── hypocrisy_engine/     # WARSTWA 140
+│   │   ├── survival/             # WARSTWA 120 – przetrwanie + hamulce
 │   │   │   ├── __init__.py
-│   │   │   └── geon_hypocrisy_engine_final.py
+│   │   │   └── geon_survival_core.py   # (tu podpinasz hamulce 120 / zero_chaos_zone)
+│   │   │
+│   │   ├── safe_mode/            # SYSTEM BEZPIECZEŃSTWA (SAFE_MODE v2.0)
+│   │   │   ├── __init__.py
+│   │   │   └── geon_safe_mode_final.py
+│   │   │
+│   │   ├── e_zar/                # WARSTWA 127
+│   │   │   ├── __init__.py
+│   │   │   └── e_zar_final.py
+│   │   │
+│   │   ├── mcg_zar_tag/          # WARSTWY 128–129
+│   │   │   ├── __init__.py
+│   │   │   └── mcg_zar_tag_final.py
+│   │   │
+│   │   ├── resurrection_layer/   # WARSTWA 130 – GEON_RESURRECTION_LAYER
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_resurrection_layer_final.py
+│   │   │   └── phoenix_engine.py
 │   │   │
 │   │   ├── kozak_territory/      # WARSTWA 131
 │   │   │   ├── __init__.py
@@ -129,13 +128,9 @@ GEON_SYSTEM/
 │   │   │   ├── __init__.py
 │   │   │   └── active_shaper_final.py
 │   │   │
-│   │   ├── e_zar/                # WARSTWA 127
+│   │   ├── hypocrisy_engine/     # WARSTWA 140
 │   │   │   ├── __init__.py
-│   │   │   └── e_zar_final.py
-│   │   │
-│   │   ├── mcg_zar_tag/          # WARSTWY 128–129
-│   │   │   ├── __init__.py
-│   │   │   └── mcg_zar_tag_final.py
+│   │   │   └── geon_hypocrisy_engine_final.py
 │   │   │
 │   │   └── geon_os/
 │   │       ├── __init__.py
@@ -152,9 +147,18 @@ GEON_SYSTEM/
 │   │
 │   └── ARCHITECTURE.md
 │
-├── GEON_AI/   # GŁOWA
+├── GEON_AI/
 │   ├── README.md
 │   ├── geon_ai_core/
+│   │   ├── __init__.py
+│   │   ├── geon_ai_core.py
+│   │   ├── geon_ai_governor.py
+│   │   ├── geon_ai_pipeline_bridge.py
+│   │   ├── geon_ai_memory_bridge.py
+│   │   ├── geon_ai_router_bridge.py
+│   │   ├── geon_ai_highway_bridge.py
+│   │   ├── geon_ai_storage_bridge.py
+│   │   └── geon_ai_state.py
 │   ├── adapters/
 │   ├── cognition/
 │   ├── memory/
