@@ -1,0 +1,214 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+🐉 GEON_KOMBAJN_RUNTIME v9.0 — Runtime Organizmu GEON
+========================================================
+Warstwa: kombajn/geon_kombajn_runtime_v9.py
+Rola: Runtime v9 — pętla życia, homeostaza, scheduler, wykonanie.
+Wersja: v9.0-INFINITY
+Sygnatura: [GEON_SYSTEM::RUNTIME::v9.0]
+========================================================
+"""
+
+import time
+from dataclasses import dataclass, field
+from typing import Dict, Any, List
+
+# Import organów (moduły 1–9)
+from geon_flow_engine_v9 import EmotionalFlowEngineV9
+from geon_mind_engine_v9 import FMPCMindEngineV9
+from geon_vector_engine_v9 import WorldVectorEngineV9
+from geon_heart_olsii_v9 import OlsiiHeartEngineV9
+from geon_integrity_guardian_v9 import Geon168GuardianV9
+from geon_vision_os_v9 import VisionOSV9
+from geon_meta_engine_v9 import MetaAggregatorV9
+from afc_infinity_core import AFCInfinityCore
+
+def LOG(module: str, event: str, msg: str) -> None:
+    print(f"[RUNTIME9][{module}][{event}] -> {msg}")
+
+
+# ============================================================
+# STRUKTURA STANU RUNTIME
+# ============================================================
+
+@dataclass
+class RuntimeStateV9:
+    last_result: Dict[str, Any]
+    history: List[Dict[str, Any]] = field(default_factory=list)
+    energy_trend: float = 0.0
+    entropy_trend: float = 0.0
+    stability_trend: float = 0.0
+    heartbeat: float = 0.0
+    timestamp: float = field(default_factory=time.time)
+
+
+# ============================================================
+# RUNTIME v9 — PĘTLA ŻYCIA ORGANIZMU GEON
+# ============================================================
+
+class GeonKombajnRuntimeV9:
+    """
+    Runtime v9 — pętla życia organizmu GEON:
+    - integracja organów
+    - homeostaza
+    - scheduler
+    - wykonanie decyzji
+    - modulacja energii fraktalnej
+    - stabilizacja organizmu
+    """
+
+    def __init__(self):
+        LOG("RUNTIME_V9", "INIT", "🐉 Runtime GEON v9 aktywowany")
+
+        # Organy
+        self.flow = EmotionalFlowEngineV9()
+        self.mind = FMPCMindEngineV9()
+        self.vector = WorldVectorEngineV9()
+        self.olsii = OlsiiHeartEngineV9()
+        self.geon168 = Geon168GuardianV9()
+        self.vision = VisionOSV9()
+        self.meta = MetaAggregatorV9()
+        self.afc_inf = AFCInfinityCore()
+
+        # Stan runtime
+        self.state = RuntimeStateV9(last_result={})
+
+    # --------------------------------------------------------
+    # HOMEOSTAZA — stabilizacja organizmu
+    # --------------------------------------------------------
+
+    def homeostasis(self, afc_inf, flow, olsii, geon168):
+        """
+        Homeostaza v9:
+        - stabilizacja energii
+        - stabilizacja entropii
+        - stabilizacja vibe
+        - modulacja D∞
+        """
+
+        energy = afc_inf.energy_map["E∞"]
+        entropy = afc_inf.entropy_map["H∞"]
+        vibe = olsii.vibe
+
+        # Trendy
+        self.state.energy_trend = energy - self.state.energy_trend
+        self.state.entropy_trend = entropy - self.state.entropy_trend
+        self.state.stability_trend = flow.stability - self.state.stability_trend
+
+        # Heartbeat
+        self.state.heartbeat = (vibe / 168.0) * flow.stability
+
+        return {
+            "energy": energy,
+            "entropy": entropy,
+            "vibe": vibe,
+            "heartbeat": self.state.heartbeat,
+            "energy_trend": self.state.energy_trend,
+            "entropy_trend": self.state.entropy_trend,
+            "stability_trend": self.state.stability_trend,
+        }
+
+    # --------------------------------------------------------
+    # SCHEDULER — kolejność organów
+    # --------------------------------------------------------
+
+    def scheduler(self, inp):
+        """
+        Scheduler v9 — kolejność organów:
+        FLOW → MIND → VECTOR → AFC∞ → OŁSii → GEON168 → VISION → META
+        """
+
+        # FLOW
+        flow = self.flow.evaluate(inp["iskra"], inp.get("meta", {}))
+
+        # MIND
+        mind = self.mind.compute(inp["human_profile"])
+
+        # VECTOR
+        vector = self.vector.compute(
+            fmpc=mind,
+            dom=inp["dom"],
+            wsp=inp["wspolnota"],
+            plan=inp["planeta"],
+        )
+
+        # AFC∞
+        afc_inf = self.afc_inf.build_layers(
+            flow.d1,
+            mind.cognitive_vector_d2,
+            vector.d3,
+            vector.d4,
+        )
+
+        # OŁSii
+        olsii = self.olsii.process(inp["iskra"], inp.get("meta", {}))
+
+        # GEON_168
+        geon168 = self.geon168.analyze(
+            afc_inf.d9,
+            afc_inf.d_inf,
+            olsii.vibe,
+        )
+
+        # VISION
+        vision = self.vision.generate(
+            inp["iskra"],
+            flow,
+            mind,
+            vector,
+            olsii,
+            geon168,
+            afc_inf,
+        )
+
+        # META
+        agents = {
+            "FLOW": flow.__dict__,
+            "MIND": mind.__dict__,
+            "VECTOR": vector.__dict__,
+            "OLSII": olsii.__dict__,
+            "GEON_168": geon168.__dict__,
+            "VISION": vision.__dict__,
+            "AFC_INF": afc_inf.__dict__,
+        }
+        meta = self.meta.weigh(agents)
+
+        return flow, mind, vector, afc_inf, olsii, geon168, vision, meta
+
+    # --------------------------------------------------------
+    # GŁÓWNA FUNKCJA RUNTIME v9
+    # --------------------------------------------------------
+
+    def run(self, inp: Dict[str, Any]) -> Dict[str, Any]:
+        start = time.time()
+
+        # Scheduler organów
+        flow, mind, vector, afc_inf, olsii, geon168, vision, meta = self.scheduler(inp)
+
+        # Homeostaza
+        homeo = self.homeostasis(afc_inf, flow, olsii, geon168)
+
+        # Wynik
+        result = {
+            "flow": flow.__dict__,
+            "mind": mind.__dict__,
+            "vector": vector.__dict__,
+            "afc_inf": afc_inf.__dict__,
+            "olsii": olsii.__dict__,
+            "geon168": geon168.__dict__,
+            "vision": vision.__dict__,
+            "meta": meta.__dict__,
+            "homeostasis": homeo,
+            "elapsed_ms": round((time.time() - start) * 1000.0, 2),
+        }
+
+        # Historia
+        self.state.last_result = result
+        self.state.history.append(result)
+        if len(self.state.history) > 200:
+            self.state.history.pop(0)
+
+        LOG("RUNTIME_V9", "COMPLETE", f"Runtime wykonany w {result['elapsed_ms']} ms")
+
+        return result
