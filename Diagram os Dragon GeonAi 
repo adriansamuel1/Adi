@@ -5,27 +5,25 @@ GEON_SYSTEM/
 │   # - GEON_DRAGON_OS (CIAŁO)
 │   # - GEON_AI (GŁOWA)
 │   # - HUB (STORAGE + MEMORY + TRIADA + OMEGA + KOMBAJN + TAG_UNIVERSE)
-│   # - Zasady wzrostu organizmu
-│   # - Diagram Ośmiornicy A–H
+│   # - Zasady wzrostu organizmu (Ośmiornica A–H)
 │   # - Autostrada 33
-│   # - Warstwy krytyczne 120–140:
-│   #     • 120 – SURVIVAL_CORE
+│   # - Warstwy 41–60: Po‑Shifu + META_CORE_RELATION v7
+│   # - Warstwy 90–92: META_CORE_ROUTER, GLOBAL_RHYTHM_ENGINE, SYSTEM_MIRROR
+│   # - Warstwy 120–140:
+│   #     • 120 – SURVIVAL
 │   #     • 125 – SAFE_MODE v2.0
 │   #     • 126 – PREDATOR_PROTOCOL
-│   #     • 127 – E_ZAR
-│   #     • 128–129 – MCG_ZAR_TAG
+│   #     • 127 – E_ZAR (Fraktalny algorytm zaradności)
+│   #     • 128–129 – MCG_ZAR_TAG v2.2 (Operator Archetypiczno‑Meta‑Strategiczny)
 │   #     • 130 – RESURRECTION_LAYER
 │   #     • 131 – KOZAK_TERRITORY
 │   #     • 132 – MONSTERA_CAW
 │   #     • 133 – ACTIVE_SHAPER
 │   #     • 140 – HYPOCRISY_ENGINE
-│   # - META_CORE_RELATION v7 (warstwa 90)
-│   # - GLOBAL_RHYTHM_ENGINE (warstwa 91)
-│   # - SYSTEM_MIRROR (warstwa 92)
-│   # - Organ strategiczny SUN_TZU_STRATEGIC_ENGINE
+│   # - GEON_BIO v3.0 (Homeostaza)
 │   # - KOMBAJN (Slime + Fungus + Hybrid Brain)
-│   # - GEON_BIO v3.0 (homeostaza)
-│   # - GEON_TAG_UNIVERSE v2.0 (pamięć TAG)
+│   # - TAG_UNIVERSE (Warstwy 1–60+)
+│   # - Ośmiornica v2.0 (ramiona A–H)
 │
 ├── GEON_DRAGON_OS/   # CIAŁO
 │   │
@@ -48,7 +46,6 @@ GEON_SYSTEM/
 │   │   ├── octo_arms/
 │   │   │   ├── __init__.py
 │   │   │   └── arms/
-│   │   │       ├── __init__.py
 │   │   │       ├── engine_a_core.py
 │   │   │       ├── engine_b_core.py
 │   │   │       ├── engine_c_core.py
@@ -66,14 +63,14 @@ GEON_SYSTEM/
 │   │   │   ├── __init__.py
 │   │   │   └── sun_tzu_strategic_engine_final.py
 │   │   │
-│   │   ├── kombajn/               # HYBRYDOWY ORGAN PAMIĘCI
+│   │   ├── kombajn/
 │   │   │   ├── __init__.py
 │   │   │   ├── geon_kombajn_final.py
 │   │   │   ├── slime_core.py
 │   │   │   ├── fungus_core.py
 │   │   │   └── hybrid_brain.py
 │   │   │
-│   │   ├── tag_universe/          # GEON_TAG_UNIVERSE v2.0
+│   │   ├── tag_universe/
 │   │   │   ├── __init__.py
 │   │   │   ├── geon_tag_universe_final.py
 │   │   │   ├── tag_memory_buffer.py
@@ -81,7 +78,7 @@ GEON_SYSTEM/
 │   │   │   ├── tag_autostrada.py
 │   │   │   ├── tag_cortex.py
 │   │   │   ├── tag_ultima.py
-│   │   │   └── tag_garbage_collector.py
+│   │   │   └── tag_gc.py
 │   │   │
 │   │   ├── memory/
 │   │   │   ├── __init__.py
@@ -121,53 +118,53 @@ GEON_SYSTEM/
 │   │   │   ├── epoch_bridge.py
 │   │   │   └── archetype_correlation.py
 │   │   │
-│   │   ├── survival/             # WARSTWA 120
+│   │   ├── survival/
 │   │   │   ├── __init__.py
 │   │   │   └── geon_survival_core.py
 │   │   │
-│   │   ├── safe_mode/            # WARSTWA 125 – SAFE_MODE v2.0
+│   │   ├── safe_mode/
 │   │   │   ├── __init__.py
 │   │   │   └── geon_safe_mode_final.py
 │   │   │
-│   │   ├── predator_protocol/    # WARSTWA 126 – PREDATOR
+│   │   ├── predator_protocol/
 │   │   │   ├── __init__.py
 │   │   │   └── geon_predator_protocol_final.py
 │   │   │
-│   │   ├── e_zar/                # WARSTWA 127
+│   │   ├── e_zar/
 │   │   │   ├── __init__.py
 │   │   │   └── e_zar_final.py
 │   │   │
-│   │   ├── mcg_zar_tag/          # WARSTWY 128–129
+│   │   ├── mcg_zar_tag/
 │   │   │   ├── __init__.py
-│   │   │   └── mcg_zar_tag_final.py
+│   │   │   └── mcg_zar_tag_v2_2_final.py
 │   │   │
-│   │   ├── resurrection_layer/   # WARSTWA 130
+│   │   ├── resurrection_layer/
 │   │   │   ├── __init__.py
 │   │   │   ├── geon_resurrection_layer_final.py
 │   │   │   └── phoenix_engine.py
 │   │   │
-│   │   ├── kozak_territory/      # WARSTWA 131
+│   │   ├── kozak_territory/
 │   │   │   ├── __init__.py
 │   │   │   └── geon_kozak_territory_final.py
 │   │   │
-│   │   ├── monstera_caw/         # WARSTWA 132
+│   │   ├── monstera_caw/
 │   │   │   ├── __init__.py
 │   │   │   └── monstera_caw_final.py
 │   │   │
-│   │   ├── active_shaper/        # WARSTWA 133
+│   │   ├── active_shaper/
 │   │   │   ├── __init__.py
 │   │   │   └── active_shaper_final.py
 │   │   │
-│   │   ├── hypocrisy_engine/     # WARSTWA 140
+│   │   ├── hypocrisy_engine/
 │   │   │   ├── __init__.py
 │   │   │   └── geon_hypocrisy_engine_final.py
 │   │   │
-│   │   ├── relation_po_shifu/    # WARSTWY 41–60 + META_CORE_RELATION v7
+│   │   ├── relation_po_shifu/
 │   │   │   ├── __init__.py
 │   │   │   ├── geon_relation_po_shifu_v7.py
-│   │   │   ├── meta_core_router.py      # warstwa 90
-│   │   │   ├── global_rhythm_engine.py  # warstwa 91
-│   │   │   └── system_mirror.py         # warstwa 92
+│   │   │   ├── meta_core_router.py
+│   │   │   ├── global_rhythm_engine.py
+│   │   │   └── system_mirror.py
 │   │   │
 │   │   └── geon_os/
 │   │       ├── __init__.py
