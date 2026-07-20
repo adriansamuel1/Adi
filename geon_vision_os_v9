@@ -1,0 +1,181 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+👁️ GEON_VISION_OS v9.0 — Układ Kierunkowy GEON
+========================================================
+Warstwa: kombajn/geon_vision_os_v9.py
+Rola: VisionOS 3.0 — meta-strategiczny organ kierunku GEON.
+Wersja: v9.0-INFINITY
+Sygnatura: [GEON_SYSTEM::VISION_OS::v9.0]
+========================================================
+"""
+
+from dataclasses import dataclass, field
+from typing import Dict, Any, List
+
+
+def LOG(module: str, event: str, msg: str) -> None:
+    print(f"[VISION9][{module}][{event}] -> {msg}")
+
+
+# ============================================================
+# STRUKTURA WYJŚCIOWA VISION v9
+# ============================================================
+
+@dataclass
+class VisionStatusV9:
+    core: str
+    trajectory: Dict[str, Any]
+    critical_points: List[int]
+    risk_factor: float
+    coherence_factor: float
+    direction_vector: List[float]
+    meta: Dict[str, Any] = field(default_factory=dict)
+
+
+# ============================================================
+# VISION OS v9 — META-STRATEGICZNY ORGAN KIERUNKU
+# ============================================================
+
+class VisionOSV9:
+    """
+    VisionOS v9 — układ kierunkowy GEON:
+    - wybór rdzenia kierunku
+    - budowa trajektorii
+    - ocena ryzyka
+    - ocena spójności
+    - generowanie punktów krytycznych
+    - modulacja kierunku (D∞)
+    """
+
+    def __init__(self):
+        self.history: List[Dict[str, Any]] = []
+        LOG("VISION_OS_V9", "INIT", "👁️ VisionOS 3.0 aktywowany")
+
+    # --------------------------------------------------------
+    # FUNKCJE POMOCNICZE
+    # --------------------------------------------------------
+
+    @staticmethod
+    def normalize(value: float) -> float:
+        return max(0.0, min(1.0, value))
+
+    @staticmethod
+    def avg(values: List[float]) -> float:
+        return sum(values) / len(values) if values else 0.0
+
+    # --------------------------------------------------------
+    # WYBÓR RDZENIA KIERUNKU
+    # --------------------------------------------------------
+
+    def choose_core(self, flow, mind, vector, olsii, geon168) -> str:
+        # 1. Tryb ochronny
+        if geon168.status == "CRITICAL":
+            return "Ochrona rdzenia — priorytet absolutny"
+
+        # 2. Tryb regulacyjny
+        if flow.flow_level == flow.flow_level.YELLOW:
+            return "Regulacja — balans i stabilizacja"
+
+        # 3. Tryb ekspansyjny
+        if mind.weighted_sum > 40 and vector.meta["meta_wektor"] > 40:
+            return "Ekspansja — wzrost fraktalny"
+
+        # 4. Tryb serca
+        if olsii.emotional_space in ["JOY", "HOPE", "TRUST"]:
+            return "Kierunek serca — ekspansja emocjonalna"
+
+        # 5. Tryb środowiskowy
+        if vector.meta["klasyfikacja"] == "wektor_globalny_stabilny":
+            return "Kierunek środowiskowy — stabilny wzrost"
+
+        return "Regulacja — balans i stabilizacja"
+
+    # --------------------------------------------------------
+    # TRAJEKTORIA
+    # --------------------------------------------------------
+
+    def build_trajectory(self, flow, mind, vector, afc_inf) -> Dict[str, Any]:
+        stability = flow.stability
+        coherence = mind.weighted_sum / 80.0
+        energy = afc_inf.energy_map["E∞"]
+        entropy = afc_inf.entropy_map["H∞"]
+
+        return {
+            "stability": stability,
+            "coherence": coherence,
+            "energy": energy,
+            "entropy": entropy,
+            "vector": stability * 0.7 + coherence * 0.3,
+        }
+
+    # --------------------------------------------------------
+    # PUNKTY KRYTYCZNE
+    # --------------------------------------------------------
+
+    def critical_points(self, trajectory: Dict[str, Any]) -> List[int]:
+        if trajectory["stability"] > 0.7:
+            return [5, 12, 24]
+        if trajectory["stability"] > 0.4:
+            return [3, 7, 14]
+        return [1, 3, 7]
+
+    # --------------------------------------------------------
+    # WEKTOR KIERUNKU (D∞ modulowane)
+    # --------------------------------------------------------
+
+    def direction_vector(self, afc_inf, olsii) -> List[float]:
+        base = afc_inf.core_9d
+        vibe = olsii.vibe / 168.0
+        return [
+            self.normalize(base * vibe * (i + 1) / 9.0)
+            for i in range(9)
+        ]
+
+    # --------------------------------------------------------
+    # GŁÓWNA FUNKCJA VISION v9
+    # --------------------------------------------------------
+
+    def generate(self, text: str, flow, mind, vector, olsii, geon168, afc_inf) -> VisionStatusV9:
+        # 1. Rdzeń kierunku
+        core = self.choose_core(flow, mind, vector, olsii, geon168)
+
+        # 2. Trajektoria
+        trajectory = self.build_trajectory(flow, mind, vector, afc_inf)
+
+        # 3. Punkty krytyczne
+        critical = self.critical_points(trajectory)
+
+        # 4. Ryzyko
+        risk_factor = 1.0 - trajectory["stability"]
+
+        # 5. Spójność
+        coherence_factor = trajectory["coherence"]
+
+        # 6. Wektor kierunku
+        direction = self.direction_vector(afc_inf, olsii)
+
+        # 7. Meta
+        meta_out = {
+            "text": text[:80],
+            "core": core,
+            "trajectory": trajectory,
+            "critical_points": critical,
+            "risk": risk_factor,
+            "coherence": coherence_factor,
+        }
+
+        # 8. Historia
+        self.history.append(meta_out)
+        if len(self.history) > 200:
+            self.history.pop(0)
+
+        return VisionStatusV9(
+            core=core,
+            trajectory=trajectory,
+            critical_points=critical,
+            risk_factor=risk_factor,
+            coherence_factor=coherence_factor,
+            direction_vector=direction,
+            meta=meta_out,
+        )
