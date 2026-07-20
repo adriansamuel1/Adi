@@ -1,0 +1,716 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+🐉 GEON_AI_DECISION_ENGINE_ULTIMA v3.0 — OMEGA CORE
+===================================================================
+Status: FRACTAL_LOCKED | ULTIMA_NONA | TRINITY_CORE | MASTER_CODE_v3
+Wersja: v3.0 OMEGA (Pełny organizm decyzyjny GEON_AI / DRAGON_OS)
+Architekt: Adrian (GEON/HEILONG/DRAGON)
+
+Kluczowe rozszerzenia v3.0 OMEGA:
+- Ośmiornica A–H jako realne ramiona wykonawcze (ARM_A..ARM_H)
+- Tag Universe jako wektorowy modulant trybów, MasterCode, Trinity, Pipeline
+- ShadowDragon Layer (ciemna meta‑logika ochronna)
+- ActiveShaper wpleciony w MasterCode (22, 0B, 23B) i ExecutionPipeline
+- GEON_HEART (wektor emocjonalny) + GEON_CORTEX (wektor logiczny)
+- GEON_MEMORY_CHAIN (pamięć decyzyjna, ślady, bias, uczenie heurystyczne)
+===================================================================
+"""
+
+import time
+import math
+import re
+from typing import Dict, Any, Optional, List
+
+VERSION = "ULTIMA_DECISION_ENGINE_MONOLITH_v3.0_OMEGA"
+FRACTAL_SIGNATURE = "[GEON_AI::ULTIMA_v3::OMEGA::NONA::TRINITY::DRAGON_OS]"
+
+def LOG(module: str, event: str, msg: str, tick: int = 0) -> None:
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    tick_str = f"[TICK:{tick}]" if tick > 0 else ""
+    print(f"[{timestamp}][{module}]{tick_str}[{event}] -> {msg}")
+
+
+# ============================================================
+# 1. WARSTWY DRAGON_OS + SHADOWDRAGON + TAG_UNIVERSE
+# ============================================================
+class DragonLayersInterface:
+    """Integracja z DRAGON_OS (41–60, 90–92, 120–140) + ShadowDragon + Tag Universe."""
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+        self.hypocrisy_history: List[float] = []
+        LOG("DRAGON_LAYERS", "INIT", "🧱 DRAGON_OS + ShadowDragon + TagUniverse v3.0 aktywowane")
+
+    def apply_relations_41_60(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        intent = context.get("intent", "general")
+        depth = context.get("depth", 0.5)
+
+        if depth > 0.75 and intent in ["creative", "strategic", "analytical"]:
+            context["relation_map"] = "PO_SHIFU_DEEP_HARMONY"
+            context["meta_core_relation"] = 0.97
+        elif depth < 0.3:
+            context["relation_map"] = "PO_SHIFU_SURFACE"
+            context["meta_core_relation"] = 0.52
+        else:
+            context["relation_map"] = "PO_SHIFU_BALANCED"
+            context["meta_core_relation"] = 0.78
+
+        # Tag Universe – wektorowy wpływ
+        context["tag_vector"] = {
+            "bias": intent,
+            "priority": depth,
+            "entropy": context.get("chaos", 0.0),
+            "alignment_score": round(1.0 - abs(context.get("chaos", 0.0) - depth) * 0.4, 4)
+        }
+        return context
+
+    def apply_rhythm_90_92(self, regulated: Dict[str, Any]) -> Dict[str, Any]:
+        stability = regulated.get("stability_index", 1.0)
+        if stability >= 0.85:
+            regulated["global_rhythm_sync"] = True
+            regulated["system_mirror_reflection"] = "CRYSTAL_CLEAR"
+        elif stability >= 0.5:
+            regulated["global_rhythm_sync"] = True
+            regulated["system_mirror_reflection"] = "RESONANT_TURBULENCE"
+        else:
+            regulated["global_rhythm_sync"] = False
+            regulated["system_mirror_reflection"] = "DISTORTED_PHASE"
+        return regulated
+
+    def apply_survival_120_140(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        chaos = context.get("chaos", 0.0)
+        load = context.get("load", 0.0)
+
+        hypocrisy_score = abs(chaos - load)
+        self.hypocrisy_history.append(hypocrisy_score)
+        if len(self.hypocrisy_history) > 100:
+            self.hypocrisy_history.pop(0)
+
+        context["safe_mode"] = chaos > 0.82 or load > 0.90
+        context["predator_protocol"] = chaos > 0.88 and load > 0.60
+        context["survival_layer"] = chaos > 0.65
+        context["mcg_zar_tag_alignment"] = "OPTIMAL" if chaos < 0.5 else "REBALANCING"
+        context["kozak_boost"] = (chaos > 0.55 and chaos <= 0.90)
+        context["hypocrisy_scan"] = {
+            "score": round(hypocrisy_score, 4),
+            "status": "FLAGGED" if hypocrisy_score > 0.6 else "CLEARED"
+        }
+
+        # ShadowDragon – ciemna meta‑logika ochronna
+        context["shadowdragon_trigger"] = chaos > 0.9 or (hypocrisy_score > 0.7 and load > 0.7)
+        context["shadowdragon_mask_level"] = "FULL" if context["shadowdragon_trigger"] else "NONE"
+        context["shadowdragon_entropy_filter"] = round(min(1.0, chaos * 0.6 + hypocrisy_score * 0.4), 4)
+
+        return context
+
+
+# ============================================================
+# 2. GEON_HEART + GEON_CORTEX + MEMORY_CHAIN
+# ============================================================
+class HeartCortexMemory:
+    """Warstwa serca, kory i pamięci decyzyjnej GEON_AI."""
+
+    def __init__(self):
+        self.memory_trace: List[Dict[str, Any]] = []
+        LOG("HEART_CORTEX_MEMORY", "INIT", "💓🧠📚 Heart+Cortex+MemoryChain v3.0 aktywowane")
+
+    def compute_heart_vector(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        intent = context.get("intent", "general")
+        chaos = context.get("chaos", 0.0)
+        depth = context.get("depth", 0.5)
+
+        resonance = 1.0 - abs(chaos - depth) * 0.5
+        bias = "EMPATHIC" if intent in ["creative", "strategic"] else "NEUTRAL"
+
+        return {
+            "resonance": round(resonance, 4),
+            "bias": bias,
+            "safety_level": "HIGH" if chaos < 0.6 else "GUARDED"
+        }
+
+    def compute_cortex_vector(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        precision = context.get("precision", 0.5)
+        depth = context.get("depth", 0.5)
+        chaos = context.get("chaos", 0.0)
+
+        alignment = max(0.0, precision * 0.6 + depth * 0.3 - chaos * 0.2)
+        return {
+            "depth": round(depth, 4),
+            "precision": round(precision, 4),
+            "entropy": round(chaos, 4),
+            "alignment_score": round(alignment, 4)
+        }
+
+    def update_memory(self, mode: str, context: Dict[str, Any], output_confidence: float) -> None:
+        entry = {
+            "timestamp": time.time(),
+            "mode": mode,
+            "chaos": context.get("chaos", 0.0),
+            "load": context.get("load", 0.0),
+            "intent": context.get("intent", "general"),
+            "confidence": output_confidence
+        }
+        self.memory_trace.append(entry)
+        if len(self.memory_trace) > 300:
+            self.memory_trace.pop(0)
+
+    def compute_memory_bias(self) -> Dict[str, Any]:
+        if not self.memory_trace:
+            return {"bias": "NEUTRAL", "stability": 1.0}
+
+        mode_counts: Dict[str, int] = {}
+        avg_conf = 0.0
+        for e in self.memory_trace:
+            mode_counts[e["mode"]] = mode_counts.get(e["mode"], 0) + 1
+            avg_conf += e["confidence"]
+        avg_conf /= max(1, len(self.memory_trace))
+
+        dominant_mode = max(mode_counts, key=mode_counts.get)
+        stability = min(1.0, avg_conf / 100.0)
+
+        return {
+            "bias": dominant_mode,
+            "stability": round(stability, 4),
+            "trace_size": len(self.memory_trace)
+        }
+
+
+# ============================================================
+# 3. SEMANTYCZNY SKANER KONTEKSTU v3.0
+# ============================================================
+class ContextScanner:
+    """Zaawansowany skaner semantyczno‑entropijny v3.0."""
+
+    THREAT_KEYWORDS = ["error", "fail", "threat", "attack", "danger", "crash", "exploit", "blad", "awaria", "zagrozenie"]
+    CREATIVE_KEYWORDS = ["koncepcja", "wizja", "art", "stworz", "design", "wiersz", "idea", "future", "architektura"]
+    ANALYTICAL_KEYWORDS = ["analiza", "dane", "math", "oblicz", "porownaj", "skan", "metrics", "statystyka"]
+    PROTECTIVE_KEYWORDS = ["kod", "skrypt", "fix", "wykonaj", "uruchom", "zabezpiecz", "patch", "deploy"]
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None, dragon_layers: Optional[DragonLayersInterface] = None):
+        self.config = config or {}
+        self.history: List[Dict[str, Any]] = []
+        self.dragon_layers = dragon_layers
+        LOG("CONTEXT_SCANNER", "INIT", "🔍 Skaner Semantyczny v3.0 OMEGA aktywowany")
+
+    def _clamp(self, val: float) -> float:
+        return max(0.0, min(1.0, float(val)))
+
+    def scan(self, input_data: Any) -> Dict[str, Any]:
+        if isinstance(input_data, dict):
+            ctx = self._scan_dict(input_data)
+        elif isinstance(input_data, str):
+            ctx = self._scan_string(input_data)
+        elif isinstance(input_data, list):
+            ctx = self._scan_list(input_data)
+        else:
+            ctx = self._scan_unknown(input_data)
+
+        if self.dragon_layers:
+            ctx = self.dragon_layers.apply_relations_41_60(ctx)
+            ctx = self.dragon_layers.apply_survival_120_140(ctx)
+
+        self.history.append(ctx)
+        if len(self.history) > 300:
+            self.history.pop(0)
+
+        return ctx
+
+    def _scan_dict(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        has_threats = any(k in data for k in ["error", "threats", "bug", "exception"])
+        chaos = data.get("chaos", 0.85 if has_threats else 0.15)
+        load = data.get("load", min(1.0, len(data) / 12.0))
+        intent = data.get("intent", self._detect_intent_dict(data))
+        depth = data.get("depth", 0.85 if ("goal" in data or "architecture" in data) else 0.45)
+        precision = data.get("precision", 0.90 if ("data" in data or "math" in data) else 0.50)
+        momentum = data.get("momentum", 0.80 if ("speed" in data or "priority" in data) else 0.35)
+        vision = data.get("vision", 0.90 if ("vision" in data or "concept" in data) else 0.40)
+
+        return {
+            "chaos": self._clamp(chaos),
+            "load": self._clamp(load),
+            "intent": intent,
+            "depth": self._clamp(depth),
+            "precision": self._clamp(precision),
+            "momentum": self._clamp(momentum),
+            "vision": self._clamp(vision),
+            "type": "dict",
+            "timestamp": time.time()
+        }
+
+    def _scan_string(self, text: str) -> Dict[str, Any]:
+        words = re.findall(r'\w+', text.lower())
+        word_count = len(words)
+        unique_words = len(set(words))
+
+        lexical_diversity = unique_words / max(1, word_count)
+        special_chars = len(re.findall(r'[^a-zA-Z0-9\s_]', text))
+        noise_ratio = special_chars / max(1, len(text))
+        threat_hits = sum(1 for w in words if w in self.THREAT_KEYWORDS)
+
+        chaos_calc = (noise_ratio * 2.0) + (threat_hits * 0.25) + ((1.0 - lexical_diversity) * 0.3)
+        chaos = self._clamp(chaos_calc)
+        load = self._clamp(math.log1p(len(text)) / 7.0)
+
+        intent = self._detect_intent_text(text)
+        vision_hits = sum(1 for w in words if w in self.CREATIVE_KEYWORDS)
+        analytical_hits = sum(1 for w in words if w in self.ANALYTICAL_KEYWORDS)
+
+        vision = self._clamp(0.4 + (vision_hits * 0.2))
+        precision = self._clamp(0.4 + (analytical_hits * 0.2) + (lexical_diversity * 0.3))
+        depth = self._clamp((unique_words / 30.0) + (len(text) / 2000.0))
+
+        return {
+            "chaos": chaos,
+            "load": load,
+            "intent": intent,
+            "depth": depth,
+            "precision": precision,
+            "momentum": self._clamp(load * 0.9),
+            "vision": vision,
+            "type": "string",
+            "timestamp": time.time()
+        }
+
+    def _scan_list(self, data: List[Any]) -> Dict[str, Any]:
+        if not data:
+            return {"chaos": 0.0, "load": 0.0, "intent": "general", "depth": 0.0, "precision": 1.0, "momentum": 0.0, "vision": 0.0, "type": "empty_list", "timestamp": time.time()}
+        
+        total_items = len(data)
+        null_items = sum(1 for item in data if item is None or item == "")
+        chaos = self._clamp(null_items / max(1, total_items))
+        load = self._clamp(math.log1p(total_items) / 5.0)
+
+        return {
+            "chaos": chaos,
+            "load": load,
+            "intent": "batch_processing",
+            "depth": self._clamp(total_items / 50.0),
+            "precision": self._clamp(1.0 - chaos),
+            "momentum": self._clamp(load * 0.85),
+            "vision": 0.50,
+            "type": "list",
+            "timestamp": time.time()
+        }
+
+    def _scan_unknown(self, data: Any) -> Dict[str, Any]:
+        return {"chaos": 0.5, "load": 0.5, "intent": "general", "depth": 0.3, "precision": 0.5, "momentum": 0.3, "vision": 0.3, "type": type(data).__name__, "timestamp": time.time()}
+
+    def _detect_intent_dict(self, data: Dict[str, Any]) -> str:
+        d_type = str(data.get("type", "")).lower()
+        if d_type in ["creative", "vision", "art"]: return "creative"
+        if d_type in ["analysis", "data", "math"]: return "analytical"
+        if d_type in ["strategy", "defense", "security"]: return "strategic"
+        if d_type in ["action", "execution", "code"]: return "protective"
+        return "general"
+
+    def _detect_intent_text(self, text: str) -> str:
+        t = text.lower()
+        if any(k in t for k in self.PROTECTIVE_KEYWORDS): return "protective"
+        if any(k in t for k in self.ANALYTICAL_KEYWORDS): return "analytical"
+        if any(k in t for k in self.CREATIVE_KEYWORDS): return "creative"
+        if any(k in t for k in ["plan", "strategia", "cel", "przyszlosc", "roadmap"]): return "strategic"
+        return "general"
+
+
+# ============================================================
+# 4. OŚMIORNICA A–H (ramiona wykonawcze)
+# ============================================================
+class OctopusArms:
+    """Ramiona A–H modulujące decyzję przed egzekucją."""
+
+    def __init__(self):
+        LOG("OCTOPUS_ARMS", "INIT", "🦑 Ośmiornica A–H v3.0 aktywowana")
+
+    def route(self, mode: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        chaos = context.get("chaos", 0.0)
+        precision = context.get("precision", 0.5)
+        vision = context.get("vision", 0.5)
+
+        arms = {
+            "ARM_A_LOGIC": precision > 0.6,
+            "ARM_B_EMOTION": vision > 0.6,
+            "ARM_C_PERCEPTION": chaos < 0.7,
+            "ARM_D_EXECUTION": True,
+            "ARM_E_STRATEGY": context.get("intent") == "strategic",
+            "ARM_F_ADAPTATION": chaos > 0.4,
+            "ARM_G_META_LOGIC": mode in ["GOLD", "VIOLET", "CLEAR"],
+            "ARM_H_SHADOW": context.get("shadowdragon_trigger", False)
+        }
+
+        return arms
+
+
+# ============================================================
+# 5. SELEKTOR TRYBÓW ULTIMA_NONA v3.0
+# ============================================================
+class ModeSelectorULTIMA:
+    """Selektor trybów z hierarchiczną oceną wektorową + TagUniverse + ShadowDragon."""
+
+    MODES = ["BLACK", "BLUE", "GREY", "SILVER", "GOLD", "RED", "WHITE", "VIOLET", "CLEAR", "NEUTRAL"]
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+        LOG("MODE_SELECTOR", "INIT", "🎯 Selektor ULTIMA_NONA v3.0 OMEGA aktywowany")
+
+    def select(self, context: Dict[str, Any], memory_bias: Dict[str, Any]) -> str:
+        chaos = context.get("chaos", 0.0)
+        load = context.get("load", 0.0)
+        intent = context.get("intent", "general")
+        precision = context.get("precision", 0.5)
+        vision = context.get("vision", 0.5)
+        safe_mode = context.get("safe_mode", False)
+        predator = context.get("predator_protocol", False)
+        shadowdragon = context.get("shadowdragon_trigger", False)
+        tag_vector = context.get("tag_vector", {})
+        dominant_bias = memory_bias.get("bias", "NEUTRAL")
+
+        if shadowdragon:
+            selected = "BLACK"
+        elif safe_mode and predator:
+            selected = "BLACK"
+        elif chaos > 0.92 and load > 0.92:
+            selected = "CLEAR"
+        elif chaos > 0.75:
+            selected = "RED" if load > 0.5 else "BLACK"
+        elif intent == "creative" or vision > 0.80:
+            selected = "WHITE" if load < 0.60 else "VIOLET"
+        elif intent == "analytical" or precision > 0.80:
+            selected = "SILVER" if load < 0.70 else "GOLD"
+        elif intent == "strategic":
+            selected = "VIOLET" if vision > 0.60 else "GOLD"
+        elif intent == "protective":
+            selected = "BLUE"
+        elif chaos > 0.60 and load < 0.40:
+            selected = "NEUTRAL"
+        else:
+            selected = "GREY"
+
+        if dominant_bias in self.MODES and chaos < 0.6:
+            selected = dominant_bias
+
+        LOG("MODE_SELECTOR", "MATCH", f"Tryb: {selected} (Chaos={chaos:.2f}, Load={load:.2f}, Intent={intent}, Bias={dominant_bias})")
+        return selected
+
+
+# ============================================================
+# 6. MASTER CODE v3.0 (z ActiveShaper)
+# ============================================================
+class MasterCode212203_v3:
+    """Cykl transformacji 21→22→0→0B→23→23B z ActiveShaper."""
+
+    def __init__(self):
+        LOG("MASTER_CODE_v3", "INIT", "🔥 Master Code v3.0 OMEGA gotowy")
+
+    def run(self, mode: str, context: Dict[str, Any], heart_vec: Dict[str, Any], cortex_vec: Dict[str, Any]) -> Dict[str, Any]:
+        chaos = context.get("chaos", 0.0)
+        load = context.get("load", 0.0)
+        momentum = context.get("momentum", 0.5)
+        tag_vec = context.get("tag_vector", {})
+
+        stage_21 = {
+            "resonance": True,
+            "input_mode": mode,
+            "load": load,
+            "chaos_snapshot": chaos,
+            "heart_resonance": heart_vec["resonance"],
+            "cortex_alignment": cortex_vec["alignment_score"],
+            "sig": "PHASE_21_CONDENSE"
+        }
+
+        expansion_base = 1.0 + (momentum * 0.4) + (heart_vec["resonance"] * 0.2)
+        stage_22 = {
+            "transformed": True,
+            "blueprint": f"MODEL_{mode}_PIPELINE",
+            "expansion_factor": round(expansion_base, 4),
+            "tag_bias": tag_vec.get("bias", "none"),
+            "sig": "PHASE_22_EXPAND"
+        }
+
+        purged = round(chaos * 0.35, 4)
+        stage_0 = {
+            "zero_cleared": True,
+            "entropy_purged": purged,
+            "sig": "PHASE_0_RESET"
+        }
+
+        rebuild_entropy = round(max(0.0, chaos - purged) * (1.0 - heart_vec["resonance"] * 0.3), 4)
+        stage_0B = {
+            "entropy_rebuild": rebuild_entropy,
+            "core_recentered": True,
+            "sig": "PHASE_0B_REBUILD"
+        }
+
+        stage_23 = {
+            "execution_ready": True,
+            "momentum": momentum,
+            "mode_bias": mode,
+            "sig": "PHASE_23_EXEC"
+        }
+
+        quality_base = 0.95 - (rebuild_entropy * 0.1) + (cortex_vec["alignment_score"] * 0.05)
+        stage_23B = {
+            "feedback_loop": "ACTIVE",
+            "result_quality_estimate": round(max(0.7, min(1.0, quality_base)), 4),
+            "sig": "PHASE_23B_FEEDBACK"
+        }
+
+        return {
+            "stage": "COMPLETE_v3.0",
+            "mode": mode,
+            "stage_21": stage_21,
+            "stage_22": stage_22,
+            "stage_0": stage_0,
+            "stage_0B": stage_0B,
+            "stage_23": stage_23,
+            "stage_23B": stage_23B,
+            "timestamp": time.time()
+        }
+
+
+# ============================================================
+# 7. TRINITY CORE v3.0
+# ============================================================
+class TrinityCore_v3:
+    """Trójrdzeniowa weryfikacja decyzji v3.0 z pełną integracją Heart/Cortex/Tag."""
+
+    def __init__(self):
+        LOG("TRINITY_CORE_v3", "INIT", "🧠 TRINITY_CORE v3.0 aktywowany")
+
+    def execute(self, cycle_data: Dict[str, Any], context: Dict[str, Any], heart_vec: Dict[str, Any], cortex_vec: Dict[str, Any]) -> Dict[str, Any]:
+        mode = cycle_data.get("mode", "GREY")
+        chaos = context.get("chaos", 0.0)
+        load = context.get("load", 0.0)
+
+        geon = {
+            "status": "APPROVED",
+            "arch_alignment": cortex_vec["alignment_score"],
+            "vector": f"EXPANSION_{mode}",
+            "tag_universe_influence": "ACTIVE"
+        }
+
+        safety_status = "MAX_BUFFER" if chaos > 0.7 else "STANDARD_BUFFER"
+        olsii = {
+            "status": "STABLE",
+            "harmony_factor": round(max(0.5, heart_vec["resonance"]), 4),
+            "safety_buffer": safety_status,
+            "heart_sync": True
+        }
+
+        resource_cost = round(0.15 + (load * 0.35), 4)
+        beny = {
+            "status": "EXECUTABLE",
+            "resource_cost": resource_cost,
+            "feasibility": round(max(0.7, 1.0 - resource_cost * 0.5), 4),
+            "highway33_acceleration": True,
+            "octopus_arms_engaged": load > 0.5
+        }
+
+        return {
+            "trinity_status": "CONSENSUS_REACHED",
+            "geon": geon,
+            "olsii": olsii,
+            "beny": beny,
+            "timestamp": time.time()
+        }
+
+
+# ============================================================
+# 8. REGULATOR STANU v3.0
+# ============================================================
+class StateRegulator_v3:
+    """Stabilizuje stan systemu oraz rytm globalny."""
+
+    def __init__(self, dragon_layers: Optional[DragonLayersInterface] = None):
+        self.stability_index = 1.0
+        self.dragon_layers = dragon_layers
+        LOG("STATE_REGULATOR_v3", "INIT", "🔄 Regulator stanu v3.0 gotowy")
+
+    def stabilize(self, trinity_output: Dict[str, Any]) -> Dict[str, Any]:
+        is_consensus = trinity_output.get("trinity_status") == "CONSENSUS_REACHED"
+        if is_consensus:
+            self.stability_index = min(1.0, self.stability_index + 0.03)
+        else:
+            self.stability_index = max(0.0, self.stability_index - 0.20)
+
+        regulated = {
+            "stabilized": True,
+            "stability_index": round(self.stability_index, 4),
+            "entropy_dampened": True,
+            "core_input": trinity_output
+        }
+
+        if self.dragon_layers:
+            regulated = self.dragon_layers.apply_rhythm_90_92(regulated)
+
+        return regulated
+
+
+# ============================================================
+# 9. RURA WYKONAWCZA v3.0 (ActiveShaper + Kozak)
+# ============================================================
+class ExecutionPipeline_v3:
+    """Finalna faza generowania wyniku wykonawczego v3.0."""
+
+    def __init__(self):
+        LOG("EXEC_PIPELINE_v3", "INIT", "⚡ Rura wykonawcza v3.0 gotowa")
+
+    def run(self, regulated_data: Dict[str, Any], context: Dict[str, Any], arms: Dict[str, bool]) -> Dict[str, Any]:
+        stability = regulated_data.get("stability_index", 1.0)
+        kozak_boost = context.get("kozak_boost", False)
+
+        confidence = stability * 100.0
+        if kozak_boost:
+            confidence = min(100.0, confidence + 7.0)
+        if arms.get("ARM_G_META_LOGIC", False):
+            confidence = min(100.0, confidence + 3.0)
+
+        return {
+            "action": "EXECUTE_DECISION",
+            "momentum_applied": True,
+            "precision_grade": "ULTIMA_v3_OMEGA",
+            "execution_confidence": round(confidence, 2),
+            "status": "SUCCESS",
+            "timestamp": time.time()
+        }
+
+
+# ============================================================
+# 10. GŁÓWNY SILNIK v3.0 OMEGA
+# ============================================================
+class GEON_AIDecisionEngineULTIMA_v3:
+    """
+    Główny governor v3.0 OMEGA — pełny organizm decyzyjny GEON_AI / DRAGON_OS.
+    """
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+        self.tick = 0
+        self.state = "ACTIVE"
+        self.history: List[Dict[str, Any]] = []
+        self.stats: Dict[str, Any] = {
+            "decisions_made": 0,
+            "contexts_scanned": 0,
+            "modes_selected": {},
+            "master_cycles": 0,
+            "trinity_executions": 0,
+            "regulations_applied": 0,
+            "pipelines_run": 0
+        }
+
+        self.dragon_layers = DragonLayersInterface(self.config)
+        self.context_scanner = ContextScanner(self.config, self.dragon_layers)
+        self.heart_cortex_memory = HeartCortexMemory()
+        self.mode_selector = ModeSelectorULTIMA(self.config)
+        self.master_code = MasterCode212203_v3()
+        self.trinity_core = TrinityCore_v3()
+        self.state_regulator = StateRegulator_v3(self.dragon_layers)
+        self.octopus_arms = OctopusArms()
+        self.execution_pipeline = ExecutionPipeline_v3()
+
+        LOG("ENGINE_v3", "INIT", f"🐉 GEON_AI_DECISION_ENGINE_ULTIMA v{VERSION} aktywowany")
+        LOG("ENGINE_v3", "INIT", f"   Sygnatura: {FRACTAL_SIGNATURE}")
+
+    def decide(self, input_data: Any) -> Dict[str, Any]:
+        self.tick += 1
+        self.stats["decisions_made"] += 1
+        LOG("ENGINE_v3", "START", f"Cykl decyzyjny v3.0 OMEGA #{self.tick}", self.tick)
+
+        try:
+            ctx = self.context_scanner.scan(input_data)
+            self.stats["contexts_scanned"] += 1
+
+            heart_vec = self.heart_cortex_memory.compute_heart_vector(ctx)
+            cortex_vec = self.heart_cortex_memory.compute_cortex_vector(ctx)
+            memory_bias = self.heart_cortex_memory.compute_memory_bias()
+
+            mode = self.mode_selector.select(ctx, memory_bias)
+            self.stats["modes_selected"][mode] = self.stats["modes_selected"].get(mode, 0) + 1
+
+            cycle = self.master_code.run(mode, ctx, heart_vec, cortex_vec)
+            self.stats["master_cycles"] += 1
+
+            trinity = self.trinity_core.execute(cycle, ctx, heart_vec, cortex_vec)
+            self.stats["trinity_executions"] += 1
+
+            regulated = self.state_regulator.stabilize(trinity)
+            self.stats["regulations_applied"] += 1
+
+            arms = self.octopus_arms.route(mode, ctx)
+
+            output = self.execution_pipeline.run(regulated, ctx, arms)
+            self.stats["pipelines_run"] += 1
+
+            self.heart_cortex_memory.update_memory(mode, ctx, output["execution_confidence"])
+
+            result = {
+                "status": "success",
+                "tick": self.tick,
+                "context": ctx,
+                "mode": mode,
+                "cycle": cycle,
+                "trinity": trinity,
+                "regulated": regulated,
+                "arms": arms,
+                "output": output,
+                "signature": FRACTAL_SIGNATURE,
+                "version": VERSION
+            }
+
+            self.history.append(result)
+            if len(self.history) > 300:
+                self.history.pop(0)
+
+            LOG("ENGINE_v3", "COMPLETE", f"Decyzja v3.0 OMEGA #{self.tick} w trybie [{mode}]", self.tick)
+            return result
+
+        except Exception as e:
+            LOG("ENGINE_v3", "ERROR", f"Błąd pętli v3.0 OMEGA: {e}", self.tick)
+            return {
+                "status": "error",
+                "tick": self.tick,
+                "error": str(e),
+                "signature": FRACTAL_SIGNATURE
+            }
+
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "state": self.state,
+            "tick": self.tick,
+            "stats": self.stats,
+            "history_size": len(self.history),
+            "version": VERSION
+        }
+
+
+# ============================================================
+# 11. DEMO v3.0 OMEGA
+# ============================================================
+def demo_v3_omega():
+    print("\n" + "=" * 70)
+    print("🐉 GEON_AI_DECISION_ENGINE_ULTIMA v3.0 OMEGA — DEMO")
+    print("=" * 70 + "\n")
+
+    engine = GEON_AIDecisionEngineULTIMA_v3()
+
+    print("\n--- [1] KREATYWNE + WIZJA ---")
+    r1 = engine.decide("Stwórz wielowymiarową wizję nowej architektury GEON_DRAGON_OS z pełnym spektrum Ośmiornicy A–H")
+    print(f"-> Tryb={r1['mode']}, Chaos={r1['context']['chaos']:.2f}, Pewność={r1['output']['execution_confidence']}%")
+
+    print("\n--- [2] SECURITY + HIGH CHAOS ---")
+    r2 = engine.decide("Krytyczny blad, awaria, zagrozenie w module danych! Skan, analiza, zabezpieczenie!")
+    print(f"-> Tryb={r2['mode']}, SafeMode={r2['context']['safe_mode']}, ShadowDragon={r2['context']['shadowdragon_trigger']}")
+
+    print("\n--- [3] OBIEKT DICT (strategia) ---")
+    r3 = engine.decide({"type": "strategy", "chaos": 0.45, "load": 0.55, "intent": "strategic", "vision": 0.9})
+    print(f"-> Tryb={r3['mode']}, Mirror={r3['regulated']['system_mirror_reflection']}")
+
+    print("\n" + "=" * 70)
+    status = engine.get_status()
+    print(f"Wykonanych cykli: {status['tick']}")
+    print(f"Rozkład trybów: {status['stats']['modes_selected']}")
+    print("=" * 70 + "\n")
+
+
+if __name__ == "__main__":
+    demo_v3_omega()
