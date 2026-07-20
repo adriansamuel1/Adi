@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+🌍 GEON_VECTOR_ENGINE v9.0 — Układ Środowiskowy GEON
+========================================================
+Warstwa: kombajn/geon_vector_engine_v9.py
+Rola: VECTOR v9 — pełny silnik środowiskowy GEON.
+Wersja: v9.0-INFINITY
+Sygnatura: [GEON_SYSTEM::VECTOR::v9.0]
+========================================================
+"""
+
+import math
+from dataclasses import dataclass, field
+from typing import Dict, Any, List
+
+
+def LOG(module: str, event: str, msg: str) -> None:
+    print(f"[VECTOR9][{module}][{event}] -> {msg}")
+
+
+# ============================================================
+# STRUKTURA WYJŚCIOWA VECTOR v9
+# ============================================================
+
+@dataclass
+class VectorStatusV9:
+    obywatel: Dict[str, Any]
+    dom: Dict[str, Any]
+    wspolnota: Dict[str, Any]
+    planeta: Dict[str, Any]
+    meta: Dict[str, Any]
+    d3: List[float]
+    d4: List[float]
+    energy_map: Dict[str, float]
+    entropy_map: Dict[str, float]
+    meta_state: Dict[str, Any]
+
+
+# ============================================================
+# VECTOR ENGINE v9 — GŁÓWNY SILNIK ŚRODOWISKOWY
+# ============================================================
+
+class WorldVectorEngineV9:
+    """
+    VECTOR v9 — układ środowiskowy GEON:
+    - ocena Domu
+    - ocena Wspólnoty
+    - ocena Planety
+    - ocena Obywatela
+    - generowanie D3 (harmonia środowiskowa)
+    - generowanie D4 (korekcja środowiskowa)
+    - energia środowiskowa
+    - entropia środowiskowa
+    """
+
+    def __init__(self):
+        LOG("VECTOR_V9", "INIT", "🌍 Vector Engine v9 aktywowany")
+
+    # --------------------------------------------------------
+    # FUNKCJE POMOCNICZE
+    # --------------------------------------------------------
+
+    @staticmethod
+    def normalize(value: float) -> float:
+        return max(0.0, min(1.0, value))
+
+    @staticmethod
+    def avg(values: List[float]) -> float:
+        return sum(values) / len(values) if values else 0.0
+
+    @staticmethod
+    def entropy(values: List[float]) -> float:
+        if not values:
+            return 0.0
+        mean = sum(values) / len(values)
+        var = sum((v - mean) ** 2 for v in values) / len(values)
+        return var
+
+    @staticmethod
+    def energy(values: List[float]) -> float:
+        return sum(values)
+
+    # --------------------------------------------------------
+    # KLASYFIKACJE ŚRODOWISKOWE
+    # --------------------------------------------------------
+
+    def classify(self, score: float, thresholds: List[float], labels: List[str]) -> str:
+        for i, th in enumerate(thresholds):
+            if score >= th:
+                return labels[i]
+        return labels[-1]
+
+    # --------------------------------------------------------
+    # GŁÓWNA FUNKCJA VECTOR v9
+    # --------------------------------------------------------
+
+    def compute(self, fmpc, dom: Dict[str, int],
+                wsp: Dict[str, int], plan: Dict[str, int]) -> VectorStatusV9:
+
+        # 1. Wektory środowiskowe
+        dom_score = sum(dom.values())
+        wsp_score = sum(wsp.values())
+        plan_score = sum(plan.values())
+
+        # 2. Klasyfikacje
+        dom_out = {
+            "wektor": dom_score,
+            "klasyfikacja": self.classify(
+                dom_score, [25, 15],
+                ["dom_stabilny", "dom_wymaga_regulacji", "dom_kryzysowy"]
+            ),
+            "zmienne": dom,
+        }
+
+        wsp_out = {
+            "wektor": wsp_score,
+            "klasyfikacja": self.classify(
+                wsp_score, [22, 14],
+                ["wspolnota_stabilna", "wspolnota_chwiejna", "wspolnota_kryzysowa"]
+            ),
+            "zmienne": wsp,
+        }
+
+        plan_out = {
+            "wektor": plan_score,
+            "klasyfikacja": self.classify(
+                plan_score, [28, 18],
+                ["planeta_stabilna", "planeta_regeneracja", "planeta_alarm"]
+            ),
+            "zmienne": plan,
+        }
+
+        obywatel_out = {
+            "klasyfikacja": fmpc.classification,
+            "suma": fmpc.weighted_sum,
+            "archetype": fmpc.archetype,
+        }
+
+        # 3. Meta-wektor globalny
+        meta_score = (
+            fmpc.weighted_sum * 0.4 +
+            dom_score * 0.2 +
+            wsp_score * 0.2 +
+            plan_score * 0.2
+        )
+
+        meta_out = {
+            "meta_wektor": meta_score,
+            "klasyfikacja": self.classify(
+                meta_score, [40, 25],
+                ["wektor_globalny_stabilny", "wektor_globalny_chwiejny", "wektor_globalny_kryzysowy"]
+            ),
+        }
+
+        # 4. D3 — harmonia środowiskowa
+        base = meta_score + dom_score + wsp_score + plan_score or 1.0
+        d3 = [
+            self.normalize((base * (i + 1) % 168) / 168.0)
+            for i in range(9)
+        ]
+
+        # 5. D4 — korekcja środowiskowa
+        d4 = [
+            self.normalize((meta_score / 100.0) * (i + 1) / 9.0)
+            for i in range(9)
+        ]
+
+        # 6. Energia środowiskowa
+        energy_map = {
+            "E_dom": dom_score,
+            "E_wsp": wsp_score,
+            "E_plan": plan_score,
+            "E_meta": meta_score,
+            "E_d3": sum(d3),
+            "E_d4": sum(d4),
+        }
+
+        # 7. Entropia środowiskowa
+        entropy_map = {
+            "H_d3": self.entropy(d3),
+            "H_d4": self.entropy(d4),
+        }
+
+        # 8. Meta-stan środowiskowy
+        meta_state = {
+            "global_energy": energy_map["E_meta"],
+            "global_entropy": entropy_map["H_d3"],
+            "trend_energy": energy_map["E_meta"] - energy_map["E_d3"],
+            "trend_entropy": entropy_map["H_d3"] - entropy_map["H_d4"],
+        }
+
+        return VectorStatusV9(
+            obywatel=obywatel_out,
+            dom=dom_out,
+            wspolnota=wsp_out,
+            planeta=plan_out,
+            meta=meta_out,
+            d3=d3,
+            d4=d4,
+            energy_map=energy_map,
+            entropy_map=entropy_map,
+            meta_state=meta_state,
+        )
