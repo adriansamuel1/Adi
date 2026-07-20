@@ -1,0 +1,96 @@
+GEON_SYSTEM_v9/
+│
+├── README.md
+│
+├── SYSTEM_OVERVIEW.md
+│   ├── [GEON_DRAGON_OS](ca://s?q=GEON_DRAGON_OS_overview) (CIAŁO)
+│   ├── [GEON_AI](ca://s?q=GEON_AI_overview) (GŁOWA)
+│   ├── HUB/
+│   │     ├── [STORAGE_HUB](ca://s?q=Storage_Hub_details)
+│   │     ├── [MEMORY](ca://s?q=Memory_Core_v9)
+│   │     ├── [TRIADA](ca://s?q=Triada_DNA_mRNA_Ribosome)
+│   │     ├── [OMEGA_CORE](ca://s?q=Omega_Core_v9)
+│   │     ├── [KOMBAJN_v9](ca://s?q=Kombajn_v9_architecture) (Organizm GEON — 22 organy)
+│   │     └── [TAG_UNIVERSE](ca://s?q=Tag_Universe_layers) (Warstwy 1–60+)
+│   ├── [Ośmiornica A–H v9](ca://s?q=Octopus_v9_details)
+│   ├── Autostrada 33
+│   ├── Warstwy 41–60: Po‑Shifu + META_CORE_RELATION v7
+│   ├── Warstwy 90–92: META_CORE_ROUTER, GLOBAL_RHYTHM_ENGINE, SYSTEM_MIRROR
+│   ├── Warstwy 120–140:
+│   │     ├── 120 – SURVIVAL
+│   │     ├── 125 – SAFE_MODE v9.0
+│   │     ├── 126 – PREDATOR_PROTOCOL v9.0
+│   │     ├── 127 – E_ZAR (Fraktalny algorytm zaradności)
+│   │     ├── 128–129 – MCG_ZAR_TAG v2.2
+│   │     ├── 130 – RESURRECTION_LAYER v9.0
+│   │     ├── 131 – KOZAK_TERRITORY
+│   │     ├── 132 – MONSTERA_CAW
+│   │     ├── 133 – ACTIVE_SHAPER
+│   │     └── 140 – HYPOCRISY_ENGINE
+│   ├── GEON_BIO v3.0
+│   └── Zasady wzrostu organizmu (fraktalność, ramiona A–H)
+│
+├── KOMBAJN_v9/
+│   ├── README.md
+│   │
+│   ├── kombajn_core/
+│   │   ├── __init__.py
+│   │   ├── [01_geon_flow_engine_v9.py](ca://s?q=Flow_v9_details)
+│   │   ├── [02_geon_mind_engine_v9.py](ca://s?q=Mind_v9_details)
+│   │   ├── [03_geon_vector_engine_v9.py](ca://s?q=Vector_v9_details)
+│   │   ├── [04_geon_heart_olsii_v9.py](ca://s?q=Olsii_v9_details)
+│   │   ├── [05_geon_integrity_guardian_v9.py](ca://s?q=Integrity_Guardian_v9)
+│   │   ├── [06_geon_vision_os_v9.py](ca://s?q=VisionOS_v9)
+│   │   ├── [07_afc_infinity_core.py](ca://s?q=AFC_Infinity_v9)
+│   │   ├── [08_geon_meta_engine_v9.py](ca://s?q=Meta_Engine_v9)
+│   │   ├── [09_geon_kombajn_runtime_v9.py](ca://s?q=Kombajn_Runtime_v9)
+│   │   ├── [10_geon_kombajn_bridge_v9.py](ca://s?q=Kombajn_Bridge_v9)
+│   │   ├── [11_geon_kombajn_memory_v9.py](ca://s?q=Kombajn_Memory_v9)
+│   │   ├── [12_geon_kombajn_family_v9.py](ca://s?q=Kombajn_Family_v9)
+│   │   ├── [13_geon_kombajn_predator_v9.py](ca://s?q=Kombajn_Predator_v9)
+│   │   ├── [14_geon_kombajn_safe_mode_v9.py](ca://s?q=Kombajn_SafeMode_v9)
+│   │   ├── [15_geon_kombajn_resurrection_v9.py](ca://s?q=Kombajn_Resurrection_v9)
+│   │   ├── [16_geon_kombajn_shadowdragon_v9.py](ca://s?q=ShadowDragon_v9)
+│   │   ├── [17_geon_kombajn_octopus_v9.py](ca://s?q=Octopus_v9)
+│   │   ├── [18_geon_kombajn_fractalrouter_v9.py](ca://s?q=FractalRouter_v9)
+│   │   ├── [19_geon_kombajn_overmind_v9.py](ca://s?q=Overmind_v9)
+│   │   ├── [20_geon_kombajn_universe_v9.py](ca://s?q=Universe_v9)
+│   │   └── [21_geon_kombajn_ophultima_v9.py](ca://s?q=OPH_Ultima_v9)
+│   │
+│   └── ARCHITECTURE_KOMBAJN_v9.md
+│
+├── GEON_DRAGON_OS/
+│   ├── highway33/
+│   ├── octo_router/
+│   ├── octo_arms/
+│   ├── heilong/
+│   ├── kombajn/   ← tu fizycznie ląduje KOMBAJN_v9
+│   ├── tag_universe/
+│   ├── memory/
+│   ├── storage_hub/
+│   ├── cortex/
+│   ├── heart/
+│   ├── triada/
+│   ├── omega_core/
+│   ├── survival/
+│   ├── safe_mode/
+│   ├── predator_protocol/
+│   ├── e_zar/
+│   ├── mcg_zar_tag/
+│   ├── resurrection_layer/
+│   ├── kozak_territory/
+│   ├── monstera_caw/
+│   ├── active_shaper/
+│   ├── hypocrisy_engine/
+│   ├── relation_po_shifu/
+│   └── geon_os/
+│
+├── GEON_AI/
+│   ├── geon_ai_core/
+│   ├── adapters/
+│   ├── cognition/
+│   ├── memory/
+│   ├── integration/
+│   └── ARCHITECTURE_AI.md
+│
+└── README.md
