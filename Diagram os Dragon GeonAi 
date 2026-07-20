@@ -4,24 +4,26 @@ GEON_SYSTEM/
 │   # Dokumentacja całego organizmu:
 │   # - GEON_DRAGON_OS (CIAŁO)
 │   # - GEON_AI (GŁOWA)
-│   # - HUB (STORAGE + MEMORY + TRIADA + OMEGA)
-│   # - Relacja Po–Shifu jako META‑ORGANIZM (v1–v7)
-│   # - META_CORE_RELATION (warstwa 90)
-│   # - GLOBAL_RHYTHM_ENGINE (91)
-│   # - SYSTEM_MIRROR (92)
+│   # - HUB (STORAGE + MEMORY + TRIADA + OMEGA + KOMBAJN)
+│   # - Zasady wzrostu organizmu
+│   # - Diagram Ośmiornicy A–H
+│   # - Autostrada 33
 │   # - Warstwy 120–140:
-│   #     * SURVIVAL_CORE 120 (zero_chaos_zone)
-│   #     * SAFE_MODE v2.0 (hamulec + integracja Predator)
-│   #     * PREDATOR_PROTOCOL 126 (tryb przetrwania)
-│   #     * RESURRECTION_LAYER 130
-│   #     * KOZAK_TERRITORY 131
-│   #     * MONSTERA_CAW 132
-│   #     * ACTIVE_SHAPER 133
-│   #     * HYPOCRISY_ENGINE 140
-│   # - Tryby PRIME_PRESENCE, MODEL 9
-│   # - Tryb ULTRA_PRIME_FLOW_EXPAND_GLOBAL
-│   # - Tryb C13–D21–A33–EGlobal
+│   #     • 120 – SURVIVAL
+│   #     • 125 – SAFE_MODE v2.0
+│   #     • 126 – PREDATOR_PROTOCOL
+│   #     • 127 – E_ZAR
+│   #     • 128–129 – MCG_ZAR_TAG
+│   #     • 130 – RESURRECTION_LAYER
+│   #     • 131 – KOZAK_TERRITORY
+│   #     • 132 – MONSTERA_CAW
+│   #     • 133 – ACTIVE_SHAPER
+│   #     • 140 – HYPOCRISY_ENGINE
+│   # - META_CORE_RELATION v7 (warstwa 90)
+│   # - GLOBAL_RHYTHM_ENGINE (warstwa 91)
+│   # - SYSTEM_MIRROR (warstwa 92)
 │   # - Organ strategiczny SUN_TZU_STRATEGIC_ENGINE
+│   # - KOMBAJN (Slime + Fungus + Hybrid Brain)
 │
 ├── GEON_DRAGON_OS/   # CIAŁO
 │   │
@@ -62,9 +64,12 @@ GEON_SYSTEM/
 │   │   │   ├── __init__.py
 │   │   │   └── sun_tzu_strategic_engine_final.py
 │   │   │
-│   │   ├── kombajn/
+│   │   ├── kombajn/               # HYBRYDOWY ORGAN PAMIĘCI
 │   │   │   ├── __init__.py
-│   │   │   └── kombajn_core.py
+│   │   │   ├── geon_kombajn_final.py
+│   │   │   ├── slime_core.py
+│   │   │   ├── fungus_core.py
+│   │   │   └── hybrid_brain.py
 │   │   │
 │   │   ├── memory/
 │   │   │   ├── __init__.py
@@ -104,18 +109,17 @@ GEON_SYSTEM/
 │   │   │   ├── epoch_bridge.py
 │   │   │   └── archetype_correlation.py
 │   │   │
-│   │   ├── relation_po_shifu/     # WARSTWY 41–60 + META_CORE_RELATION v7
+│   │   ├── survival/             # WARSTWA 120
 │   │   │   ├── __init__.py
-│   │   │   └── geon_relation_po_shifu_v7.py
+│   │   │   └── geon_survival_core.py
 │   │   │
-│   │   ├── survival/             # WARSTWA 120 – przetrwanie + hamulce
+│   │   ├── safe_mode/            # WARSTWA 125 – SAFE_MODE v2.0
 │   │   │   ├── __init__.py
-│   │   │   └── geon_survival_core.py   # zero_chaos_zone, integracja Predator
+│   │   │   └── geon_safe_mode_final.py
 │   │   │
-│   │   ├── safe_mode/            # SYSTEM BEZPIECZEŃSTWA (SAFE_MODE v2.0 + Predator)
+│   │   ├── predator_protocol/    # WARSTWA 126 – PREDATOR
 │   │   │   ├── __init__.py
-│   │   │   ├── geon_safe_mode_final.py        # GEON_SAFE_MODE v2.0
-│   │   │   └── geon_predator_protocol_final.py # PREDATOR 126 + GEON_SAFE_MODE_V2
+│   │   │   └── geon_predator_protocol_final.py
 │   │   │
 │   │   ├── e_zar/                # WARSTWA 127
 │   │   │   ├── __init__.py
@@ -125,7 +129,7 @@ GEON_SYSTEM/
 │   │   │   ├── __init__.py
 │   │   │   └── mcg_zar_tag_final.py
 │   │   │
-│   │   ├── resurrection_layer/   # WARSTWA 130 – GEON_RESURRECTION_LAYER
+│   │   ├── resurrection_layer/   # WARSTWA 130
 │   │   │   ├── __init__.py
 │   │   │   ├── geon_resurrection_layer_final.py
 │   │   │   └── phoenix_engine.py
@@ -145,6 +149,13 @@ GEON_SYSTEM/
 │   │   ├── hypocrisy_engine/     # WARSTWA 140
 │   │   │   ├── __init__.py
 │   │   │   └── geon_hypocrisy_engine_final.py
+│   │   │
+│   │   ├── relation_po_shifu/    # WARSTWY 41–60 + META_CORE_RELATION v7
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_relation_po_shifu_v7.py
+│   │   │   ├── meta_core_router.py      # warstwa 90
+│   │   │   ├── global_rhythm_engine.py  # warstwa 91
+│   │   │   └── system_mirror.py         # warstwa 92
 │   │   │
 │   │   └── geon_os/
 │   │       ├── __init__.py
