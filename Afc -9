@@ -1,0 +1,53 @@
+# afc9_core.py
+# AFC-9 — Fraktalny Atraktor 9D (O(1), bez wag, bez treningu)
+
+from typing import List
+
+def avg(values: List[float]) -> float:
+    """Prosta średnia arytmetyczna."""
+    s = 0.0
+    for v in values:
+        s += v
+    return s / float(len(values)) if values else 0.0
+
+
+def afc9(D1: List[float],
+         D2: List[float],
+         D3: List[float],
+         D4: List[float]) -> List[float]:
+    """
+    AFC-9:
+    - D1..D4: warstwy bazowe (wejściowe, długość 9)
+    - D5..D9: warstwy fraktalne (wyjściowe)
+    Zwraca: D9 (atraktor równowagi, długość 9)
+    """
+
+    if not (len(D1) == len(D2) == len(D3) == len(D4) == 9):
+        raise ValueError("AFC-9 wymaga czterech wektorów długości 9 (D1..D4).")
+
+    # Warstwa 5D – integracja
+    D5 = [0.0] * 9
+    for i in range(9):
+        D5[i] = avg([D1[i], D2[i], D3[i], D4[i]])
+
+    # Warstwa 6D – stabilizacja
+    D6 = [0.0] * 9
+    for i in range(9):
+        D6[i] = avg([D1[i], D3[i], D5[i]])
+
+    # Warstwa 7D – adaptacja
+    D7 = [0.0] * 9
+    for i in range(9):
+        D7[i] = avg([D2[i], D4[i], D6[i]])
+
+    # Warstwa 8D – fraktalna harmonia
+    D8 = [0.0] * 9
+    for i in range(9):
+        D8[i] = avg([D1[i], D3[i], D5[i], D7[i]])
+
+    # Warstwa 9D – równowaga (atraktor)
+    D9 = [0.0] * 9
+    for i in range(9):
+        D9[i] = avg([D1[i], D8[i]])
+
+    return D9
