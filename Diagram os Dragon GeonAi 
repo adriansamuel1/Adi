@@ -5,10 +5,19 @@ GEON_SYSTEM/
 │   # - GEON_DRAGON_OS (CIAŁO)
 │   # - GEON_AI (GŁOWA)
 │   # - HUB (STORAGE + MEMORY + TRIADA + OMEGA)
-│   # - Zasady wzrostu organizmu
-│   # - Diagram Ośmiornicy A–H
-│   # - Autostrada 33
-│   # - Warstwy 120–140 (SURVIVAL + SAFE_MODE + RESURRECTION + KOZAK + MONSTERA + ACTIVE_SHAPER + HYPOCRISY)
+│   # - Relacja Po–Shifu jako META‑ORGANIZM (v1–v7)
+│   # - META_CORE_RELATION (warstwa 90)
+│   # - GLOBAL_RHYTHM_ENGINE (91)
+│   # - SYSTEM_MIRROR (92)
+│   # - Warstwy 120–140:
+│   #     * SURVIVAL_CORE 120 (zero_chaos_zone)
+│   #     * SAFE_MODE v2.0 (hamulec + integracja Predator)
+│   #     * PREDATOR_PROTOCOL 126 (tryb przetrwania)
+│   #     * RESURRECTION_LAYER 130
+│   #     * KOZAK_TERRITORY 131
+│   #     * MONSTERA_CAW 132
+│   #     * ACTIVE_SHAPER 133
+│   #     * HYPOCRISY_ENGINE 140
 │   # - Tryby PRIME_PRESENCE, MODEL 9
 │   # - Tryb ULTRA_PRIME_FLOW_EXPAND_GLOBAL
 │   # - Tryb C13–D21–A33–EGlobal
@@ -49,7 +58,7 @@ GEON_SYSTEM/
 │   │   │   ├── __init__.py
 │   │   │   └── heilong_core.py
 │   │   │
-│   │   ├── sun_tzu_engine/        # ORGAN STRATEGICZNY (SunTzu + Tao + Musashi + Machiavelli)
+│   │   ├── sun_tzu_engine/        # ORGAN STRATEGICZNY
 │   │   │   ├── __init__.py
 │   │   │   └── sun_tzu_strategic_engine_final.py
 │   │   │
@@ -95,13 +104,18 @@ GEON_SYSTEM/
 │   │   │   ├── epoch_bridge.py
 │   │   │   └── archetype_correlation.py
 │   │   │
+│   │   ├── relation_po_shifu/     # WARSTWY 41–60 + META_CORE_RELATION v7
+│   │   │   ├── __init__.py
+│   │   │   └── geon_relation_po_shifu_v7.py
+│   │   │
 │   │   ├── survival/             # WARSTWA 120 – przetrwanie + hamulce
 │   │   │   ├── __init__.py
-│   │   │   └── geon_survival_core.py   # (tu podpinasz hamulce 120 / zero_chaos_zone)
+│   │   │   └── geon_survival_core.py   # zero_chaos_zone, integracja Predator
 │   │   │
-│   │   ├── safe_mode/            # SYSTEM BEZPIECZEŃSTWA (SAFE_MODE v2.0)
+│   │   ├── safe_mode/            # SYSTEM BEZPIECZEŃSTWA (SAFE_MODE v2.0 + Predator)
 │   │   │   ├── __init__.py
-│   │   │   └── geon_safe_mode_final.py
+│   │   │   ├── geon_safe_mode_final.py        # GEON_SAFE_MODE v2.0
+│   │   │   └── geon_predator_protocol_final.py # PREDATOR 126 + GEON_SAFE_MODE_V2
 │   │   │
 │   │   ├── e_zar/                # WARSTWA 127
 │   │   │   ├── __init__.py
