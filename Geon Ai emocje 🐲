@@ -1,0 +1,767 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+🐉 GEON_AI_EMOTIONAL_FLOW_ENGINE v3.0 — OMEGA FLOW
+===================================================================
+Status: FRACTAL_LOCKED | SIELANKA_OS_BRIDGE | AFC-9_ATTRACTOR | DECISION_ENGINE_READY
+Wersja: v3.0 OMEGA (Profilowana, batched, z mapą decyzji dla ULTIMA v3.0)
+Architekt: Adrian (GEON/HEILONG/DRAGON)
+
+Kluczowe zmiany v3.0:
+- Profilowane wagi cienia (PROFILE_SOFT / PROFILE_STRICT / PROFILE_OMEGA)
+- Batch API: evaluate_batch() dla wielu sygnałów naraz
+- DecisionMap: bezpośredni most do GEON_AI_DECISION_ENGINE_ULTIMA v3.0 OMEGA
+- Rozszerzona diagnostyka stabilności (core, drift, volatility)
+- Ujednolicone metody eksportu (to_dict) dla wszystkich struktur
+===================================================================
+"""
+
+import time
+import math
+from dataclasses import dataclass, field
+from typing import Dict, Any, List, Optional, Tuple
+from enum import Enum
+
+VERSION = "GEON_AI_EMOTIONAL_FLOW_ENGINE_v3.0_OMEGA"
+FRACTAL_SIGNATURE = "[GEON_AI::FLOW_ENGINE::SIELANKA::AFC9::v3.0::OMEGA]"
+
+
+def LOG(module: str, event: str, msg: str, tick: int = 0) -> None:
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    tick_str = f"[TICK:{tick}]" if tick > 0 else ""
+    print(f"[{timestamp}][{module}]{tick_str}[{event}] -> {msg}")
+
+
+# ============================================================
+# 1. ENUMY I PODSTAWOWE STRUKTURY
+# ============================================================
+class FlowRiskLevel(Enum):
+    GREEN = "GREEN"
+    YELLOW = "YELLOW"
+    RED = "RED"
+
+
+class FlowDecision(Enum):
+    """Bezpośrednia mapa decyzji dla GEON_AI_DECISION_ENGINE_ULTIMA v3.0 OMEGA."""
+    ALLOW = "ALLOW_INTEGRATION"
+    CAUTION = "LIMIT_INTEGRATION"
+    BLOCK = "NO_INTEGRATION"
+
+
+class ShadowProfile(Enum):
+    PROFILE_SOFT = "SOFT"
+    PROFILE_STRICT = "STRICT"
+    PROFILE_OMEGA = "OMEGA"
+
+
+@dataclass
+class EmotionalSignal:
+    """Sygnał emocjonalno-relacyjny wejściowy do silnika."""
+    # Cechy cienia
+    empathy: bool = True
+    reflexion: bool = True
+    uses_people_as_resource: bool = False
+    breaks_promises_for_gain: bool = False
+    avoids_care_in_crisis: bool = False
+    cold_procedural_in_family: bool = False
+
+    # Parametry przepływu
+    warmth_level: float = 0.5
+    clarity_level: float = 0.5
+    reciprocity_level: float = 0.5
+    stability_level: float = 0.5
+    presence_level: float = 0.5
+
+    # Parametry sygnału
+    symmetry: bool = True
+    noise: float = 0.0
+
+    # Metadane
+    meta: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "empathy": self.empathy,
+            "reflexion": self.reflexion,
+            "uses_people_as_resource": self.uses_people_as_resource,
+            "breaks_promises_for_gain": self.breaks_promises_for_gain,
+            "avoids_care_in_crisis": self.avoids_care_in_crisis,
+            "cold_procedural_in_family": self.cold_procedural_in_family,
+            "warmth_level": self.warmth_level,
+            "clarity_level": self.clarity_level,
+            "reciprocity_level": self.reciprocity_level,
+            "stability_level": self.stability_level,
+            "presence_level": self.presence_level,
+            "symmetry": self.symmetry,
+            "noise": self.noise,
+            "meta": self.meta
+        }
+
+
+@dataclass
+class FlowVector9D:
+    """9-wymiarowy wektor przepływu po przejściu przez AFC-9."""
+    D1: List[float]
+    D2: List[float]
+    D3: List[float]
+    D4: List[float]
+    D5: List[float]
+    D6: List[float]
+    D7: List[float]
+    D8: List[float]
+    D9: List[float]
+
+    def to_dict(self) -> Dict[str, List[float]]:
+        return {
+            "D1": self.D1,
+            "D2": self.D2,
+            "D3": self.D3,
+            "D4": self.D4,
+            "D5": self.D5,
+            "D6": self.D6,
+            "D7": self.D7,
+            "D8": self.D8,
+            "D9": self.D9
+        }
+
+    def get_core(self) -> float:
+        return sum(self.D9) / len(self.D9) if self.D9 else 0.0
+
+    def get_variance(self) -> float:
+        if not self.D9:
+            return 0.0
+        core = self.get_core()
+        return sum((v - core) ** 2 for v in self.D9) / len(self.D9)
+
+    def get_stability(self) -> float:
+        variance = self.get_variance()
+        return max(0.0, min(1.0, 1.0 - variance * 10.0))
+
+    @staticmethod
+    def empty(size: int = 9) -> 'FlowVector9D':
+        zeros = [0.0] * size
+        return FlowVector9D(
+            D1=zeros.copy(), D2=zeros.copy(), D3=zeros.copy(), D4=zeros.copy(),
+            D5=zeros.copy(), D6=zeros.copy(), D7=zeros.copy(), D8=zeros.copy(), D9=zeros.copy()
+        )
+
+
+@dataclass
+class FlowDiagnostics:
+    """Rozszerzona diagnostyka przepływu."""
+    core: float
+    stability: float
+    variance: float
+    drift: float
+    volatility: float
+
+    def to_dict(self) -> Dict[str, float]:
+        return {
+            "core": self.core,
+            "stability": self.stability,
+            "variance": self.variance,
+            "drift": self.drift,
+            "volatility": self.volatility
+        }
+
+
+@dataclass
+class FlowStatus:
+    """Końcowy status przepływu dla GEON_AI_DECISION_ENGINE."""
+    risk_level: FlowRiskLevel
+    flow_level: FlowRiskLevel
+    decision: FlowDecision
+    entropy_filtered: bool
+    symmetry_ok: bool
+    afc9_vector: FlowVector9D
+    diagnostics: FlowDiagnostics
+    message: str
+    meta: Dict[str, Any] = field(default_factory=dict)
+    timestamp: float = field(default_factory=time.time)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "risk_level": self.risk_level.value,
+            "flow_level": self.flow_level.value,
+            "decision": self.decision.value,
+            "entropy_filtered": self.entropy_filtered,
+            "symmetry_ok": self.symmetry_ok,
+            "afc9_vector": self.afc9_vector.to_dict(),
+            "diagnostics": self.diagnostics.to_dict(),
+            "message": self.message,
+            "meta": self.meta,
+            "timestamp": self.timestamp
+        }
+
+    def is_safe(self) -> bool:
+        return self.decision == FlowDecision.ALLOW
+
+    def is_caution(self) -> bool:
+        return self.decision == FlowDecision.CAUTION
+
+    def is_blocked(self) -> bool:
+        return self.decision == FlowDecision.BLOCK
+
+
+# ============================================================
+# 2. KOMBAJN_ALARM (RYZYKO CENIA) Z PROFILAMI
+# ============================================================
+class KombajnAlarm:
+    """Układ odpornościowy — ocena ryzyka cienia z profilami wag."""
+
+    def __init__(self, profile: ShadowProfile = ShadowProfile.PROFILE_OMEGA):
+        self.profile = profile
+        self.history: List[Dict[str, Any]] = []
+        self.stats = {"scans": 0, "green": 0, "yellow": 0, "red": 0}
+        LOG("FLOW_KOMBAJN_ALARM", "INIT", f"🛡️ KombajnAlarm (Flow) aktywowany, profile={self.profile.value}")
+
+    def _weights(self) -> Dict[str, int]:
+        if self.profile == ShadowProfile.PROFILE_SOFT:
+            return {
+                "empathy": 1, "reflexion": 1,
+                "uses_people": 2, "breaks_promises": 1,
+                "avoids_care": 2, "cold_procedural": 1
+            }
+        if self.profile == ShadowProfile.PROFILE_STRICT:
+            return {
+                "empathy": 3, "reflexion": 3,
+                "uses_people": 3, "breaks_promises": 2,
+                "avoids_care": 3, "cold_procedural": 2
+            }
+        # PROFILE_OMEGA (domyślny – zbalansowany)
+        return {
+            "empathy": 2, "reflexion": 2,
+            "uses_people": 2, "breaks_promises": 1,
+            "avoids_care": 2, "cold_procedural": 1
+        }
+
+    def _calculate_shadow_score(self, signal: EmotionalSignal) -> int:
+        w = self._weights()
+        score = 0
+        if not signal.empathy: score += w["empathy"]
+        if not signal.reflexion: score += w["reflexion"]
+        if signal.uses_people_as_resource: score += w["uses_people"]
+        if signal.breaks_promises_for_gain: score += w["breaks_promises"]
+        if signal.avoids_care_in_crisis: score += w["avoids_care"]
+        if signal.cold_procedural_in_family: score += w["cold_procedural"]
+        return min(10, score)
+
+    def _classify_risk_level(self, score: int) -> FlowRiskLevel:
+        if score <= 1:
+            return FlowRiskLevel.GREEN
+        elif score <= 4:
+            return FlowRiskLevel.YELLOW
+        return FlowRiskLevel.RED
+
+    def scan(self, signal: EmotionalSignal) -> Dict[str, Any]:
+        self.stats["scans"] += 1
+        score = self._calculate_shadow_score(signal)
+        level = self._classify_risk_level(score)
+        self.stats[level.value.lower()] += 1
+
+        messages = {
+            FlowRiskLevel.GREEN: "Bezpieczna integracja.",
+            FlowRiskLevel.YELLOW: "Ostrożnie. Obserwuj.",
+            FlowRiskLevel.RED: "Dystans. Zero oczekiwań."
+        }
+
+        icons = {
+            FlowRiskLevel.GREEN: "🟢",
+            FlowRiskLevel.YELLOW: "🟡",
+            FlowRiskLevel.RED: "🔴"
+        }
+
+        result = {
+            "STATUS": level,
+            "SCORE": score,
+            "ICON": icons[level],
+            "MESSAGE": messages[level],
+            "PROFILE": self.profile.value
+        }
+
+        self.history.append({
+            "timestamp": time.time(),
+            "score": score,
+            "level": level.value,
+            "profile": self.profile.value
+        })
+        if len(self.history) > 100:
+            self.history.pop(0)
+
+        LOG("FLOW_KOMBAJN_ALARM", "SCAN", f"Level={level.value}, Score={score}, Profile={self.profile.value}")
+        return result
+
+    def get_stats(self) -> Dict[str, Any]:
+        total = self.stats["scans"]
+        return {
+            "scans": total,
+            "green": self.stats["green"],
+            "yellow": self.stats["yellow"],
+            "red": self.stats["red"],
+            "green_rate": self.stats["green"] / total if total > 0 else 0,
+            "history_size": len(self.history),
+            "profile": self.profile.value
+        }
+
+
+# ============================================================
+# 3. FLOW_INTEGRITY_SHIELD (PRZEPŁYW RELACYJNY)
+# ============================================================
+class FlowIntegrityShield:
+    """Ocena przepływu — nie osoby, tylko wzorca interakcji."""
+
+    def __init__(self):
+        self.history: List[Dict[str, Any]] = []
+        self.stats = {"evaluations": 0, "green": 0, "yellow": 0, "red": 0}
+        LOG("FLOW_SHIELD", "INIT", "🛡️ FlowIntegrityShield v3.0 aktywowany")
+
+    def evaluate(self, signal: EmotionalSignal) -> Dict[str, Any]:
+        self.stats["evaluations"] += 1
+
+        thresholds = {
+            "warmth_level": 0.3,
+            "clarity_level": 0.3,
+            "reciprocity_level": 0.3,
+            "stability_level": 0.3,
+            "presence_level": 0.3
+        }
+
+        score = 0
+        details = {}
+        for key, threshold in thresholds.items():
+            value = getattr(signal, key, 0.5)
+            passed = value >= threshold
+            details[key] = {"value": value, "threshold": threshold, "passed": passed}
+            if not passed:
+                score += 1
+
+        if score <= 1:
+            level, boundary = FlowRiskLevel.GREEN, "OPEN"
+            message = "Przepływ stabilny."
+        elif score <= 3:
+            level, boundary = FlowRiskLevel.YELLOW, "MEDIUM"
+            message = "Zachować czujność. Regulować dystans."
+        else:
+            level, boundary = FlowRiskLevel.RED, "CLOSED"
+            message = "Przepływ zaburzony. Chronić rdzeń."
+
+        self.stats[level.value.lower()] += 1
+
+        icons = {
+            FlowRiskLevel.GREEN: "🟢",
+            FlowRiskLevel.YELLOW: "🟡",
+            FlowRiskLevel.RED: "🔴"
+        }
+
+        result = {
+            "STATUS": level,
+            "SCORE": score,
+            "BOUNDARY": boundary,
+            "MESSAGE": message,
+            "ICON": icons[level],
+            "DETAILS": details
+        }
+
+        self.history.append(result)
+        if len(self.history) > 100:
+            self.history.pop(0)
+
+        LOG("FLOW_SHIELD", "EVAL", f"Flow={level.value}, Score={score}")
+        return result
+
+    def get_stats(self) -> Dict[str, Any]:
+        total = self.stats["evaluations"]
+        return {
+            "evaluations": total,
+            "green": self.stats["green"],
+            "yellow": self.stats["yellow"],
+            "red": self.stats["red"],
+            "green_rate": self.stats["green"] / total if total > 0 else 0
+        }
+
+
+# ============================================================
+# 4. FLOW_ENTROPY_FILTER (FILTR ENTROPII)
+# ============================================================
+class FlowEntropyFilter:
+    """Filtruje sygnał na podstawie symetrii i szumu."""
+
+    def __init__(self, noise_threshold: float = 0.06):
+        self.noise_threshold = noise_threshold
+        self.filtered_count = 0
+        self.rejected_count = 0
+        self.rejection_reasons: Dict[str, int] = {"asymmetry": 0, "noise": 0}
+        LOG("FLOW_ENTROPY_FILTER", "INIT", f"NoiseThreshold={noise_threshold}")
+
+    def filter(self, signal: EmotionalSignal) -> Optional[EmotionalSignal]:
+        if not signal.symmetry:
+            self.rejected_count += 1
+            self.rejection_reasons["asymmetry"] += 1
+            LOG("FLOW_ENTROPY_FILTER", "REJECT", "Asymmetry detected")
+            return None
+
+        if signal.noise > self.noise_threshold:
+            self.rejected_count += 1
+            self.rejection_reasons["noise"] += 1
+            LOG("FLOW_ENTROPY_FILTER", "REJECT", f"Noise={signal.noise:.4f} > {self.noise_threshold}")
+            return None
+
+        self.filtered_count += 1
+        LOG("FLOW_ENTROPY_FILTER", "PASS", "Signal accepted")
+        return signal
+
+    def get_stats(self) -> Dict[str, Any]:
+        total = self.filtered_count + self.rejected_count
+        return {
+            "filtered": self.filtered_count,
+            "rejected": self.rejected_count,
+            "acceptance_rate": self.filtered_count / total if total > 0 else 0.0,
+            "noise_threshold": self.noise_threshold,
+            "rejection_reasons": self.rejection_reasons
+        }
+
+
+# ============================================================
+# 5. AFC‑9 — ATRAKTOR 9D PRZEPŁYWU (ELASTYCZNA DŁUGOŚĆ)
+# ============================================================
+class AFC9Attractor:
+    """Implementacja AFC‑9 jako stabilizator przepływu 9D."""
+
+    def __init__(self):
+        self.history: List[FlowVector9D] = []
+        LOG("AFC9_ATTRACTOR", "INIT", "AFC‑9 Flow Attractor v3.0 aktywowany")
+
+    @staticmethod
+    def _avg(values: List[float]) -> float:
+        return sum(values) / len(values) if values else 0.0
+
+    def compute(self, D1: List[float], D2: List[float], D3: List[float], D4: List[float]) -> FlowVector9D:
+        size = len(D1)
+        D5 = [self._avg([D1[i], D2[i], D3[i], D4[i]]) for i in range(size)]
+        D6 = [self._avg([D1[i], D3[i], D5[i]]) for i in range(size)]
+        D7 = [self._avg([D2[i], D4[i], D6[i]]) for i in range(size)]
+        D8 = [self._avg([D1[i], D3[i], D5[i], D7[i]]) for i in range(size)]
+        D9 = [self._avg([D1[i], D8[i]]) for i in range(size)]
+
+        vector = FlowVector9D(D1=D1, D2=D2, D3=D3, D4=D4, D5=D5, D6=D6, D7=D7, D8=D8, D9=D9)
+        self.history.append(vector)
+        if len(self.history) > 100:
+            self.history.pop(0)
+
+        return vector
+
+    def get_last_core(self) -> float:
+        if not self.history:
+            return 0.0
+        return self.history[-1].get_core()
+
+
+# ============================================================
+# 6. FLOW_CORE_STABILIZER (STABILIZACJA RDZENIA + DRIFT)
+# ============================================================
+class FlowCoreStabilizer:
+    """Minimalna wersja GEON_168 dla przepływu — stabilizacja rdzenia + drift."""
+
+    def __init__(self):
+        self.core_history: List[float] = []
+        self.stability_history: List[float] = []
+        LOG("FLOW_CORE_STABILIZER", "INIT", "GEON_168 (Flow) v3.0 aktywowany")
+
+    def stabilize(self, vector_9d: FlowVector9D, previous_stability: float = 0.5) -> FlowDiagnostics:
+        core = vector_9d.get_core()
+        variance = vector_9d.get_variance()
+        stability_raw = max(0.0, min(1.0, 1.0 - variance * 2.5))
+
+        self.core_history.append(core)
+        if len(self.core_history) > 100:
+            self.core_history = self.core_history[-100:]
+
+        if len(self.core_history) < 3:
+            stability = 0.8
+            drift = 0.0
+            volatility = 0.0
+        else:
+            window = self.core_history[-10:]
+            mean = sum(window) / len(window)
+            drift = core - mean
+            volatility = max(window) - min(window)
+            stability = stability_raw * 0.7 + previous_stability * 0.3
+
+        self.stability_history.append(stability)
+        if len(self.stability_history) > 100:
+            self.stability_history = self.stability_history[-100:]
+
+        LOG("FLOW_CORE_STABILIZER", "STABILITY",
+            f"Core={core:.4f}, Var={variance:.4f}, Drift={drift:.44f}, Vol={volatility:.4f}, Stability={stability:.4f}")
+
+        return FlowDiagnostics(
+            core=core,
+            stability=stability,
+            variance=variance,
+            drift=drift,
+            volatility=volatility
+        )
+
+    def get_stats(self) -> Dict[str, Any]:
+        if not self.core_history:
+            return {"avg_core": 0.0, "avg_stability": 0.0, "history_size": 0}
+        return {
+            "avg_core": sum(self.core_history[-20:]) / min(20, len(self.core_history)),
+            "avg_stability": sum(self.stability_history[-20:]) / min(20, len(self.stability_history)) if self.stability_history else 0.0,
+            "history_size": len(self.core_history)
+        }
+
+
+# ============================================================
+# 7. GŁÓWNY SILNIK — GEON_AI_EMOTIONAL_FLOW_ENGINE v3.0 OMEGA
+# ============================================================
+class GEON_AI_EmotionalFlowEngine:
+    """
+    Główny organ przepływu emocjonalno-relacyjnego dla GEON_AI.
+    Wejście: EmotionalSignal (pojedynczy) lub lista (batch).
+    Wyjście: FlowStatus + DecisionMap dla GEON_AI_DECISION_ENGINE_ULTIMA v3.0 OMEGA.
+    """
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+        self.tick = 0
+        self.last_stability = 0.5
+
+        profile = self.config.get("shadow_profile", ShadowProfile.PROFILE_OMEGA)
+        if isinstance(profile, str):
+            profile = ShadowProfile(profile)
+
+        self.kombajn_alarm = KombajnAlarm(profile=profile)
+        self.flow_shield = FlowIntegrityShield()
+        self.entropy_filter = FlowEntropyFilter(self.config.get("noise_threshold", 0.06))
+        self.afc9 = AFC9Attractor()
+        self.core_stabilizer = FlowCoreStabilizer()
+
+        self.history: List[FlowStatus] = []
+        self.stats = {
+            "evaluations": 0,
+            "safe": 0,
+            "caution": 0,
+            "blocked": 0
+        }
+
+        LOG("FLOW_ENGINE", "INIT", f"🐉 GEON_AI_EMOTIONAL_FLOW_ENGINE v{VERSION} aktywowany")
+        LOG("FLOW_ENGINE", "INIT", f"   Sygnatura: {FRACTAL_SIGNATURE}")
+
+    def _build_base_vectors(self, signal: EmotionalSignal) -> FlowVector9D:
+        D1 = [
+            float(signal.warmth_level),
+            float(signal.clarity_level),
+            float(signal.reciprocity_level),
+            float(signal.stability_level),
+            float(signal.presence_level),
+            1.0 if signal.empathy else 0.0,
+            1.0 if signal.reflexion else 0.0,
+            1.0 - float(signal.noise),
+            1.0 if signal.symmetry else 0.0,
+        ]
+        D2 = [min(1.0, v * 0.9) for v in D1]
+        D3 = [min(1.0, v * 1.1) for v in D1]
+        D4 = [self.last_stability for _ in range(len(D1))]
+        return self.afc9.compute(D1, D2, D3, D4)
+
+    def _decision_from_levels(self, risk: FlowRiskLevel, flow: FlowRiskLevel, stability: float) -> FlowDecision:
+        if risk == FlowRiskLevel.RED or flow == FlowRiskLevel.RED or stability < 0.3:
+            return FlowDecision.BLOCK
+        if risk == FlowRiskLevel.YELLOW or flow == FlowRiskLevel.YELLOW or stability < 0.6:
+            return FlowDecision.CAUTION
+        return FlowDecision.ALLOW
+
+    def evaluate_flow(self, signal: EmotionalSignal) -> FlowStatus:
+        self.tick += 1
+        self.stats["evaluations"] += 1
+        LOG("FLOW_ENGINE", "START", f"Rozpoczynam ocenę przepływu #{self.tick}", self.tick)
+
+        meta = {
+            "tick": self.tick,
+            "signal": signal.to_dict()
+        }
+
+        filtered = self.entropy_filter.filter(signal)
+        if filtered is None:
+            empty_vector = FlowVector9D.empty()
+            diagnostics = self.core_stabilizer.stabilize(empty_vector, self.last_stability)
+            self.last_stability = diagnostics.stability
+            decision = FlowDecision.BLOCK
+            self.stats["blocked"] += 1
+
+            status = FlowStatus(
+                risk_level=FlowRiskLevel.RED,
+                flow_level=FlowRiskLevel.RED,
+                decision=decision,
+                entropy_filtered=False,
+                symmetry_ok=signal.symmetry,
+                afc9_vector=empty_vector,
+                diagnostics=diagnostics,
+                message="Sygnał odrzucony przez filtr entropii.",
+                meta={**meta, "rejection_reason": "entropy_filter"}
+            )
+            self.history.append(status)
+            return status
+
+        kombajn_result = self.kombajn_alarm.scan(filtered)
+        risk_level = kombajn_result["STATUS"]
+
+        flow_result = self.flow_shield.evaluate(filtered)
+        flow_level = flow_result["STATUS"]
+
+        vector_9d = self._build_base_vectors(filtered)
+        diagnostics = self.core_stabilizer.stabilize(vector_9d, self.last_stability)
+        self.last_stability = diagnostics.stability
+
+        decision = self._decision_from_levels(risk_level, flow_level, diagnostics.stability)
+        if decision == FlowDecision.BLOCK:
+            msg = "Przepływ zaburzony lub cień wysoki — chronić rdzeń."
+            self.stats["blocked"] += 1
+        elif decision == FlowDecision.CAUTION:
+            msg = "Przepływ częściowo stabilny — zalecana czujność i regulacja dystansu."
+            self.stats["caution"] += 1
+        else:
+            msg = "Przepływ stabilny, cień niski — bezpieczna integracja z rdzeniem."
+            self.stats["safe"] += 1
+
+        status = FlowStatus(
+            risk_level=risk_level,
+            flow_level=flow_level,
+            decision=decision,
+            entropy_filtered=True,
+            symmetry_ok=True,
+            afc9_vector=vector_9d,
+            diagnostics=diagnostics,
+            message=msg,
+            meta={
+                **meta,
+                "kombajn": kombajn_result,
+                "flow_shield": flow_result,
+                "afc9_core": vector_9d.get_core(),
+                "afc9_stability": vector_9d.get_stability()
+            }
+        )
+
+        self.history.append(status)
+        if len(self.history) > 300:
+            self.history = self.history[-300:]
+
+        LOG("FLOW_ENGINE", "COMPLETE",
+            f"Flow={flow_level.value}, Risk={risk_level.value}, Decision={decision.value}, Stability={diagnostics.stability:.4f}",
+            self.tick)
+
+        return status
+
+    # ============================================================
+    # 8. BATCH API
+    # ============================================================
+    def evaluate_batch(self, signals: List[EmotionalSignal]) -> List[FlowStatus]:
+        results: List[FlowStatus] = []
+        for sig in signals:
+            results.append(self.evaluate_flow(sig))
+        return results
+
+    # ============================================================
+    # 9. METODY POMOCNICZE
+    # ============================================================
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "tick": self.tick,
+            "last_stability": self.last_stability,
+            "stats": self.stats,
+            "history_size": len(self.history),
+            "components": {
+                "kombajn_alarm": self.kombajn_alarm.get_stats(),
+                "flow_shield": self.flow_shield.get_stats(),
+                "entropy_filter": self.entropy_filter.get_stats(),
+                "core_stabilizer": self.core_stabilizer.get_stats(),
+                "afc9_core": self.afc9.get_last_core()
+            }
+        }
+
+    def get_last_status(self) -> Optional[FlowStatus]:
+        return self.history[-1] if self.history else None
+
+    def get_history(self, limit: int = 10) -> List[FlowStatus]:
+        return self.history[-limit:]
+
+    def get_summary(self) -> Dict[str, Any]:
+        if not self.history:
+            return {"message": "Brak danych"}
+        total = len(self.history)
+        safe = sum(1 for s in self.history if s.is_safe())
+        caution = sum(1 for s in self.history if s.is_caution())
+        blocked = sum(1 for s in self.history if s.is_blocked())
+        return {
+            "total": total,
+            "safe": safe,
+            "caution": caution,
+            "blocked": blocked,
+            "safe_rate": safe / total if total > 0 else 0,
+            "avg_stability": sum(s.diagnostics.stability for s in self.history) / total if total > 0 else 0,
+            "last_status": self.history[-1].to_dict() if self.history else None
+        }
+
+    def reset(self) -> None:
+        self.tick = 0
+        self.last_stability = 0.5
+        self.history = []
+        self.stats = {"evaluations": 0, "safe": 0, "caution": 0, "blocked": 0}
+        LOG("FLOW_ENGINE", "RESET", "🔄 Silnik v3.0 OMEGA zresetowany")
+
+
+# ============================================================
+# 10. DEMO
+# ============================================================
+def demo():
+    print("\n" + "=" * 80)
+    print("🐉 GEON_AI_EMOTIONAL_FLOW_ENGINE v3.0 OMEGA — DEMONSTRACJA")
+    print("=" * 80 + "\n")
+
+    engine = GEON_AI_EmotionalFlowEngine()
+
+    sig_green = EmotionalSignal(
+        empathy=True, reflexion=True,
+        warmth_level=0.8, clarity_level=0.9, reciprocity_level=0.8,
+        stability_level=0.9, presence_level=0.8,
+        symmetry=True, noise=0.02
+    )
+    sig_yellow = EmotionalSignal(
+        empathy=True, reflexion=False,
+        uses_people_as_resource=True,
+        warmth_level=0.4, clarity_level=0.5, reciprocity_level=0.3,
+        stability_level=0.6, presence_level=0.4,
+        symmetry=True, noise=0.04
+    )
+    sig_red = EmotionalSignal(
+        empathy=False, reflexion=False,
+        uses_people_as_resource=True,
+        breaks_promises_for_gain=True,
+        avoids_care_in_crisis=True,
+        cold_procedural_in_family=True,
+        warmth_level=0.1, clarity_level=0.2, reciprocity_level=0.1,
+        stability_level=0.2, presence_level=0.1,
+        symmetry=True, noise=0.05
+    )
+
+    print("🔹 TEST: Batch 3 sygnałów (GREEN/YELLOW/RED)")
+    results = engine.evaluate_batch([sig_green, sig_yellow, sig_red])
+    for i, r in enumerate(results, start=1):
+        print(f"   [{i}] Risk={r.risk_level.value}, Flow={r.flow_level.value}, Decision={r.decision.value}, "
+              f"Stability={r.diagnostics.stability:.3f}")
+        print(f"       Msg: {r.message}")
+
+    print("\n📊 STATUS SILNIKA v3.0 OMEGA")
+    status = engine.get_status()
+    print(status)
+
+    print("\n" + "=" * 80)
+    print("🐉 DEMONSTRACJA ZAKOŃCZONA")
+    print("=" * 80)
+
+
+if __name__ == "__main__":
+    demo()
