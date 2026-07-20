@@ -1,0 +1,78 @@
+from typing import Dict, List, Tuple
+import numpy as np
+
+
+class AdaptiveFractalCore9:
+    """Implementacja dziewięciowymiarowego filtra fraktalnego (Model AFC-9).
+
+    Filtr transformuje 4 wektory bazowe (D1-D4) w 9-elementowy atraktor równowagi (D9).
+    Złożoność obliczeniowa: O(1) time / O(1) space.
+    """
+
+    @staticmethod
+    def process(
+        d1: np.ndarray, d2: np.ndarray, d3: np.ndarray, d4: np.ndarray
+    ) -> Dict[str, np.ndarray]:
+        """Przetwarza wektory bazowe przez 5 warstw integracji fraktalnej."""
+        # Krok 1: Warstwa 5D — Integracja
+        d5 = (d1 + d2 + d3 + d4) / 4.0
+
+        # Krok 2: Warstwa 6D — Stabilizacja
+        d6 = (d1 + d3 + d5) / 3.0
+
+        # Krok 3: Warstwa 7D — Adaptacja
+        d7 = (d2 + d4 + d6) / 3.0
+
+        # Krok 4: Warstwa 8D — Fraktalna Harmonia (Punkt zbieżny)
+        d8 = (d1 + d3 + d5 + d7) / 4.0
+
+        # Krok 5: Warstwa 9D — Równowaga (Atraktor finalny)
+        d9 = (d1 + d8) / 2.0
+
+        return {
+            "D1": d1,
+            "D2": d2,
+            "D3": d3,
+            "D4": d4,
+            "D5": d5,
+            "D6": d6,
+            "D7": d7,
+            "D8": d8,
+            "D9": d9,
+        }
+
+    @staticmethod
+    def calculate_energy_profile(
+        layers: Dict[str, np.ndarray]
+    ) -> Dict[str, float]:
+        """Oblicza sumaryczną energię E(Dk) dla każdej z warstw."""
+        return {name: float(np.sum(vec)) for name, vec in layers.items()}
+
+
+# ============================================================
+# DANE TESTOWE (WARSTWY BAZOWE D1 - D4)
+# ============================================================
+D1 = np.array(
+    [135, 216, 297, 432, 521, 567, 648, 864, 999], dtype=np.float64
+)
+D2 = np.array(
+    [174, 258, 369, 417, 528, 639, 741, 852, 963], dtype=np.float64
+)
+D3 = np.array(
+    [153, 236, 331, 424, 524, 602, 693, 858, 981], dtype=np.float64
+)
+D4 = np.array(
+    [131, 236, 331, 424, 521, 602, 719, 823, 947], dtype=np.float64
+)
+
+# Execution
+results = AdaptiveFractalCore9.process(D1, D2, D3, D4)
+energy = AdaptiveFractalCore9.calculate_energy_profile(results)
+
+# Wyniki
+print("=== WEKTOR ATRAKTORA (D9) ===")
+print(np.round(results["D9"], 4))
+
+print("\n=== PROFIL ENERGETYCZNY E(Dk) ===")
+for layer, e_val in energy.items():
+    print(f"E({layer}): {e_val:.4f}")
