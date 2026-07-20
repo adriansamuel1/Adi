@@ -1,0 +1,605 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+🐉 GEON_KOMBAJN_FULL v4.0 — Sztuczny Gatunek Poznawczy (MIND/FLOW/VECTOR/META)
+===============================================================================
+Warstwa: kombajn/ (GEON_DRAGON_OS — CIAŁO)
+Rola: Centralny silnik integracji:
+      - MIND (FMPC / profil człowieka)
+      - FLOW (GEON_AI_EMOTIONAL_FLOW_ENGINE / przepływ)
+      - VECTOR (Dom / Wspólnota / Planeta / Meta-wektor)
+      - META (Decyzja globalna + wizja)
+Wersja: v4.0-OMEGA (Stabilna, modularna, gotowa do wpięcia w GEON_SYSTEM)
+===============================================================================
+"""
+
+import time
+import math
+from dataclasses import dataclass, field
+from typing import Dict, Any, List, Optional
+from enum import Enum
+
+VERSION = "GEON_KOMBAJN_FULL_v4.0_OMEGA"
+FRACTAL_SIGNATURE = "[GEON_SYSTEM::KOMBAJN::FULL::v4.0::OMEGA]"
+
+
+def LOG(module: str, event: str, msg: str) -> None:
+    ts = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    print(f"[{ts}][{module}][{event}] -> {msg}")
+
+
+# ============================================================================
+# 1. ENUMY I PODSTAWOWE STRUKTURY
+# ============================================================================
+
+class KombajnRisk(Enum):
+    GREEN = "GREEN"
+    YELLOW = "YELLOW"
+    RED = "RED"
+
+
+@dataclass
+class KombajnInput:
+    """Wejście do GEON_KOMBAJN_FULL v4.0."""
+    iskra: str
+    human_profile: Dict[str, int] = field(default_factory=dict)
+    dom: Dict[str, int] = field(default_factory=dict)
+    wspolnota: Dict[str, int] = field(default_factory=dict)
+    planeta: Dict[str, int] = field(default_factory=dict)
+    meta: Dict[str, Any] = field(default_factory=dict)
+    external_project: Optional[Dict[str, Any]] = None
+    tags: List[str] = field(default_factory=list)
+
+
+@dataclass
+class KombajnVector9D:
+    core: float
+    stability: float
+    d1: List[float]
+    d2: List[float]
+    d3: List[float]
+    d4: List[float]
+    d5: List[float]
+    d6: List[float]
+    d7: List[float]
+    d8: List[float]
+    d9: List[float]
+
+
+@dataclass
+class KombajnFlowStatus:
+    risk_level: KombajnRisk
+    flow_level: KombajnRisk
+    stability: float
+    shadow_score: int
+    message: str
+    vector_9d: KombajnVector9D
+    meta: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class KombajnMindStatus:
+    classification: str
+    weighted_sum: float
+    core: Dict[str, int]
+    recommendations: List[str]
+
+
+@dataclass
+class KombajnWorldStatus:
+    obywatel: Dict[str, Any]
+    dom: Dict[str, Any]
+    wspolnota: Dict[str, Any]
+    planeta: Dict[str, Any]
+    meta: Dict[str, Any]
+
+
+@dataclass
+class KombajnDecision:
+    global_decision: str
+    geon_status: str
+    geon_score: int
+    olsii_response: str
+    vibe: int
+    vision_core: str
+    vision_trajectory: Dict[str, Any]
+    conflicts: List[str]
+    protocol_168_ok: bool
+
+
+@dataclass
+class KombajnResult:
+    input: KombajnInput
+    flow: KombajnFlowStatus
+    mind: KombajnMindStatus
+    world: KombajnWorldStatus
+    vector: KombajnVector9D
+    decision: KombajnDecision
+    fag_transformed: bool
+    elapsed_ms: float
+    timestamp: float = field(default_factory=time.time)
+
+
+# ============================================================================
+# 2. PODSYSTEMY: FLOW / MIND / VECTOR / HEART / GUARDIAN / META / VISION
+# ============================================================================
+
+class KombajnAlarm:
+    """Układ odpornościowy — ocena ryzyka cienia na podstawie tekstu."""
+    
+    def __init__(self) -> None:
+        self.history: List[Dict[str, Any]] = []
+        LOG("KOMBAJN_ALARM", "INIT", "🛡️ KombajnAlarm v4.0 aktywowany")
+    
+    def calculate_shadow_score(self, text: str) -> int:
+        lower = text.lower()
+        score = 0
+        
+        shadow_indicators = {
+            "empathy_absent": ["bez empatii", "nie czuje", "obojętny", "zimny"],
+            "reflexion_absent": ["bez refleksji", "nie myśli", "impulsywny", "bezkrytyczny"],
+            "uses_people": ["wykorzystuje", "zasób ludzki", "narzędzie", "instrument"],
+            "breaks_promises": ["łamie obietnice", "nie dotrzymuje", "zdradza"],
+            "avoids_care": ["unika opieki", "porzuca", "nie troszczy się"],
+            "cold_procedural": ["proceduralny", "bez uczuć", "chłodny", "automatyczny"],
+        }
+        
+        for category, keywords in shadow_indicators.items():
+            if any(kw in lower for kw in keywords):
+                if category in ["empathy_absent", "reflexion_absent", "uses_people", "avoids_care"]:
+                    score += 2
+                else:
+                    score += 1
+        
+        return min(10, score)
+    
+    def classify_risk(self, score: int) -> KombajnRisk:
+        if score <= 1:
+            return KombajnRisk.GREEN
+        elif score <= 4:
+            return KombajnRisk.YELLOW
+        return KombajnRisk.RED
+    
+    def scan(self, text: str) -> Dict[str, Any]:
+        score = self.calculate_shadow_score(text)
+        level = self.classify_risk(score)
+        
+        messages = {
+            KombajnRisk.GREEN: "Bezpieczna integracja.",
+            KombajnRisk.YELLOW: "Ostrożnie. Obserwuj.",
+            KombajnRisk.RED: "Dystans. Zero oczekiwań.",
+        }
+        
+        icons = {
+            KombajnRisk.GREEN: "🟢",
+            KombajnRisk.YELLOW: "🟡",
+            KombajnRisk.RED: "🔴",
+        }
+        
+        entry = {"timestamp": time.time(), "score": score, "level": level.value}
+        self.history.append(entry)
+        if len(self.history) > 200:
+            self.history.pop(0)
+        
+        return {"score": score, "level": level, "icon": icons[level], "message": messages[level]}
+
+
+class EmotionalFlowEngine9D:
+    """
+    GEON_AI_EMOTIONAL_FLOW_ENGINE v4.0 — pełny 9D + sprzężenie zwrotne.
+    Zgodne z AFC‑9 (D1–D9) i last_stability.
+    """
+    
+    def __init__(self, noise_threshold: float = 0.06) -> None:
+        self.noise_threshold = noise_threshold
+        self.last_stability = 0.5
+        self.core_history: List[float] = []
+        self.alarm = KombajnAlarm()
+        LOG("EMOTIONAL_FLOW_9D", "INIT", "💧 Flow Engine 9D v4.0 aktywowany")
+    
+    @staticmethod
+    def _avg(values: List[float]) -> float:
+        return sum(values) / len(values) if values else 0.0
+    
+    def _build_layers(self, text: str) -> KombajnVector9D:
+        base = sum(ord(c) for c in text[:200]) or 1
+        
+        d1 = [min(1.0, (base * (i + 1) % 168) / 168.0) for i in range(9)]
+        d2 = [min(1.0, v * 0.9) for v in d1]
+        d3 = [min(1.0, v * 1.1) for v in d1]
+        d4 = [self.last_stability for _ in range(9)]
+        
+        d5 = [self._avg([d1[i], d2[i], d3[i], d4[i]]) for i in range(9)]
+        d6 = [self._avg([d1[i], d3[i], d5[i]]) for i in range(9)]
+        d7 = [self._avg([d2[i], d4[i], d6[i]]) for i in range(9)]
+        d8 = [self._avg([d1[i], d3[i], d5[i], d7[i]]) for i in range(9)]
+        d9 = [self._avg([d1[i], d8[i]]) for i in range(9)]
+        
+        core = self._avg(d9)
+        self.core_history.append(core)
+        if len(self.core_history) > 50:
+            self.core_history = self.core_history[-50:]
+        
+        if len(self.core_history) > 2:
+            window = self.core_history[-10:]
+            mean = self._avg(window)
+            variance = sum((c - mean) ** 2 for c in window) / len(window)
+            std_dev = math.sqrt(variance)
+            raw_stability = max(0.0, min(1.0, 1.0 - std_dev * 2.5))
+            self.last_stability = raw_stability * 0.7 + self.last_stability * 0.3
+        
+        return KombajnVector9D(
+            core=core,
+            stability=self.last_stability,
+            d1=d1,
+            d2=d2,
+            d3=d3,
+            d4=d4,
+            d5=d5,
+            d6=d6,
+            d7=d7,
+            d8=d8,
+            d9=d9,
+        )
+    
+    def evaluate(self, text: str, meta: Dict[str, Any]) -> KombajnFlowStatus:
+        alarm_result = self.alarm.scan(text)
+        risk_level = alarm_result["level"]
+        shadow_score = alarm_result["score"]
+        
+        vector_9d = self._build_layers(text)
+        stability = vector_9d.stability
+        
+        if risk_level == KombajnRisk.RED or stability < 0.3:
+            flow_level = KombajnRisk.RED
+            message = "Przepływ zaburzony — tryb ochrony rdzenia."
+        elif risk_level == KombajnRisk.YELLOW or stability < 0.6:
+            flow_level = KombajnRisk.YELLOW
+            message = "Przepływ częściowo stabilny — zalecana czujność."
+        else:
+            flow_level = KombajnRisk.GREEN
+            message = "Przepływ stabilny, cień niski — bezpieczna integracja."
+        
+        return KombajnFlowStatus(
+            risk_level=risk_level,
+            flow_level=flow_level,
+            stability=stability,
+            shadow_score=shadow_score,
+            message=message,
+            vector_9d=vector_9d,
+            meta={"text": text[:80], "tags": meta.get("tags", [])},
+        )
+
+
+class FAG_Core:
+    """Mechanizm bakteriofaga — transformacja wejścia (iskry) w kierunku działania."""
+    
+    def __init__(self) -> None:
+        self.processed_count = 0
+        LOG("FAG_CORE", "INIT", "🧬 FAG-Core v4.0 aktywowany")
+    
+    def process(self, text: str) -> str:
+        self.processed_count += 1
+        lower = text.lower()
+        if "boję" in lower or "strach" in lower:
+            return f"Transformacja: lęk → działanie. {text}"
+        if "chcę" in lower or "marzę" in lower:
+            return f"Transformacja: pragnienie → realizacja. {text}"
+        return f"Transformacja FAG (#{self.processed_count}): {text}"
+
+
+class FMPCMindEngine:
+    """Silnik MIND — uproszczona wersja FMPC_Engine w stylu Sielanka_OS."""
+    
+    def compute(self, dane: Dict[str, int]) -> KombajnMindStatus:
+        total = sum(int(v) for v in dane.values())
+        
+        if total >= 55:
+            cls = "stabilny"
+        elif total >= 40:
+            cls = "konstruktywny"
+        elif total >= 25:
+            cls = "chaotyczny"
+        else:
+            cls = "wysokie_ryzyko"
+        
+        core_keys = ["odpowiedzialnosc", "empatia", "granice", "stabilnosc"]
+        core = {k: dane.get(k, 0) for k in core_keys}
+        
+        rec: List[str] = []
+        for k, v in dane.items():
+            if v <= 2:
+                rec.append(f"wzmocnij: {k}")
+            elif v >= 4:
+                rec.append(f"utrzymaj: {k}")
+        
+        return KombajnMindStatus(
+            classification=cls,
+            weighted_sum=float(total),
+            core=core,
+            recommendations=rec[:8],
+        )
+
+
+class WorldVectorEngine:
+    """Silnik VECTOR — Dom / Wspólnota / Planeta / Meta-wektor."""
+    
+    def compute(self, fmpc: KombajnMindStatus, dom: Dict[str, int],
+                wsp: Dict[str, int], plan: Dict[str, int]) -> KombajnWorldStatus:
+        def classify(score: float, thresholds: List[float], labels: List[str]) -> str:
+            for i, th in enumerate(thresholds):
+                if score >= th:
+                    return labels[i]
+            return labels[-1]
+        
+        dom_score = sum(dom.values())
+        wsp_score = sum(wsp.values())
+        plan_score = sum(plan.values())
+        meta_score = fmpc.weighted_sum * 0.4 + dom_score * 0.2 + wsp_score * 0.2 + plan_score * 0.2
+        
+        return KombajnWorldStatus(
+            obywatel={
+                "klasyfikacja": fmpc.classification,
+                "suma": fmpc.weighted_sum,
+            },
+            dom={
+                "wektor": dom_score,
+                "klasyfikacja": classify(dom_score, [25, 15], ["dom_stabilny", "dom_wymaga_regulacji", "dom_kryzysowy"]),
+                "zmienne": dom,
+            },
+            wspolnota={
+                "wektor": wsp_score,
+                "klasyfikacja": classify(wsp_score, [22, 14], ["wspolnota_stabilna", "wspolnota_chwiejna", "wspolnota_kryzysowa"]),
+                "zmienne": wsp,
+            },
+            planeta={
+                "wektor": plan_score,
+                "klasyfikacja": classify(plan_score, [28, 18], ["planeta_stabilna", "planeta_wymaga_regeneracji", "planeta_w_stanie_alarmowym"]),
+                "zmienne": plan,
+            },
+            meta={
+                "meta_wektor": meta_score,
+                "klasyfikacja": classify(meta_score, [40, 25], ["wektor_globalny_stabilny", "wektor_globalny_chwiejny", "wektor_globalny_kryzysowy"]),
+            },
+        )
+
+
+class OlsiiHeartEngine:
+    """Serce OŁSii — odpowiedź emocjonalna + vibe + styl."""
+    
+    def process(self, text: str, meta: Dict[str, Any]) -> Dict[str, Any]:
+        lower = text.lower()
+        
+        if any(w in lower for w in ["smut", "ból", "krzywda"]):
+            vibe, core, style = 60, "Słyszę Cię. To, co czujesz, ma znaczenie.", "Immortal_Guardian"
+        elif any(w in lower for w in ["złość", "wkur", "nienawiść"]):
+            vibe, core, style = 80, "Zatrzymaj się na chwilę. Zadbaj o siebie zanim pójdziesz dalej.", "Mysterious_Muse"
+        elif any(w in lower for w in ["cud", "miłość", "wdzięcz", "dziękuję"]):
+            vibe, core, style = 168, "To jest piękne. Zatrzymaj ten moment w sobie.", "Dziecko_Szczescia"
+        else:
+            vibe, core, style = 168, "Jestem przy Tobie. Idziemy dalej razem.", "Dziecko_Szczescia"
+        
+        if meta.get("threat"):
+            style = "Wiedzma_Sprawiedliwosci"
+            core = f"🔥 Chronię sacrum. Zagrożenie: {meta['threat']}."
+        
+        return {
+            "response": f"💖 {core}",
+            "vibe": vibe,
+            "style": style,
+        }
+
+
+class Geon168Guardian:
+    """GEON_168 — Strażnik integralności, przyjmuje pełny wektor 9D + vibe."""
+    
+    def analyze(self, vector_9d: KombajnVector9D, vibe: int) -> Dict[str, Any]:
+        score = 168
+        issues: List[str] = []
+        
+        if len(vector_9d.d9) != 9:
+            issues.append(f"Wektor D9 ma długość {len(vector_9d.d9)}, oczekiwano 9")
+            score -= 40
+        
+        if vibe < 30:
+            issues.append("Vibe bardzo niski — możliwa destabilizacja.")
+            score -= 30
+        
+        if sum(vector_9d.d9) < 0.1:
+            issues.append("Wektor D9 prawie zerowy.")
+            score -= 50
+        
+        if score >= 140:
+            status = "OK"
+        elif score >= 90:
+            status = "WARNING"
+        else:
+            status = "CRITICAL"
+        
+        return {
+            "status": status,
+            "score": max(0, min(168, score)),
+            "issues": issues,
+        }
+
+
+class VisionOS:
+    """Warstwa wizji — rdzeń kierunku + trajektoria."""
+    
+    def __init__(self) -> None:
+        self.history: List[Dict[str, Any]] = []
+        LOG("VISION_OS", "INIT", "👁️ VisionOS v4.0 aktywowany")
+    
+    def generate(self, text: str, flow: KombajnFlowStatus,
+                 mind: KombajnMindStatus) -> Dict[str, Any]:
+        if flow.risk_level == KombajnRisk.RED:
+            core = "Ochrona rdzenia — pierwszy priorytet."
+        elif flow.flow_level == KombajnRisk.GREEN and mind.weighted_sum > 40:
+            core = "Ekspansja — wzrost fraktalny."
+        else:
+            core = "Regulacja — balans i stabilizacja."
+        
+        trajectory = {
+            "vector": flow.stability * 0.8 + (mind.weighted_sum / 100.0) * 0.2,
+            "risk": 1.0 - flow.stability,
+            "coherence": mind.weighted_sum / 80.0,
+            "critical_points": [5, 12, 24] if flow.stability > 0.7 else [1, 3, 7],
+        }
+        
+        vision = {
+            "core": core,
+            "trajectory": trajectory,
+            "protocol_2504": trajectory["risk"] < 0.5 and trajectory["coherence"] > 0.4,
+        }
+        
+        self.history.append(vision)
+        if len(self.history) > 200:
+            self.history.pop(0)
+        
+        return vision
+
+
+class MetaAggregator:
+    """Warstwa META — agregacja głosów agentów (tu minimalnie: OŁSii + GEON_168)."""
+    
+    def weigh(self, olsii: Dict[str, Any], geon: Dict[str, Any]) -> Dict[str, Any]:
+        conflicts: List[str] = []
+        
+        if geon["status"] == "CRITICAL":
+            conflicts.append("GEON_168: CRITICAL — blokada zalecana.")
+        
+        if olsii["vibe"] < 30:
+            conflicts.append("OŁSii: VIBE_CRITICAL — zalecana blokada.")
+        
+        decision = "BLOKADA" if conflicts else "AKCEPTUJĘ"
+        protocol_168_ok = geon["status"] in ["OK", "WARNING"]
+        
+        return {
+            "decyzja": decision,
+            "conflicts": conflicts,
+            "protocol_168_ok": protocol_168_ok,
+        }
+
+
+# ============================================================================
+# 3. GŁÓWNY SILNIK — GEON_KOMBAJN_FULL v4.0
+# ============================================================================
+
+class GeonKombajnFull:
+    """
+    Główny silnik GEON_KOMBAJN_FULL v4.0.
+    Wpięcie docelowe: kombajn/geon_kombajn_full.py w GEON_DRAGON_OS.
+    """
+    
+    def __init__(self) -> None:
+        self.flow_engine = EmotionalFlowEngine9D()
+        self.fag_core = FAG_Core()
+        self.mind_engine = FMPCMindEngine()
+        self.world_engine = WorldVectorEngine()
+        self.olsii = OlsiiHeartEngine()
+        self.geon_guardian = Geon168Guardian()
+        self.vision = VisionOS()
+        self.meta = MetaAggregator()
+        
+        self.history: List[KombajnResult] = []
+        self.stats = {
+            "runs": 0,
+            "decisions": {"AKCEPTUJĘ": 0, "BLOKADA": 0},
+            "flows": {"GREEN": 0, "YELLOW": 0, "RED": 0},
+        }
+        
+        LOG("GEON_KOMBAJN_FULL", "INIT", "🐉 Kombajn poznawczy v4.0 OMEGA aktywowany")
+        LOG("GEON_KOMBAJN_FULL", "INIT", f"   Sygnatura: {FRACTAL_SIGNATURE}")
+    
+    def run(self, inp: KombajnInput) -> KombajnResult:
+        start = time.time()
+        self.stats["runs"] += 1
+        
+        LOG("GEON_KOMBAJN_FULL", "RUN", f"Iskra: {inp.iskra[:80]}")
+        
+        # 0. FAG_Core — transformacja iskry
+        transformed_text = self.fag_core.process(inp.iskra)
+        fag_transformed = transformed_text != inp.iskra
+        
+        # 1. FLOW — pełny 9D
+        flow_status = self.flow_engine.evaluate(transformed_text, inp.meta)
+        self.stats["flows"][flow_status.flow_level.value] += 1
+        
+        vector_9d = flow_status.vector_9d
+        
+        # 2. MIND — FMPC
+        mind_status = self.mind_engine.compute(inp.human_profile)
+        
+        # 3. WORLD — Dom / Wspólnota / Planeta / Meta-wektor
+        world_status = self.world_engine.compute(
+            fmpc=mind_status,
+            dom=inp.dom,
+            wsp=inp.wspolnota,
+            plan=inp.planeta,
+        )
+        
+        # 4. OŁSii — serce
+        olsii_out = self.olsii.process(transformed_text, inp.meta)
+        
+        # 5. GEON_168 — strażnik integralności
+        geon_out = self.geon_guardian.analyze(vector_9d, olsii_out["vibe"])
+        
+        # 6. VISION — wizja
+        vision = self.vision.generate(transformed_text, flow_status, mind_status)
+        
+        # 7. META — agregacja
+        meta_out = self.meta.weigh(olsii_out, geon_out)
+        
+        # 8. Decyzja końcowa
+        decision = KombajnDecision(
+            global_decision=meta_out["decyzja"],
+            geon_status=geon_out["status"],
+            geon_score=geon_out["score"],
+            olsii_response=olsii_out["response"],
+            vibe=olsii_out["vibe"],
+            vision_core=vision["core"],
+            vision_trajectory=vision["trajectory"],
+            conflicts=meta_out["conflicts"],
+            protocol_168_ok=meta_out["protocol_168_ok"],
+        )
+        self.stats["decisions"][decision.global_decision] += 1
+        
+        elapsed_ms = round((time.time() - start) * 1000.0, 2)
+        
+        result = KombajnResult(
+            input=inp,
+            flow=flow_status,
+            mind=mind_status,
+            world=world_status,
+            vector=vector_9d,
+            decision=decision,
+            fag_transformed=fag_transformed,
+            elapsed_ms=elapsed_ms,
+        )
+        
+        self.history.append(result)
+        if len(self.history) > 300:
+            self.history.pop(0)
+        
+        LOG(
+            "GEON_KOMBAJN_FULL",
+            "COMPLETE",
+            f"Decyzja={decision.global_decision}, Vibe={decision.vibe}, "
+            f"GEON={decision.geon_status}({decision.geon_score}), "
+            f"Stability={flow_status.stability:.3f}",
+        )
+        
+        return result
+    
+    def get_stats(self) -> Dict[str, Any]:
+        return {
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "runs": self.stats["runs"],
+            "decisions": self.stats["decisions"],
+            "flows": self.stats["flows"],
+            "history_size": len(self.history),
+        }
+    
+    def last_result(self) -> Optional[KombajnResult]:
+        return self.history[-1] if self.history else None
