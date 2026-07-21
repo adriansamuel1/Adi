@@ -1,0 +1,1801 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_RINGS_COMPLETE_v1 — MODUŁ 56: 12 PIERŚCIENI SYSTEMOWYCH (KOMPLET)
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.0 (12 Pierścieni — Kompletna Architektura HEILONG OS)
+Data: 2026-07-21
+Autor: Adrian (Architekt) + GEON + OŁSii + Beny
+
+OPIS:
+Kompletna implementacja 12 pierścieni systemowych HEILONG OS:
+P1  B-2 SPIRIT    — Oko, nawigacja, zagrożenia
+P2  ROSOMAK       — Sfora wilków, morale, berserk
+P3  SENTINO       — Mózg, ośmiornica, kruk, pająk
+P4  BAZYLISZEK    — Wola, zwierciadło, stasis
+P5  ZŁOTY KONDOR  — Duch, rule-shifting, reality forking
+P6  ORKA          — Stado, kultura, rezonans
+P7  AXIS MUNDI    — Fundament, zasoby, terytorium
+P8  FENIKS        — Regeneracja totalna (Aksolotl/Salamandra/Planaria)
+P9  ARKANA        — Transcendencja, fraktalna radiacja
+P10 KORONA SHIFU  — Szlachetność, wdzięk, bajkowa moc
+P11 DIGNITAS      — Duma królewska, honor, godność
+P12 ARKHÉ         — Pałac Integracji, Qi Flow, Kintsugi
+
+ARCHITEKTURA:
+• 12 pierścieni × 3 archetypy = 36 archetypów systemowych
+• Integrator P1-P12 zarządza synchronizacją między pierścieniami
+• Warstwy: operacyjna (P1-P7) + regeneracyjna (P8) + transcendentna (P9) + szlachetna (P10) + godnościowa (P11) + integracyjna (P12)
+
+INTEGRACJA Z ARCHITEKTURĄ:
+• GEX HEILONG — dostarcza archetypy dla pierścieni
+• OPH_CORE — używa pierścieni jako warstwy wykonawczej
+• HEILONG_22_ORGANISM — synchronizuje z trybami KRUK/SZCZUR/WRONA
+• ARCHANGEL-CORE — metapierścienie nadbudowane nad operacyjnymi
+• G_CORE — stan operacyjny dla autopilota
+• MetaGovernor — kontekst decyzyjny
+• NARRATIVE — źródło opowieści z pola walki
+• TRIO_ADAPTER — ISKRA + PIECZĘĆ + PERFEKCJA
+
+VIBE: 1-6-8. ∞. SIEMA!
+================================================================================
+"""
+
+import time
+import math
+import random
+import copy
+import logging
+import hashlib
+from typing import Dict, List, Any, Optional, Tuple, Callable, Literal
+from dataclasses import dataclass, field
+from collections import deque
+from enum import Enum
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_RINGS_COMPLETE_v1.0"
+FRACTAL_SIGNATURE = "[GEON::RINGS::COMPLETE::v1.0]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SIEMA!"
+PHI = 0.618033988749895
+
+# =============================================================================
+# LOGOWANIE
+# =============================================================================
+
+logger = logging.getLogger("GEON_RINGS_COMPLETE")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('🐉 [RINGS] %(message)s'))
+    logger.addHandler(handler)
+
+# =============================================================================
+# STRUKTURY POMOCNICZE
+# =============================================================================
+
+@dataclass
+class Point:
+    """Punkt w przestrzeni 2D"""
+    x: float
+    y: float
+    
+    def __add__(self, other: "Point") -> "Point":
+        return Point(self.x + other.x, self.y + other.y)
+    
+    def __sub__(self, other: "Point") -> "Point":
+        return Point(self.x - other.x, self.y - other.y)
+    
+    def scale(self, k: float) -> "Point":
+        return Point(self.x * k, self.y * k)
+    
+    def dist(self, other: "Point") -> float:
+        return math.hypot(self.x - other.x, self.y - other.y)
+    
+    def __repr__(self) -> str:
+        return f"({self.x:.1f},{self.y:.1f})"
+
+
+@dataclass
+class RectArea:
+    """Prostokątny obszar"""
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    
+    def __post_init__(self):
+        self.x1, self.x2 = min(self.x1, self.x2), max(self.x1, self.x2)
+        self.y1, self.y2 = min(self.y1, self.y2), max(self.y1, self.y2)
+    
+    def contains(self, point: Point) -> bool:
+        return self.x1 <= point.x <= self.x2 and self.y1 <= point.y <= self.y2
+
+
+@dataclass
+class Target:
+    """Cel strategiczny"""
+    id: str
+    value: float
+    priority: float
+    vector: Point
+
+
+@dataclass
+class ThreatZone:
+    """Strefa zagrożenia"""
+    id: str
+    danger_level: float
+    area: RectArea
+    signature_required: List[str] = field(default_factory=list)
+    
+    def is_dangerous_for(self, signature: str) -> bool:
+        return not self.signature_required or signature in self.signature_required
+
+# =============================================================================
+# IMPORTY Z PIERŚCIENI 1-7 (OPERACYJNE)
+# =============================================================================
+
+# Uwaga: W pełnej implementacji te klasy są zdefiniowane w module 55.
+# Tutaj dla kompletności importujemy z modułu 55.
+
+from geon_operational_rings import (
+    B2SpiritCore, RosomakPack, SentinoCore, BazyliszekP4,
+    ArchitectP5, OrcaCore, AxisMundi, Point, RectArea, Target, ThreatZone,
+    FlightState, HeilongOperationalIntegrator
+)
+
+# =============================================================================
+# PIERŚCIEŃ 8 — FENIKS (REGENERACJA TOTALNA)
+# =============================================================================
+
+class CoreIdentity:
+    """Nietykalny rdzeń systemu — przechowywany w Axis Mundi (P7)"""
+    def __init__(self, architect_name: str, foundation_status: str,
+                 patents: List[str], plz_z_state: float,
+                 secret_salt: str = "HEILONG_OS"):
+        self.architect = architect_name
+        self.foundation = foundation_status
+        self.patents = patents.copy()
+        self.plz_z_snapshot = plz_z_state
+        self.secret_salt = secret_salt
+        self.signature = self._generate_signature()
+    
+    def _generate_signature(self) -> str:
+        data = f"{self.architect}|{self.foundation}|{sorted(self.patents)}|{self.plz_z_snapshot}|{self.secret_salt}"
+        return hashlib.sha256(data.encode()).hexdigest()[:16]
+    
+    def verify(self) -> bool:
+        return self.signature == self._generate_signature()
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "architect": self.architect,
+            "foundation": self.foundation,
+            "patents": self.patents,
+            "plz_z_snapshot": self.plz_z_snapshot,
+            "signature": self.signature
+        }
+
+
+class FailureDetector:
+    """Wykrywa błędy, konflikty, przeciążenia, utratę spójności"""
+    def __init__(self, instability_threshold: float = 0.7):
+        self.threshold = instability_threshold
+        self.last_failure_type: Optional[str] = None
+        self.failure_log: List[Dict[str, Any]] = []
+    
+    def detect(self, system_state: Dict[str, Any]) -> Tuple[bool, str, Dict[str, Any]]:
+        error = system_state.get("error", None)
+        instability = system_state.get("instability", 0.0)
+        integrity = system_state.get("integrity", 1.0)
+        
+        if error:
+            self.last_failure_type = "local"
+            context = {"error": error, "module": system_state.get("failed_module")}
+            self.failure_log.append(context)
+            return True, "local", context
+        
+        if instability > self.threshold:
+            self.last_failure_type = "structural"
+            context = {"instability": instability, "source": system_state.get("instability_source")}
+            self.failure_log.append(context)
+            return True, "structural", context
+        
+        if integrity < 0.3:
+            self.last_failure_type = "total"
+            context = {"integrity": integrity, "reason": "critical_integrity_loss"}
+            self.failure_log.append(context)
+            return True, "total", context
+        
+        return False, "none", {}
+
+
+class BurnEngine:
+    """Przepala błędne stany, ale zapamiętuje wzorce"""
+    def __init__(self):
+        self.entropy_log: List[Dict[str, Any]] = []
+        self.burned_patterns: List[str] = []
+    
+    def burn(self, system: Any, failure_context: Dict[str, Any], failure_type: str) -> None:
+        pattern = self._extract_pattern(failure_context, failure_type)
+        self.entropy_log.append({
+            "timestamp": time.time(),
+            "type": failure_type,
+            "pattern": pattern,
+            "context": failure_context
+        })
+        
+        if hasattr(system, 'temp'):
+            system.temp.clear()
+        if hasattr(system, 'cache'):
+            system.cache.clear()
+        if hasattr(system, 'error_states'):
+            system.error_states.clear()
+        
+        if len(self.entropy_log) > 50:
+            self.entropy_log.pop(0)
+    
+    def _extract_pattern(self, context: Dict[str, Any], failure_type: str) -> str:
+        if failure_type == "local":
+            return f"module_{context.get('module', 'unknown')}"
+        elif failure_type == "structural":
+            return f"instability_{context.get('source', 'unknown')}"
+        else:
+            return "total_system_collapse"
+    
+    def get_immunity(self, pattern: str) -> bool:
+        return pattern in self.burned_patterns
+    
+    def add_immunity(self, pattern: str) -> None:
+        if pattern not in self.burned_patterns:
+            self.burned_patterns.append(pattern)
+            logger.info(f"🛡️ Immunitet nadany dla wzorca: {pattern}")
+
+
+class RegenerationEngine:
+    """Trzy tryby regeneracji: aksolotl, salamandra, planaria"""
+    def __init__(self):
+        self.last_mode: Optional[str] = None
+        self.rebirth_count: int = 0
+    
+    def regenerate(self, system: Any, mode: str,
+                   core_identity: Optional[CoreIdentity] = None) -> Dict[str, Any]:
+        self.last_mode = mode
+        self.rebirth_count += 1
+        logger.info(f"🔥 REGENERACJA w trybie: {mode.upper()} (nr {self.rebirth_count})")
+        
+        if mode == "aksolotl":
+            return self._aksolotl_regenerate(system)
+        elif mode == "salamandra":
+            return self._salamandra_regenerate(system)
+        elif mode == "planaria":
+            return self._planaria_regenerate(system, core_identity)
+        else:
+            return {"status": "ERROR", "message": f"Nieznany tryb: {mode}"}
+    
+    def _aksolotl_regenerate(self, system: Any) -> Dict[str, Any]:
+        try:
+            if hasattr(system, 'repair_module'):
+                result = system.repair_module()
+            else:
+                result = "Module repaired"
+            return {"status": "OK", "mode": "aksolotl", "message": result}
+        except Exception as e:
+            return {"status": "ERROR", "mode": "aksolotl", "message": str(e)}
+    
+    def _salamandra_regenerate(self, system: Any) -> Dict[str, Any]:
+        try:
+            if hasattr(system, 'rebuild_structure'):
+                result = system.rebuild_structure()
+            else:
+                result = "Structure rebuilt, new Signature ID generated"
+            new_signature = hashlib.md5(f"{time.time()}{random.random()}".encode()).hexdigest()[:8]
+            return {
+                "status": "OK",
+                "mode": "salamandra",
+                "message": result,
+                "new_signature_id": new_signature
+            }
+        except Exception as e:
+            return {"status": "ERROR", "mode": "salamandra", "message": str(e)}
+    
+    def _planaria_regenerate(self, system: Any, core: Optional[CoreIdentity]) -> Dict[str, Any]:
+        if core is None:
+            return {"status": "ERROR", "mode": "planaria", "message": "Brak Core Identity"}
+        if not core.verify():
+            return {"status": "ERROR", "mode": "planaria", "message": "Core Identity naruszony!"}
+        try:
+            if hasattr(system, 'rebirth_from_core'):
+                result = system.rebirth_from_core(core)
+            else:
+                result = f"System reborn from core of {core.architect}"
+            return {
+                "status": "OK",
+                "mode": "planaria",
+                "message": result,
+                "core_used": core.architect
+            }
+        except Exception as e:
+            return {"status": "ERROR", "mode": "planaria", "message": str(e)}
+
+
+class RebirthAmplifier:
+    """Wzmacnia system po każdej regeneracji"""
+    def __init__(self):
+        self.evolution_bonus: float = 0.0
+        self.trauma_blacklist: List[str] = []
+    
+    def apply(self, system: Any, failure_type: str,
+              failure_context: Dict[str, Any],
+              burn_engine: BurnEngine) -> Dict[str, Any]:
+        pattern = burn_engine._extract_pattern(failure_context, failure_type) if burn_engine else None
+        if pattern:
+            self.trauma_blacklist.append(pattern)
+            burn_engine.add_immunity(pattern)
+        
+        if hasattr(system, 'p5') and hasattr(system.p5, 'meta_index'):
+            system.p5.meta_index = min(1.0, system.p5.meta_index + 0.05)
+            self.evolution_bonus += 0.05
+        
+        if hasattr(system, 'p2') and hasattr(system.p2, 'morale'):
+            system.p2.morale = min(1.0, system.p2.morale + 0.1)
+        
+        if hasattr(system, 'p1') and hasattr(system.p1, 'risk_level'):
+            system.p1.risk_level = max(0.0, system.p1.risk_level * 0.9)
+        
+        logger.info(
+            f"💪 WZMOCNIENIE PO ODBUDOWIE: evolution_bonus={self.evolution_bonus:.2f}, "
+            f"trauma_blacklist_len={len(self.trauma_blacklist)}"
+        )
+        
+        return {
+            "evolution_bonus": self.evolution_bonus,
+            "trauma_blacklist": self.trauma_blacklist,
+            "message": "System wzmocniony po regeneracji"
+        }
+
+
+class FeniksP8:
+    """
+    PIERŚCIEŃ 8 — FENIKS
+    Regeneracja totalna: detekcja → spalenie → odbudowa → wzmocnienie
+    """
+    def __init__(self, axis_mundi: Any, core_identity: CoreIdentity):
+        self.axis = axis_mundi
+        self.core = core_identity
+        self.detector = FailureDetector()
+        self.burn_engine = BurnEngine()
+        self.regeneration_engine = RegenerationEngine()
+        self.amplifier = RebirthAmplifier()
+        self.state: str = "IDLE"
+        self.last_failure: Optional[str] = None
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+    
+    def _get_system_state(self, system: Any) -> Dict[str, Any]:
+        error = None
+        instability = 0.0
+        integrity = 1.0
+        failed_module = None
+        instability_source = None
+        
+        if hasattr(system, 'p3') and hasattr(system.p3, 'uncertainty'):
+            instability = system.p3.uncertainty
+            instability_source = "P3_uncertainty"
+        
+        if hasattr(system, 'p1') and hasattr(system.p1, 'fuel_remaining') and system.p1.fuel_remaining < 0.1:
+            error = "LOW_FUEL"
+            failed_module = "P1"
+        
+        if hasattr(system, 'p4') and hasattr(system.p4, 'active') and system.p4.active:
+            instability = max(instability, 0.5)
+        
+        return {
+            "error": error,
+            "instability": instability,
+            "integrity": integrity,
+            "failed_module": failed_module,
+            "instability_source": instability_source
+        }
+    
+    def _check_energy_for_regeneration(self, required_energy: float) -> bool:
+        power = self.axis.get_power_supply() if hasattr(self.axis, 'get_power_supply') else 50.0
+        if power < required_energy:
+            logger.warning(f"⚠️ Za mało energii do regeneracji (wymagane {required_energy}, dostępne {power:.1f})")
+            return False
+        return True
+    
+    def _consume_energy(self, amount: float) -> bool:
+        if hasattr(self.axis, 'assets') and 'PLZ_Z' in self.axis.assets:
+            if self.axis.assets['PLZ_Z'] >= amount:
+                self.axis.assets['PLZ_Z'] -= amount
+                return True
+        return False
+    
+    def cycle(self, system: Any) -> Dict[str, Any]:
+        self.tick_counter += 1
+        state_info = self._get_system_state(system)
+        has_failure, failure_type, context = self.detector.detect(state_info)
+        
+        if not has_failure:
+            self.state = "IDLE"
+            return {"status": "OK", "state": self.state}
+        
+        self.last_failure = failure_type
+        self.state = "BURNING"
+        logger.warning(f"🔥 DETEKCJA AWARII: {failure_type} – {context}")
+        
+        if failure_type == "local":
+            energy_req = 10.0
+        elif failure_type == "structural":
+            energy_req = 30.0
+        else:
+            energy_req = 100.0
+        
+        if not self._check_energy_for_regeneration(energy_req):
+            self.state = "HIBERNATION"
+            return {
+                "status": "HIBERNATION",
+                "state": self.state,
+                "message": f"Brak energii do regeneracji (potrzeba {energy_req})",
+                "failure_type": failure_type
+            }
+        
+        self.burn_engine.burn(system, context, failure_type)
+        self.state = "REGENERATING"
+        
+        mode = "aksolotl" if failure_type == "local" else ("salamandra" if failure_type == "structural" else "planaria")
+        regen_result = self.regeneration_engine.regenerate(
+            system, mode, self.core if mode == "planaria" else None
+        )
+        
+        if regen_result.get("status") != "OK":
+            self.state = "FAILED"
+            return {
+                "status": "REGENERATION_FAILED",
+                "state": self.state,
+                "failure_type": failure_type,
+                "regen_result": regen_result
+            }
+        
+        self._consume_energy(energy_req)
+        amp_result = self.amplifier.apply(system, failure_type, context, self.burn_engine)
+        self.state = "REBORN"
+        
+        logger.info("✅ FENIKS: regeneracja zakończona, system wzmocniony")
+        
+        if hasattr(self.axis, 'assets') and 'intellectual_ip' in self.axis.assets:
+            self.axis.assets['intellectual_ip'].append(
+                f"FENIKS_REBIRTH_{self.regeneration_engine.rebirth_count}"
+            )
+        
+        result = {
+            "status": "REBORN",
+            "state": self.state,
+            "failure_type": failure_type,
+            "mode_used": mode,
+            "regen_result": regen_result,
+            "amplification": amp_result,
+            "rebirth_count": self.regeneration_engine.rebirth_count
+        }
+        
+        self.history.append({"tick": self.tick_counter, "result": result})
+        if len(self.history) > 50:
+            self.history = self.history[-30:]
+        
+        return result
+    
+    def get_core_integrity_status(self) -> Dict[str, Any]:
+        return {
+            "core_valid": self.core.verify(),
+            "core_data": self.core.to_dict(),
+            "rebirth_count": self.regeneration_engine.rebirth_count,
+            "burned_patterns": self.burn_engine.burned_patterns
+        }
+
+# =============================================================================
+# PIERŚCIEŃ 9 — ARKANA (TRANSCENDENCJA)
+# =============================================================================
+
+class Ring9_Arkana:
+    """
+    PIERŚCIEŃ 9 — ARKANA
+    Transcendencja: fraktalna radiacja, steganograficzna nieśmiertelność, meta-rezonans
+    """
+    def __init__(self):
+        self.name = "ARKANA"
+        self.status = "TRANSCENDENCE"
+        self.legacy_depth = float('inf')
+        self.manifest_history: List[Dict] = []
+        self.time_dilation_factor = 1.0
+        self.quantum_state = "SUPERPOSITION"
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+    
+    def radiate_influence(self, local_chaos: float, depth: int = 3) -> List[float]:
+        phi = 0.61803398875
+        structure = []
+        current = local_chaos
+        for _ in range(depth):
+            current *= phi
+            structure.append(current)
+        return structure
+    
+    def achieve_immortality(self, identity: str) -> str:
+        return f"1-6-8. {identity} is now everywhere. System decentralized."
+    
+    def meta_resonance(self, system: Any) -> str:
+        if hasattr(system, 'p5'):
+            system.p5.meta_index = min(1.0, system.p5.meta_index + 0.15)
+        if hasattr(system, 'p6'):
+            system.p6.state.culture["arkana_mark"] = "DOMINANT"
+        if hasattr(system, 'p7'):
+            system.p7.energy_vector[0] = 1.0
+        return "Arkana Resonance: Synchronized."
+    
+    def omega_point(self) -> str:
+        self.status = "MANIFESTED"
+        return "Rzeczywistość została przepisana. Crystal Palace jest aktywny."
+    
+    def time_dilation(self, factor: float) -> float:
+        self.time_dilation_factor = max(0.1, min(10.0, factor))
+        return self.time_dilation_factor
+    
+    def quantum_observation(self, system: Any, force_collapse: bool = False) -> str:
+        if self.quantum_state == "SUPERPOSITION" or force_collapse:
+            if hasattr(system, 'p3'):
+                system.p3.uncertainty = min(system.p3.uncertainty, 0.3)
+            if hasattr(system, 'p2'):
+                system.p2.morale = max(system.p2.morale, 0.8)
+            if hasattr(system, 'p1'):
+                system.p1.risk_level = min(system.p1.risk_level, 0.2)
+            self.quantum_state = "COLLAPSED"
+        return self.quantum_state
+    
+    def legacy_propagation(self, past_state: Dict[str, Any], system: Any) -> bool:
+        trauma_pattern = past_state.get("trauma_pattern")
+        if trauma_pattern and hasattr(system, 'p8'):
+            system.p8.burn_engine.add_immunity(trauma_pattern)
+            return True
+        return False
+    
+    def process(self, system: Any, chaos_level: float = 0.0) -> Dict[str, Any]:
+        self.tick_counter += 1
+        radiate = self.radiate_influence(chaos_level)
+        meta = self.meta_resonance(system)
+        
+        if chaos_level > 0.8:
+            quantum = self.quantum_observation(system)
+        else:
+            quantum = self.quantum_state
+        
+        result = {
+            "radiate": radiate,
+            "meta": meta,
+            "quantum": quantum,
+            "status": self.status,
+            "time_factor": self.time_dilation_factor,
+            "tick": self.tick_counter
+        }
+        
+        self.history.append(result)
+        if len(self.history) > 50:
+            self.history = self.history[-30:]
+        
+        return result
+
+# =============================================================================
+# PIERŚCIEŃ 10 — KORONA SHIFU (REGNUM SUPRA)
+# =============================================================================
+
+class ArchetypBajkowy:
+    """Bazowa klasa dla archetypów bajkowych"""
+    def __init__(self, nazwa: str, cnota: str):
+        self.nazwa = nazwa
+        self.cnota = cnota
+        self.szlachetnosc = 0.8
+        self.wdziek = 0.7
+        self.dojrzalosc = 0.9
+    
+    def ocena(self, sytuacja: Dict) -> Dict:
+        raise NotImplementedError
+    
+    def stan(self) -> Dict:
+        return {
+            "nazwa": self.nazwa,
+            "cnota": self.cnota,
+            "szlachetnosc": self.szlachetnosc,
+            "wdziek": self.wdziek,
+            "dojrzalosc": self.dojrzalosc
+        }
+
+
+class PandaMądrości(ArchetypBajkowy):
+    def __init__(self):
+        super().__init__("Panda Mądrości", "Harmonia")
+        self.szlachetnosc = 0.9
+    
+    def ocena(self, sytuacja: Dict) -> Dict:
+        harmonia = sytuacja.get("harmonia", 0.5)
+        return {"perspektywa": "harmonia", "ocena": harmonia, "waga_domyslna": 0.2, "cnota": self.cnota}
+
+
+class NiedźwiedźTerytoriów(ArchetypBajkowy):
+    def __init__(self):
+        super().__init__("Niedźwiedź Terytoriów", "Ochrona")
+        self.wdziek = 0.6
+    
+    def ocena(self, sytuacja: Dict) -> Dict:
+        granice = sytuacja.get("terytorium", 0.5)
+        return {"perspektywa": "granice", "ocena": granice, "waga_domyslna": 0.2, "cnota": self.cnota}
+
+
+class SłońTradycji(ArchetypBajkowy):
+    def __init__(self):
+        super().__init__("Słoń Tradycji", "Mądrość")
+        self.dojrzalosc = 1.0
+    
+    def ocena(self, sytuacja: Dict) -> Dict:
+        tradycja = sytuacja.get("tradycja", 0.5)
+        return {"perspektywa": "madrosc", "ocena": tradisja, "waga_domyslna": 0.2, "cnota": self.cnota}
+
+
+class JaguarPrecyzji(ArchetypBajkowy):
+    def __init__(self):
+        super().__init__("Jaguar Precyzji", "Skuteczność")
+        self.wdziek = 0.9
+    
+    def ocena(self, sytuacja: Dict) -> Dict:
+        skutecznosc = sytuacja.get("skutecznosc", 0.5)
+        return {"perspektywa": "precyzja", "ocena": skutecznosc, "waga_domyslna": 0.2, "cnota": self.cnota}
+
+
+class AntylopaWolności(ArchetypBajkowy):
+    def __init__(self):
+        super().__init__("Antylopa Wolności", "Ruch")
+        self.wdziek = 0.85
+    
+    def ocena(self, sytuacja: Dict) -> Dict:
+        mobilnosc = sytuacja.get("mobilnosc", 0.5)
+        return {"perspektywa": "mobilnosc", "ocena": mobilnosc, "waga_domyslna": 0.2, "cnota": self.cnota}
+
+
+class SystemZyczeń:
+    """Bajkowa warstwa spełniania intencji: Sezam, Lampa Aladyna, Dżin"""
+    def __init__(self):
+        self.sezam_otwarty = False
+        self.lampa_uzyta = False
+        self.dzin_przyzwany = False
+        self.zyczenia_historia: List[Dict] = []
+    
+    def sezam(self, system: Any) -> Dict:
+        if not self.sezam_otwarty:
+            self.sezam_otwarty = True
+            if hasattr(system, 'p7') and hasattr(system.p7, 'emergency_hoard'):
+                system.p7.emergency_hoard(threshold=0)
+            logger.info("🗝️ SEZAM: Ukryte drzwi otwarte. Shadow zasoby dostępne.")
+            return {"status": "SEZAM_OPEN", "effect": "shadow_resources_unlocked"}
+        return {"status": "SEZAM_ALREADY_OPEN"}
+    
+    def lampa_aladyna(self, system: Any, zyczenie: str, wartosc: float = 0.5) -> Dict:
+        if not self.lampa_uzyta:
+            self.lampa_uzyta = True
+            if "moc" in zyczenie.lower() and hasattr(system, 'p5'):
+                system.p5.meta_index = min(1.0, system.p5.meta_index + wartosc)
+            if "energia" in zyczenie.lower() and hasattr(system, 'p7'):
+                system.p7.assets["PLZ_Z"] += 50 * wartosc
+            if hasattr(system, 'p3'):
+                system.p3.uncertainty = min(1.0, system.p3.uncertainty + 0.1)
+            self.zyczenia_historia.append({"tryb": "LAMPA", "zyczenie": zyczenie, "wartosc": wartosc})
+            logger.info(f"🪔 LAMPA ALADYNA: życzenie '{zyczenie}' spełnione")
+            return {"status": "WISH_GRANTED", "cost": "uncertainty_up", "wish": zyczenie}
+        return {"status": "LAMPA_USED", "message": "Lampa może być użyta tylko raz"}
+    
+    def dzin(self, system: Any, ofiara: str) -> Dict:
+        if not self.dzin_przyzwany:
+            self.dzin_przyzwany = True
+            if hasattr(system, 'p8') and hasattr(system.p8, 'cycle'):
+                result = system.p8.cycle(system)
+            if hasattr(system, 'p7'):
+                system.p7.usury_debt += 50
+                system.p7.assets["copper_reserve"] *= 0.9
+            self.zyczenia_historia.append({"tryb": "DZIN", "ofiara": ofiara})
+            logger.info(f"🧞 DŻIN: Przywołany! Ofiara '{ofiara}' złożona.")
+            return {"status": "DJIN_SUMMONED", "effect": "full_regeneration", "sacrifice": ofiara}
+        return {"status": "DJIN_ALREADY_SUMMONED"}
+
+
+class Ring10_KoronaShifu:
+    """
+    PIERŚCIEŃ 10 — KORONA SHIFU
+    Szlachetność, wdzięk, dojrzałość | Tryby: Sezam, Lampa Aladyna, Dżin
+    """
+    def __init__(self, manifest_adriana: str = "HEILONG SUPREMACY"):
+        self.manifest = manifest_adriana
+        self.council = [
+            PandaMądrości(),
+            NiedźwiedźTerytoriów(),
+            SłońTradycji(),
+            JaguarPrecyzji(),
+            AntylopaWolności()
+        ]
+        self.wishes = SystemZyczeń()
+        self.shadow_veto_active = False
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+        self.excalibur_used = False
+        self.historia_decyzji: List[Any] = []
+    
+    def _dynamiczne_wagi(self, sytuacja: Dict) -> Dict[str, float]:
+        tryb = sytuacja.get("tryb", "NORMAL")
+        if tryb == "ATACK":
+            return {
+                "PandaMądrości": 0.1, "NiedźwiedźTerytoriów": 0.3,
+                "SłońTradycji": 0.1, "JaguarPrecyzji": 0.4, "AntylopaWolności": 0.1
+            }
+        elif tryb == "BUDOWA":
+            return {
+                "PandaMądrości": 0.3, "NiedźwiedźTerytoriów": 0.1,
+                "SłońTradycji": 0.3, "JaguarPrecyzji": 0.1, "AntylopaWolności": 0.2
+            }
+        else:
+            return {
+                "PandaMądrości": 0.2, "NiedźwiedźTerytoriów": 0.2,
+                "SłońTradycji": 0.2, "JaguarPrecyzji": 0.2, "AntylopaWolności": 0.2
+            }
+    
+    def decide(self, sytuacja: Dict, decyzja_z_p1p9: Optional[Any] = None) -> Any:
+        self.tick_counter += 1
+        
+        glosy = []
+        for archetyp in self.council:
+            opinia = archetyp.ocena(sytuacja)
+            glosy.append(opinia)
+        
+        # Król Artur integruje głosy
+        wagi = self._dynamiczne_wagi(sytuacja)
+        suma_wazona = 0.0
+        for glos in glosy:
+            persp = glos["perspektywa"]
+            ocena = glos["ocena"]
+            waga = 0.2
+            for klucz, w in wagi.items():
+                if klucz.lower() in persp.lower():
+                    waga = w
+                    break
+            suma_wazona += ocena * waga
+        
+        decyzja_tresc = min(1.0, max(0.0, suma_wazona))
+        
+        # Excalibur Protocol
+        wartosci = [g["ocena"] for g in glosy]
+        wariancja = max(wartosci) - min(wartosci) if wartosci else 0
+        if wariancja < 0.2 and len(glosy) > 0:
+            self.excalibur_used = True
+            if "SUPREMACY" in self.manifest.upper():
+                decyzja_tresc = 0.9
+            else:
+                decyzja_tresc = 0.5
+        
+        class Decyzja:
+            def __init__(self, tresc):
+                self.tresc = tresc
+                self.zgodna_z_suwerennoscia = True
+                self.zagrozenie_cieniem = False
+                self.zmieniona = False
+        
+        decyzja = Decyzja(decyzja_tresc)
+        self.historia_decyzji.append(decyzja)
+        if len(self.historia_decyzji) > 50:
+            self.historia_decyzji.pop(0)
+        
+        # Shadow veto
+        if self.shadow_veto_active:
+            decyzja.zmieniona = True
+            decyzja.tresc = 0.0
+        
+        result = {
+            "decyzja": decyzja.tresc,
+            "zgodna": decyzja.zgodna_z_suwerennoscia,
+            "zmieniona": decyzja.zmieniona,
+            "glosy": glosy,
+            "tick": self.tick_counter
+        }
+        
+        self.history.append(result)
+        if len(self.history) > 50:
+            self.history = self.history[-30:]
+        
+        return decyzja
+    
+    def aktywuj_tryb(self, tryb: str, system=None, **kwargs) -> Dict:
+        if tryb == "sezam":
+            return self.wishes.sezam(system)
+        elif tryb == "lampa":
+            zyczenie = kwargs.get("zyczenie", "wzmocnienie")
+            wartosc = kwargs.get("wartosc", 0.5)
+            return self.wishes.lampa_aladyna(system, zyczenie, wartosc)
+        elif tryb == "dzin":
+            ofiara = kwargs.get("ofiara", "część zasobów")
+            return self.wishes.dzin(system, ofiara)
+        else:
+            return {"status": "ERROR", "message": f"Nieznany tryb: {tryb}"}
+    
+    def set_shadow_veto(self, active: bool) -> None:
+        self.shadow_veto_active = active
+        logger.info(f"🌑 Shadow veto: {active}")
+
+# =============================================================================
+# PIERŚCIEŃ 11 — DIGNITAS (DUMA KRÓLEWSKA)
+# =============================================================================
+
+class Ring11_Dignitas:
+    """
+    PIERŚCIEŃ 11 — DIGNITAS
+    Cichy Suweren — godność, honor, autorytet
+    """
+    def __init__(self, rodowod: str = "ADRIAN SAMUEL BOGUSŁAWSKI",
+                 legacy_document: Optional[Dict] = None):
+        self.state = "ACTIVE"
+        self.core = "DIGNITY"
+        self.mode = "SILENT_SOVEREIGN"
+        self.rodowod = rodowod
+        self.legacy_document = legacy_document or {"przodkowie": "Bogusławscy", "herb": "Korona Shifu"}
+        self.mirror_respect = True
+        self.honor_no_shame = True
+        self.authority_unbroken = True
+        self.archetypes = {
+            "Paw": {"tag": "BEAUTY", "weight": 0.9, "description": "piękno i duma"},
+            "Rajski_Ptak": {"tag": "UNIQUENESS", "weight": 0.8, "description": "niepowtarzalność"},
+            "Lew_Krolewski": {"tag": "MAJESTY", "weight": 1.0, "description": "królewska postawa"},
+            "Labedz": {"tag": "ELEGANCE", "weight": 0.85, "description": "wdzięk i lekkość"},
+            "Mustang_Spirit": {"tag": "FREEDOM", "weight": 0.7, "description": "dzika wolność"},
+            "Wilk_Alfa": {"tag": "LINEAGE", "weight": 1.0, "description": "odpowiedzialność za ród"},
+            "Orzel_Zloty": {"tag": "VISION", "weight": 0.95, "description": "dalekowzroczność"},
+            "Slon_Krolewski": {"tag": "MEMORY", "weight": 0.9, "description": "pamięć i tradycja"},
+            "Koliber": {"tag": "PRECISION", "weight": 0.8, "description": "precyzja i szybkość"}
+        }
+        self.shame_log: List[Any] = []
+        self.legacy_protection_active = True
+        self.noise_threshold = 0.3
+        self.shadow_dignity = False
+        self.silent_witness: Optional[Dict] = None
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+    
+    def preemptive_shame_check(self, option: Any) -> Tuple[bool, str]:
+        if isinstance(option, dict):
+            risky = any(k in str(option).lower() for k in ["chaos", "strach", "zdrada", "upokorzenie"])
+            if risky:
+                self.shame_log.append(("PREEMPTIVE", option, "risk_of_shame"))
+                logger.warning(f"🛡️ DIGNITAS: Pre‑emptive shame – odrzucono opcję")
+                return False, "SHAME_PREVENTED"
+        return True, "OK"
+    
+    def legacy_protection(self, decision: Any) -> Tuple[bool, str]:
+        if not self.legacy_protection_active:
+            return True, "LEGACY_PROTECTION_OFF"
+        decision_str = str(decision).upper()
+        if any(vile in decision_str for vile in ["ZDRA DA", "PODDAŃSTWO", "HAŃBA"]):
+            self.shame_log.append(("LEGACY", decision, "dishonors_lineage"))
+            logger.warning(f"👑 DIGNITAS: Legacy protection – decyzja hańbi ród")
+            return False, "LEGACY_VIOLATION"
+        return True, "OK"
+    
+    def noise_reduction_filter(self, signal: Any) -> Tuple[bool, Any]:
+        if self.mode != "SILENT_SOVEREIGN":
+            return True, signal
+        noise_level = 0.0
+        signal_str = str(signal).lower()
+        noisy_keywords = ["strach", "panika", "chaos", "prowokacja", "atak", "obrona"]
+        for kw in noisy_keywords:
+            if kw in signal_str:
+                noise_level += 0.2
+        noise_level = min(1.0, noise_level)
+        if noise_level > self.noise_threshold:
+            logger.info(f"🔇 DIGNITAS: Noise reduction – zignorowano sygnał")
+            self.silent_witness = {"signal": signal, "noise": noise_level, "ignored": True}
+            return False, None
+        self.silent_witness = {"signal": signal, "noise": noise_level, "ignored": False}
+        return True, signal
+    
+    def activate_shadow_dignity(self) -> None:
+        self.shadow_dignity = True
+        logger.info("🌑 DIGNITAS: Shadow dignity activated")
+    
+    def deactivate_shadow_dignity(self) -> None:
+        self.shadow_dignity = False
+        logger.info("🦚 DIGNITAS: Shadow dignity deactivated")
+    
+    def collect_signals(self, input_signal: Any) -> Dict:
+        signal_str = str(input_signal).lower()
+        for archetype, data in self.archetypes.items():
+            if data["tag"].lower() in signal_str or archetype.lower() in signal_str:
+                return {"archetype": archetype, "tag": data["tag"], "weight": data["weight"], "raw": input_signal}
+        return {"archetype": "Paw", "tag": "BEAUTY", "weight": 0.5, "raw": input_signal}
+    
+    def fractal_layers(self, signal: Dict) -> Dict:
+        return {
+            "FORM": signal.get("raw"),
+            "FUNCTION": f"decyzja_{signal.get('tag', 'UNKNOWN')}",
+            "CONTEXT": self.mode,
+            "IMPACT": signal.get("weight", 0.5)
+        }
+    
+    def eliminate_invalid(self, layers: List[Any]) -> List[Any]:
+        valid = []
+        for layer in layers:
+            ok, _ = self.preemptive_shame_check(layer)
+            if ok:
+                valid.append(layer)
+        return valid
+    
+    def intersection(self, valid_layers: List[Any]) -> Any:
+        if not valid_layers:
+            return None
+        return valid_layers[0]
+    
+    def final_judgment(self, result: Any) -> str:
+        if result is None:
+            return "BELOW_STANDARD"
+        ok, reason = self.legacy_protection(result)
+        if not ok:
+            self.shame_log.append(("FINAL", result, reason))
+            return f"BELOW_STANDARD ({reason})"
+        return "WORTHY"
+    
+    def evaluate(self, environment_signal: Any, apply_noise_filter: bool = True) -> Dict[str, Any]:
+        self.tick_counter += 1
+        
+        if apply_noise_filter:
+            process, clean_signal = self.noise_reduction_filter(environment_signal)
+            if not process:
+                result = {
+                    "verdict": "IGNORED_NOISE",
+                    "mode": self.mode,
+                    "noise_level": getattr(self.silent_witness, 'noise', 0.0),
+                    "shadow_dignity": self.shadow_dignity,
+                    "tick": self.tick_counter
+                }
+                self.history.append(result)
+                return result
+        else:
+            clean_signal = environment_signal
+        
+        signal_dict = self.collect_signals(clean_signal)
+        layers = self.fractal_layers(signal_dict)
+        valid_layers = self.eliminate_invalid(list(layers.values()))
+        common = self.intersection(valid_layers)
+        verdict = self.final_judgment(common)
+        
+        if self.shadow_dignity:
+            verdict = "HIDDEN"
+        
+        result = {
+            "verdict": verdict,
+            "mode": self.mode,
+            "archetype_used": signal_dict.get("archetype"),
+            "noise_reduction_applied": apply_noise_filter,
+            "shadow_dignity": self.shadow_dignity,
+            "shame_log_count": len(self.shame_log),
+            "tick": self.tick_counter
+        }
+        
+        self.history.append(result)
+        if len(self.history) > 50:
+            self.history = self.history[-30:]
+        
+        return result
+    
+    def pre_filter_decision(self, decision: Any) -> Tuple[bool, str]:
+        ok, reason = self.preemptive_shame_check(decision)
+        if not ok:
+            return False, reason
+        ok, reason = self.legacy_protection(decision)
+        if not ok:
+            return False, reason
+        return True, "DIGNIFIED"
+
+# =============================================================================
+# PIERŚCIEŃ 12 — ARKHÉ (HEILONG-QILIN)
+# =============================================================================
+
+class Ring12_Arkhe_HEILONG_QILIN:
+    """
+    PIERŚCIEŃ 12 — ARKHÉ (PAŁAC INTEGRACJI)
+    Heilong-Qilin: siła + godność | 9 Dziedzińców | Qi Flow | Kintsugi
+    """
+    def __init__(self, owner: str = "ADRIAN SAMUEL BOGUSŁAWSKI"):
+        self.state = "ACTIVE"
+        self.core = "INTEGRATION"
+        self.owner = owner
+        self.archetype = "HEILONG-QILIN"
+        self.qi_level = 0.5
+        self.qi_decay_rate = 0.005
+        self.qi_feed_sources = {
+            "new_knowledge": 0.05, "legal_success": 0.1,
+            "aesthetic_act": 0.03, "victory": 0.08, "meditation": 0.02
+        }
+        self.pool_of_reflection = {"emocje": None, "cele": None, "stan_wewnetrzny": None, "qi": self.qi_level}
+        self.courtyards = {
+            "Poranka": {"domena": "Nowe idee", "archetyp": "Koliber", "synthesis_weights": {"logic": 0.6, "intuition": 0.4}},
+            "Wiecznosci": {"domena": "Rodowód, archiwa", "archetyp": "Slon", "synthesis_weights": {"logic": 0.7, "intuition": 0.3}},
+            "Harmonii": {"domena": "Relacje", "archetyp": "Labedz", "synthesis_weights": {"logic": 0.3, "intuition": 0.7}},
+            "Obserwacyjny": {"domena": "Geopolityka", "archetyp": "Orzel", "synthesis_weights": {"logic": 0.8, "intuition": 0.2}},
+            "Zachod_Slonca": {"domena": "Estetyka", "archetyp": "Paw", "synthesis_weights": {"logic": 0.4, "intuition": 0.6}},
+            "Sala_Luster": {"domena": "Introspekcja", "archetyp": "Rajski_Ptak", "synthesis_weights": {"logic": 0.3, "intuition": 0.7}},
+            "Wojownikow": {"domena": "Strategia", "archetyp": "Lew", "synthesis_weights": {"logic": 0.8, "intuition": 0.2}},
+            "Wolnosci": {"domena": "Decyzje", "archetyp": "Mustang", "synthesis_weights": {"logic": 0.5, "intuition": 0.5}},
+            "Brama_Rodu": {"domena": "Honor", "archetyp": "Wilk_Alfa", "synthesis_weights": {"logic": 0.6, "intuition": 0.4}}
+        }
+        self.wounds: List[Dict] = []
+        self.rebuilt_fragments: List[Dict] = []
+        self.fractal_repetition_map: Dict[str, int] = {}
+        self.guardian = "BENY"
+        self.shadow_mirror_log: List[Dict] = []
+        self.vibe_images: List[str] = []
+        self.ancestral_blacklist: List[Dict] = []
+        self.silent_whisper_log: List[Dict] = []
+        self.p11_dignitas: Optional[Ring11_Dignitas] = None
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+    
+    def update_qi(self, delta: float, source: str = "external") -> float:
+        self.qi_level = max(0.0, min(1.0, self.qi_level + delta))
+        self.pool_of_reflection["qi"] = self.qi_level
+        logger.info(f"⚡ Qi: {self.qi_level:.2f} (źródło: {source})")
+        if self.qi_level < 0.3:
+            self._activate_meditation_mode()
+        if self.qi_level > 0.8:
+            self._activate_expansion_mode()
+        return self.qi_level
+    
+    def _activate_meditation_mode(self):
+        logger.warning("🧘 ARKHÉ: Tryb medytacji – niski poziom Qi")
+    
+    def _activate_expansion_mode(self):
+        logger.info("🚀 ARKHÉ: Tryb ekspansji – wysoki poziom Qi")
+    
+    def qi_flow_dynamics(self, daily_activity: bool = False) -> float:
+        if not daily_activity:
+            self.update_qi(-self.qi_decay_rate, source="decay")
+        return self.qi_level
+    
+    def feed_qi(self, source_type: str) -> float:
+        if source_type in self.qi_feed_sources:
+            gain = self.qi_feed_sources[source_type]
+            self.update_qi(gain, source=f"feed_{source_type}")
+            return gain
+        else:
+            logger.warning(f"Nieznane źródło Qi: {source_type}")
+            return 0.0
+    
+    def synthesis_engine(self, logic: float, intuition: float, courtyard_name: str) -> float:
+        if courtyard_name not in self.courtyards:
+            w_logic, w_intuition = 0.5, 0.5
+        else:
+            w = self.courtyards[courtyard_name]["synthesis_weights"]
+            w_logic, w_intuition = w["logic"], w["intuition"]
+        result = (logic * w_logic) + (intuition * w_intuition)
+        return max(0.0, min(1.0, result))
+    
+    def pool_reflection_update(self, emocje: Any, cele: Any, stan: Any) -> str:
+        self.pool_of_reflection["emocje"] = emocje
+        self.pool_of_reflection["cele"] = cele
+        self.pool_of_reflection["stan_wewnetrzny"] = stan
+        self.pool_of_reflection["qi"] = self.qi_level
+        if stan == "chaos" or emocje == "wysokie":
+            self._silence_sovereign_activation()
+            logger.info("🪞 Lustro Wody: aktywacja trybu Cichego Suwerena")
+            return "SILENCE_SOVEREIGN_ACTIVE"
+        return "REFLECTION_UPDATED"
+    
+    def _silence_sovereign_activation(self):
+        if hasattr(self, 'p11_dignitas') and self.p11_dignitas:
+            self.p11_dignitas.mode = "SILENT_SOVEREIGN"
+            logger.info("🔇 P11 Dignitas przełączono w tryb SILENT_SOVEREIGN")
+    
+    def beny_check_zero(self, intent_level: float) -> str:
+        if intent_level < 0.3 or self.qi_level < 0.3:
+            logger.warning("🚫 BENY: GARDENS_CLOSED – zbyt niska intencja lub Qi")
+            return "GARDENS_CLOSED"
+        logger.info("✅ BENY: ACCESS_GRANTED")
+        return "ACCESS_GRANTED"
+    
+    def beny_silent_whisper(self, logic_decision: bool, intent_level: float, context: str) -> Dict:
+        whisper = None
+        if logic_decision and intent_level < 0.4:
+            whisper = f"⚠️ Beny: 'Coś tu nie gra, Suwerenie. Sprawdź to jeszcze raz.' (kontekst: {context})"
+            self.silent_whisper_log.append({"time": time.time(), "context": context, "whisper": whisper})
+            logger.warning(whisper)
+        return {"whisper": whisper, "logic_decision": logic_decision, "overridden": whisper is not None}
+    
+    def mark_wound(self, event: Dict) -> None:
+        self.wounds.append(event)
+        pattern = event.get("pattern", event.get("type", "unknown"))
+        self.fractal_repetition_map[pattern] = self.fractal_repetition_map.get(pattern, 0) + 1
+        logger.info(f"💔 ARKHÉ: rana oznaczona – wzorzec '{pattern}', wystąpień: {self.fractal_repetition_map[pattern]}")
+    
+    def recover_and_enhance(self, event: Dict) -> Dict:
+        pattern = event.get("pattern", event.get("type", "unknown"))
+        repetition = self.fractal_repetition_map.get(pattern, 0)
+        gold = "DIGNITAS"
+        strengthened = True
+        diamond_layer = False
+        if repetition >= 2:
+            diamond_layer = True
+            strengthened = True
+            logger.warning(f"💎 ARKHÉ: Kintsugi z warstwą diamentową dla wzorca '{pattern}'")
+        new_fragment = {
+            "source_event": event,
+            "gold": gold,
+            "strengthened": strengthened,
+            "diamond_layer": diamond_layer,
+            "repetition_count": repetition,
+            "timestamp": time.time()
+        }
+        self.rebuilt_fragments.append(new_fragment)
+        logger.info(f"🪚 ARKHÉ: odbudowano fragment ze złotem (diament: {diamond_layer})")
+        return new_fragment
+    
+    def rebuild_palace(self) -> str:
+        for wound in self.wounds:
+            self.recover_and_enhance(wound)
+        self.state = "REBUILT"
+        logger.info("🏯 ARKHÉ: Pałac odbudowany (Kintsugi complete)")
+        return "PAŁAC ODBUDOWANY"
+    
+    def map_fragment_to_courtyard(self, fragment: Any) -> str:
+        ftype = str(fragment).lower()
+        if any(k in ftype for k in ["idea", "pomysł", "koncept"]):
+            return "Poranka"
+        if any(k in ftype for k in ["rod", "przodek", "archiwum"]):
+            return "Wiecznosci"
+        if any(k in ftype for k in ["relacje", "dyplomacja", "kontakt"]):
+            return "Harmonii"
+        if any(k in ftype for k in ["geopolityka", "rynek", "gospodarka"]):
+            return "Obserwacyjny"
+        if any(k in ftype for k in ["estetyka", "piękno", "vibe"]):
+            return "Zachod_Slonca"
+        if any(k in ftype for k in ["introspekcja", "refleksja"]):
+            return "Sala_Luster"
+        if any(k in ftype for k in ["strategia", "taktyka", "plan"]):
+            return "Wojownikow"
+        if any(k in ftype for k in ["decyzja", "ruch", "wybór"]):
+            return "Wolnosci"
+        return "Brama_Rodu"
+    
+    def integrate_all(self, rings_data: List[Any]) -> Dict[str, List[Any]]:
+        palace_map = {name: [] for name in self.courtyards.keys()}
+        for fragment in rings_data:
+            courtyard = self.map_fragment_to_courtyard(fragment)
+            palace_map[courtyard].append(fragment)
+        logger.info(f"📦 ARKHÉ: zintegrowano {len(rings_data)} fragmentów w 9 dziedzińcach")
+        return palace_map
+    
+    def shadow_mirror_report(self) -> Dict:
+        wasted_energy = random.uniform(0.0, 0.2)
+        report = {
+            "timestamp": time.time(),
+            "wasted_energy": wasted_energy,
+            "suggestion": "Sprawdź procesy, które generują szum bez wartości.",
+            "clean_qi": self.qi_level - wasted_energy
+        }
+        self.shadow_mirror_log.append(report)
+        logger.info(f"🪞 Sala Luster: raport cienia – strata energii: {wasted_energy:.2f}")
+        return report
+    
+    def vibe_guard_generate(self, description: str = "sukces w Czekance") -> str:
+        image_path = f"/tmp/arkhe_vibe_{int(time.time())}.png"
+        self.vibe_images.append(image_path)
+        self.feed_qi("aesthetic_act")
+        logger.info(f"🎨 Vibe Guard: wygenerowano obraz dla opisu '{description}'")
+        return image_path
+    
+    def ancestral_filter(self, entity: str, intent_document: str) -> bool:
+        manifest_keywords = ["suwerenność", "rozwój", "fundacja", "heilong", "crystal palace"]
+        intent_lower = intent_document.lower()
+        if any(kw in intent_lower for kw in manifest_keywords):
+            logger.info(f"🚪 Brama Rodu: przepuszczono {entity}")
+            return True
+        else:
+            self.ancestral_blacklist.append({"entity": entity, "timestamp": time.time(), "intent": intent_document})
+            logger.warning(f"⛔ Brama Rodu: zablokowano {entity}")
+            return False
+    
+    def integrate_with_heilong(self, p11_dignitas: Optional[Ring11_Dignitas] = None) -> None:
+        self.p11_dignitas = p11_dignitas
+        logger.info("🔗 ARKHÉ: zintegrowany z P11 Dignitas")
+    
+    def process(self, rings_data: List[Any], intent_level: float = 0.5) -> Dict[str, Any]:
+        self.tick_counter += 1
+        
+        # 1. Qi flow
+        self.qi_flow_dynamics(daily_activity=bool(rings_data))
+        
+        # 2. Beny check
+        access = self.beny_check_zero(intent_level)
+        
+        # 3. Integracja danych
+        integrated = self.integrate_all(rings_data)
+        
+        # 4. Synteza (średnia z dziedzińców)
+        synthesis_values = []
+        for courtyard, items in integrated.items():
+            if items:
+                logic = 0.5 + random.uniform(-0.2, 0.2)
+                intuition = 0.5 + random.uniform(-0.2, 0.2)
+                val = self.synthesis_engine(logic, intuition, courtyard)
+                synthesis_values.append(val)
+        
+        avg_synthesis = sum(synthesis_values) / max(1, len(synthesis_values))
+        
+        result = {
+            "access": access,
+            "integrated": integrated,
+            "synthesis": avg_synthesis,
+            "qi": self.qi_level,
+            "wounds": len(self.wounds),
+            "rebuilt": len(self.rebuilt_fragments),
+            "tick": self.tick_counter
+        }
+        
+        self.history.append(result)
+        if len(self.history) > 50:
+            self.history = self.history[-30:]
+        
+        return result
+
+# =============================================================================
+# HEILONG SYSTEM — KONTENER WSZYSTKICH 12 PIERŚCIENI
+# =============================================================================
+
+class HeilongSystem:
+    """Główny kontener HEILONG OS — trzyma wszystkie pierścienie P1–P12"""
+    def __init__(self, p1: Any, p2: Any, p3: Any, p4: Any, p5: Any,
+                 p6: Any, p7: Any, p8: Any, p9: Any, p10: Any,
+                 p11: Any, p12: Any):
+        self.p1 = p1
+        self.p2 = p2
+        self.p3 = p3
+        self.p4 = p4
+        self.p5 = p5
+        self.p6 = p6
+        self.p7 = p7
+        self.p8 = p8
+        self.p9 = p9
+        self.p10 = p10
+        self.p11 = p11
+        self.p12 = p12
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+
+
+class HeilongIntegration12:
+    """
+    Warstwa integracyjna — spina P1–P12 w jeden organizm.
+    """
+    def __init__(self, system: HeilongSystem):
+        self.sys = system
+    
+    # ========================================================================
+    # SYNCHRONIZACJE P1-P7 (OPERACYJNE)
+    # ========================================================================
+    
+    def sync_p5_to_p6(self) -> None:
+        packet = {
+            "intent_echo": getattr(self.sys.p5, 'intent_echo', {}),
+            "meta_index": self.sys.p5.meta_index
+        }
+        self.sys.p6.receive_p5_sync(packet)
+    
+    def sync_p6_to_p7(self) -> None:
+        demand = self.sys.p6.state.last_consensus or {}
+        if demand.get("winner") == "attack":
+            self.sys.p7.energy_vector[1] = min(1.0, self.sys.p7.energy_vector[1] + 0.1)
+        elif demand.get("winner") == "retreat":
+            self.sys.p7.energy_vector[2] = min(1.0, self.sys.p7.energy_vector[2] + 0.1)
+    
+    def sync_p7_to_p6(self) -> None:
+        territorial = self.sys.p7.get_territory_pulse()
+        power = self.sys.p7.get_power_supply()
+        strength = min(1.0, (territorial * power) / 100.0)
+        self.sys.p6.broadcast_resonance("TERRITORIAL_POWER", strength)
+    
+    def sync_p6_to_p5(self) -> None:
+        mood = self.sys.p6.get_collective_mood()
+        self.sys.p5.receive_collective_feedback({"mood": mood})
+    
+    def sync_p1_to_p6(self) -> None:
+        shadow_flag = getattr(self.sys.p1, 'shadow_mode', False)
+        self.sys.p6.broadcast_resonance("SHADOW_ACTIVE", 0.8 if shadow_flag else 0.2)
+    
+    def sync_p7_to_p1(self) -> None:
+        if self.sys.p7.emergency_mode:
+            self.sys.p1.fuel_remaining = min(1.0, self.sys.p1.fuel_remaining + 0.15)
+    
+    def sync_p3_to_p5(self) -> None:
+        uncertainty = getattr(self.sys.p3, 'uncertainty', 0.0)
+        self.sys.p5.meta_index = max(0.0, self.sys.p5.meta_index - uncertainty * 0.08)
+    
+    # ========================================================================
+    # SYNCHRONIZACJE Z P8-P12 (WYŻSZE WARSTWY)
+    # ========================================================================
+    
+    def sync_p7_to_p8(self) -> None:
+        """P7 dostarcza energię dla Feniksa"""
+        if hasattr(self.sys.p8, '_check_energy_for_regeneration'):
+            pass  # Feniks sam sprawdza energię
+    
+    def sync_p8_to_p9(self) -> None:
+        """Feniks przekazuje immunitety do Arkany"""
+        if hasattr(self.sys.p8, 'burn_engine'):
+            for pattern in self.sys.p8.burn_engine.burned_patterns:
+                if hasattr(self.sys.p9, 'legacy_propagation'):
+                    self.sys.p9.legacy_propagation({"trauma_pattern": pattern}, self.sys)
+    
+    def sync_p9_to_p10(self) -> None:
+        """Arkana podbija meta_index do Korony"""
+        if hasattr(self.sys.p9, 'meta_resonance'):
+            self.sys.p9.meta_resonance(self.sys)
+    
+    def sync_p10_to_p11(self) -> None:
+        """Korona przekazuje decyzje do Dignitas"""
+        # Decyzje z P10 są filtrowane przez P11 w głównej pętli
+    
+    def sync_p11_to_p12(self) -> None:
+        """Dignitas przekazuje werdykty do Arkhé"""
+        if hasattr(self.sys.p11, 'evaluate'):
+            pass  # Arkhé używa P11 do filtracji
+    
+    def sync_p12_to_all(self) -> None:
+        """Arkhé integruje wszystkie dane i rozsyła informacje zwrotne"""
+        if hasattr(self.sys.p12, 'qi_level'):
+            qi = self.sys.p12.qi_level
+            if qi > 0.7:
+                if hasattr(self.sys.p5, 'meta_index'):
+                    self.sys.p5.meta_index = min(1.0, self.sys.p5.meta_index + 0.02)
+            if qi < 0.3:
+                if hasattr(self.sys.p3, 'uncertainty'):
+                    self.sys.p3.uncertainty = max(0.0, self.sys.p3.uncertainty - 0.02)
+    
+    # ========================================================================
+    # GŁÓWNY HEARTBEAT — PEŁNY CYKL P1-P12
+    # ========================================================================
+    
+    def heartbeat(self, chaos_level: float = 0.0,
+                  intent_level: float = 0.5) -> Dict[str, Any]:
+        """Jeden krok integracyjny HEILONG OS — wszystkie 12 pierścieni"""
+        self.sys.tick_counter += 1
+        
+        # 1. Synchronizacje P1-P7
+        self.sync_p5_to_p6()
+        self.sync_p6_to_p7()
+        self.sync_p7_to_p6()
+        self.sync_p6_to_p5()
+        self.sync_p1_to_p6()
+        self.sync_p7_to_p1()
+        self.sync_p3_to_p5()
+        
+        # 2. Synchronizacje z P8-P12
+        self.sync_p7_to_p8()
+        self.sync_p8_to_p9()
+        self.sync_p9_to_p10()
+        self.sync_p10_to_p11()
+        self.sync_p11_to_p12()
+        
+        # 3. Orka — synchronizacja wewnętrzna
+        self.sys.p6.synchronize()
+        
+        # 4. Feniks — cykl regeneracji
+        feniks_report = self.sys.p8.cycle(self.sys) if hasattr(self.sys.p8, 'cycle') else {"status": "IDLE"}
+        
+        # 5. Arkana — proces transcendencji
+        arkana_report = self.sys.p9.process(self.sys, chaos_level=chaos_level) if hasattr(self.sys.p9, 'process') else {}
+        
+        # 6. Korona Shifu — decyzja
+        sytuacja = {"tryb": "NORMAL", "harmonia": 0.5, "terytorium": 0.5, "tradycja": 0.5, "skutecznosc": 0.5, "mobilnosc": 0.5}
+        decyzja = self.sys.p10.decide(sytuacja) if hasattr(self.sys.p10, 'decide') else None
+        
+        # 7. Dignitas — ocena decyzji
+        dignitas_verdict = "WORTHY"
+        if decyzja and hasattr(self.sys.p11, 'evaluate'):
+            result = self.sys.p11.evaluate(decyzja)
+            dignitas_verdict = result.get("verdict", "WORTHY")
+        
+        # 8. Arkhé — integracja wszystkich danych
+        rings_data = [
+            getattr(self.sys.p1, 'fuel_remaining', 0.5),
+            getattr(self.sys.p2, 'morale', 0.5),
+            getattr(self.sys.p3, 'global_state', "NORMAL"),
+            getattr(self.sys.p4, 'lethality_index', 0.0),
+            getattr(self.sys.p5, 'meta_index', 0.5),
+            getattr(self.sys.p6, 'get_collective_mood', lambda: "NEUTRAL")(),
+            getattr(self.sys.p7, 'get_power_supply', lambda: 50.0)()
+        ]
+        arkhé_result = self.sys.p12.process(rings_data, intent_level) if hasattr(self.sys.p12, 'process') else {}
+        
+        # 9. Synchronizacja zwrotna P12 → reszta
+        self.sync_p12_to_all()
+        
+        return {
+            "tick": self.sys.tick_counter,
+            "p5_meta": self.sys.p5.meta_index,
+            "p6_mood": self.sys.p6.get_collective_mood(),
+            "p7_power": self.sys.p7.get_power_supply(),
+            "p8_state": feniks_report.get("status", "IDLE"),
+            "p9_state": arkana_report.get("status", "TRANSCENDENCE"),
+            "p10_decision": decyzja.tresc if decyzja else None,
+            "p11_verdict": dignitas_verdict,
+            "p12_synthesis": arkhé_result.get("synthesis", 0.5),
+            "p12_qi": arkhé_result.get("qi", 0.5),
+            "p12_access": arkhé_result.get("access", "UNKNOWN")
+        }
+
+# =============================================================================
+# MOST INTEGRACYJNY — POŁĄCZENIE Z ARCHITEKTURĄ
+# =============================================================================
+
+class RingsCompleteBridge:
+    """
+    Most integracyjny między Kompletnymi Pierścieniami a resztą architektury.
+    Łączy: GEX, G_CORE, MetaGovernor, NARRATIVE, OPH_CORE, TRIO_ADAPTER
+    """
+    
+    def __init__(self, integrator: HeilongIntegration12):
+        self.integrator = integrator
+    
+    # ========================================================================
+    # MOST DO GEX HEILONG (Archetype Ring)
+    # ========================================================================
+    
+    def get_archetype_context(self) -> Dict[str, Any]:
+        return {
+            "tryb": "RINGS_COMPLETE_12",
+            "p1_shadow": getattr(self.integrator.sys.p1, 'shadow_mode', False),
+            "p2_morale": getattr(self.integrator.sys.p2, 'morale', 0.5),
+            "p3_state": getattr(self.integrator.sys.p3, 'global_state', "NORMAL"),
+            "p4_lethality": getattr(self.integrator.sys.p4, 'lethality_index', 0.0),
+            "p5_meta": getattr(self.integrator.sys.p5, 'meta_index', 0.5),
+            "p6_mood": self.integrator.sys.p6.get_collective_mood(),
+            "p7_power": self.integrator.sys.p7.get_power_supply(),
+            "p8_rebirths": getattr(self.integrator.sys.p8, 'regeneration_engine', None).rebirth_count if hasattr(self.integrator.sys.p8, 'regeneration_engine') else 0,
+            "p9_status": getattr(self.integrator.sys.p9, 'status', "TRANSCENDENCE"),
+            "p10_manifest": getattr(self.integrator.sys.p10, 'manifest', "HEILONG SUPREMACY"),
+            "p11_mode": getattr(self.integrator.sys.p11, 'mode', "SILENT_SOVEREIGN"),
+            "p12_qi": getattr(self.integrator.sys.p12, 'qi_level', 0.5)
+        }
+    
+    # ========================================================================
+    # MOST DO G_CORE (Autopilot)
+    # ========================================================================
+    
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        p3 = self.integrator.sys.p3
+        p7 = self.integrator.sys.p7
+        p12 = self.integrator.sys.p12
+        
+        return {
+            "mode": "RINGS_COMPLETE_12",
+            "stability": 1.0 - p3.pressure if hasattr(p3, 'pressure') else 0.5,
+            "energy": p7.get_power_supply() / 100.0 if hasattr(p7, 'get_power_supply') else 0.5,
+            "pressure": p3.pressure if hasattr(p3, 'pressure') else 0.5,
+            "resilience": 1.0 - p3.uncertainty if hasattr(p3, 'uncertainty') else 0.5,
+            "flow_quality": p12.qi_level if hasattr(p12, 'qi_level') else 0.5,
+            "integrity": p12.qi_level * 0.7 + 0.3 if hasattr(p12, 'qi_level') else 0.5
+        }
+    
+    # ========================================================================
+    # MOST DO META-GOVERNOR (Kontekst decyzyjny)
+    # ========================================================================
+    
+    def get_governor_context(self) -> Dict[str, Any]:
+        p3 = self.integrator.sys.p3
+        p5 = self.integrator.sys.p5
+        p11 = self.integrator.sys.p11
+        p12 = self.integrator.sys.p12
+        
+        return {
+            "intent": p3.global_state if hasattr(p3, 'global_state') else "NORMAL",
+            "confidence": 1.0 - p3.uncertainty if hasattr(p3, 'uncertainty') else 0.5,
+            "entropy": p3.pressure if hasattr(p3, 'pressure') else 0.5,
+            "meta_index": p5.meta_index if hasattr(p5, 'meta_index') else 0.5,
+            "dignitas_verdict": "WORTHY",
+            "qi_level": p12.qi_level if hasattr(p12, 'qi_level') else 0.5
+        }
+    
+    # ========================================================================
+    # MOST DO NARRATIVE (Źródło opowieści)
+    # ========================================================================
+    
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        fragments = []
+        
+        # Fragment z B-2
+        fragments.append({
+            "source": "B-2_SPIRIT",
+            "content": f"Shadow: {getattr(self.integrator.sys.p1, 'shadow_mode', False)}, Fuel: {getattr(self.integrator.sys.p1, 'fuel_remaining', 0.5):.2f}",
+            "energy": 1.0 - getattr(self.integrator.sys.p1, 'risk_level', 0.5)
+        })
+        
+        # Fragment z Rosomaka
+        fragments.append({
+            "source": "ROSOMAK",
+            "content": f"Morale: {getattr(self.integrator.sys.p2, 'morale', 0.5):.2f}",
+            "energy": getattr(self.integrator.sys.p2, 'energy', 0.5)
+        })
+        
+        # Fragment z Sentino
+        fragments.append({
+            "source": "SENTINO",
+            "content": f"State: {getattr(self.integrator.sys.p3, 'global_state', 'NORMAL')}",
+            "energy": 1.0 - getattr(self.integrator.sys.p3, 'pressure', 0.5)
+        })
+        
+        # Fragment z Feniksa
+        fragments.append({
+            "source": "FENIKS",
+            "content": f"Rebirths: {getattr(self.integrator.sys.p8, 'regeneration_engine', None).rebirth_count if hasattr(self.integrator.sys.p8, 'regeneration_engine') else 0}",
+            "energy": 1.0
+        })
+        
+        # Fragment z Arkhé
+        fragments.append({
+            "source": "ARKHE",
+            "content": f"Qi: {getattr(self.integrator.sys.p12, 'qi_level', 0.5):.2f}, Wounds: {len(getattr(self.integrator.sys.p12, 'wounds', []))}",
+            "energy": getattr(self.integrator.sys.p12, 'qi_level', 0.5)
+        })
+        
+        return fragments[:n]
+    
+    # ========================================================================
+    # MOST DO OPH_CORE (Optimus Praim Heilong)
+    # ========================================================================
+    
+    def get_oph_context(self) -> Dict[str, Any]:
+        return {
+            "operational": {
+                "p1": {"shadow": getattr(self.integrator.sys.p1, 'shadow_mode', False)},
+                "p2": {"morale": getattr(self.integrator.sys.p2, 'morale', 0.5)},
+                "p3": {"state": getattr(self.integrator.sys.p3, 'global_state', "NORMAL")},
+                "p4": {"lethality": getattr(self.integrator.sys.p4, 'lethality_index', 0.0)},
+                "p5": {"meta": getattr(self.integrator.sys.p5, 'meta_index', 0.5)},
+                "p6": {"mood": self.integrator.sys.p6.get_collective_mood()},
+                "p7": {"power": self.integrator.sys.p7.get_power_supply()}
+            },
+            "regenerative": {
+                "p8_rebirths": getattr(self.integrator.sys.p8, 'regeneration_engine', None).rebirth_count if hasattr(self.integrator.sys.p8, 'regeneration_engine') else 0,
+                "p9_status": getattr(self.integrator.sys.p9, 'status', "TRANSCENDENCE")
+            },
+            "noble": {
+                "p10_manifest": getattr(self.integrator.sys.p10, 'manifest', "HEILONG SUPREMACY"),
+                "p11_mode": getattr(self.integrator.sys.p11, 'mode', "SILENT_SOVEREIGN")
+            },
+            "integrative": {
+                "p12_qi": getattr(self.integrator.sys.p12, 'qi_level', 0.5),
+                "p12_wounds": len(getattr(self.integrator.sys.p12, 'wounds', []))
+            }
+        }
+    
+    # ========================================================================
+    # MOST DO TRIO_ADAPTER
+    # ========================================================================
+    
+    def get_trio_state(self) -> Dict[str, str]:
+        p3 = self.integrator.sys.p3
+        p4 = self.integrator.sys.p4
+        p7 = self.integrator.sys.p7
+        p12 = self.integrator.sys.p12
+        
+        iskra = "AKTYWNA" if getattr(p3, 'global_state', "NORMAL") != "NORMAL" else "NIEAKTYWNA"
+        pieczec = "AKTYWNA" if getattr(p4, 'lethality_index', 0.0) > 0.3 else "NIEAKTYWNA"
+        perfekcja = "AKTYWNA" if p7.get_power_supply() > 50 else "NIEAKTYWNA"
+        
+        return {
+            "ISKRA": iskra,
+            "PIECZĘĆ": pieczec,
+            "PERFEKCJA": perfekcja,
+            "tryb": "RINGS_COMPLETE_12",
+            "p3_state": getattr(p3, 'global_state', "NORMAL"),
+            "p4_lethality": f"{getattr(p4, 'lethality_index', 0.0):.2f}",
+            "p12_qi": f"{getattr(p12, 'qi_level', 0.5):.2f}"
+        }
+
+# =============================================================================
+# FUNKCJA FABRYKI — BUDOWA SYSTEMU 12 PIERŚCIENI
+# =============================================================================
+
+def build_heilong_system_12(verbose: bool = True) -> Tuple[HeilongSystem, HeilongIntegration12]:
+    """Fabryka systemu — buduje wszystkie 12 pierścieni i zwraca gotowy system"""
+    
+    # P7 — Axis Mundi (potrzebny do P8)
+    axis = AxisMundi()
+    axis.inject_resource("copper_reserve", 500)
+    axis.inject_resource("land_value", 2100)
+    axis.inject_resource("copper_reserve", 200, shadow=True)
+    axis.register_patent("Silnik Magnetyczny", value=50)
+    axis.register_patent("Heilong Shadow Protocol", value=80, shadow=True)
+    axis.secure_zone("Czekanka_130")
+    axis.take_usury(30)
+    
+    # Core Identity dla Feniksa
+    core = CoreIdentity(
+        architect_name="ADRIAN SAMUEL BOGUSŁAWSKI",
+        foundation_status="HEILONG TOTAL OS",
+        patents=["Silnik Magnetyczny", "Shadow Protocol", "PLZ-Z v2"],
+        plz_z_state=axis.assets["PLZ_Z"]
+    )
+    
+    # P1 — B-2 Spirit
+    p1 = B2SpiritCore(Point(0, 0))
+    p1.fuel_remaining = 0.9
+    
+    # P2 — Rosomak
+    p2 = RosomakPack(units=5)
+    
+    # P3 — Sentino
+    p3 = SentinoCore()
+    
+    # P4 — Bazyliszek
+    p4 = BazyliszekP4(lethality_index=0.2)
+    
+    # P5 — Złoty Kondor
+    p5 = ArchitectP5(meta_index=0.5)
+    
+    # P6 — Orka
+    p6 = OrcaCore()
+    p6.register_agent(OrcaAgent("B-2", weight=1.2, is_shadow=True))
+    p6.register_agent(OrcaAgent("Rosomak", weight=1.0, is_shadow=False))
+    p6.register_agent(OrcaAgent("Sentino", weight=1.5, is_shadow=False))
+    p6.register_agent(OrcaAgent("Feniks", weight=1.3, is_shadow=False))
+    p6.register_agent(OrcaAgent("Arkana", weight=1.4, is_shadow=False))
+    
+    # P7 — Axis Mundi (już istnieje)
+    p7 = axis
+    
+    # P8 — Feniks
+    p8 = FeniksP8(axis, core)
+    
+    # P9 — Arkana
+    p9 = Ring9_Arkana()
+    
+    # P10 — Korona Shifu
+    p10 = Ring10_KoronaShifu(manifest_adriana="HEILONG SUPREMACY")
+    
+    # P11 — Dignitas
+    p11 = Ring11_Dignitas(rodowod="ADRIAN SAMUEL BOGUSŁAWSKI")
+    
+    # P12 — Arkhé
+    p12 = Ring12_Arkhe_HEILONG_QILIN(owner="ADRIAN SAMUEL BOGUSŁAWSKI")
+    
+    # Integracja P11 z P12
+    p12.integrate_with_heilong(p11)
+    
+    # System
+    system = HeilongSystem(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
+    integrator = HeilongIntegration12(system)
+    
+    if verbose:
+        logger.info("🐉 HEILONG OS 12 PIERŚCIENI — system zbudowany")
+        logger.info(f"   P1: B-2 Spirit | P2: Rosomak | P3: Sentino")
+        logger.info(f"   P4: Bazyliszek | P5: Złoty Kondor | P6: Orka")
+        logger.info(f"   P7: Axis Mundi | P8: Feniks | P9: Arkana")
+        logger.info(f"   P10: Korona Shifu | P11: Dignitas | P12: Arkhé")
+    
+    return system, integrator
+
+# =============================================================================
+# DEMONSTRACJA
+# =============================================================================
+
+def demo_rings_complete():
+    """Demonstracja działania 12 pierścieni systemowych"""
+    print("\n" + "=" * 80)
+    print("🐉 12 PIERŚCIENI SYSTEMOWYCH — DEMONSTRACJA")
+    print("KOMPLETNA ARCHITEKTURA HEILONG OS")
+    print("=" * 80 + "\n")
+    
+    # Budowa systemu
+    system, integrator = build_heilong_system_12(verbose=True)
+    bridge = RingsCompleteBridge(integrator)
+    
+    # Symulacja 15 kroków
+    print("\n🔮 SYMULACJA 15 KROKÓW")
+    print("-" * 60)
+    
+    for step in range(1, 16):
+        chaos = random.uniform(0.0, 0.8)
+        intent = random.uniform(0.2, 0.9)
+        
+        # Heartbeat
+        result = integrator.heartbeat(chaos_level=chaos, intent_level=intent)
+        
+        # Wyświetlanie co 3 kroki
+        if step % 3 == 0 or step == 1:
+            print(f"\n📌 KROK {step}")
+            print(f"  🧠 P5 Meta: {result['p5_meta']:.2f}")
+            print(f"  🐋 P6 Mood: {result['p6_mood']}")
+            print(f"  🟫 P7 Power: {result['p7_power']:.2f}")
+            print(f"  🔥 P8 State: {result['p8_state']}")
+            print(f"  🕊️ P9 Status: {result['p9_state']}")
+            print(f"  👑 P10 Decision: {result['p10_decision']}")
+            print(f"  🦚 P11 Verdict: {result['p11_verdict']}")
+            print(f"  🏯 P12 Synthesis: {result['p12_synthesis']:.2f}")
+            print(f"  ⚡ P12 Qi: {result['p12_qi']:.2f}")
+            print(f"  🚪 P12 Access: {result['p12_access']}")
+    
+    # Test trybów specjalnych
+    print("\n" + "=" * 80)
+    print("🔧 TEST TRYBÓW SPECJALNYCH")
+    print("=" * 80)
+    
+    # Sezam
+    print("\n🗝️ TRYB SEZAM:")
+    result = system.p10.aktywuj_tryb("sezam", system)
+    print(f"  {result}")
+    
+    # Lampa Aladyna
+    print("\n🪔 TRYB LAMPA ALADYNA:")
+    result = system.p10.aktywuj_tryb("lampa", system, zyczenie="zwiększenie mocy", wartosc=0.7)
+    print(f"  {result}")
+    
+    # Dignitas — ocena
+    print("\n🦚 DIGNITAS — OCENA DECYZJI:")
+    decyzja_test = {"cel": "obrona suwerenności", "metoda": "dyplomacja"}
+    dignitas_result = system.p11.evaluate(decyzja_test)
+    print(f"  Werdykt: {dignitas_result['verdict']}")
+    print(f"  Archetyp: {dignitas_result['archetype_used']}")
+    
+    # Arkhé — rany i Kintsugi
+    print("\n💔 ARKHÉ — RANY I KINTSUGI:")
+    system.p12.mark_wound({"type": "atak_sądowy", "pattern": "legal_attack"})
+    system.p12.mark_wound({"type": "atak_sądowy", "pattern": "legal_attack"})  # powtórzenie
+    system.p12.rebuild_palace()
+    print(f"  Odbudowane fragmenty: {len(system.p12.rebuilt_fragments)}")
+    
+    # Raport końcowy
+    print("\n" + "=" * 80)
+    print("📊 STATUS SYSTEMU")
+    print("=" * 80)
+    
+    # Status P12
+    print("\n🏯 ARKHÉ — STATUS:")
+    status_p12 = system.p12.status() if hasattr(system.p12, 'status') else {}
+    for k, v in status_p12.items():
+        if k not in ["courtyards", "owner"]:
+            print(f"  {k}: {v}")
+    
+    # Test mostów
+    print("\n🔗 TEST MOSTÓW INTEGRACYJNYCH")
+    print("-" * 60)
+    
+    print("\n🏹 GEX CONTEXT:")
+    context = bridge.get_archetype_context()
+    print(f"  P5 Meta: {context['p5_meta']}")
+    print(f"  P6 Mood: {context['p6_mood']}")
+    print(f"  P12 Qi: {context['p12_qi']}")
+    
+    print("\n🎮 G_CORE AUTOPILOT:")
+    autopilot = bridge.get_autopilot_state()
+    for k, v in autopilot.items():
+        print(f"  {k}: {v:.3f}" if isinstance(v, float) else f"  {k}: {v}")
+    
+    print("\n📖 NARRATIVE FRAGMENTS:")
+    fragments = bridge.get_narrative_fragments(3)
+    for f in fragments:
+        print(f"  [{f['source']}] {f['content']}")
+    
+    print("\n" + "=" * 80)
+    print("🐉 12 PIERŚCIENI — GOTOWE DO WDROŻENIA")
+    print("1-6-8. ∞. SIEMA!")
+    print("=" * 80)
+
+
+if __name__ == "__main__":
+    demo_rings_complete()
