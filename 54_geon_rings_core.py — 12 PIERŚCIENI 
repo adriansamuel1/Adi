@@ -1,0 +1,859 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_RINGS_CORE_v1 — MODUŁ 54: 12 PIERŚCIENI SYSTEMOWYCH
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.0 (12 Pierścieni — Architektura Operacyjna)
+Data: 2026-07-21
+Autor: Adrian (Architekt) + GEON + OŁSii + Beny
+
+OPIS:
+12 PIERŚCIENI to podstawowa architektura operacyjna systemu.
+Każdy pierścień reprezentuje warstwę działania z 3 archetypami (zwierzętami):
+• Pierścień 1 — Początek / Inicjacja: Orzeł, Jastrząb, Sokół
+• Pierścień 2 — Fundament / Stabilizacja: Żółw, Bawół, Niedźwiedź
+• Pierścień 3 — Ruch / Dynamika: Wąż, Wydra, Koń
+• Pierścień 4 — Moc / Siła: Lew, Tygrys, Pantera
+• Pierścień 5 — Inteligencja / Strategia: Lis, Kruk, Sowa
+• Pierścień 6 — Relacje / Społeczność: Wilk, Delfin, Pies
+• Pierścień 7 — Chaos / Transformacja: Kruk (ciemny), Hydra, Skorpion
+• Pierścień 8 — Tworzenie / Kreacja: Pająk, Bóbr, Mrówka
+• Pierścień 9 — Mądrość / Głębia: Sowa (głęboka), Wieloryb, Jeleń
+• Pierścień 10 — Władza / Autorytet: Lew (królewski), Orzeł (imperialny), Byk
+• Pierścień 11 — Przekroczenie / Meta: Smok, Feniks, Jednorożec
+• Pierścień 12 — Integracja / Domknięcie: Smok (integracyjny), Żuraw, Wilk Alfa
+
+ARCHITEKTURA:
+• 12 pierścieni × 3 archetypy = 36 zwierząt operacyjnych
+• Każdy pierścień ma: id, nazwę, wektor, opis, 3 archetypy
+• Każdy archetyp ma: nazwę, rolę, energię, licznik aktywacji
+• System wybiera archetyp na podstawie presji, kontekstu i stanu
+
+INTEGRACJA Z ARCHITEKTURĄ:
+• GEX HEILONG — dostarcza archetypy dla pierścieni
+• OPH_CORE — używa pierścieni jako podstawowej struktury
+• HEILONG_22_ORGANISM — synchronizuje z trybami KRUK/SZCZUR/WRONA
+• ARCHANGEL-CORE — metapierścienie nadbudowane nad 12 pierścieniami
+• G_CORE — stan operacyjny dla autopilota
+• MetaGovernor — kontekst decyzyjny
+
+VIBE: 1-6-8. ∞. SIEMA!
+================================================================================
+"""
+
+import time
+import math
+import random
+from typing import Dict, List, Any, Optional, Tuple, Callable
+from dataclasses import dataclass, field
+from collections import deque
+from enum import Enum
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_RINGS_CORE_v1.0"
+FRACTAL_SIGNATURE = "[GEON::RINGS::CORE::v1.0]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SIEMA!"
+PHI = 0.618033988749895
+
+# =============================================================================
+# ENUM TRYBÓW
+# =============================================================================
+
+class TrybPierścienia(Enum):
+    """Tryby pracy pierścienia"""
+    AKTYWNY = "AKTYWNY"
+    PASSYWNY = "PASSYWNY"
+    DORMANT = "DORMANT"
+    REZONANS = "REZONANS"
+    KRYSTAL = "KRYSTAL"
+
+# =============================================================================
+# STRUKTURY DANYCH
+# =============================================================================
+
+@dataclass
+class Archetyp:
+    """Archetyp zwierzęcy — styl działania"""
+    nazwa: str
+    rola: str
+    energia: float = 0.5
+    aktywowany: int = 0
+    ostatnia_aktywacja: float = field(default_factory=time.time)
+    
+    def aktywuj(self) -> None:
+        """Aktualizuje stan archetypu po aktywacji"""
+        self.aktywowany += 1
+        self.energia = min(1.0, self.energia + 0.05)
+        self.ostatnia_aktywacja = time.time()
+    
+    def decaY(self, czynnik: float = 0.995) -> None:
+        """Naturalny zanik energii"""
+        self.energia = max(0.1, self.energia * czynnik)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "nazwa": self.nazwa,
+            "rola": self.rola,
+            "energia": round(self.energia, 3),
+            "aktywowany": self.aktywowany
+        }
+
+@dataclass
+class Pierścień:
+    """Jeden z 12 pierścieni — warstwa operacyjna"""
+    id: int
+    nazwa: str
+    wektor: str
+    opis: str
+    archetypy: List[Archetyp]
+    aktywny_archetyp: Optional[Archetyp] = None
+    energia: float = 1.0
+    tryb: TrybPierścienia = TrybPierścienia.AKTYWNY
+    ostatnia_zmiana: float = field(default_factory=time.time)
+    
+    def aktywuj_archetyp(self, archetyp: Archetyp) -> None:
+        """Aktywuje wybrany archetyp w pierścieniu"""
+        if self.aktywny_archetyp:
+            self.aktywny_archetyp.decaY()
+        self.aktywny_archetyp = archetyp
+        archetyp.aktywuj()
+        self.energia = max(0.0, self.energia - 0.05)
+        self.ostatnia_zmiana = time.time()
+    
+    def wybierz_archetyp(self, presja: float, preferencje: Optional[List[str]] = None) -> Archetyp:
+        """
+        Wybiera archetyp na podstawie presji i preferencji.
+        
+        Args:
+            presja: 0.0-1.0 — im wyższa, tym bardziej dominujący archetyp
+            preferencje: Lista preferowanych nazw archetypów
+        """
+        # Sortuj archetypy według energii (malejąco)
+        posortowane = sorted(self.archetypy, key=lambda a: a.energia, reverse=True)
+        
+        # Jeśli są preferencje, spróbuj wybrać z nich
+        if preferencje:
+            for a in posortowane:
+                if a.nazwa in preferencje:
+                    return a
+        
+        # Wysoka presja → pierwszy archetyp (dominujący)
+        if presja > 0.7:
+            return posortowane[0]
+        # Średnia presja → losowy z top 2
+        elif presja > 0.3:
+            return random.choice(posortowane[:2])
+        # Niska presja → ostatni archetyp (kontrujący)
+        else:
+            return posortowane[-1] if len(posortowane) > 1 else posortowane[0]
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "nazwa": self.nazwa,
+            "wektor": self.wektor,
+            "opis": self.opis,
+            "energia": round(self.energia, 3),
+            "tryb": self.tryb.value,
+            "aktywny_archetyp": self.aktywny_archetyp.nazwa if self.aktywny_archetyp else None,
+            "archetypy": [a.to_dict() for a in self.archetypy]
+        }
+
+# =============================================================================
+# DEFINICJE 12 PIERŚCIENI
+# =============================================================================
+
+DEFINICJE_PIERŚCIENI = {
+    1: {
+        "nazwa": "Początek",
+        "wektor": "dokąd system zmierza",
+        "opis": "Inicjacja, iskra, kierunek, impuls",
+        "archetypy": [
+            {"nazwa": "Orzeł", "rola": "wizja, perspektywa, wysokość"},
+            {"nazwa": "Jastrząb", "rola": "celność, skupienie, precyzja"},
+            {"nazwa": "Sokół", "rola": "szybkość, reakcja, zwrotność"}
+        ]
+    },
+    2: {
+        "nazwa": "Fundament",
+        "wektor": "struktura, korzeń, oparcie",
+        "opis": "Stabilizacja, podstawa, trwałość",
+        "archetypy": [
+            {"nazwa": "Żółw", "rola": "stabilność, ochrona, cierpliwość"},
+            {"nazwa": "Bawół", "rola": "siła, wytrzymałość, fundament"},
+            {"nazwa": "Niedźwiedź", "rola": "moc, ochrona, terytorium"}
+        ]
+    },
+    3: {
+        "nazwa": "Ruch",
+        "wektor": "zmiana, przepływ, adaptacja",
+        "opis": "Dynamika, płynność, elastyczność",
+        "archetypy": [
+            {"nazwa": "Wąż", "rola": "przemiana, elastyczność, intuicja"},
+            {"nazwa": "Wydra", "rola": "zwinność, zabawa, adaptacja"},
+            {"nazwa": "Koń", "rola": "ruch, wolność, siła napędowa"}
+        ]
+    },
+    4: {
+        "nazwa": "Moc",
+        "wektor": "presja, energia, dominacja",
+        "opis": "Siła, władza, intensywność",
+        "archetypy": [
+            {"nazwa": "Lew", "rola": "dominacja, odwaga, przywództwo"},
+            {"nazwa": "Tygrys", "rola": "agresja, precyzja, siła"},
+            {"nazwa": "Pantera", "rola": "skradanie, moc, elegancja"}
+        ]
+    },
+    5: {
+        "nazwa": "Inteligencja",
+        "wektor": "analiza, plan, logika",
+        "opis": "Myślenie, strategia, mądrość",
+        "archetypy": [
+            {"nazwa": "Lis", "rola": "spryt, strategia, adaptacja"},
+            {"nazwa": "Kruk", "rola": "analiza, komunikacja, mądrość"},
+            {"nazwa": "Sowa", "rola": "mądrość, obserwacja, wiedza"}
+        ]
+    },
+    6: {
+        "nazwa": "Relacje",
+        "wektor": "więzi, współpraca, komunikacja",
+        "opis": "Społeczność, partnerstwo, dialog",
+        "archetypy": [
+            {"nazwa": "Wilk", "rola": "lojalność, współpraca, hierarchia"},
+            {"nazwa": "Delfin", "rola": "komunikacja, inteligencja, harmonia"},
+            {"nazwa": "Pies", "rola": "wierność, ochrona, towarzyskość"}
+        ]
+    },
+    7: {
+        "nazwa": "Chaos",
+        "wektor": "rozpad, mutacja, przejście",
+        "opis": "Transformacja, destrukcja, odrodzenie",
+        "archetypy": [
+            {"nazwa": "Kruk (ciemny)", "rola": "przemiana, śmierć, odrodzenie"},
+            {"nazwa": "Hydra", "rola": "regeneracja, wiele ścieżek"},
+            {"nazwa": "Skorpion", "rola": "transformacja, ochrona, żądło"}
+        ]
+    },
+    8: {
+        "nazwa": "Tworzenie",
+        "wektor": "budowa, ekspansja, wynalazczość",
+        "opis": "Kreacja, konstrukcja, organizacja",
+        "archetypy": [
+            {"nazwa": "Pająk", "rola": "sieć, cierpliwość, kreacja"},
+            {"nazwa": "Bóbr", "rola": "budowa, praca, konstrukcja"},
+            {"nazwa": "Mrówka", "rola": "organizacja, praca zespołowa"}
+        ]
+    },
+    9: {
+        "nazwa": "Mądrość",
+        "wektor": "introspekcja, sens, duchowość",
+        "opis": "Głębia, refleksja, transcendencja",
+        "archetypy": [
+            {"nazwa": "Sowa (głęboka)", "rola": "mądrość, widzenie w ciemności"},
+            {"nazwa": "Wieloryb", "rola": "głębia, pieśń, mądrość"},
+            {"nazwa": "Jeleń", "rola": "delikatność, intuicja, łagodność"}
+        ]
+    },
+    10: {
+        "nazwa": "Władza",
+        "wektor": "kontrola, struktura, hierarchia",
+        "opis": "Autorytet, porządek, przywództwo",
+        "archetypy": [
+            {"nazwa": "Lew (królewski)", "rola": "władza, duma, przywództwo"},
+            {"nazwa": "Orzeł (imperialny)", "rola": "imperium, wzrok, władza"},
+            {"nazwa": "Byk", "rola": "siła, determinacja, moc"}
+        ]
+    },
+    11: {
+        "nazwa": "Przekroczenie",
+        "wektor": "meta-logika, abstrakcja, fraktal",
+        "opis": "Meta, transcendencja, nieskończoność",
+        "archetypy": [
+            {"nazwa": "Smok", "rola": "moc, transcendencja, nieskończoność"},
+            {"nazwa": "Feniks", "rola": "odrodzenie, transformacja, ogień"},
+            {"nazwa": "Jednorożec", "rola": "czystość, meta, archetyp"}
+        ]
+    },
+    12: {
+        "nazwa": "Integracja",
+        "wektor": "synteza, jedność, powrót do źródła",
+        "opis": "Domknięcie, harmonia, pełnia",
+        "archetypy": [
+            {"nazwa": "Smok (integracyjny)", "rola": "jednia, synteza, pełnia"},
+            {"nazwa": "Żuraw", "rola": "harmonia, długowieczność, równowaga"},
+            {"nazwa": "Wilk Alfa", "rola": "przywództwo, jedność, ochrona"}
+        ]
+    }
+}
+
+# =============================================================================
+# GŁÓWNA KLASA — RINGS CORE
+# =============================================================================
+
+class RingsCore:
+    """
+    12 PIERŚCIENI — podstawowa architektura operacyjna systemu.
+    
+    API:
+        aktywuj_pierścień(id, archetyp_nazwa) -> Dict
+        wybierz_archetyp(pierścień_id, presja) -> str
+        krok(presja, preferencje) -> Dict
+        status() -> Dict
+        raport() -> str
+        reset() -> None
+    """
+    
+    def __init__(self, verbose: bool = True):
+        # === INICJALIZACJA PIERŚCIENI ===
+        self.pierścienie: Dict[int, Pierścień] = {}
+        self._inicjalizuj_pierścienie()
+        
+        # === STAN ===
+        self.tick = 0
+        self.historia: deque = deque(maxlen=200)
+        self._ostatni_wybór: Dict[int, str] = {}
+        
+        # === HOOKI ===
+        self._aktywacja_hooki: List[Callable] = []
+        self._zmiana_hooki: List[Callable] = []
+        
+        # === LOG ===
+        self._verbose = verbose
+        if self._verbose:
+            print(f"🐉 RINGS_CORE aktywowany | {FRACTAL_SIGNATURE}")
+            print(f"   PIERŚCIENIE: 12 | ARCHETYPY: 36")
+    
+    # ========================================================================
+    # INICJALIZACJA
+    # ========================================================================
+    
+    def _inicjalizuj_pierścienie(self) -> None:
+        """Tworzy 12 pierścieni z definicji"""
+        for pid, definicja in DEFINICJE_PIERŚCIENI.items():
+            archetypy = [
+                Archetyp(
+                    nazwa=a["nazwa"],
+                    rola=a["rola"],
+                    energia=0.5 + random.random() * 0.1
+                )
+                for a in definicja["archetypy"]
+            ]
+            
+            pierścień = Pierścień(
+                id=pid,
+                nazwa=definicja["nazwa"],
+                wektor=definicja["wektor"],
+                opis=definicja["opis"],
+                archetypy=archetypy
+            )
+            
+            # Domyślnie aktywuj pierwszy archetyp
+            pierścień.aktywny_archetyp = archetypy[0]
+            self.pierścienie[pid] = pierścień
+            self._ostatni_wybór[pid] = archetypy[0].nazwa
+    
+    # ========================================================================
+    # PUBLIC API
+    # ========================================================================
+    
+    def aktywuj_pierścień(self, pierścień_id: int, archetyp_nazwa: str) -> Dict[str, Any]:
+        """
+        Aktywuje konkretny archetyp w pierścieniu.
+        
+        Args:
+            pierścień_id: 1-12
+            archetyp_nazwa: Nazwa archetypu do aktywacji
+            
+        Returns:
+            Stan pierścienia po aktywacji
+        """
+        if pierścień_id not in self.pierścienie:
+            return {"status": "ERROR", "message": f"Nieznany pierścień: {pierścień_id}"}
+        
+        pierścień = self.pierścienie[pierścień_id]
+        
+        # Znajdź archetyp
+        archetyp = None
+        for a in pierścień.archetypy:
+            if a.nazwa == archetyp_nazwa:
+                archetyp = a
+                break
+        
+        if not archetyp:
+            return {"status": "ERROR", "message": f"Nieznany archetyp: {archetyp_nazwa}"}
+        
+        # Aktywuj
+        pierścień.aktywuj_archetyp(archetyp)
+        self._ostatni_wybór[pierścień_id] = archetyp_nazwa
+        
+        # Hooki
+        self._on_aktywacja(pierścień_id, archetyp_nazwa)
+        
+        return {
+            "status": "OK",
+            "pierścień": pierścień_id,
+            "archetyp": archetyp_nazwa,
+            "energia": round(pierścień.energia, 3),
+            "timestamp": time.time()
+        }
+    
+    def wybierz_archetyp(self, pierścień_id: int, presja: float = 0.5,
+                         preferencje: Optional[List[str]] = None) -> str:
+        """
+        Wybiera archetyp na podstawie presji i preferencji.
+        
+        Args:
+            pierścień_id: 1-12
+            presja: 0.0-1.0
+            preferencje: Lista preferowanych archetypów
+            
+        Returns:
+            Nazwa wybranego archetypu
+        """
+        if pierścień_id not in self.pierścienie:
+            return "ERROR"
+        
+        pierścień = self.pierścienie[pierścień_id]
+        wybrany = pierścień.wybierz_archetyp(presja, preferencje)
+        self._ostatni_wybór[pierścień_id] = wybrany.nazwa
+        return wybrany.nazwa
+    
+    def krok(self, presja: float = 0.5, preferencje: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Wykonuje pełny krok systemu — wybiera archetypy dla wszystkich pierścieni.
+        
+        Args:
+            presja: 0.0-1.0
+            preferencje: Lista preferowanych archetypów
+            
+        Returns:
+            Stan wszystkich pierścieni po kroku
+        """
+        self.tick += 1
+        
+        wyniki = {}
+        for pid, pierścień in self.pierścienie.items():
+            wybrany = pierścień.wybierz_archetyp(presja, preferencje)
+            if wybrany != pierścień.aktywny_archetyp:
+                pierścień.aktywuj_archetyp(wybrany)
+                self._on_zmiana(pid, wybrany.nazwa)
+            wyniki[pid] = {
+                "archetyp": wybrany.nazwa,
+                "energia": round(pierścień.energia, 3),
+                "aktywowany": wybrany.aktywowany
+            }
+        
+        # Zapis do historii
+        self.historia.append({
+            "tick": self.tick,
+            "presja": presja,
+            "wyniki": wyniki.copy()
+        })
+        
+        return {
+            "tick": self.tick,
+            "presja": presja,
+            "pierścienie": wyniki
+        }
+    
+    def aktywuj_wszystkie(self, archetypy: Dict[int, str]) -> Dict[str, Any]:
+        """
+        Aktywuje określone archetypy we wszystkich pierścieniach.
+        
+        Args:
+            archetypy: {pierścień_id: archetyp_nazwa}
+            
+        Returns:
+            Status aktywacji
+        """
+        wyniki = {}
+        for pid, nazwa in archetypy.items():
+            if pid in self.pierścienie:
+                wynik = self.aktywuj_pierścień(pid, nazwa)
+                wyniki[pid] = wynik
+        return {
+            "status": "OK",
+            "wyniki": wyniki,
+            "timestamp": time.time()
+        }
+    
+    def pobierz_aktywne(self) -> Dict[int, str]:
+        """Zwraca aktualnie aktywne archetypy we wszystkich pierścieniach"""
+        return {
+            pid: p.aktywny_archetyp.nazwa if p.aktywny_archetyp else "BRAK"
+            for pid, p in self.pierścienie.items()
+        }
+    
+    def pobierz_energie(self) -> Dict[int, float]:
+        """Zwraca energie wszystkich pierścieni"""
+        return {
+            pid: round(p.energia, 3)
+            for pid, p in self.pierścienie.items()
+        }
+    
+    def pobierz_statystyki(self) -> Dict[str, Any]:
+        """Zwraca statystyki aktywacji archetypów"""
+        staty = {}
+        for p in self.pierścienie.values():
+            for a in p.archetypy:
+                if a.aktywowany > 0:
+                    staty[a.nazwa] = staty.get(a.nazwa, 0) + a.aktywowany
+        return dict(sorted(staty.items(), key=lambda x: x[1], reverse=True)[:10])
+    
+    # ========================================================================
+    # STATUS I RAPORTY
+    # ========================================================================
+    
+    def status(self) -> Dict[str, Any]:
+        """Pełny status systemu pierścieni"""
+        return {
+            "system": "RINGS_CORE",
+            "wersja": VERSION,
+            "tick": self.tick,
+            "pierścienie": len(self.pierścienie),
+            "archetypy": sum(len(p.archetypy) for p in self.pierścienie.values()),
+            "aktywne": self.pobierz_aktywne(),
+            "energie": self.pobierz_energie(),
+            "statystyki": self.pobierz_statystyki(),
+            "historia": len(self.historia)
+        }
+    
+    def raport(self) -> str:
+        """Formatowany raport systemu"""
+        s = self.status()
+        aktywne = "\n".join([
+            f"   [{pid}] {nazwa:12s} | energia={s['energie'][pid]:.2f}"
+            for pid, nazwa in s['aktywne'].items()
+        ])
+        staty = "\n".join([
+            f"   {nazwa:12s}: {count} aktywacji"
+            for nazwa, count in list(s['statystyki'].items())[:5]
+        ])
+        
+        return f"""
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 🐉 12 PIERŚCIENI — RAPORT SYSTEMOWY                                     ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║ TICK: {s['tick']}                                                        ║
+║ PIERŚCIENIE: {s['pierścienie']} | ARCHETYPY: {s['archetypy']}            ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║ AKTYWNE ARCHETYPY:                                                       ║
+{aktywne}
+╠════════════════════════════════════════════════════════════════════════════╣
+║ STATYSTYKI AKTYWACJI:                                                    ║
+{staty if staty else "   (brak danych)"}
+║                                                                           ║
+║ HISTORIA: {s['historia']} kroków                                         ║
+╚════════════════════════════════════════════════════════════════════════════╝
+{HASLO}
+"""
+    
+    def reset(self) -> None:
+        """Resetuje wszystkie pierścienie do stanu początkowego"""
+        for p in self.pierścienie.values():
+            p.energia = 1.0
+            p.tryb = TrybPierścienia.AKTYWNY
+            p.aktywny_archetyp = p.archetypy[0]
+            p.ostatnia_zmiana = time.time()
+            for a in p.archetypy:
+                a.energia = 0.5
+                a.aktywowany = 0
+        self.tick = 0
+        self.historia.clear()
+        if self._verbose:
+            print("[RINGS] Reset wykonany")
+    
+    # ========================================================================
+    # HOOKI
+    # ========================================================================
+    
+    def register_aktywacja_hook(self, hook: Callable) -> None:
+        """Rejestruje hook wołany po aktywacji archetypu"""
+        self._aktywacja_hooki.append(hook)
+    
+    def register_zmiana_hook(self, hook: Callable) -> None:
+        """Rejestruje hook wołany po zmianie archetypu"""
+        self._zmiana_hooki.append(hook)
+    
+    def _on_aktywacja(self, pierścień_id: int, archetyp_nazwa: str) -> None:
+        for hook in self._aktywacja_hooki:
+            try:
+                hook(pierścień_id, archetyp_nazwa)
+            except Exception as e:
+                if self._verbose:
+                    print(f"[HOOK ERROR] aktywacja: {e}")
+    
+    def _on_zmiana(self, pierścień_id: int, archetyp_nazwa: str) -> None:
+        for hook in self._zmiana_hooki:
+            try:
+                hook(pierścień_id, archetyp_nazwa)
+            except Exception as e:
+                if self._verbose:
+                    print(f"[HOOK ERROR] zmiana: {e}")
+    
+    # ========================================================================
+    # METODY POMOCNICZE
+    # ========================================================================
+    
+    def __str__(self) -> str:
+        return self.raport()
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Zwraca pełną reprezentację słownikową"""
+        return {
+            "pierścienie": {pid: p.to_dict() for pid, p in self.pierścienie.items()},
+            "tick": self.tick,
+            "historia": list(self.historia)[-10:]
+        }
+
+# =============================================================================
+# MOST INTEGRACYJNY — POŁĄCZENIE Z ARCHITEKTURĄ
+# =============================================================================
+
+class RingsBridge:
+    """
+    Most integracyjny między RINGS_CORE a resztą architektury.
+    Łączy: GEX, G_CORE, MetaGovernor, NARRATIVE, OPH_CORE
+    """
+    
+    def __init__(self, rings: RingsCore):
+        self.rings = rings
+    
+    # ========================================================================
+    # MOST DO GEX HEILONG (Archetype Ring)
+    # ========================================================================
+    
+    def get_archetype_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst archetypów dla GEX"""
+        aktywne = self.rings.pobierz_aktywne()
+        return {
+            "tryb": "RINGS_CORE",
+            "aktywne_archetypy": aktywne,
+            "dominujące": list(aktywne.values())[:6],
+            "energie": self.rings.pobierz_energie(),
+            "statystyki": self.rings.pobierz_statystyki()
+        }
+    
+    # ========================================================================
+    # MOST DO G_CORE (Autopilot)
+    # ========================================================================
+    
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        """Zwraca stan dla autopilota G_CORE"""
+        energie = self.rings.pobierz_energie()
+        avg_energia = sum(energie.values()) / len(energie) if energie else 0.5
+        aktywne = self.rings.pobierz_aktywne()
+        
+        return {
+            "mode": "RINGS_CORE",
+            "stability": avg_energia,
+            "energy": avg_energia,
+            "pressure": 1.0 - avg_energia,
+            "resilience": min(1.0, avg_energia * 1.2),
+            "flow_quality": avg_energia,
+            "aktywne_pierścienie": len([a for a in aktywne.values() if a != "BRAK"])
+        }
+    
+    # ========================================================================
+    # MOST DO META-GOVERNOR (Kontekst decyzyjny)
+    # ========================================================================
+    
+    def get_governor_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst dla MetaGovernor"""
+        energie = self.rings.pobierz_energie()
+        aktywne = self.rings.pobierz_aktywne()
+        staty = self.rings.pobierz_statystyki()
+        
+        return {
+            "intent": "OPERATIONAL",
+            "confidence": sum(energie.values()) / len(energie) if energie else 0.5,
+            "entropy": 1.0 - (sum(energie.values()) / len(energie) if energie else 0.5),
+            "aktywne_pierścienie": len(aktywne),
+            "dominujący_archetyp": list(staty.keys())[0] if staty else "BRAK"
+        }
+    
+    # ========================================================================
+    # MOST DO NARRATIVE (Źródło opowieści)
+    # ========================================================================
+    
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        """Zwraca fragmenty narracyjne z pierścieni"""
+        fragments = []
+        aktywne = self.rings.pobierz_aktywne()
+        energie = self.rings.pobierz_energie()
+        
+        for pid, nazwa in list(aktywne.items())[:n]:
+            if nazwa != "BRAK":
+                fragments.append({
+                    "source": f"PIERŚCIEŃ_{pid}",
+                    "content": f"{nazwa} | energia={energie.get(pid, 0):.2f}",
+                    "energy": energie.get(pid, 0.5)
+                })
+        
+        # Dodaj fragment statystyk
+        staty = self.rings.pobierz_statystyki()
+        if staty:
+            top = list(staty.items())[0]
+            fragments.append({
+                "source": "RINGS_STATS",
+                "content": f"Najczęściej aktywowany: {top[0]} ({top[1]} razy)",
+                "energy": 0.8
+            })
+        
+        return fragments
+    
+    # ========================================================================
+    # MOST DO OPH_CORE (Optimus Praim Heilong)
+    # ========================================================================
+    
+    def get_oph_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst dla OPH_CORE (12 pierścieni)"""
+        aktywne = self.rings.pobierz_aktywne()
+        energie = self.rings.pobierz_energie()
+        
+        return {
+            "pierścienie": {
+                pid: {
+                    "archetyp": aktywne.get(pid, "BRAK"),
+                    "energia": energie.get(pid, 0.5)
+                }
+                for pid in range(1, 13)
+            },
+            "tick": self.rings.tick,
+            "statystyki": self.rings.pobierz_statystyki()
+        }
+    
+    # ========================================================================
+    # MOST DO TRIO_ADAPTER
+    # ========================================================================
+    
+    def get_trio_state(self) -> Dict[str, str]:
+        """Zwraca stan dla TRIO_ADAPTER (ISKRA + PIECZĘĆ + PERFEKCJA)"""
+        energie = self.rings.pobierz_energie()
+        avg = sum(energie.values()) / len(energie) if energie else 0.5
+        
+        iskra = "AKTYWNA" if self.rings.tick > 0 else "NIEAKTYWNA"
+        pieczec = "AKTYWNA" if avg > 0.4 else "NIEAKTYWNA"
+        perfekcja = "AKTYWNA" if avg > 0.7 else "NIEAKTYWNA"
+        
+        return {
+            "ISKRA": iskra,
+            "PIECZĘĆ": pieczec,
+            "PERFEKCJA": perfekcja,
+            "tryb": "RINGS_CORE",
+            "średnia_energia": f"{avg:.2f}"
+        }
+
+# =============================================================================
+# FUNKCJA JEDNOLINIOWA — szybki start
+# =============================================================================
+
+def uruchom_pierścienie(presja: float = 0.5, kroki: int = 10) -> str:
+    """
+    Szybkie uruchomienie systemu pierścieni.
+    
+    Args:
+        presja: 0.0-1.0
+        kroki: Liczba kroków do wykonania
+    
+    Returns:
+        Raport końcowy
+    """
+    rings = RingsCore(verbose=True)
+    for i in range(kroki):
+        wynik = rings.krok(presja + random.uniform(-0.1, 0.1))
+        if i % 5 == 0:
+            print(f"Krok {i+1}: presja={wynik['presja']:.2f}")
+    return rings.raport()
+
+# =============================================================================
+# DEMONSTRACJA
+# =============================================================================
+
+def demo():
+    """Pokazuje działanie 12 PIERŚCIENI"""
+    print("\n" + "=" * 80)
+    print("🐉 12 PIERŚCIENI — DEMONSTRACJA")
+    print("ARCHETYPY ZWIERZĄT — SYSTEM OPERACYJNY")
+    print("=" * 80 + "\n")
+    
+    # Inicjalizacja
+    rings = RingsCore(verbose=True)
+    bridge = RingsBridge(rings)
+    
+    # 1. Wyświetl definicje pierścieni
+    print("\n📌 DEFINICJE 12 PIERŚCIENI:")
+    print("-" * 60)
+    for pid, p in rings.pierścienie.items():
+        archetypy = ", ".join([a.nazwa for a in p.archetypy])
+        print(f"[{pid:2d}] {p.nazwa:14s} | {archetypy}")
+    
+    # 2. Symulacja kroków
+    print("\n🔮 SYMULACJA 20 KROKÓW (zmienna presja):")
+    print("-" * 60)
+    
+    for i in range(20):
+        presja = 0.3 + (i % 10) * 0.07
+        wynik = rings.krok(presja)
+        
+        if i % 5 == 0:
+            aktywne = rings.pobierz_aktywne()
+            print(f"\nKrok {i+1:2d} | presja={presja:.2f}")
+            for pid in [1, 4, 7, 10, 12]:
+                print(f"  [{pid}] {aktywne.get(pid, '?'):12s}", end="")
+            print()
+    
+    # 3. Aktywacja konkretnych archetypów
+    print("\n🔧 AKTYWACJA KONKRETNYCH ARCHETYPÓW:")
+    print("-" * 60)
+    
+    aktywacja = {
+        1: "Orzeł",
+        4: "Lew",
+        7: "Skorpion",
+        11: "Smok",
+        12: "Żuraw"
+    }
+    wynik = rings.aktywuj_wszystkie(aktywacja)
+    print(f" Aktywowano: {wynik}")
+    
+    # 4. Raport
+    print(rings.raport())
+    
+    # 5. Test mostów integracyjnych
+    print("\n" + "=" * 80)
+    print("🔗 TEST MOSTÓW INTEGRACYJNYCH")
+    print("=" * 80)
+    
+    print("\n🏹 ARCHETYPE CONTEXT (GEX):")
+    context = bridge.get_archetype_context()
+    print(f" Dominujące: {context['dominujące'][:4]}")
+    print(f" Energia: {context['energie']}")
+    
+    print("\n🎮 AUTOPILOT STATE (G_CORE):")
+    autopilot = bridge.get_autopilot_state()
+    for k, v in autopilot.items():
+        print(f" {k}: {v}")
+    
+    print("\n📖 NARRATIVE FRAGMENTS:")
+    fragments = bridge.get_narrative_fragments(3)
+    for f in fragments:
+        print(f" [{f['source']}] {f['content']}")
+    
+    print("\n" + "=" * 80)
+    print("🐉 12 PIERŚCIENI — GOTOWE DO WDROŻENIA")
+    print(HASLO)
+    print("=" * 80)
+
+# =============================================================================
+# URUCHOMIENIE
+# =============================================================================
+
+if __name__ == "__main__":
+    demo()
