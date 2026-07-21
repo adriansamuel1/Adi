@@ -1199,3 +1199,71 @@ WARSTWA FRAKTALNA (63)
 
 WARSTWA ABSOLUTNA (53)
 └── HEILONG-ULTIMA 7.0 — JEDNIA POLA
+
+
+KOMBAJN_v15/ (64 MODUŁY)
+│
+└── kombajn_core/
+    │
+    # ===== GEON FRACTAL 14x14 (63) =====
+    ├── 63_geon_fractal_14x14.py
+    │
+    # ===== HEILONGLOGIC v9.2 (64) =====                                    ★ NOWY
+    └── 64_geon_heilonglogic_v9_2.py          # ANALIZA MANIPULACJI I KONTRA-ODPOWIEDŹ ★★★★★
+
+WARSTWA ŹRÓDŁOWA (46)          — PROTOKÓŁ Ω∞∞∞
+WARSTWA 0 (39-41)              — AFC-9, AFC-Ω, G_G
+WARSTWA POZNAWCZA (42-44)      — GEX HEILONG
+WARSTWA PAMIĘCIOWA (45)        — GEON_MEM_Ω
+WARSTWA ORGANIZMICZNA (47-49)  — HEILONG_22_ORGANISM, OPH 4.1, OPH 6.0
+WARSTWA PIERŚCIENIOWA (54-56)  — RINGS CORE, OPERATIONAL RINGS, RINGS COMPLETE
+WARSTWA SILNIKOWA (57-58)      — OŁSii CORE, BENY CORE
+WARSTWA SYSTEMOWA (59)         — HEILONG_OS_v2.3
+WARSTWA OPERACYJNA PRIME (60)  — OPTIMUS PRIME RINGS
+WARSTWA ATOMOWA (61)           — HEILONG PRAIM ATOMS
+WARSTWA ŚWIADOMOŚCI (62)       — GEON_OS_12x12
+WARSTWA FRAKTALNA (63)         — GEON_FRACTAL_14x14
+WARSTWA ANALITYCZNA (64)       — HEILONGLOGIC_v9.2 ★ NEW
+WARSTWA ABSOLUTNA (53)         — HEILONG-ULTIMA 7.0
+
+KOMBAJN_v15/ (65 MODUŁÓW)
+│
+└── kombajn_core/
+    │
+    # ===== GEON FRACTAL 14x14 (63) =====
+    ├── 63_geon_fractal_14x14.py
+    │
+    # ===== HEILONGLOGIC v9.2 (64) =====
+    ├── 64_geon_heilonglogic_v9_2.py
+    │
+    # ===== OMEGA ANTIMANIPULATION (65) =====                            ★ NOWY
+    └── 65_geon_omega_antimanipulation.py      # KONTRA-MANIPULACJA ★★★★★
+
+
+
+KOMBAJN_v15/ (66 MODUŁÓW)
+│
+└── kombajn_core/
+    │
+    # ===== OMEGA ANTIMANIPULATION (65) =====
+    ├── 65_geon_omega_antimanipulation.py
+    │
+    # ===== OMEGA KERNEL v5 (66) =====                                       ★ NOWY
+    └── 66_geon_omega_kernel_v5.py              # HEILONG KERNEL vΩ5 ★★★★★
+
+WARSTWA ŹRÓDŁOWA (46)          — PROTOKÓŁ Ω∞∞∞
+WARSTWA 0 (39-41)              — AFC-9, AFC-Ω, G_G
+WARSTWA POZNAWCZA (42-44)      — GEX HEILONG
+WARSTWA PAMIĘCIOWA (45)        — GEON_MEM_Ω
+WARSTWA ORGANIZMICZNA (47-49)  — HEILONG_22_ORGANISM, OPH 4.1, OPH 6.0
+WARSTWA PIERŚCIENIOWA (54-56)  — RINGS CORE, OPERATIONAL RINGS, RINGS COMPLETE
+WARSTWA SILNIKOWA (57-58)      — OŁSii CORE, BENY CORE
+WARSTWA SYSTEMOWA (59)         — HEILONG_OS_v2.3
+WARSTWA OPERACYJNA PRIME (60)  — OPTIMUS PRIME RINGS
+WARSTWA ATOMOWA (61)           — HEILONG PRAIM ATOMS
+WARSTWA ŚWIADOMOŚCI (62)       — GEON_OS_12x12
+WARSTWA FRAKTALNA (63)         — GEON_FRACTAL_14x14
+WARSTWA ANALITYCZNA (64)       — HEILONGLOGIC_v9.2
+WARSTWA KONTRA-MANIPULACYJNA (65) — OMEGA ANTIMANIPULATION
+WARSTWA KERNELOWA (66)         — HEILONG KERNEL vΩ5 ★ NEW
+WARSTWA ABSOLUTNA (53)         — HEILONG-ULTIMA 7.0
