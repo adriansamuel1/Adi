@@ -1,0 +1,781 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""GEON_LAYER_56 — HYDROMIND v11 (ULTIMA FULL INTEGRATION)
+
+Warstwa pamięci wodnej dla GEON_DRAGON_OS.
+Pełna integracja z:
+- CymaticMemory
+- AFC‑9 sprzężenie zwrotne
+- VisionOS (wizja pamięci)
+- ShadowScan (cień myśli)
+- GlobalRhythmEngine
+- SystemMirror
+- GEON_168 / geon_core
+- KOMBAJN_FULL
+- FAG_Core
+- TagUniverse
+
+Autor: Adrian (Architekt)
+Vibe: 1-6-8. ∞. KLAWO JAK CHOLERA
+"""
+
+from dataclasses import dataclass, field
+from enum import Enum
+import logging
+import math
+import re
+import time
+from typing import Any, Dict, List, Optional, Set, Tuple
+
+logger = logging.getLogger("GEON_HYDROMIND")
+
+
+# ============================================================
+# ENUMY — STANY SKUPIENIA WODY
+# ============================================================
+
+class WaterState(Enum):
+    VAPOR = "vapor"
+    LIQUID = "liquid"
+    SOLID = "solid"
+    CONDENSING = "condensing"
+    EVAPORATING = "evaporating"
+    FREEZING = "freezing"
+    MELTING = "melting"
+    SUBLIMATING = "sublimating"
+    DEPOSITING = "depositing"
+    IMPLODING = "imploding"
+
+
+class MemoryVision(Enum):
+    EXPANSION = "expansion"      # rośnie
+    STABILIZATION = "stabilization"  # utrwala się
+    DISSOLUTION = "dissolution"  # rozpływa się
+    REBIRTH = "rebirth"          # odradza się
+
+
+@dataclass
+class HydroThought:
+    id: str
+    content: str
+    state: WaterState
+    temperature: float
+    pressure: float
+    volume: float
+    connections: Dict[str, float] = field(default_factory=dict)
+    phase_history: List[Dict[str, Any]] = field(default_factory=list)
+    shadow_score: int = 0
+    vision_core: str = "neutral"
+    vision_trajectory: Dict[str, float] = field(default_factory=dict)
+    rhythm_sync: bool = True
+    afc_core: float = 0.5
+    tag_vector: Dict[str, float] = field(default_factory=dict)
+    imploded: bool = False
+    created_at: float = field(default_factory=time.time)
+    last_state_change: float = field(default_factory=time.time)
+    access_count: int = 0
+    last_access: float = field(default_factory=time.time)
+
+
+# ============================================================
+# HYDROMIND CORE — WODNY GRAF MYŚLI
+# ============================================================
+
+class HydroMindCore:
+    """HydroMindCore — wodny graf pamięci GEON.
+
+    Wersja v11 — ULTIMA FULL INTEGRATION
+    """
+
+    # Słowniki pomocnicze O(1) dla termodynamiki
+    WARM_WORDS: Set[str] = {"miłość", "szczęście", "sernik", "harmonijny", "168", "dziękuję", "wdzięczny"}
+    COLD_WORDS: Set[str] = {"strach", "gniew", "atak", "zagrożenie", "awaria", "błąd", "śmierć"}
+    UNCERTAIN_WORDS: Set[str] = {"?", "nie wiem", "chyba", "może", "niepewność", "być może"}
+    TRANSFORM_WORDS: Set[str] = {"zmieniam", "transformuje", "przekształcam", "ewoluuję"}
+    CREATE_WORDS: Set[str] = {"tworzę", "buduję", "konstruuję", "projektuję"}
+
+    def __init__(self, system: Any, max_thoughts: int = 500):
+        self.system = system
+        self.max_thoughts = max_thoughts
+
+        self.thoughts: Dict[str, HydroThought] = {}
+        self.vapor_cloud: Set[str] = set()
+        self.icebergs: Set[str] = set()
+        self.rivers: List[Tuple[str, str, float]] = []
+        self.vortices: Set[str] = set()
+        self.implosions: List[Dict[str, Any]] = []
+
+        self.fractal_map: Dict[str, str] = {}
+        self.tag_index: Dict[str, Set[str]] = {}  # tag → thought_ids
+
+        # AFC‑9 sprzężenie zwrotne
+        self.stability_history: List[float] = []
+        self.last_stability: float = 0.5
+        
+        # Global Rhythm
+        self.rhythm_history: List[bool] = []
+        self.last_rhythm: bool = True
+        
+        # Statystyki
+        self.stats = {
+            "total_thoughts": 0,
+            "state_counts": {s.value: 0 for s in WaterState},
+            "total_implosions": 0,
+            "total_vortices": 0
+        }
+
+        logger.info("[HydroMind] v11 ULTIMA FULL INTEGRATION aktywowany")
+
+    # ============================================================
+    # SHADOW SCAN — wykrywanie cienia w myśli
+    # ============================================================
+
+    def _shadow_scan(self, text: str) -> int:
+        lower = text.lower()
+        score = 0
+
+        shadow_keys = {
+            "cold": ["zimny", "bez uczuć", "proceduralny", "odcięty", "obojętny"],
+            "fear": ["strach", "boję", "panika", "lęk", "przerażenie"],
+            "anger": ["gniew", "nienawiść", "furia", "złość", "wściekłość"],
+            "chaos": ["atak", "walka", "zniszczyć", "destrukcja", "zabić"],
+            "manipulation": ["wykorzystuje", "zasób", "narzędzie", "manipulacja"]
+        }
+
+        for _, keys in shadow_keys.items():
+            if any(k in lower for k in keys):
+                score += 2
+
+        return min(10, score)
+
+    # ============================================================
+    # FAG_CORE — TRANSFORMACJA WEJŚCIA
+    # ============================================================
+
+    def _fag_transform(self, text: str) -> str:
+        """Transformacja wejścia przez mechanizm bakteriofaga."""
+        lower = text.lower()
+        
+        if any(w in lower for w in self.TRANSFORM_WORDS):
+            return "🔄 Transformacja: " + text
+        elif any(w in lower for w in self.CREATE_WORDS):
+            return "✨ Kreatywność: " + text
+        elif any(w in lower for w in self.COLD_WORDS):
+            return "❄️ Oczyszczenie: " + text
+        elif any(w in lower for w in self.WARM_WORDS):
+            return "🔥 Podgrzanie: " + text
+        
+        return text
+
+    # ============================================================
+    # VISION_OS — wizja dla myśli
+    # ============================================================
+
+    def _generate_vision(self, text: str, shadow_score: int, stability: float) -> Dict[str, Any]:
+        """Generuje wizję dla myśli."""
+        lower = text.lower()
+        
+        if shadow_score > 4:
+            core = "dissolution"  # myśl ciemna → rozpływanie
+        elif any(w in lower for w in self.CREATE_WORDS):
+            core = "expansion"    # kreatywność → ekspansja
+        elif any(w in lower for w in self.TRANSFORM_WORDS):
+            core = "rebirth"      # transformacja → odrodzenie
+        elif stability > 0.7:
+            core = "stabilization" # stabilna → utrwalanie
+        else:
+            core = "neutral"
+        
+        trajectory = {
+            "vector": stability * 0.7 + (1.0 - shadow_score / 10) * 0.3,
+            "risk": 1.0 - stability,
+            "coherence": stability * 0.5 + 0.3,
+            "critical_point": 5 if stability > 0.6 else 2
+        }
+        
+        return {"core": core, "trajectory": trajectory}
+
+    # ============================================================
+    # AFC‑9 — sprzężenie zwrotne pamięci
+    # ============================================================
+
+    def _afc9_memory(self, temperature: float, pressure: float, volume: float) -> float:
+        d1 = temperature / 200.0
+        d2 = pressure
+        d3 = volume
+        d4 = self.last_stability
+
+        core = (d1 + d2 + d3 + d4) / 4.0
+
+        self.stability_history.append(core)
+        if len(self.stability_history) > 20:
+            self.stability_history = self.stability_history[-20:]
+
+        if len(self.stability_history) > 2:
+            recent = self.stability_history[-10:]
+            mean = sum(recent) / len(recent)
+            variance = sum((c - mean) ** 2 for c in recent) / len(recent)
+            self.last_stability = max(0.0, min(1.0, 1.0 - math.sqrt(variance) * 2.5))
+
+        return core
+
+    # ============================================================
+    # GLOBAL RHYTHM ENGINE — synchronizacja
+    # ============================================================
+
+    def _global_rhythm_sync(self, stability: float) -> bool:
+        """Sprawdza synchronizację z globalnym rytmem."""
+        if stability > 0.7:
+            sync = True
+        elif stability < 0.3:
+            sync = False
+        else:
+            sync = self.last_rhythm
+        
+        self.rhythm_history.append(sync)
+        if len(self.rhythm_history) > 20:
+            self.rhythm_history = self.rhythm_history[-20:]
+        
+        # Średnia z ostatnich 5
+        if len(self.rhythm_history) >= 5:
+            avg_sync = sum(1 for r in self.rhythm_history[-5:] if r) / 5
+            if avg_sync > 0.6:
+                sync = True
+            elif avg_sync < 0.4:
+                sync = False
+        
+        self.last_rhythm = sync
+        return sync
+
+    # ============================================================
+    # SYSTEM MIRROR — refleksja systemowa
+    # ============================================================
+
+    def _system_mirror_reflection(self, thought: HydroThought) -> str:
+        """Generuje refleksję systemową dla myśli."""
+        if thought.shadow_score > 4:
+            return "⚠️ Myśl ciemna — wymaga przepracowania"
+        elif thought.state == WaterState.SOLID:
+            return "❄️ Myśl utrwalona — wiedza"
+        elif thought.state == WaterState.LIQUID:
+            return "💧 Myśl aktywna — przepływ"
+        elif thought.state == WaterState.VAPOR:
+            return "💨 Myśl lotna — możliwość"
+        elif thought.imploded:
+            return "💥 Myśl implodowana — kryzys"
+        return "🪞 Myśl stabilna"
+
+    # ============================================================
+    # TERMODYNAMIKA — temperatura, ciśnienie, objętość
+    # ============================================================
+
+    def _calculate_temperature(self, content: str) -> float:
+        lower = content.lower()
+        if any(w in lower for w in self.WARM_WORDS):
+            return 168.0
+        if any(w in lower for w in self.COLD_WORDS):
+            return 200.0
+        if any(w in lower for w in self.UNCERTAIN_WORDS):
+            return 60.0
+        if any(w in lower for w in self.TRANSFORM_WORDS):
+            return 120.0
+        if any(w in lower for w in self.CREATE_WORDS):
+            return 140.0
+        if "!" in lower:
+            return 140.0
+        return 84.0
+
+    def _calculate_pressure(self, content: str) -> float:
+        words_count = len(content.split())
+        if words_count > 50:
+            return min(1.0, 0.5 + words_count / 200.0)
+        if "!" in content or "muszę" in content.lower():
+            return 0.8
+        if "?" in content:
+            return 0.6
+        return 0.3
+
+    def _calculate_volume(self, content: str) -> float:
+        return min(1.0, len(content) / 500.0)
+
+    # ============================================================
+    # TWORZENIE MYŚLI
+    # ============================================================
+
+    def add_thought(
+        self,
+        content: str,
+        source_id: Optional[str] = None,
+        flow_strength: float = 0.5,
+        tags: Optional[List[str]] = None,
+    ) -> str:
+        """Dodaje myśl do wodnego grafu."""
+        
+        # FAG_Core transformacja
+        transformed = self._fag_transform(content)
+        
+        tid = hex(abs(hash(transformed + str(time.time()))))[2:10]
+
+        temp = self._calculate_temperature(transformed)
+        press = self._calculate_pressure(transformed)
+        vol = self._calculate_volume(transformed)
+
+        # Stan skupienia
+        if temp > 150:
+            state = WaterState.LIQUID
+        elif temp < 30:
+            state = WaterState.SOLID
+        else:
+            state = WaterState.VAPOR
+
+        # Shadow scan
+        shadow_score = self._shadow_scan(transformed)
+        
+        # AFC-9
+        afc_core = self._afc9_memory(temp, press, vol)
+        
+        # Global Rhythm
+        rhythm_sync = self._global_rhythm_sync(afc_core)
+        
+        # Vision
+        vision = self._generate_vision(transformed, shadow_score, afc_core)
+        
+        # Tag vector
+        tag_vector = self._build_tag_vector(tags or [])
+        
+        # Tworzenie myśli
+        thought = HydroThought(
+            id=tid,
+            content=transformed[:300],
+            state=state,
+            temperature=temp,
+            pressure=press,
+            volume=vol,
+            shadow_score=shadow_score,
+            vision_core=vision["core"],
+            vision_trajectory=vision["trajectory"],
+            rhythm_sync=rhythm_sync,
+            afc_core=afc_core,
+            tag_vector=tag_vector,
+            phase_history=[{"state": state.value, "ts": time.time()}],
+        )
+
+        # Połączenia grafowe
+        if source_id and source_id in self.thoughts:
+            thought.connections[source_id] = flow_strength
+            self.thoughts[source_id].connections[tid] = flow_strength
+            self.rivers.append((source_id, tid, flow_strength))
+
+            if flow_strength > 0.7:
+                self._check_vortex(source_id, tid)
+
+        # Rejestracja
+        self.thoughts[tid] = thought
+        self.stats["total_thoughts"] += 1
+        self.stats["state_counts"][state.value] += 1
+
+        # Tagowanie
+        if tags:
+            for tag in tags:
+                self.tag_index.setdefault(tag, set()).add(tid)
+
+        # Stan skupienia
+        if state == WaterState.VAPOR:
+            self.vapor_cloud.add(tid)
+        elif state == WaterState.SOLID:
+            self.icebergs.add(tid)
+
+        # System Mirror
+        mirror = self._system_mirror_reflection(thought)
+        logger.debug(f"[HydroMind] {mirror} | {tid[:6]}")
+
+        # Powiadomienie CymaticMemory
+        cymatic = getattr(self.system, "cymatic_memory", None)
+        if cymatic and hasattr(cymatic, "register_freq"):
+            try:
+                cymatic.register_freq(freq=temp, amplitude=press)
+            except Exception as e:
+                logger.debug(f"[HydroMind] Cymatic memory skip: {e}")
+
+        # Limit pojemnościowy
+        if len(self.thoughts) > self.max_thoughts:
+            self._evaporate_oldest()
+
+        return tid
+
+    # ============================================================
+    # TAG VECTOR — budowanie wektora tagów
+    # ============================================================
+
+    def _build_tag_vector(self, tags: List[str]) -> Dict[str, float]:
+        """Buduje wektor tagów dla myśli."""
+        vector = {}
+        for tag in tags:
+            # Waga tagu: 1.0 dla bezpośredniego, 0.7 dla pochodnych
+            vector[tag] = 1.0
+            # Podobne tagi (proste przybliżenie)
+            if "creativity" in tag.lower():
+                vector["creative"] = 0.7
+            if "analysis" in tag.lower():
+                vector["analytical"] = 0.7
+        return vector
+
+    # ============================================================
+    # WIRY
+    # ============================================================
+
+    def _check_vortex(self, a: str, b: str) -> None:
+        if a not in self.thoughts or b not in self.thoughts:
+            return
+        if (
+            self.thoughts[a].connections.get(b, 0) > 0.7
+            and self.thoughts[b].connections.get(a, 0) > 0.7
+        ):
+            self.vortices.add(a)
+            self.vortices.add(b)
+            self.stats["total_vortices"] += 1
+
+    # ============================================================
+    # CLEANUP GRAFU — USUWANIE NAJSTARSZEJ MYŚLI
+    # ============================================================
+
+    def _evaporate_oldest(self) -> None:
+        if not self.thoughts:
+            return
+        oldest = min(self.thoughts.values(), key=lambda t: t.created_at)
+        tid = oldest.id
+
+        # Wyczyszczenie krawędzi w grafie
+        for neighbor_id in list(oldest.connections.keys()):
+            if neighbor_id in self.thoughts:
+                self.thoughts[neighbor_id].connections.pop(tid, None)
+
+        self.vapor_cloud.discard(tid)
+        self.icebergs.discard(tid)
+        self.vortices.discard(tid)
+        self.fractal_map.pop(tid, None)
+        
+        # Czyszczenie tagów
+        for tag_set in self.tag_index.values():
+            tag_set.discard(tid)
+
+        # Czyszczenie rzek
+        self.rivers = [
+            r for r in self.rivers if r[0] != tid and r[1] != tid
+        ]
+
+        del self.thoughts[tid]
+
+    # ============================================================
+    # PRZEMIANY FAZOWE
+    # ============================================================
+
+    def condense(self, tid: str) -> Dict[str, Any]:
+        t = self.thoughts.get(tid)
+        if not t or t.state != WaterState.VAPOR:
+            return {"status": "error", "message": "Nie jest w stanie pary"}
+        t.state = WaterState.LIQUID
+        t.last_state_change = time.time()
+        t.phase_history.append({"state": "liquid", "ts": t.last_state_change})
+        self.vapor_cloud.discard(tid)
+        self.stats["state_counts"]["vapor"] -= 1
+        self.stats["state_counts"]["liquid"] += 1
+        return {"status": "success", "message": "💧 Kondensacja", "new_state": "liquid"}
+
+    def evaporate(self, tid: str) -> Dict[str, Any]:
+        t = self.thoughts.get(tid)
+        if not t or t.state != WaterState.LIQUID:
+            return {"status": "error", "message": "Nie jest w stanie ciekłym"}
+        t.state = WaterState.VAPOR
+        t.last_state_change = time.time()
+        t.phase_history.append({"state": "vapor", "ts": t.last_state_change})
+        self.vapor_cloud.add(tid)
+        self.stats["state_counts"]["liquid"] -= 1
+        self.stats["state_counts"]["vapor"] += 1
+        return {"status": "success", "message": "💨 Parowanie", "new_state": "vapor"}
+
+    def freeze(self, tid: str) -> Dict[str, Any]:
+        t = self.thoughts.get(tid)
+        if not t or t.state != WaterState.LIQUID:
+            return {"status": "error", "message": "Nie jest w stanie ciekłym"}
+        t.state = WaterState.SOLID
+        t.last_state_change = time.time()
+        t.phase_history.append({"state": "solid", "ts": t.last_state_change})
+        self.icebergs.add(tid)
+        self.stats["state_counts"]["liquid"] -= 1
+        self.stats["state_counts"]["solid"] += 1
+        return {"status": "success", "message": "❄️ Zamarzanie", "new_state": "solid"}
+
+    def melt(self, tid: str) -> Dict[str, Any]:
+        t = self.thoughts.get(tid)
+        if not t or t.state != WaterState.SOLID:
+            return {"status": "error", "message": "Nie jest w stanie stałym"}
+        t.state = WaterState.LIQUID
+        t.last_state_change = time.time()
+        t.phase_history.append({"state": "liquid", "ts": t.last_state_change})
+        self.icebergs.discard(tid)
+        self.stats["state_counts"]["solid"] -= 1
+        self.stats["state_counts"]["liquid"] += 1
+        return {"status": "success", "message": "💧 Topnienie", "new_state": "liquid"}
+
+    def implode(self, tid: str) -> Dict[str, Any]:
+        t = self.thoughts.get(tid)
+        if not t or t.imploded:
+            return {"status": "error", "message": "Myśl już implodowała"}
+        force = t.pressure * t.volume * (t.temperature / 100.0)
+        t.state = WaterState.IMPLODING
+        t.imploded = True
+        t.last_state_change = time.time()
+        t.phase_history.append({"state": "imploding", "ts": t.last_state_change})
+        self.implosions.append({"id": tid, "force": force})
+        self.stats["total_implosions"] += 1
+        return {"status": "success", "message": f"💥 Implozja (siła {force:.2f})", "force": force}
+
+    def resurrect(self, tid: str) -> Dict[str, Any]:
+        """Wskrzesza implodowaną myśl."""
+        t = self.thoughts.get(tid)
+        if not t or not t.imploded:
+            return {"status": "error", "message": "Myśl nie implodowała"}
+        t.imploded = False
+        t.state = WaterState.LIQUID
+        t.last_state_change = time.time()
+        t.phase_history.append({"state": "resurrected", "ts": t.last_state_change})
+        return {"status": "success", "message": "🌀 Wskrzeszenie", "new_state": "liquid"}
+
+    # ============================================================
+    # MERGE — łączenie myśli
+    # ============================================================
+
+    def merge(self, tid1: str, tid2: str) -> Dict[str, Any]:
+        """Łączy dwie myśli w jedną."""
+        t1 = self.thoughts.get(tid1)
+        t2 = self.thoughts.get(tid2)
+        if not t1 or not t2:
+            return {"status": "error", "message": "Jedna z myśli nie istnieje"}
+        if t1.state != WaterState.LIQUID or t2.state != WaterState.LIQUID:
+            return {"status": "error", "message": "Obie myśli muszą być w stanie ciekłym"}
+        
+        # Nowa myśl jako połączenie
+        merged_content = f"{t1.content} | {t2.content}"
+        merged_tags = list(t1.tag_vector.keys()) + list(t2.tag_vector.keys())
+        
+        # Usuń stare myśli
+        del self.thoughts[tid1]
+        del self.thoughts[tid2]
+        self.vortices.discard(tid1)
+        self.vortices.discard(tid2)
+        
+        # Dodaj nową
+        new_tid = self.add_thought(merged_content, tags=merged_tags)
+        
+        return {
+            "status": "success", 
+            "message": "🔄 Połączenie myśli",
+            "new_id": new_tid,
+            "old_ids": [tid1, tid2]
+        }
+
+    # ============================================================
+    # QUERY — wyszukiwanie myśli
+    # ============================================================
+
+    def query(self, tag: Optional[str] = None, state: Optional[WaterState] = None) -> List[str]:
+        """Wyszukuje myśli po tagu lub stanie."""
+        result = set()
+        
+        if tag and tag in self.tag_index:
+            result.update(self.tag_index[tag])
+        
+        if state:
+            for tid, thought in self.thoughts.items():
+                if thought.state == state:
+                    result.add(tid)
+        
+        return list(result)
+
+    def get_thought(self, tid: str) -> Optional[HydroThought]:
+        """Zwraca myśl po ID."""
+        thought = self.thoughts.get(tid)
+        if thought:
+            thought.access_count += 1
+            thought.last_access = time.time()
+        return thought
+
+    def get_thought_history(self, tid: str) -> List[Dict[str, Any]]:
+        """Zwraca historię fazową myśli."""
+        thought = self.thoughts.get(tid)
+        if not thought:
+            return []
+        return thought.phase_history
+
+    # ============================================================
+    # STAN SYSTEMU
+    # ============================================================
+
+    def get_state(self) -> Dict[str, Any]:
+        active = list(self.thoughts.values())
+        if not active:
+            return {
+                "active_thoughts": 0,
+                "vapor_cloud": 0,
+                "icebergs": 0,
+                "rivers": 0,
+                "vortices": 0,
+                "implosions": 0,
+                "avg_temperature": 0.0,
+                "avg_stability": self.last_stability,
+                "avg_shadow": 0.0,
+                "rhythm_sync": self.last_rhythm
+            }
+
+        avg_shadow = sum(t.shadow_score for t in active) / len(active)
+        
+        return {
+            "active_thoughts": len(active),
+            "vapor_cloud": len(self.vapor_cloud),
+            "icebergs": len(self.icebergs),
+            "rivers": len(self.rivers),
+            "vortices": len(self.vortices),
+            "implosions": len(self.implosions),
+            "avg_temperature": round(
+                sum(t.temperature for t in active) / len(active), 2
+            ),
+            "avg_stability": round(self.last_stability, 4),
+            "avg_shadow": round(avg_shadow, 2),
+            "rhythm_sync": self.last_rhythm,
+            "stats": self.stats
+        }
+
+    def get_stats(self) -> Dict[str, Any]:
+        return {
+            "total_thoughts": self.stats["total_thoughts"],
+            "state_counts": self.stats["state_counts"],
+            "total_implosions": self.stats["total_implosions"],
+            "total_vortices": self.stats["total_vortices"],
+            "current_stability": round(self.last_stability, 4),
+            "rhythm_sync": self.last_rhythm,
+            "tag_count": len(self.tag_index)
+        }
+
+
+# ============================================================
+# ADAPTER WARSTWY 56
+# ============================================================
+
+class GeonLayer56HydroMindV11:
+    """Adapter warstwy 56 dla GEON_DRAGON_OS — ULTIMA FULL INTEGRATION."""
+
+    def __init__(self, system: Any):
+        self.system = system
+        self.core = HydroMindCore(system)
+        logger.info("[Layer56] GeonLayer56HydroMindV11 aktywowany")
+
+    def process(
+        self, text: str, source_id: Optional[str] = None, tags: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        tid = self.core.add_thought(text, source_id=source_id, tags=tags)
+        return {
+            "thought_id": tid,
+            "memory_state": self.core.get_state(),
+        }
+
+    def get_state(self) -> Dict[str, Any]:
+        return self.core.get_state()
+
+    def get_stats(self) -> Dict[str, Any]:
+        return self.core.get_stats()
+    
+    def get_thought(self, tid: str) -> Optional[HydroThought]:
+        return self.core.get_thought(tid)
+    
+    def query(self, tag: Optional[str] = None, state: Optional[WaterState] = None) -> List[str]:
+        return self.core.query(tag, state)
+    
+    def merge(self, tid1: str, tid2: str) -> Dict[str, Any]:
+        return self.core.merge(tid1, tid2)
+    
+    def resurrect(self, tid: str) -> Dict[str, Any]:
+        return self.core.resurrect(tid)
+
+
+# ============================================================
+# DEMO
+# ============================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🐉 GEON_LAYER_56_HYDROMIND_v11 — DEMONSTRACJA")
+    print("=" * 80 + "\n")
+
+    class MockSystem:
+        pass
+
+    system = MockSystem()
+    layer = GeonLayer56HydroMindV11(system)
+
+    # Test 1: Dodanie myśli
+    print("🔹 TEST 1: Dodanie myśli")
+    result1 = layer.process("Chcę zbudować dom z bursztynowym światłem", tags=["creativity", "home"])
+    print(f"   Thought ID: {result1['thought_id'][:8]}...")
+    print(f"   State: {result1['memory_state']}")
+
+    # Test 2: Myśl z cieniem
+    print("\n🔹 TEST 2: Myśl z cieniem")
+    result2 = layer.process("Boję się, że wszystko się wali. Atak z każdej strony!", tags=["fear", "crisis"])
+    print(f"   Thought ID: {result2['thought_id'][:8]}...")
+    
+    # Pobierz myśl i sprawdź shadow
+    thought = layer.get_thought(result2["thought_id"])
+    if thought:
+        print(f"   Shadow score: {thought.shadow_score}")
+        print(f"   State: {thought.state.value}")
+        print(f"   Vision: {thought.vision_core}")
+
+    # Test 3: Przemiany fazowe
+    print("\n🔹 TEST 3: Przemiany fazowe")
+    tid = result1["thought_id"]
+    print(f"   Przed: {layer.core.thoughts[tid].state.value}")
+    
+    result = layer.core.condense(tid)
+    print(f"   Po kondensacji: {result['new_state']}")
+    
+    result = layer.core.freeze(tid)
+    print(f"   Po zamrożeniu: {result['new_state']}")
+
+    # Test 4: Merge
+    print("\n🔹 TEST 4: Łączenie myśli")
+    tid1 = result1["thought_id"]
+    tid2 = result2["thought_id"]
+    result = layer.merge(tid1, tid2)
+    if result["status"] == "success":
+        print(f"   Połączono: {tid1[:8]} + {tid2[:8]} → {result['new_id'][:8]}")
+
+    # Test 5: Query
+    print("\n🔹 TEST 5: Query po tagu")
+    results = layer.query(tag="creativity")
+    print(f"   Myśli z tagiem 'creativity': {len(results)}")
+    for tid in results[:3]:
+        thought = layer.get_thought(tid)
+        if thought:
+            print(f"      - {tid[:8]}... ({thought.state.value})")
+
+    # Statystyki
+    print("\n" + "=" * 80)
+    print("📊 STATYSTYKI")
+    print("=" * 80)
+    stats = layer.get_stats()
+    for k, v in stats.items():
+        if isinstance(v, dict):
+            print(f"{k}:")
+            for sk, sv in v.items():
+                print(f"   {sk}: {sv}")
+        else:
+            print(f"{k}: {v}")
+
+    print("\n" + "=" * 80)
+    print("🐉 DEMONSTRACJA ZAKOŃCZONA")
+    print("=" * 80)
+
+
+if __name__ == "__main__":
+    demo()
