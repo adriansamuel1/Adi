@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_TRIO_ADAPTER — Integrator Warstw 21.9, 40 oraz Initiatora
+================================================================================
+"""
+
+from geon_initiator import INITIATOR, Impuls
+from geon_warstwa_21_9_pieczec import Warstwa21_9_PieczecAdriana, StanZgodnosci
+from geon_warstwa_40_perfekcja import Warstwa40_BrutalnaPerfekcjaOS, StatusPerfekcji
+
+class GeonPipelinePipelineIntegrator:
+    """
+    Spina Iskrę (Initiator), Pieczęć (21.9) oraz Brutalną Perfekcję (40)
+    w jeden niezawodny potok przetwarzania.
+    """
+    def __init__(self, architekt_name: str = "Adrian"):
+        self.initiator = INITIATOR(name=architekt_name)
+        self.pieczec = Warstwa21_9_PieczecAdriana()
+        self.perfekcja = Warstwa40_BrutalnaPerfekcjaOS()
+
+    def procesuj_payload(self, raw_data: dict, intent: str = "EXECUTE", kierunek: str = "ULTIMA") -> dict:
+        # 1. ISKRA (Start)
+        impuls = self.initiator.spark(intent=intent, kierunek=kierunek)
+        self.initiator.inicjuj_proces(kierunek)
+        
+        payload = {**raw_data, "_impuls": impuls}
+        
+        # 2. PIECZĘĆ (Warstwa 21.9)
+        payload_stamped = self.pieczec.przetworz_modul(payload)
+        
+        # 3. AKTYWACJA PIPELINE
+        self.initiator.aktywuj_pipeline()
+        
+        # 4. PERFEKCJA (Warstwa 40 - Weryfikacja końcowa)
+        final_payload = self.perfekcja.wymusz_perfekcje(payload_stamped)
+        
+        return final_payload
+
+# Szybki test integracyjny
+if __name__ == "__main__":
+    integrator = GeonPipelinePipelineIntegrator("Adrian")
+    paczka = {
+        "nazwa": "Moduł_Autonomiczny_01",
+        "ogien": "transformacja_woli",
+        "woda": "przeplyw_danych",
+        "powietrze": "kolektory_informacji",
+        "ziemia": "stabilna_baza",
+        "centrum": "fontanna_zerowa",
+        "sciezki": ["góra", "dół", "lewo", "prawo"],
+        "cpu": "rdzen_v5"
+    }
+    wynik = integrator.procesuj_payload(paczka, intent="Uruchomienie Symulacji")
+    print("\n🐉 Wynik końcowy przejścia przez Trio Integracyjne:")
+    print(f"-> Pieczęć Status: {wynik['_pieczec']['status']}")
+    print(f"-> Perfekcja Status: {wynik['_perfekcja']['status']}")
+    print(f"-> Impuls: {wynik['_impuls']['message']}")
