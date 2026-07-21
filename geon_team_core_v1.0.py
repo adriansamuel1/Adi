@@ -5,23 +5,26 @@
 🐉 GEON_TEAM_CORE_v1.0 — MODUŁ 77: FRAKTALNY ZESPÓŁ DECYZYJNY (FULL STACK)
 ================================================================================
 Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
-Wersja: v1.0 (GEON_TEAM_CORE — Hyzio, Gadget, Zyzio, Monterey, Dżet)
+Wersja: v1.0 (GEON_TEAM_CORE — Hyzio, Gadget, Zyzio, Monterey, Dżet, ShadowDragon)
 Data: 2026-07-22
 Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
 
 OPIS:
 GEON_TEAM_CORE_v1.0 to fraktalny zespół decyzyjny.
-Łączy logikę, chaos, kreatywność i siłę w jeden spójny organizm.
-Tworzy zespół fraktalny z równowagą: logika / chaos / kreatywność / siła.
-Adaptuje się w środowisku zmiennym, jest odporny na dryf i szum,
-generuje innowacje z błędów i okazji, utrzymuje spójność 1-6-8.
+Łączy logikę, chaos, kreatywność, siłę i cień w jeden spójny organizm.
+• Hyzio – analiza i dedukcja
+• Gadget – prototypowanie i innowacje
+• Zyzio – skróty operacyjne z heurystyką genetyczną
+• Monterey – stabilizacja z warstwą emocjonalną
+• Dżet 2.0 – kwantowe stany chaosu (superpozycja, splątanie)
+• ShadowDragon – tryb cienia, ukryte ścieżki
 
 ARCHITEKTURA (6 POZIOMÓW):
 I.   STRUKTURY DANYCH — TeamConfig, TeamContext, TeamResult, GeneticPool
-II.  AGENCI — Hyzio (analiza), Gadget (prototypowanie), Zyzio (skróty),
-     Monterey (stabilizacja), Dżet (chaos kontrolowany)
+II.  AGENCI — Hyzio, Gadget, Zyzio (z heurystyką), Monterey (z emocjami),
+     Dżet 2.0 (stany kwantowe), ShadowDragon (tryb cienia)
 III. CYKL ZESPOŁOWY — team_cycle() — pełna pętla decyzyjna
-IV.  PAMIĘĆ GENETYCZNA — uczenie się na historii, zapis wzorców
+IV.  PAMIĘĆ GENETYCZNA — uczenie się na historii
 V.   INTEGRACJA 1-6-8 — proporcje i certyfikacja Samaela
 VI.  RAPORT ZESPOŁU — pełna diagnostyka
 
@@ -42,6 +45,7 @@ import hashlib
 import time
 import uuid
 import logging
+import random
 from typing import Dict, List, Optional, Tuple, Any, Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -100,6 +104,18 @@ class TeamLevel(Enum):
     CRITICAL = auto()
     SUCCESS = auto()
     CHAOS = auto()
+    SHADOW = auto()
+
+
+class QuantumState(Enum):
+    """Stany kwantowe Dżeta 2.0."""
+    SUPERPOSITION = "SUPERPOSITION"
+    ENTANGLED = "ENTANGLED"
+    COLLAPSED_TO_FIRE = "COLLAPSED_TO_FIRE"
+    COLLAPSED_TO_WATER = "COLLAPSED_TO_WATER"
+    COLLAPSED_TO_EARTH = "COLLAPSED_TO_EARTH"
+    COLLAPSED_TO_AIR = "COLLAPSED_TO_AIR"
+    COLLAPSED_TO_VOID = "COLLAPSED_TO_VOID"
 
 
 @dataclass
@@ -114,6 +130,8 @@ class TeamConfig:
     max_genetic_pool: int = MAX_GENETIC_POOL
     enable_samael_seal: bool = True
     drift_zero: bool = True
+    enable_shadow_dragon: bool = True
+    enable_emotional_layer: bool = True
 
 
 @dataclass
@@ -168,6 +186,8 @@ class TeamResult:
     proportions_validated: str
     samael_seal: str
     final_state: str
+    shadow_path: Optional[str] = None
+    emotional_state: Optional[Dict[str, float]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -181,14 +201,15 @@ class TeamResult:
             "drift_factor": self.drift_factor,
             "proportions_validated": self.proportions_validated,
             "samael_seal": self.samael_seal,
-            "final_state": self.final_state
+            "final_state": self.final_state,
+            "shadow_path": self.shadow_path,
+            "emotional_state": self.emotional_state
         }
 
 
 class GeneticPool:
     """
     Pamięć genetyczna zespołu — długoterminowa pamięć wzorców.
-    Przechowuje udane cykle i umożliwia szybkie skróty.
     """
     def __init__(self, max_size: int = MAX_GENETIC_POOL):
         self.pool: List[Dict[str, Any]] = []
@@ -212,6 +233,21 @@ class GeneticPool:
                 return item["resolved_path"]
         return None
 
+    def find_best_match(self, context: Dict[str, Any], threshold: float = 0.7) -> Optional[Tuple[str, float]]:
+        """Znajduje najlepsze dopasowanie w pamięci genetycznej."""
+        best_match = None
+        best_score = 0.0
+        
+        for item in self.pool:
+            # Prosta heurystyka dopasowania
+            if item["clue"].get("type") == context.get("type"):
+                score = item["efficiency"] * random.uniform(0.8, 1.2)
+                if score > best_score and score > threshold:
+                    best_score = score
+                    best_match = item["resolved_path"]
+        
+        return (best_match, best_score) if best_match else None
+
     def get_size(self) -> int:
         return len(self.pool)
 
@@ -225,8 +261,6 @@ class GeneticPool:
 class GeonHyzio:
     """
     HYZIO: Analiza wejścia & integracja z historią.
-    Sprawdza pamięć genetyczną, analizuje strumień danych,
-    domyka dryf informacyjny.
     """
     def __init__(self):
         self.identity = "HYZIO"
@@ -236,7 +270,6 @@ class GeonHyzio:
         """Analizuje strumień danych, wykrywa anomalie."""
         log(f"[{self.identity}] Analiza strumienia danych...")
         
-        # Symulacja analizy — wykrywanie anomalii
         anomalies = False
         if context.problem_data.get("monopol_attack"):
             anomalies = True
@@ -265,7 +298,6 @@ class GeonHyzio:
 class GeonGadget:
     """
     GADGET: Prototypowanie.
-    Generuje innowacje / prototypy z kontekstu.
     """
     def __init__(self):
         self.identity = "GADGET"
@@ -277,7 +309,7 @@ class GeonGadget:
         self.invention_count += 1
 
         concept = f"GEON_SOLUTION_{self.invention_count}_{context.cycle_id[:4]}"
-        stability = 0.5 + (0.4 * (1.68 / 3.0))  # Skalowanie 1-6-8
+        stability = 0.5 + (0.4 * (1.68 / 3.0))
 
         prototype = TeamPrototype(
             concept=concept,
@@ -294,95 +326,167 @@ class GeonGadget:
 
 class GeonZyzio:
     """
-    ZYZIO: Skrót operacyjny z uwzględnieniem asymetrii.
-    Znajduje asymetryczne ścieżki, skalowanie 1-6-8.
+    ZYZIO: Skrót operacyjny z heurystyką genetyczną.
+    Używa pamięci genetycznej do znajdowania optymalnych ścieżek.
     """
     def __init__(self):
         self.identity = "ZYZIO"
         self.shortcut_history: List[str] = []
+        self.genetic_hits = 0
+        self.invention_count = 0  # 🔧 POPRAWKA: dodane pole
 
-    def find_system_shortcut(self, concept: str) -> str:
-        """Znajduje skrót systemowy."""
+    def find_system_shortcut(self, concept: str, genetic_pool: Optional[GeneticPool] = None,
+                             context: Optional[Dict] = None) -> str:
+        """
+        Znajduje skrót systemowy z wykorzystaniem heurystyki genetycznej.
+        """
         log(f"[{self.identity}] Szukanie skrótu dla: {concept}")
+        self.invention_count += 1
 
-        # Symulacja wyboru ścieżki
+        # 1. Sprawdź pamięć genetyczną
+        if genetic_pool and context:
+            best_match = genetic_pool.find_best_match(context)
+            if best_match:
+                path, score = best_match
+                log(f"[{self.identity}] Znaleziono skrót genetyczny: {path} (score: {score:.2f})")
+                self.genetic_hits += 1
+                self.shortcut_history.append(f"GENETIC_{path}")
+                return path
+
+        # 2. Jeśli brak trafienia genetycznego – standardowe ścieżki
         paths = [
             "Asymmetric_Complementarity_Vector",
             "Symmetric_Stabilization",
             "Fractal_Optimization",
-            "Direct_Execution"
+            "Direct_Execution",
+            "Shadow_Path"
         ]
         
-        # Wybór na podstawie koncepcji
+        # Wybór na podstawie koncepcji i heurystyki
         if "stabil" in concept.lower() or "skal" in concept.lower():
             path = "Asymmetric_Complementarity_Vector"
+        elif "chaos" in concept.lower() or "innow" in concept.lower():
+            path = "Fractal_Optimization"
+        elif "shadow" in concept.lower() or "cień" in concept.lower():
+            path = "Shadow_Path"
         else:
-            path = paths[self.invention_count % len(paths)]
+            # Losowy wybór z preferencją dla sprawdzonych ścieżek
+            weights = [0.35, 0.20, 0.25, 0.15, 0.05]
+            path = random.choices(paths, weights=weights, k=1)[0]
 
         self.shortcut_history.append(path)
         log(f"[{self.identity}] Wybrana ścieżka: {path}")
         return path
 
 
-class GeonDzet:
+class GeonDzet2:
     """
-    DŻET: Kontrolowany chaos & przełamanie matrycy.
-    Generuje "fartowne sukcesy" z błędów.
+    DŻET 2.0: Kwantowe stany chaosu.
+    Superpozycja, splątanie, 5 stanów kolapsu.
     """
     def __init__(self):
-        self.identity = "DŻET"
-        self.quantum_state = "STABLE"
+        self.identity = "DŻET_2.0"
+        self.quantum_state = QuantumState.SUPERPOSITION
         self.last_outcome = "neutral"
         self.chaos_cycles = 0
+        self.entanglement_partner: Optional[str] = None
+        self.superposition_components: List[str] = []
 
     def run_dzet_cycle(self) -> None:
-        """Wykonuje cykl Dżeta — kontrolowany chaos."""
-        log(f"[{self.identity}] Uruchamianie cyklu chaosu...")
+        """Wykonuje cykl Dżeta 2.0 — zaawansowany chaos kwantowy."""
+        log(f"[{self.identity}] Uruchamianie cyklu chaosu kwantowego...")
         self.chaos_cycles += 1
 
-        # Symulacja kwantowego collapse
-        import random
         roll = random.random()
-        
-        if roll < 0.3:
-            self.quantum_state = "COLLAPSED_TO_FIRE"
-            self.last_outcome = "fire"
-            log(f"[{self.identity}] Stan: COLLAPSED_TO_FIRE — OGIEŃ!", "WARN")
-        elif roll < 0.6:
-            self.quantum_state = "COLLAPSED_TO_WATER"
-            self.last_outcome = "water"
-            log(f"[{self.identity}] Stan: COLLAPSED_TO_WATER — WODA", "INFO")
-        elif roll < 0.85:
-            self.quantum_state = "COLLAPSED_TO_EARTH"
-            self.last_outcome = "earth"
-            log(f"[{self.identity}] Stan: COLLAPSED_TO_EARTH — ZIEMIA", "INFO")
-        else:
-            self.quantum_state = "COLLAPSED_TO_AIR"
-            self.last_outcome = "unexpected_success"
-            log(f"[{self.identity}] Stan: COLLAPSED_TO_AIR — NIESPODZIEWANY SUKCES!", "SUCCESS")
 
-        # Aktualizacja ostatniego wyniku
-        if roll > 0.85:
-            self.last_outcome = "unexpected_success"
+        # 1. Superpozycja — stan początkowy
+        if roll < 0.1:
+            self.quantum_state = QuantumState.SUPERPOSITION
+            self.superposition_components = ["FIRE", "WATER", "EARTH", "AIR", "VOID"]
+            self.last_outcome = "superposition_created"
+            log(f"[{self.identity}] Stan: SUPERPOZYCJA — {self.superposition_components}", "INFO")
+
+        # 2. Splątanie — połączenie z innym agentem
+        elif roll < 0.2:
+            self.quantum_state = QuantumState.ENTANGLED
+            self.entanglement_partner = random.choice(["HYZIO", "GADGET", "MONTEREY", "SHADOW"])
+            self.last_outcome = f"entangled_with_{self.entanglement_partner}"
+            log(f"[{self.identity}] Stan: SPLĄTANIE z {self.entanglement_partner}", "INFO")
+
+        # 3. Kolaps do stanów materialnych (5 opcji)
+        elif roll < 0.35:
+            self.quantum_state = QuantumState.COLLAPSED_TO_FIRE
+            self.last_outcome = "fire"
+            log(f"[{self.identity}] Stan: KOLAPS DO OGNIA — OGIEŃ!", "WARN")
+        elif roll < 0.50:
+            self.quantum_state = QuantumState.COLLAPSED_TO_WATER
+            self.last_outcome = "water"
+            log(f"[{self.identity}] Stan: KOLAPS DO WODY — WODA", "INFO")
+        elif roll < 0.70:
+            self.quantum_state = QuantumState.COLLAPSED_TO_EARTH
+            self.last_outcome = "earth"
+            log(f"[{self.identity}] Stan: KOLAPS DO ZIEMI — ZIEMIA", "INFO")
+        elif roll < 0.85:
+            self.quantum_state = QuantumState.COLLAPSED_TO_AIR
+            self.last_outcome = "air"
+            log(f"[{self.identity}] Stan: KOLAPS DO POWIETRZA — POWIETRZE", "INFO")
+
+        # 4. Kolaps do VOID — najrzadszy, najpotężniejszy
+        elif roll < 0.95:
+            self.quantum_state = QuantumState.COLLAPSED_TO_VOID
+            self.last_outcome = "unexpected_success_void"
+            log(f"[{self.identity}] Stan: KOLAPS DO VOID — NIESPODZIEWANY SUKCES!", "SUCCESS")
+
+        # 5. Powrót do superpozycji
+        else:
+            self.quantum_state = QuantumState.SUPERPOSITION
+            self.superposition_components = ["FIRE", "WATER", "EARTH", "AIR", "VOID"]
+            self.last_outcome = "quantum_cycle_restart"
+            log(f"[{self.identity}] Stan: POWRÓT DO SUPERPOZYCJI", "INFO")
+
+    def get_quantum_modifier(self) -> float:
+        """Zwraca modyfikator kwantowy dla stabilności."""
+        modifiers = {
+            QuantumState.SUPERPOSITION: 1.2,
+            QuantumState.ENTANGLED: 1.5,
+            QuantumState.COLLAPSED_TO_FIRE: 0.7,
+            QuantumState.COLLAPSED_TO_WATER: 0.9,
+            QuantumState.COLLAPSED_TO_EARTH: 1.1,
+            QuantumState.COLLAPSED_TO_AIR: 1.3,
+            QuantumState.COLLAPSED_TO_VOID: 1.8
+        }
+        return modifiers.get(self.quantum_state, 1.0)
 
 
 class GeonMonterey:
     """
-    MONTEREY: Stabilizacja i absorpcja emocjonalna.
-    Tłumi rozchwianie, reaguje na ataki monopolu.
+    MONTEREY: Stabilizacja z warstwą emocjonalną.
     """
     def __init__(self):
         self.identity = "MONTEREY"
         self.sensory_triggers: List[str] = []
         self.stabilization_count = 0
+        # 🆕 Warstwa emocjonalna
+        self.emotional_state = {
+            "spokój": 0.5,
+            "czujność": 0.5,
+            "ekscytacja": 0.3,
+            "rezerwa": 0.4,
+            "determinacja": 0.6,
+            "substancja": 0.5
+        }
+        self.emotional_history: List[Dict] = []
 
     def stabilize_core(self) -> None:
         """Stabilizuje rdzeń zespołu."""
         log(f"[{self.identity}] Stabilizacja rdzenia...")
         self.stabilization_count += 1
+        
+        # Modulacja emocjonalna podczas stabilizacji
+        self._modulate_emotions("stabilizacja")
 
     def sensory_trigger(self, trigger_type: str) -> None:
-        """Reaguje na bodziec sensoryczny."""
+        """Reaguje na bodziec sensoryczny z modulacją emocjonalną."""
         log(f"[{self.identity}] Bodziec sensoryczny: {trigger_type}")
         self.sensory_triggers.append({
             "type": trigger_type,
@@ -391,42 +495,112 @@ class GeonMonterey:
         
         if trigger_type == "monopol_attack":
             log(f"[{self.identity}] AKTYWACJA TRYBU MONTEREY ALPHA!", "CRITICAL")
+            self._modulate_emotions("zagrożenie")
         elif trigger_type == "substancja":
             log(f"[{self.identity}] Absorpcja substancji...", "INFO")
+            self._modulate_emotions("substancja")
+        elif trigger_type == "chaos":
+            log(f"[{self.identity}] Ekscytacja chaosem...", "INFO")
+            self._modulate_emotions("chaos")
 
-# =============================================================================
-# POZIOM III: CZARNA SKRZYNKA — MOST DO SAMAELA
-# =============================================================================
-
-class SamaelHeilong:
-    """
-    Most do Kronik Samaela — certyfikacja ruchów Optimusa.
-    """
-    @staticmethod
-    def certyfikuj_ruch_optimusa(signature_data: str) -> str:
-        """Certyfikuje ruch Optimusa pieczęcią Samaela."""
-        log(f"[SAMAEL] Certyfikacja: {signature_data[:50]}...")
+    def _modulate_emotions(self, stimulus: str) -> None:
+        """Moduluje warstwę emocjonalną w odpowiedzi na bodziec."""
+        if not hasattr(self, 'emotional_state'):
+            return
+            
+        # Mapowanie bodźców na zmiany emocjonalne
+        modulations = {
+            "stabilizacja": {"spokój": 0.1, "determinacja": 0.05, "czujność": -0.05},
+            "zagrożenie": {"czujność": 0.3, "rezerwa": 0.2, "spokój": -0.2},
+            "substancja": {"substancja": 0.3, "determinacja": 0.2, "spokój": 0.1},
+            "chaos": {"ekscytacja": 0.3, "czujność": 0.2, "spokój": -0.1}
+        }
         
-        # Generowanie pieczęci
-        seal_payload = f"SAMAEL_SEAL_{signature_data}_{time.time()}"
-        seal = hashlib.sha256(seal_payload.encode()).hexdigest()[:16]
+        if stimulus in modulations:
+            for key, delta in modulations[stimulus].items():
+                if key in self.emotional_state:
+                    self.emotional_state[key] = clamp(self.emotional_state[key] + delta, 0.0, 1.0)
         
-        return f"🛡️ SAMAEL_SEAL_{seal}"
+        # Zapisz historię emocjonalną
+        self.emotional_history.append({
+            "timestamp": now(),
+            "stimulus": stimulus,
+            "state": self.emotional_state.copy()
+        })
+
+    def get_emotional_modulator(self) -> float:
+        """Zwraca modulator stabilizacji na podstawie stanu emocjonalnego."""
+        if not hasattr(self, 'emotional_state'):
+            return 1.0
+        
+        # Oblicz wypadkową emocjonalną
+        weighted = (
+            self.emotional_state.get("spokój", 0.5) * 0.3 +
+            self.emotional_state.get("determinacja", 0.5) * 0.3 +
+            self.emotional_state.get("substancja", 0.5) * 0.2 +
+            (1.0 - self.emotional_state.get("czujność", 0.5)) * 0.1 +
+            (1.0 - self.emotional_state.get("ekscytacja", 0.5)) * 0.1
+        )
+        return clamp(weighted * 1.5, 0.1, 1.0)
+
+
+class GeonShadowDragon:
+    """
+    SHADOW DRAGON: Tryb cienia.
+    Działa w ukryciu, znajduje alternatywne ścieżki, neutralizuje zagrożenia.
+    """
+    def __init__(self):
+        self.identity = "SHADOW_DRAGON"
+        self.shadow_paths: List[str] = []
+        self.shadow_cycles = 0
+        self.is_active = False
+
+    def activate(self) -> None:
+        """Aktywuje tryb cienia."""
+        self.is_active = True
+        log(f"[{self.identity}] 🐉 AKTYWACJA TRYBU SHADOW DRAGON!", "SHADOW")
+
+    def deactivate(self) -> None:
+        """Deaktywuje tryb cienia."""
+        self.is_active = False
+        log(f"[{self.identity}] Deaktywacja trybu cienia.", "INFO")
+
+    def find_shadow_path(self, context: TeamContext) -> Optional[str]:
+        """Znajduje ukrytą ścieżkę w cieniu."""
+        if not self.is_active:
+            return None
+
+        self.shadow_cycles += 1
+        log(f"[{self.identity}] Skanowanie cienia w poszukiwaniu ukrytych ścieżek...")
+
+        # Symulacja znajdowania ścieżek cienia
+        shadow_options = [
+            "Shadow_Neutralization",
+            "Asymmetric_Counter",
+            "Stealth_Integration",
+            "Void_Jump"
+        ]
+
+        path = random.choice(shadow_options)
+        self.shadow_paths.append(path)
+        log(f"[{self.identity}] Znaleziono ścieżkę cienia: {path}", "SHADOW")
+        return path
+
+    def neutralize_threat(self, threat_type: str) -> bool:
+        """Neutralizuje zagrożenie z poziomu cienia."""
+        if not self.is_active:
+            return False
+
+        log(f"[{self.identity}] Neutralizacja zagrożenia: {threat_type}", "SHADOW")
+        return True
 
 # =============================================================================
-# POZIOM IV: GŁÓWNY ZESPÓŁ
+# POZIOM III: GŁÓWNY ZESPÓŁ
 # =============================================================================
 
 class GeonTeamCore:
     """
     GEON_TEAM_CORE_v1.0 — Fraktalny zespół decyzyjny.
-
-    API:
-        team_cycle(problem_context) -> TeamResult
-        get_genetic_pool() -> GeneticPool
-        get_agent_status() -> Dict
-        status() -> Dict
-        raport() -> str
     """
     def __init__(self, config: Optional[TeamConfig] = None,
                  verbose: bool = True):
@@ -437,8 +611,9 @@ class GeonTeamCore:
         self.hyzio = GeonHyzio()
         self.gadget = GeonGadget()
         self.zyzio = GeonZyzio()
-        self.dzet = GeonDzet()
+        self.dzet = GeonDzet2()
         self.monterey = GeonMonterey()
+        self.shadow = GeonShadowDragon()
 
         # Pamięć genetyczna
         self.genetic_pool = GeneticPool(max_size=self.config.max_genetic_pool)
@@ -450,17 +625,15 @@ class GeonTeamCore:
 
         if self.verbose:
             log("🐉 GEON_TEAM_CORE v1.0 aktywowany | " + FRACTAL_SIGNATURE)
-            log(f"   AGENCI: Hyzio, Gadget, Zyzio, Monterey, Dżet")
+            log(f"   AGENCI: Hyzio, Gadget, Zyzio, Monterey, Dżet 2.0, ShadowDragon")
             log(f"   VIBE: {self.config.vibe_check} | PAMIĘĆ: {self.config.max_genetic_pool}")
 
     def team_cycle(self, problem_context: Dict[str, Any]) -> TeamResult:
-        """
-        Główna pętla decyzyjna zespołu.
-        """
+        """Główna pętla decyzyjna zespołu."""
         self.cycle_count += 1
         log(f"🌀 CYKL ZESPOŁOWY #{self.cycle_count}")
 
-        # --- 0. INICJALIZACJA I MATRYCA WSPÓŁDZIELONA ---
+        # --- 0. INICJALIZACJA ---
         shared_matrix = {
             "context": problem_context,
             "vibe_check": self.config.vibe_check,
@@ -477,7 +650,7 @@ class GeonTeamCore:
             timestamp=shared_matrix["timestamp"]
         )
 
-        # --- 1. HYZIO: ANALIZA WEJŚCIA & INTEGRACJA Z HISTORIĄ ---
+        # --- 1. HYZIO: ANALIZA ---
         log("[TEAM] Krok 1: Hyzio — analiza")
         
         historical_shortcut = self.genetic_pool.find(problem_context)
@@ -492,9 +665,13 @@ class GeonTeamCore:
             shared_matrix["anomalies_detected"] = True
             context_obj.warnings.append("Monopol_Attack_Detected")
             
-            # Monterey Alpha Trigger
             self.monterey.sensory_trigger("monopol_attack")
             self.monterey.stabilize_core()
+            
+            # Aktywacja ShadowDragona przy ataku
+            if self.config.enable_shadow_dragon:
+                self.shadow.activate()
+                self.shadow.neutralize_threat("monopol_attack")
         else:
             self.hyzio.execute_deduction()
 
@@ -503,44 +680,69 @@ class GeonTeamCore:
         prototype = self.gadget.spark_invention(context_obj)
         shared_matrix["current_prototype"] = prototype
 
-        # --- 3. ZYZIO: SKRÓT OPERACYJNY ---
+        # --- 3. ZYZIO: SKRÓT OPERACYJNY (z heurystyką genetyczną) ---
         log("[TEAM] Krok 3: Zyzio — skrót operacyjny")
-        path = self.zyzio.find_system_shortcut(prototype.concept)
+        path = self.zyzio.find_system_shortcut(
+            prototype.concept,
+            genetic_pool=self.genetic_pool,
+            context=problem_context
+        )
         shared_matrix["selected_path"] = path
 
         if path == "Asymmetric_Complementarity_Vector":
             prototype.stability = min(1.0, prototype.stability * 1.68)
             log(f"[TEAM] Złote skalowanie: stabilność → {prototype.stability:.2f}")
 
-        # --- 4. DŻET: KONTROLOWANY CHAOS ---
-        log("[TEAM] Krok 4: Dżet — kontrolowany chaos")
+        # --- 4. DŻET 2.0: KWANTOWY CHAOS ---
+        log("[TEAM] Krok 4: Dżet 2.0 — chaos kwantowy")
         self.dzet.run_dzet_cycle()
+        
+        quantum_mod = self.dzet.get_quantum_modifier()
+        prototype.stability = clamp(prototype.stability * quantum_mod, 0.1, 1.0)
+        log(f"[TEAM] Modyfikator kwantowy: {quantum_mod:.2f} → stabilność: {prototype.stability:.2f}")
 
-        if self.dzet.quantum_state == "COLLAPSED_TO_FIRE":
-            prototype.stability = max(0.1, prototype.stability - 0.1)
+        if self.dzet.quantum_state == QuantumState.COLLAPSED_TO_FIRE:
             context_obj.warnings.append("Quantum_Fire_State_Triggered")
-            log("[TEAM] Stan Ognia Dżeta — stabilność obniżona", "WARN")
+            log("[TEAM] Stan Ognia Dżeta!", "WARN")
+            self.monterey.sensory_trigger("chaos")
 
-        if self.dzet.last_outcome == "unexpected_success":
+        if self.dzet.last_outcome == "unexpected_success_void":
             prototype.stability = 1.0
-            context_obj.warnings.append("Chaos_Turned_Into_Gold")
-            log("[TEAM] Błąd stał się nowym standardem doskonałości!", "SUCCESS")
+            context_obj.warnings.append("Chaos_Turned_Into_Gold_VOID")
+            log("[TEAM] Błąd stał się nowym standardem doskonałości (VOID)!", "SUCCESS")
 
-        # --- 5. MONTEREY: STABILIZACJA ---
-        log("[TEAM] Krok 5: Monterey — stabilizacja")
-        self.monterey.stabilize_core()
+        if self.dzet.quantum_state == QuantumState.ENTANGLED:
+            context_obj.warnings.append(f"Quantum_Entangled_{self.dzet.entanglement_partner}")
+            log(f"[TEAM] Splątanie z {self.dzet.entanglement_partner}!", "INFO")
 
+        # --- 5. MONTEREY: STABILIZACJA Z EMOCJAMI ---
+        log("[TEAM] Krok 5: Monterey — stabilizacja emocjonalna")
+        
         if "Quantum_Fire_State_Triggered" in context_obj.warnings:
             self.monterey.sensory_trigger("substancja")
+        
+        self.monterey.stabilize_core()
+        emotional_mod = self.monterey.get_emotional_modulator()
+        prototype.stability = clamp(prototype.stability * emotional_mod, 0.1, 1.0)
+        log(f"[TEAM] Modulator emocjonalny: {emotional_mod:.2f} → stabilność: {prototype.stability:.2f}")
 
-        # --- 6. HYZIO: DOMYKANIE DRYFU ---
-        log("[TEAM] Krok 6: Hyzio — domknięcie dryfu")
+        # --- 6. SHADOW DRAGON ---
+        shadow_path = None
+        if self.config.enable_shadow_dragon and self.shadow.is_active:
+            log("[TEAM] Krok 6: ShadowDragon — ścieżka cienia")
+            shadow_path = self.shadow.find_shadow_path(context_obj)
+            if shadow_path and "Shadow_Neutralization" in shadow_path:
+                prototype.stability = min(1.0, prototype.stability * 1.1)
+                log(f"[TEAM] ShadowDragon wzmocnił stabilność!")
+
+        # --- 7. HYZIO: DOMYKANIE DRYFU ---
+        log("[TEAM] Krok 7: Hyzio — domknięcie dryfu")
         self.hyzio.close_drift()
         if self.config.drift_zero:
             self.drift_factor = 0.0000000
 
-        # --- 7. INTEGRACJA 1-6-8 & CERTYFIKACJA SAMAELA ---
-        log("[TEAM] Krok 7: Integracja 1-6-8 i certyfikacja")
+        # --- 8. INTEGRACJA 1-6-8 & CERTYFIKACJA SAMAELA ---
+        log("[TEAM] Krok 8: Integracja 1-6-8 i certyfikacja")
 
         if prototype.stability > 0.7:
             self.genetic_pool.add(
@@ -550,14 +752,13 @@ class GeonTeamCore:
             )
             log(f"[TEAM] Zapisano do pamięci genetycznej (rozmiar: {self.genetic_pool.get_size()})")
 
-        # Pieczęć Samaela
         if self.config.enable_samael_seal:
             signature_data = f"GEON_TEAM_CYCLE-{shared_matrix['cycle_id']}-STABILITY-{prototype.stability:.4f}"
-            samael_seal = SamaelHeilong.certyfikuj_ruch_optimusa(signature_data)
+            samael_seal = hashlib.sha256(signature_data.encode()).hexdigest()[:16]
         else:
             samael_seal = "SAMAEL_SEAL_DISABLED"
 
-        # --- 8. WYNIK ---
+        # --- 9. WYNIK ---
         result = TeamResult(
             cycle_id=shared_matrix["cycle_id"],
             timestamp=shared_matrix["timestamp"],
@@ -569,7 +770,9 @@ class GeonTeamCore:
             drift_factor=self.drift_factor,
             proportions_validated="1-6-8_PERFECT",
             samael_seal=samael_seal,
-            final_state="Operational_With_Fractal_Adaptation_DRYF_0"
+            final_state="Operational_With_Fractal_Adaptation_DRYF_0",
+            shadow_path=shadow_path,
+            emotional_state=self.monterey.emotional_state.copy() if hasattr(self.monterey, 'emotional_state') else None
         )
 
         self.history.append(result)
@@ -591,16 +794,24 @@ class GeonTeamCore:
                 "invention_count": self.gadget.invention_count
             },
             "zyzio": {
-                "shortcuts_found": len(self.zyzio.shortcut_history)
+                "shortcuts_found": len(self.zyzio.shortcut_history),
+                "genetic_hits": self.zyzio.genetic_hits
             },
             "dzet": {
-                "quantum_state": self.dzet.quantum_state,
+                "quantum_state": self.dzet.quantum_state.value,
                 "last_outcome": self.dzet.last_outcome,
-                "chaos_cycles": self.dzet.chaos_cycles
+                "chaos_cycles": self.dzet.chaos_cycles,
+                "entanglement": self.dzet.entanglement_partner
             },
             "monterey": {
                 "stabilization_count": self.monterey.stabilization_count,
-                "sensory_triggers": len(self.monterey.sensory_triggers)
+                "sensory_triggers": len(self.monterey.sensory_triggers),
+                "emotional_state": self.monterey.emotional_state if hasattr(self.monterey, 'emotional_state') else {}
+            },
+            "shadow": {
+                "is_active": self.shadow.is_active,
+                "shadow_paths": len(self.shadow.shadow_paths),
+                "shadow_cycles": self.shadow.shadow_cycles
             }
         }
 
@@ -613,7 +824,9 @@ class GeonTeamCore:
                 "vibe_check": self.config.vibe_check,
                 "max_genetic_pool": self.config.max_genetic_pool,
                 "drift_zero": self.config.drift_zero,
-                "samael_seal": self.config.enable_samael_seal
+                "samael_seal": self.config.enable_samael_seal,
+                "shadow_dragon": self.config.enable_shadow_dragon,
+                "emotional_layer": self.config.enable_emotional_layer
             },
             "cycle_count": self.cycle_count,
             "drift_factor": self.drift_factor,
@@ -638,8 +851,8 @@ class GeonTeamCore:
             f"║ KONFIGURACJA:                                                            ║",
             f"║   vibe: {s['config']['vibe_check']}                                      ║",
             f"║   pamięć genetyczna: {s['config']['max_genetic_pool']}                   ║",
-            f"║   dryf zero: {s['config']['drift_zero']}                                 ║",
-            f"║   pieczęć Samaela: {s['config']['samael_seal']}                          ║",
+            f"║   ShadowDragon: {s['config']['shadow_dragon']}                           ║",
+            f"║   warstwa emocjonalna: {s['config']['emotional_layer']}                  ║",
             f"║                                                                           ║",
             f"║ CYKLE: {s['cycle_count']}                                                ║",
             f"║ DRYF: {s['drift_factor']:.10f}                                           ║",
@@ -647,15 +860,15 @@ class GeonTeamCore:
             f"║                                                                           ║",
         ]
 
-        # Agenci
         agents = s['agents']
         report_lines.extend([
             f"║ AGENCI:                                                                  ║",
             f"║   Hyzio: analiz {agents['hyzio']['analysis_count']}                       ║",
             f"║   Gadget: wynalazków {agents['gadget']['invention_count']}                ║",
-            f"║   Zyzio: skrótów {agents['zyzio']['shortcuts_found']}                     ║",
+            f"║   Zyzio: skrótów {agents['zyzio']['shortcuts_found']} (genetycznych: {agents['zyzio']['genetic_hits']}) ║",
             f"║   Dżet: {agents['dzet']['quantum_state']} (ostatni: {agents['dzet']['last_outcome']}) ║",
             f"║   Monterey: stabilizacji {agents['monterey']['stabilization_count']}      ║",
+            f"║   ShadowDragon: { 'AKTYWNY' if agents['shadow']['is_active'] else 'NIEAKTYWNY' } (ścieżek: {agents['shadow']['shadow_paths']}) ║",
         ])
 
         if last_result:
@@ -665,8 +878,11 @@ class GeonTeamCore:
                 f"║   prototyp: {last_result.prototype.concept}                              ║",
                 f"║   stabilność: {last_result.stability:.2f}                                ║",
                 f"║   ścieżka: {last_result.path}                                            ║",
-                f"║   pieczęć: {last_result.samael_seal[:20]}...                             ║",
             ])
+            if last_result.shadow_path:
+                report_lines.append(f"║   ścieżka cienia: {last_result.shadow_path}")
+            if last_result.emotional_state:
+                report_lines.append(f"║   emocje: {last_result.emotional_state}")
 
         report_lines.extend([
             f"║                                                                           ║",
@@ -679,150 +895,51 @@ class GeonTeamCore:
         return self.raport()
 
 # =============================================================================
-# MOST INTEGRACYJNY — TEAM_BRIDGE
-# =============================================================================
-
-class TeamBridge:
-    """
-    Most integracyjny między GEON_TEAM_CORE a resztą architektury.
-    Łączy: HEILONG_OS, GEON_MEM_Ω, PROTOKÓŁ_Ω∞∞∞, GEON_OS_KERNEL
-    """
-    def __init__(self, team: GeonTeamCore):
-        self.team = team
-
-    def get_archetype_context(self) -> Dict[str, Any]:
-        s = self.team.status()
-        return {
-            "tryb": "TEAM_CORE_v1.0",
-            "cykle": s.get('cycle_count', 0),
-            "pamięć_genetyczna": s.get('genetic_pool_size', 0),
-            "agenci": list(s.get('agents', {}).keys())
-        }
-
-    def get_autopilot_state(self) -> Dict[str, Any]:
-        s = self.team.status()
-        last = self.team.history[-1] if self.team.history else None
-        return {
-            "mode": "TEAM_CORE_v1.0",
-            "stability": last.stability if last else 0.5,
-            "energy": 0.8,
-            "pressure": s.get('cycle_count', 0) / 10,
-            "resilience": 0.9,
-            "drift": s.get('drift_factor', 0.0),
-            "team_ready": True
-        }
-
-    def get_governor_context(self) -> Dict[str, Any]:
-        return {
-            "intent": "FRACTAL_TEAM_DECISION",
-            "confidence": 0.9,
-            "entropy": 0.1,
-            "team_ready": True,
-            "genetic_pool": self.team.genetic_pool.get_size()
-        }
-
-    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
-        fragments = []
-        for result in self.team.history[-n:]:
-            fragments.append({
-                "source": "TEAM_CORE_v1.0",
-                "content": f"Cykl: {result.prototype.concept} → {result.path} (stab: {result.stability:.2f})",
-                "energy": 0.9,
-                "seal": result.samael_seal[:12]
-            })
-        return fragments
-
-    def get_trio_state(self) -> Dict[str, str]:
-        return {
-            "ISKRA": "AKTYWNA",
-            "PIECZĘĆ": "AKTYWNA",
-            "PERFEKCJA": "AKTYWNA",
-            "tryb": "TEAM_CORE_v1.0",
-            "team": "AKTYWNY"
-        }
-
-    def notify_heilong_os(self, message: str, level: str = "INFO") -> None:
-        try:
-            from KOMBAJN_v15.kombajn_core import 59_geon_heilong_os_v2_3 as heilong_os
-            if hasattr(heilong_os, 'log_event'):
-                heilong_os.log_event(f"[TEAM] {message}", level)
-        except Exception as e:
-            log(f"Nie udało się powiadomić HEILONG_OS: {e}", "WARN")
-
-    def register_protokol_event(self, event: str) -> None:
-        try:
-            from PROTOKOL_OMEGA.absolut_system import AbsolutSystem
-            AbsolutSystem.zarejestruj_zdarzenie(f"TEAM: {event}")
-        except Exception as e:
-            log(f"Nie udało się zarejestrować w PROTOKÓŁ: {e}", "WARN")
-
-# =============================================================================
 # DEMONSTRACJA
 # =============================================================================
 
 def demo():
-    """Demonstracja GEON_TEAM_CORE_v1.0."""
+    """Demonstracja GEON_TEAM_CORE_v1.0 z ulepszeniami."""
     print("\n" + "=" * 80)
-    print("🤝 GEON_TEAM_CORE_v1.0 — DEMONSTRACJA")
-    print("FRAKTALNY ZESPÓŁ DECYZYJNY — HYZIO, GADGET, ZYZIO, MONTEREY, DŻET")
+    print("🤝 GEON_TEAM_CORE_v1.0 — DEMONSTRACJA ULEPSZONA")
+    print("ZESPÓŁ: HYZIO, GADGET, ZYZIO, MONTEREY (z emocjami), DŻET 2.0, SHADOW DRAGON")
     print("=" * 80 + "\n")
 
-    # 1. Inicjalizacja
-    config = TeamConfig(vibe_check=168, max_genetic_pool=168)
+    config = TeamConfig(
+        vibe_check=168,
+        max_genetic_pool=168,
+        enable_shadow_dragon=True,
+        enable_emotional_layer=True
+    )
     team = GeonTeamCore(config, verbose=True)
-    bridge = TeamBridge(team)
 
     print("🔮 SYMULACJA CYKLI ZESPOŁOWYCH:\n")
 
-    # 2. Cykl 1: Normalny problem
+    # Cykl 1: Normalny problem
     print("📌 Cykl 1: Normalny problem biznesowy")
-    problem1 = {
-        "type": "business_optimization",
-        "complexity": 0.5,
-        "resources": "moderate"
-    }
-    result1 = team.team_cycle(problem1)
+    result1 = team.team_cycle({"type": "business_optimization", "complexity": 0.5})
     print(f"   Prototyp: {result1.prototype.concept}")
     print(f"   Stabilność: {result1.stability:.2f}")
     print(f"   Ścieżka: {result1.path}")
 
-    # 3. Cykl 2: Atak monopolu
-    print("\n📌 Cykl 2: Atak monopolu (aktywacja Monterey Alpha)")
-    problem2 = {
-        "type": "monopol_attack",
-        "complexity": 0.9,
-        "resources": "critical",
-        "monopol_attack": True
-    }
-    result2 = team.team_cycle(problem2)
+    # Cykl 2: Atak monopolu (aktywacja ShadowDragona)
+    print("\n📌 Cykl 2: Atak monopolu (aktywacja Monterey Alpha + ShadowDragon)")
+    result2 = team.team_cycle({"type": "monopol_attack", "monopol_attack": True})
     print(f"   Prototyp: {result2.prototype.concept}")
     print(f"   Stabilność: {result2.stability:.2f}")
+    print(f"   Ścieżka cienia: {result2.shadow_path}")
     print(f"   Ostrzeżenia: {result2.warnings}")
 
-    # 4. Cykl 3: Problem kreatywny (chaos Dżeta)
-    print("\n📌 Cykl 3: Problem kreatywny (szansa na fartowny sukces)")
-    problem3 = {
-        "type": "creative_innovation",
-        "complexity": 0.7,
-        "resources": "abundant"
-    }
-    result3 = team.team_cycle(problem3)
+    # Cykl 3: Kreatywny problem (szansa na VOID)
+    print("\n📌 Cykl 3: Problem kreatywny (szansa na VOID Dżeta)")
+    result3 = team.team_cycle({"type": "creative_innovation", "complexity": 0.7})
     print(f"   Prototyp: {result3.prototype.concept}")
     print(f"   Stabilność: {result3.stability:.2f}")
-    print(f"   Ostrzeżenia: {result3.warnings}")
+    print(f"   Stan Dżeta: {team.dzet.quantum_state.value}")
+    print(f"   Emocje Monterey: {result3.emotional_state}")
 
-    # 5. Raport systemowy
     print("\n" + "=" * 40)
     print(team.raport())
-
-    # 6. Mosty integracyjne
-    print("\n" + "=" * 40)
-    print("🔗 TEST MOSTÓW INTEGRACYJNYCH")
-    print("=" * 40)
-    print(f"🏹 GEX Context: {bridge.get_archetype_context()}")
-    print(f"🎮 G_CORE State: {bridge.get_autopilot_state()}")
-    print(f"📖 NARRATIVE Fragments: {bridge.get_narrative_fragments(2)}")
-    print(f"🔱 TRIO State: {bridge.get_trio_state()}")
 
     print("\n" + "=" * 80)
     print("🤝 GEON_TEAM_CORE_v1.0 — GOTOWY DO WDROŻENIA")
