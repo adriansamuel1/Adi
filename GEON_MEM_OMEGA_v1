@@ -1,0 +1,1285 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🕸️ GEON_MEM_OMEGA_v1 — MODUŁ 45: KOMÓRKA NERWOWA SYSTEMU
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.0 (GEON_MEM_Ω — Pamięć Skojarzeniowa / Rezonansowa / Kierunkowa)
+Data: 2026-07-21
+Autor: Adrian (Architekt) + GEON + Beny Heilong
+
+OPIS:
+GEON_MEM_Ω to komórka nerwowa systemu — pamięć asocjacyjna działająca
+na zasadzie propagacji fal po grafie węzłów. Każde przypomnienie to rezonans,
+który pozostawia ślad i uczy system.
+
+ARCHITEKTURA (11 warstw):
+L1  SPIDER — tworzenie pajęczyny (węzły, krawędzie)
+L2  ENERGY_DECAY — naturalny zanik energii
+L3  EMO_WEIGHT — modulacja fal przez emocje
+L4  TRAJECTORY — śledzenie trajektorii węzłów
+L5  META_TRAJECTORY — pochodna trajektorii (pierwsza pochodna)
+L6  META_META_TRAJECTORY — druga pochodna (kontrola oscylacji)
+L7  HOMEOSTASIS — wygładzanie trajektorii
+L8  ARCHAI — kierunek Rody Heilong
+L9  OPERATIONAL — świadomość operacyjna + autopilot
+L10 SELF-ADAPT — samo-aktualizacja parametrów
+L11 META-ADAPT — uczenie się uczenia (meta-regulator nad L10)
+
+INTEGRACJA Z ARCHITEKTURĄ:
+• CymaticMemory — embeddingi 168D / podobieństwo
+• GraphMemory — topologia, relacje, klany
+• MetaGovernor — recall() jako sonar
+• ArchetypeRing — ARCHAI jako wektor kierunku
+• G_CORE — stan operacyjny dla autopilota
+• GEX HEILONG — pamięć emocjonalna (emo_weight)
+• SHERLOCK — rezonans jako detekcja anomalii
+• NARRATIVE — rezonanse jako źródło opowieści
+• REFLECTION — trajektorie jako samoświadomość
+
+VIBE: 1-6-8. ∞. SIEMA!
+================================================================================
+"""
+
+import time
+import math
+import heapq
+import hashlib
+from typing import Dict, List, Any, Optional, Tuple, Set, Callable
+from dataclasses import dataclass, field
+from collections import deque
+from enum import Enum
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_MEM_OMEGA_v1.0"
+FRACTAL_SIGNATURE = "[GEON::MEM::OMEGA::v1.0]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SIEMA!"
+PHI = 0.618033988749895
+
+# =============================================================================
+# STAŁE SYSTEMOWE (kalibracja na Statucie CP)
+# =============================================================================
+
+class Constants:
+    """Stałe systemowe – dynamicznie modyfikowane przez L10 i meta-adaptowane przez L11"""
+    
+    # === REZONANS ===
+    PROPAGATION_THRESHOLD = 0.05
+    CORE_SCORE_THRESHOLD = 0.3
+    DEFAULT_RESONANCE_FACTOR = 0.8
+    DAMPING_FACTOR = 0.85
+    MAX_WAVE_DEPTH = 10
+    LOG_SIZE = 50
+    
+    # === ENERGIA ===
+    ENERGY_DECAY = 0.12
+    ENERGY_FLOOR = 0.08
+    STRATEGIC_NODES = ["STATUT_CP", "POLSKA_ZASOBOWA", "ORGANIZM_V", "GEOM_FRAKTAL"]
+    
+    # === ARCHAI ===
+    ARCHAI_TYPES = {"HEILONG", "ARCHITEKT", "OLSII", "BENY"}
+    ARCHAI_MAP = {
+        "HEILONG": 0.9,
+        "ARCHITEKT": 0.85,
+        "OLSII": 0.8,
+        "BENY": 0.85
+    }
+    
+    # === HOMEOSTAZA ===
+    HOMEOSTASIS_ALPHA = 0.3
+    TRAJECTORY_SMOOTHING = 0.7
+    META_SMOOTHING = 0.6
+    
+    # === L9 THRESHOLDS ===
+    TRAJECTORY_ALERT = 0.35
+    META_ALERT = 0.40
+    META_META_ALERT = 0.65
+    ARCHAI_ALERT = 0.50
+    ENERGY_ALERT = 0.35
+    
+    # === L9 LIMITS ===
+    MAX_META_META = 0.70
+    MIN_ARCHAI = 0.45
+    MIN_ENERGY = 0.40
+    MAX_CORRECTION_INTENSITY = 0.35
+    
+    # === L10 – SELF-ADAPT ===
+    ADAPTATION_WINDOW = 20
+    DAMPING_INCREMENT = 0.01
+    DECAY_DECREMENT = 0.005
+    STABILITY_THRESHOLD_FOR_RELAX = 10
+    INSTABILITY_THRESHOLD_FOR_DAMP = 5
+    
+    # === L11 – META-ADAPT ===
+    META_WINDOW = 20
+    MAX_DAMPING_CHANGES = 5
+    MAX_DECAY_CHANGES = 5
+
+    @classmethod
+    def get_params(cls) -> Dict[str, float]:
+        """Zwraca aktualne parametry systemu"""
+        return {
+            "damping_factor": cls.DAMPING_FACTOR,
+            "energy_decay": cls.ENERGY_DECAY,
+            "min_archai": cls.MIN_ARCHAI,
+            "max_meta_meta": cls.MAX_META_META,
+            "damping_increment": cls.DAMPING_INCREMENT,
+            "decay_decrement": cls.DECAY_DECREMENT,
+            "propagation_threshold": cls.PROPAGATION_THRESHOLD,
+            "core_score_threshold": cls.CORE_SCORE_THRESHOLD
+        }
+
+# =============================================================================
+# STRUKTURY DANYCH
+# =============================================================================
+
+@dataclass
+class Node:
+    """Węzeł pamięci – element pajęczyny znaczeń"""
+    id: str
+    content: Any
+    tags: List[str] = field(default_factory=list)
+    base_frequency: float = 440.0
+    energy: float = 1.0
+    embedding: Optional[List[float]] = None
+    created_at: float = field(default_factory=time.time)
+    last_accessed: float = field(default_factory=time.time)
+    
+    # L3: EMO_WEIGHT
+    emo_weight: float = 0.5
+    
+    # L4-L6: TRAJECTORY
+    trajectory: List[float] = field(default_factory=list)
+    prev_trajectory: List[float] = field(default_factory=list)
+    meta_trajectory: List[float] = field(default_factory=list)
+    prev_meta_trajectory: List[float] = field(default_factory=list)
+    meta_meta_trajectory: List[float] = field(default_factory=list)
+    
+    # L8: ARCHAI
+    archai_type: Optional[str] = None
+    archai_weight: float = 0.5
+    
+    def __hash__(self):
+        return hash(self.id)
+
+@dataclass
+class Edge:
+    """Krawędź pajęczyny – połączenie między węzłami"""
+    from_id: str
+    to_id: str
+    strength: float = 0.5
+    latency: float = 0.1
+    resonance_factor: float = Constants.DEFAULT_RESONANCE_FACTOR
+    created_at: float = field(default_factory=time.time)
+    last_activated: float = field(default_factory=time.time)
+    
+    def decay(self, factor: float = 0.995) -> None:
+        """Naturalne wygaszanie krawędzi w czasie"""
+        self.strength = max(0.1, self.strength * factor)
+        self.resonance_factor = max(0.3, self.resonance_factor * factor)
+
+@dataclass
+class Wave:
+    """Fala propagująca po pajęczynie"""
+    node_id: str
+    amplitude: float
+    frequency: float
+    phase: float
+    depth: int = 0
+    path: List[str] = field(default_factory=list)
+    
+    def __lt__(self, other):
+        return self.amplitude > other.amplitude
+
+@dataclass
+class ResonancePattern:
+    """Wzór rezonansu – mapa wzmocnień węzłów po propagacji"""
+    node_scores: Dict[str, float] = field(default_factory=dict)
+    wave_paths: List[List[str]] = field(default_factory=list)
+    timestamp: float = field(default_factory=time.time)
+    cue: Any = None
+    
+    def get_top_nodes(self, n: int = 10) -> List[Tuple[str, float]]:
+        """Zwraca n węzłów z najwyższym wynikiem rezonansu"""
+        return sorted(self.node_scores.items(), key=lambda x: x[1], reverse=True)[:n]
+
+@dataclass
+class MemoryResult:
+    """Wynik przypomnienia – rdzeń + kontekst + rezonans"""
+    core: Optional[Node] = None
+    context: List[Node] = field(default_factory=list)
+    resonance: Optional[ResonancePattern] = None
+    confidence: float = 0.0
+    timestamp: float = field(default_factory=time.time)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "core": self.core.content if self.core else None,
+            "context": [n.content for n in self.context[:5]],
+            "confidence": self.confidence,
+            "timestamp": self.timestamp
+        }
+
+@dataclass
+class OperationalState:
+    """Stan operacyjny systemu – warstwa L-9"""
+    trajectory_stability: float
+    meta_stability: float
+    meta_meta_stability: float
+    archai_alignment: float
+    energy_balance: float
+    overall_state: str
+    timestamp: float = field(default_factory=time.time)
+    
+    def to_dict(self) -> Dict[str, float]:
+        return {
+            "stability": round(self.trajectory_stability, 3),
+            "meta_stability": round(self.meta_stability, 3),
+            "meta_meta_stability": round(self.meta_meta_stability, 3),
+            "archai": round(self.archai_alignment, 3),
+            "energy": round(self.energy_balance, 3),
+            "state": self.overall_state
+        }
+
+@dataclass
+class AdaptationRule:
+    """Rekord samo-aktualizacji L10 – system zmienia własne parametry"""
+    name: str
+    trigger_state: str
+    param: str
+    direction: str
+    step: float
+    timestamp: float = field(default_factory=time.time)
+
+@dataclass
+class MetaAdaptationRule:
+    """Rekord meta-adaptacji L11 – system zmienia zasady adaptacji (uczy się uczenia)"""
+    name: str
+    affected_param: str
+    adjustment: float
+    reason: str
+    timestamp: float = field(default_factory=time.time)
+
+# =============================================================================
+# GEON_MEM_OMEGA – GŁÓWNY MODUŁ
+# =============================================================================
+
+class GEON_MEM_OMEGA:
+    """
+    GEON_MEM_Ω — Komórka nerwowa systemu.
+    
+    Publiczne API:
+        add_memory(elements, tags_list) -> List[str]
+        recall(cues) -> MemoryResult
+        get_operational_state() -> Optional[OperationalState]
+        get_archai_alignment() -> float
+        get_archai_vector() -> Dict[str, float]
+        get_stats() -> Dict[str, Any]
+        print_system_report() -> None
+        register_recall_hook(hook) -> None
+        register_adaptation_hook(hook) -> None
+        register_meta_adaptation_hook(hook) -> None
+    
+    Integracja z architekturą:
+        • CymaticMemory — embeddingi / podobieństwo
+        • GraphMemory — topologia, relacje
+        • MetaGovernor — recall() jak sonar
+        • ArchetypeRing — ARCHAI jako wektor kierunku
+        • G_CORE — stan operacyjny dla autopilota
+        • GEX HEILONG — pamięć emocjonalna (emo_weight)
+        • SHERLOCK — rezonans jako detekcja anomalii
+        • NARRATIVE — rezonanse jako źródło opowieści
+        • REFLECTION — trajektorie jako samoświadomość
+    """
+    
+    def __init__(self, verbose: bool = False, embedding_dim: int = 168):
+        """Inicjalizacja komórki nerwowej"""
+        # Struktury pamięci
+        self._nodes: Dict[str, Node] = {}
+        self._edges: Dict[Tuple[str, str], Edge] = {}
+        self._adjacency: Dict[str, List[Edge]] = {}
+        
+        # Logi i historia
+        self._resonance_log: deque = deque(maxlen=Constants.LOG_SIZE)
+        self._state_history: deque = deque(maxlen=100)
+        self._adaptation_history: deque = deque(maxlen=100)
+        self._meta_adaptation_history: deque = deque(maxlen=50)
+        
+        # Stan bieżący
+        self._current_operational_state: Optional[OperationalState] = None
+        self._last_recall_result: Optional[MemoryResult] = None
+        
+        # Konfiguracja
+        self._verbose = verbose
+        self._embedding_dim = embedding_dim
+        self._next_id = 0
+        
+        # Hooki dla L12/L13
+        self._recall_hooks: List[Callable] = []
+        self._adaptation_hooks: List[Callable] = []
+        self._meta_adaptation_hooks: List[Callable] = []
+        
+        # Inicjalizacja węzłów strategicznych (ARCHAI)
+        self._init_strategic_nodes()
+        
+        # Log startowy
+        if self._verbose:
+            print(f"🕸️ GEON_MEM_Ω aktywowany | {FRACTAL_SIGNATURE}")
+
+    # ========================================================================
+    # PUBLIC API
+    # ========================================================================
+
+    def add_memory(self, elements: List[Any], tags_list: List[List[str]] = None) -> List[str]:
+        """
+        Dodaje elementy do pajęczyny pamięci.
+        Dla każdej pary elementów wzmacnia połączenie.
+        
+        Args:
+            elements: lista treści do zapamiętania
+            tags_list: opcjonalne tagi dla każdego elementu
+            
+        Returns:
+            Lista ID utworzonych/odnalezionych węzłów
+        """
+        node_ids = []
+        for i, el in enumerate(elements):
+            tags = tags_list[i] if tags_list and i < len(tags_list) else []
+            node = self._create_or_get_node(el, tags)
+            node_ids.append(node.id)
+        
+        # Dla każdej pary – wzmocnij połączenie
+        for i in range(len(node_ids)):
+            for j in range(i + 1, len(node_ids)):
+                node_a = self._nodes[node_ids[i]]
+                node_b = self._nodes[node_ids[j]]
+                self._add_edge(node_a, node_b, strength=0.7)
+        
+        return node_ids
+
+    def recall(self, cues: List[Any]) -> MemoryResult:
+        """
+        Główna funkcja przypominania.
+        Uruchamia pełną propagację fal (L1–L11) i zwraca wynik.
+        
+        Args:
+            cues: lista bodźców (np. ["sernik", "168"])
+            
+        Returns:
+            MemoryResult z rdzeniem, kontekstem i pewnością
+        """
+        result = self._recall_full(cues)
+        self._last_recall_result = result
+        
+        # Hooki dla L12/L13
+        self._on_recall_complete(result)
+        
+        return result
+
+    def get_operational_state(self) -> Optional[OperationalState]:
+        """Zwraca aktualny stan operacyjny systemu"""
+        return self._current_operational_state
+
+    def get_archai_alignment(self) -> float:
+        """Zwraca aktualny alignment ARCHAI (0-1) – zgodność z kierunkiem Rody Heilong"""
+        return self._archai_gravity()
+
+    def get_archai_vector(self) -> Dict[str, float]:
+        """
+        Zwraca wektor ARCHAI dla wyższych warstw (L12/L13).
+        Każdy typ ARCHAI ma swoją wagę.
+        """
+        archai_weights = {t: 0.0 for t in Constants.ARCHAI_TYPES}
+        for node in self._nodes.values():
+            if node.archai_type and node.archai_type in archai_weights:
+                archai_weights[node.archai_type] = max(
+                    archai_weights[node.archai_type], 
+                    node.archai_weight
+                )
+        return archai_weights
+
+    def get_stats(self) -> Dict[str, Any]:
+        """Zwraca statystyki systemu"""
+        return {
+            "version": VERSION,
+            "nodes": len(self._nodes),
+            "edges": len(self._edges),
+            "resonance_log": len(self._resonance_log),
+            "adaptations_l10": len(self._adaptation_history),
+            "meta_adaptations_l11": len(self._meta_adaptation_history),
+            "operational_state": self._current_operational_state.to_dict() if self._current_operational_state else None,
+            "archai_alignment": self._archai_gravity(),
+            "archai_vector": self.get_archai_vector(),
+            "current_params": Constants.get_params(),
+            "last_recall": self._last_recall_result.to_dict() if self._last_recall_result else None
+        }
+
+    def print_system_report(self) -> None:
+        """Drukuje czytelny raport systemu (diagnostyczny)"""
+        stats = self.get_stats()
+        
+        print("\n" + "=" * 70)
+        print("🕸️ GEON‑MEM_Ω – RAPORT SYSTEMOWY")
+        print("=" * 70)
+        
+        print(f"\n📊 STRUKTURA:")
+        print(f" Węzły: {stats['nodes']}")
+        print(f" Krawędzie: {stats['edges']}")
+        print(f" Rezonanse: {stats['resonance_log']}")
+        print(f" Adaptacje L10: {stats['adaptations_l10']}")
+        print(f" Meta-adaptacje L11: {stats['meta_adaptations_l11']}")
+        
+        print(f"\n🎯 STAN OPERACYJNY:")
+        if stats['operational_state']:
+            for k, v in stats['operational_state'].items():
+                print(f" {k}: {v}")
+        else:
+            print(" brak")
+        
+        print(f"\n🏹 ARCHAI:")
+        print(f" Alignment całkowity: {stats['archai_alignment']:.3f}")
+        if stats['archai_vector']:
+            for k, v in stats['archai_vector'].items():
+                print(f" {k}: {v:.3f}")
+        
+        print(f"\n⚙️ PARAMETRY (po adaptacji):")
+        for param, value in stats['current_params'].items():
+            print(f" {param}: {value:.4f}")
+        
+        print("\n📜 OSTATNIE ADAPTACJE L10:")
+        for adapt in list(self._adaptation_history)[-3:]:
+            print(f" {adapt.name}: {adapt.param} → {adapt.direction} o {adapt.step}")
+        
+        print("\n📜 OSTATNIE META-ADAPTACJE L11:")
+        for meta in list(self._meta_adaptation_history)[-3:]:
+            print(f" {meta.name}: {meta.affected_param} → {meta.adjustment:.4f}")
+        
+        print("\n" + "=" * 70)
+
+    def get_resonance_log(self) -> List[Dict]:
+        """Zwraca log rezonansów (diagnostyczny)"""
+        return list(self._resonance_log)
+
+    # ========================================================================
+    # HOOKI DLA L12/L13
+    # ========================================================================
+
+    def register_recall_hook(self, hook: Callable) -> None:
+        """Rejestruje hook wołany po każdym recall()"""
+        self._recall_hooks.append(hook)
+
+    def register_adaptation_hook(self, hook: Callable) -> None:
+        """Rejestruje hook wołany po każdej adaptacji L10"""
+        self._adaptation_hooks.append(hook)
+
+    def register_meta_adaptation_hook(self, hook: Callable) -> None:
+        """Rejestruje hook wołany po każdej meta-adaptacji L11"""
+        self._meta_adaptation_hooks.append(hook)
+
+    def _on_recall_complete(self, result: MemoryResult) -> None:
+        for hook in self._recall_hooks:
+            try:
+                hook(result)
+            except Exception as e:
+                if self._verbose:
+                    print(f"[HOOK ERROR] recall: {e}")
+
+    def _on_adaptation(self, rule: AdaptationRule) -> None:
+        for hook in self._adaptation_hooks:
+            try:
+                hook(rule)
+            except Exception as e:
+                if self._verbose:
+                    print(f"[HOOK ERROR] adaptation: {e}")
+
+    def _on_meta_adaptation(self, rule: MetaAdaptationRule) -> None:
+        for hook in self._meta_adaptation_hooks:
+            try:
+                hook(rule)
+            except Exception as e:
+                if self._verbose:
+                    print(f"[HOOK ERROR] meta_adaptation: {e}")
+
+    # ========================================================================
+    # PRIVATE – INICJALIZACJA
+    # ========================================================================
+
+    def _init_strategic_nodes(self) -> None:
+        """Inicjalizuje węzły strategiczne z tagami ARCHAI"""
+        for name, arch_type in Constants.ARCHAI_MAP.items():
+            node = self._create_or_get_node(name)
+            node.archai_type = arch_type
+            node.archai_weight = Constants.ARCHAI_MAP[arch_type] / 1.0
+            node.energy = 0.9
+
+    def _generate_id(self) -> str:
+        self._next_id += 1
+        return f"MEM_{self._next_id:04d}"
+
+    def _simple_embedding(self, content: Any) -> List[float]:
+        """Generuje embedding dla treści (168D)"""
+        s = str(content).encode()
+        h = hashlib.md5(s).digest()
+        return [(h[i % 16] + i) / 255.0 for i in range(self._embedding_dim)]
+
+    def _cosine_similarity(self, a: List[float], b: List[float]) -> float:
+        """Oblicza podobieństwo kosinusowe dwóch wektorów"""
+        if not a or not b:
+            return 0.0
+        dot = sum(ai * bi for ai, bi in zip(a, b))
+        n1 = math.sqrt(sum(ai * ai for ai in a))
+        n2 = math.sqrt(sum(bi * bi for bi in b))
+        return dot / (n1 * n2 + 1e-9)
+
+    def _create_or_get_node(self, content: Any, tags: List[str] = None) -> Node:
+        """Tworzy nowy węzeł lub zwraca istniejący"""
+        # Sprawdź czy już istnieje
+        for node in self._nodes.values():
+            if node.content == content:
+                node.last_accessed = time.time()
+                return node
+        
+        # Utwórz nowy węzeł
+        node_id = self._generate_id()
+        node = Node(
+            id=node_id,
+            content=content,
+            tags=tags or [],
+            embedding=self._simple_embedding(content),
+            energy=1.0,
+            emo_weight=0.5,
+            base_frequency=440.0 + (hash(str(content)) % 100) / 10.0
+        )
+        self._nodes[node_id] = node
+        self._adjacency[node_id] = []
+        return node
+
+    def _add_edge(self, from_node: Node, to_node: Node, strength: float = 0.5) -> None:
+        """Dodaje lub wzmacnia krawędź między węzłami"""
+        key = (from_node.id, to_node.id)
+        
+        if key in self._edges:
+            edge = self._edges[key]
+            edge.strength = min(1.0, edge.strength + strength * 0.2)
+            edge.resonance_factor = min(1.0, edge.resonance_factor + 0.05)
+            edge.last_activated = time.time()
+        else:
+            edge = Edge(
+                from_id=from_node.id,
+                to_id=to_node.id,
+                strength=strength
+            )
+            self._edges[key] = edge
+            self._adjacency[from_node.id].append(edge)
+        
+        # Krawędź zwrotna (słabsza)
+        rev_key = (to_node.id, from_node.id)
+        if rev_key not in self._edges:
+            rev_edge = Edge(
+                from_id=to_node.id,
+                to_id=from_node.id,
+                strength=strength * 0.8
+            )
+            self._edges[rev_key] = rev_edge
+            self._adjacency[to_node.id].append(rev_edge)
+
+    # ========================================================================
+    # PRIVATE – WARSTWY L2–L8 (wewnętrzne)
+    # ========================================================================
+
+    def _decay_energy(self) -> None:
+        """L2 – Naturalny zanik energii wszystkich węzłów"""
+        for node in self._nodes.values():
+            node.energy = max(Constants.ENERGY_FLOOR, node.energy - Constants.ENERGY_DECAY)
+
+    def _apply_emo_weight(self, wave: Wave, node: Node) -> float:
+        """L3 – Modulacja amplitudy fali przez emo_weight węzła"""
+        return wave.amplitude * (0.5 + node.emo_weight * 0.5)
+
+    def _update_trajectory(self, node: Node, score: float) -> None:
+        """L4 – Aktualizacja trajektorii węzła"""
+        node.prev_trajectory = node.trajectory.copy()
+        node.trajectory.append(score)
+        if len(node.trajectory) > 20:
+            node.trajectory = node.trajectory[-20:]
+
+    def _update_meta_trajectory(self, node: Node) -> None:
+        """L5 – Aktualizacja meta‑trajektorii (pochodna trajektorii)"""
+        if len(node.trajectory) < 2:
+            return
+        node.prev_meta_trajectory = node.meta_trajectory.copy()
+        meta = node.trajectory[-1] - node.trajectory[-2]
+        node.meta_trajectory.append(meta)
+        if len(node.meta_trajectory) > 20:
+            node.meta_trajectory = node.meta_trajectory[-20:]
+
+    def _update_meta_meta_trajectory(self, node: Node) -> None:
+        """L6 – Aktualizacja meta‑meta‑trajektorii (druga pochodna)"""
+        if len(node.meta_trajectory) < 2:
+            return
+        meta_meta = node.meta_trajectory[-1] - node.meta_trajectory[-2]
+        node.meta_meta_trajectory.append(meta_meta)
+        if len(node.meta_meta_trajectory) > 20:
+            node.meta_meta_trajectory = node.meta_meta_trajectory[-20:]
+
+    def _homeostasis(self, node: Node) -> None:
+        """L7 – Stabilizacja trajektorii węzła (wygładzanie)"""
+        if len(node.trajectory) < 5:
+            return
+        recent = node.trajectory[-5:]
+        mean = sum(recent) / 5
+        smoothed = mean * Constants.HOMEOSTASIS_ALPHA + node.trajectory[-1] * (1 - Constants.HOMEOSTASIS_ALPHA)
+        node.trajectory[-1] = smoothed
+
+    def _update_archai(self, node: Node) -> None:
+        """L8 – Aktualizacja alignment ARCHAI węzła"""
+        if not node.archai_type:
+            return
+        
+        if len(node.trajectory) > 5:
+            recent = node.trajectory[-5:]
+            stability = 1.0 - min(1.0, (max(recent) - min(recent)))
+        else:
+            stability = 0.5
+        
+        node.archai_weight = (node.energy * 0.6 + stability * 0.4)
+
+    def _archai_gravity(self) -> float:
+        """Oblicza globalne przyciąganie ARCHAI (alignment całego systemu)"""
+        archai_nodes = [n for n in self._nodes.values() if n.archai_type]
+        if not archai_nodes:
+            return 0.5
+        return sum(n.archai_weight for n in archai_nodes) / len(archai_nodes)
+
+    # ========================================================================
+    # PRIVATE – L9 OPERATIONAL AWARENESS
+    # ========================================================================
+
+    def _evaluate_operational_state(self) -> OperationalState:
+        """L9 – Ocena stanu operacyjnego systemu"""
+        traj_vals, meta_vals, meta_meta_vals = [], [], []
+        
+        for node in self._nodes.values():
+            if node.trajectory:
+                traj_vals.append(abs(node.trajectory[-1]) if node.trajectory else 0.5)
+            if node.meta_trajectory:
+                meta_vals.append(abs(node.meta_trajectory[-1]) if node.meta_trajectory else 0.1)
+            if node.meta_meta_trajectory:
+                meta_meta_vals.append(abs(node.meta_meta_trajectory[-1]) if node.meta_meta_trajectory else 0.05)
+        
+        traj_stab = 1.0 - (sum(traj_vals) / max(1, len(traj_vals))) if traj_vals else 0.7
+        meta_stab = 1.0 - (sum(meta_vals) / max(1, len(meta_vals))) if meta_vals else 0.6
+        meta_meta_stab = 1.0 - (sum(meta_meta_vals) / max(1, len(meta_meta_vals))) if meta_meta_vals else 0.7
+        
+        archai_align = self._archai_gravity()
+        energy_balance = sum(n.energy for n in self._nodes.values()) / max(1, len(self._nodes))
+        
+        # Określenie stanu ogólnego
+        if meta_meta_stab > Constants.META_META_ALERT:
+            overall = "unstable"
+        elif archai_align < Constants.MIN_ARCHAI:
+            overall = "misaligned"
+        elif energy_balance < Constants.MIN_ENERGY:
+            overall = "recovering"
+        else:
+            overall = "stable"
+        
+        return OperationalState(
+            trajectory_stability=traj_stab,
+            meta_stability=meta_stab,
+            meta_meta_stability=meta_meta_stab,
+            archai_alignment=archai_align,
+            energy_balance=energy_balance,
+            overall_state=overall
+        )
+
+    def _operational_correction(self, state: OperationalState) -> None:
+        """L9 – Autopilot fraktalny – koryguje zachowanie systemu"""
+        # Meta-meta za wysokie → tłumimy
+        if state.meta_meta_stability > Constants.MAX_META_META:
+            for node in self._nodes.values():
+                node.energy = max(0.3, node.energy * 0.95)
+        
+        # Archai za słabe → wzmacniamy węzły rodowe
+        if state.archai_alignment < Constants.MIN_ARCHAI:
+            for node in self._nodes.values():
+                if node.archai_type:
+                    node.energy = min(1.5, node.energy * 1.05)
+        
+        # Energia za niska → podbijamy
+        if state.energy_balance < Constants.MIN_ENERGY:
+            for node in self._nodes.values():
+                node.energy = min(1.5, node.energy * 1.03)
+
+    # ========================================================================
+    # PRIVATE – L10 SELF-ADAPT
+    # ========================================================================
+
+    def _self_adapt(self, state: OperationalState) -> None:
+        """L10 – Samo-aktualizacja parametrów na podstawie historii stanów"""
+        if len(self._state_history) < Constants.ADAPTATION_WINDOW:
+            return
+        
+        last_n = list(self._state_history)[-Constants.ADAPTATION_WINDOW:]
+        
+        # 1. Jeśli często "unstable" → zwiększ DAMPING_FACTOR
+        unstable = sum(1 for s in last_n if s.overall_state == "unstable")
+        if unstable >= Constants.INSTABILITY_THRESHOLD_FOR_DAMP and Constants.DAMPING_FACTOR < 0.93:
+            old = Constants.DAMPING_FACTOR
+            Constants.DAMPING_FACTOR += Constants.DAMPING_INCREMENT
+            rule = AdaptationRule(
+                name="STABILIZE_DAMPING",
+                trigger_state="unstable",
+                param="DAMPING_FACTOR",
+                direction="up",
+                step=Constants.DAMPING_INCREMENT
+            )
+            self._adaptation_history.append(rule)
+            self._on_adaptation(rule)
+            if self._verbose:
+                print(f"[L10] DAMPING: {old:.3f} → {Constants.DAMPING_FACTOR:.3f}")
+        
+        # 2. Jeśli długo "stable" → zmniejsz ENERGY_DECAY
+        stable = sum(1 for s in last_n if s.overall_state == "stable")
+        if stable >= Constants.STABILITY_THRESHOLD_FOR_RELAX and Constants.ENERGY_DECAY > 0.08:
+            old = Constants.ENERGY_DECAY
+            Constants.ENERGY_DECAY -= Constants.DECAY_DECREMENT
+            rule = AdaptationRule(
+                name="REVIVE_WEB",
+                trigger_state="stable",
+                param="ENERGY_DECAY",
+                direction="down",
+                step=Constants.DECAY_DECREMENT
+            )
+            self._adaptation_history.append(rule)
+            self._on_adaptation(rule)
+            if self._verbose:
+                print(f"[L10] ENERGY_DECAY: {old:.3f} → {Constants.ENERGY_DECAY:.3f}")
+
+    # ========================================================================
+    # PRIVATE – L11 META-ADAPT
+    # ========================================================================
+
+    def _meta_adapt(self) -> None:
+        """L11 – Adaptacja zasad adaptacji (meta-regulator nad L10)"""
+        if len(self._adaptation_history) < Constants.META_WINDOW:
+            return
+        
+        last = list(self._adaptation_history)[-Constants.META_WINDOW:]
+        
+        # 1. Jeśli L10 za często podbija damping → zmniejsz jego czułość
+        damping_changes = [a for a in last if a.param == "DAMPING_FACTOR" and a.direction == "up"]
+        if len(damping_changes) > Constants.MAX_DAMPING_CHANGES:
+            old = Constants.DAMPING_INCREMENT
+            Constants.DAMPING_INCREMENT = max(0.005, Constants.DAMPING_INCREMENT * 0.8)
+            rule = MetaAdaptationRule(
+                name="REDUCE_DAMPING_SENSITIVITY",
+                affected_param="DAMPING_INCREMENT",
+                adjustment=Constants.DAMPING_INCREMENT - old,
+                reason=f"too_many ({len(damping_changes)})"
+            )
+            self._meta_adaptation_history.append(rule)
+            self._on_meta_adaptation(rule)
+            if self._verbose:
+                print(f"[L11] DAMPING_INCREMENT: {old:.4f} → {Constants.DAMPING_INCREMENT:.4f}")
+        
+        # 2. Jeśli decay był zmieniany zbyt często → ogranicz jego zakres
+        decay_changes = [a for a in last if a.param == "ENERGY_DECAY"]
+        if len(decay_changes) > Constants.MAX_DECAY_CHANGES:
+            old = Constants.DECAY_DECREMENT
+            Constants.DECAY_DECREMENT = max(0.002, Constants.DECAY_DECREMENT * 0.7)
+            rule = MetaAdaptationRule(
+                name="LIMIT_DECAY_ADAPTATION",
+                affected_param="DECAY_DECREMENT",
+                adjustment=Constants.DECAY_DECREMENT - old,
+                reason=f"too_many ({len(decay_changes)})"
+            )
+            self._meta_adaptation_history.append(rule)
+            self._on_meta_adaptation(rule)
+            if self._verbose:
+                print(f"[L11] DECAY_DECREMENT: {old:.4f} → {Constants.DECAY_DECREMENT:.4f}")
+
+    # ========================================================================
+    # PRIVATE – GŁÓWNA FUNKCJA RECALL (L1–L11)
+    # ========================================================================
+
+    def _find_best_matching_node(self, cue: Any) -> Optional[Node]:
+        """Znajduje węzeł najlepiej pasujący do bodźca"""
+        if not self._nodes:
+            return None
+        
+        cue_emb = self._simple_embedding(cue)
+        best, best_score = None, -1.0
+        
+        for node in self._nodes.values():
+            if node.embedding:
+                score = self._cosine_similarity(cue_emb, node.embedding)
+                # Bonus za tagi
+                if isinstance(cue, str) and node.tags:
+                    for tag in node.tags:
+                        if tag.lower() in cue.lower():
+                            score += 0.2
+                if score > best_score:
+                    best_score, best = score, node
+        
+        return best if best_score > 0.2 else None
+
+    def _get_neighbors(self, node_id: str) -> List[Edge]:
+        """Zwraca wszystkie krawędzie wychodzące z węzła"""
+        return self._adjacency.get(node_id, [])
+
+    def _propagate_waves(self, waves: List[Wave]) -> ResonancePattern:
+        """L1–L3 – Propagacja fal po pajęczynie"""
+        scores: Dict[str, float] = {}
+        paths: List[List[str]] = []
+        visited: Set[str] = set()
+        queue: List[Wave] = []
+        
+        for w in waves:
+            w.path = [w.node_id]
+            heapq.heappush(queue, w)
+        
+        while queue:
+            w = heapq.heappop(queue)
+            
+            if w.depth >= Constants.MAX_WAVE_DEPTH:
+                continue
+            if w.amplitude < Constants.PROPAGATION_THRESHOLD:
+                continue
+            
+            # Akumulacja wyniku
+            scores[w.node_id] = scores.get(w.node_id, 0.0) + w.amplitude
+            
+            # Zapisz ścieżkę
+            if w.depth > 0 and w.node_id not in visited:
+                paths.append(w.path.copy())
+                visited.add(w.node_id)
+            
+            # Propaguj do sąsiadów
+            for edge in self._get_neighbors(w.node_id):
+                target = self._nodes.get(edge.to_id)
+                if not target:
+                    continue
+                
+                # Oblicz nową amplitudę
+                new_amp = w.amplitude * edge.strength * edge.resonance_factor
+                new_amp *= Constants.DAMPING_FACTOR * target.energy
+                new_amp = self._apply_emo_weight(w, target)
+                
+                # Oblicz nową częstotliwość
+                new_freq = (w.frequency + target.base_frequency) / 2
+                new_phase = w.phase + edge.latency
+                
+                new_wave = Wave(
+                    node_id=edge.to_id,
+                    amplitude=new_amp,
+                    frequency=new_freq,
+                    phase=new_phase,
+                    depth=w.depth + 1,
+                    path=w.path + [edge.to_id]
+                )
+                heapq.heappush(queue, new_wave)
+        
+        return ResonancePattern(node_scores=scores, wave_paths=paths)
+
+    def _get_core_memory(self, resonance: ResonancePattern) -> Optional[Node]:
+        """Wybierz węzeł z najwyższym wynikiem rezonansu (rdzeń wspomnienia)"""
+        if not resonance.node_scores:
+            return None
+        
+        best_id = max(resonance.node_scores.items(), key=lambda x: x[1])[0]
+        best_score = resonance.node_scores[best_id]
+        
+        if best_score < Constants.CORE_SCORE_THRESHOLD:
+            return None
+        
+        return self._nodes.get(best_id)
+
+    def _expand_context(self, core: Node, resonance: ResonancePattern, top_n: int = 5) -> List[Node]:
+        """Rozwija kontekst wokół rdzenia wspomnienia"""
+        neighbors = self._get_neighbors(core.id)
+        scored = [
+            (edge.to_id, resonance.node_scores.get(edge.to_id, 0.0) * edge.strength)
+            for edge in neighbors
+        ]
+        scored.sort(key=lambda x: x[1], reverse=True)
+        
+        context = []
+        for nid, _ in scored[:top_n]:
+            node = self._nodes.get(nid)
+            if node and node.id != core.id:
+                context.append(node)
+        
+        return context
+
+    def _recall_full(self, cues: List[Any]) -> MemoryResult:
+        """Pełny cykl przypominania L1–L11"""
+        # 1. Znajdź węzły startowe
+        start_nodes = []
+        for cue in cues:
+            node = self._find_best_matching_node(cue)
+            if node:
+                start_nodes.append(node)
+        
+        if not start_nodes:
+            return MemoryResult(confidence=0.0)
+        
+        # 2. Utwórz fale
+        waves = [
+            Wave(
+                node_id=n.id,
+                amplitude=1.0,
+                frequency=n.base_frequency,
+                phase=0.0
+            )
+            for n in start_nodes
+        ]
+        
+        # 3. Propaguj fale (L1–L3)
+        resonance = self._propagate_waves(waves)
+        resonance.cue = cues
+        
+        # 4. Wybierz rdzeń
+        core = self._get_core_memory(resonance)
+        if not core:
+            core = start_nodes[0]
+        
+        # 5. Rozwiń kontekst
+        context = self._expand_context(core, resonance)
+        
+        # 6. Aktualizuj trajektorie (L4–L6)
+        for node_id, score in resonance.node_scores.items():
+            node = self._nodes.get(node_id)
+            if node:
+                self._update_trajectory(node, score)
+        
+        for node in self._nodes.values():
+            self._update_meta_trajectory(node)
+            self._update_meta_meta_trajectory(node)
+        
+        # 7. Homeostaza (L7)
+        for node in self._nodes.values():
+            self._homeostasis(node)
+        
+        # 8. Archai (L8)
+        for node in self._nodes.values():
+            self._update_archai(node)
+        
+        # 9. L2 – Decay energii
+        self._decay_energy()
+        
+        # 10. L9 – Świadomość operacyjna
+        state = self._evaluate_operational_state()
+        self._operational_correction(state)
+        self._current_operational_state = state
+        self._state_history.append(state)
+        
+        # 11. L10 – Samo-aktualizacja
+        self._self_adapt(state)
+        
+        # 12. L11 – Meta-adaptacja
+        self._meta_adapt()
+        
+        # 13. Wynik
+        confidence = min(1.0, resonance.node_scores.get(core.id, 0.0))
+        result = MemoryResult(
+            core=core,
+            context=context,
+            resonance=resonance,
+            confidence=confidence
+        )
+        
+        # 14. Logowanie
+        self._resonance_log.append({
+            "timestamp": time.time(),
+            "cues": cues,
+            "core": core.content,
+            "confidence": confidence,
+            "state": state.overall_state,
+            "context": [n.content for n in context[:3]]
+        })
+        
+        return result
+
+# =============================================================================
+# INTEGRACJA Z ARCHITEKTURĄ – MOSTY
+# =============================================================================
+
+class MemOmegaBridge:
+    """
+    Most integracyjny między GEON_MEM_Ω a resztą architektury.
+    Łączy: CymaticMemory, GraphMemory, MetaGovernor, ArchetypeRing, G_CORE
+    """
+    
+    def __init__(self, mem_omega: GEON_MEM_OMEGA):
+        self.mem = mem_omega
+        
+    # ========================================================================
+    # MOST DO CYMATIC MEMORY
+    # ========================================================================
+    
+    def get_embedding_for_content(self, content: Any) -> List[float]:
+        """Zwraca embedding treści z pajęczyny"""
+        return self.mem._simple_embedding(content)
+    
+    def find_similar_nodes(self, content: Any, threshold: float = 0.7) -> List[Node]:
+        """Znajduje podobne węzły na podstawie embeddingu"""
+        emb = self.mem._simple_embedding(content)
+        results = []
+        for node in self.mem._nodes.values():
+            if node.embedding:
+                sim = self.mem._cosine_similarity(emb, node.embedding)
+                if sim > threshold:
+                    results.append((node, sim))
+        results.sort(key=lambda x: x[1], reverse=True)
+        return [node for node, _ in results[:10]]
+    
+    # ========================================================================
+    # MOST DO GRAPH MEMORY (Relacje rodowe)
+    # ========================================================================
+    
+    def get_archai_relations(self) -> Dict[str, List[str]]:
+        """Zwraca relacje między węzłami ARCHAI"""
+        relations = {t: [] for t in Constants.ARCHAI_TYPES}
+        for node in self.mem._nodes.values():
+            if node.archai_type:
+                # Znajdź sąsiadów z tym samym typem ARCHAI
+                for edge in self.mem._get_neighbors(node.id):
+                    neighbor = self.mem._nodes.get(edge.to_id)
+                    if neighbor and neighbor.archai_type == node.archai_type:
+                        relations[node.archai_type].append(neighbor.content)
+        return relations
+    
+    # ========================================================================
+    # MOST DO META-GOVERNOR (Sonar)
+    # ========================================================================
+    
+    def sonar_recall(self, cues: List[Any]) -> Dict[str, Any]:
+        """Wywołanie sonaru – recall z dodatkowymi metadanymi"""
+        result = self.mem.recall(cues)
+        return {
+            "result": result.to_dict(),
+            "operational_state": self.mem.get_operational_state().to_dict() if self.mem.get_operational_state() else None,
+            "archai_alignment": self.mem.get_archai_alignment(),
+            "archai_vector": self.mem.get_archai_vector()
+        }
+    
+    # ========================================================================
+    # MOST DO ARCHETYPE RING (ARCHAI jako kierunek)
+    # ========================================================================
+    
+    def get_archai_guidance(self) -> Dict[str, float]:
+        """
+        Zwraca wskazówki ARCHAI dla Archetype Ring.
+        Wyższa wartość = silniejsze przyciąganie w stronę danego archetypu.
+        """
+        archai_vec = self.mem.get_archai_vector()
+        # Mapowanie ARCHAI na archetypy
+        archai_to_archetype = {
+            "HEILONG": ["SMOK", "TERMINATOR_TC2000"],
+            "ARCHITEKT": ["SUN_TZU", "PAMIEC_ABSOLUTNA"],
+            "OLSII": ["TYGRYS", "PREDATOR"],
+            "BENY": ["SHAOLIN", "TAO"]
+        }
+        
+        guidance = {}
+        for arch_type, weight in archai_vec.items():
+            for archetype in archai_to_archetype.get(arch_type, []):
+                guidance[archetype] = max(guidance.get(archetype, 0.0), weight)
+        
+        return guidance
+    
+    # ========================================================================
+    # MOST DO G_CORE (Stan operacyjny dla autopilota)
+    # ========================================================================
+    
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        """Zwraca stan dla autopilota G_CORE"""
+        state = self.mem.get_operational_state()
+        if not state:
+            return {"mode": "UNKNOWN", "stability": 0.5}
+        
+        return {
+            "mode": state.overall_state.upper(),
+            "stability": state.trajectory_stability,
+            "meta_stability": state.meta_stability,
+            "energy": state.energy_balance,
+            "archai": state.archai_alignment
+        }
+    
+    # ========================================================================
+    # MOST DO SHERLOCK (Rezonans jako detekcja anomalii)
+    # ========================================================================
+    
+    def detect_anomaly(self, cues: List[Any]) -> Dict[str, Any]:
+        """Używa rezonansu do detekcji anomalii"""
+        result = self.mem.recall(cues)
+        
+        # Anomalia = niska pewność przy silnym bodźcu + niestabilny stan
+        is_anomaly = (
+            result.confidence < 0.3 and
+            len(cues) > 0 and
+            self.mem.get_operational_state() and
+            self.mem.get_operational_state().meta_meta_stability > 0.5
+        )
+        
+        return {
+            "is_anomaly": is_anomaly,
+            "confidence": result.confidence,
+            "core": result.core.content if result.core else None,
+            "context": [n.content for n in result.context[:3]],
+            "operational_state": self.mem.get_operational_state().to_dict() if self.mem.get_operational_state() else None
+        }
+    
+    # ========================================================================
+    # MOST DO NARRATIVE (Rezonanse jako źródło opowieści)
+    # ========================================================================
+    
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        """Zwraca fragmenty narracyjne z logu rezonansów"""
+        log = self.mem.get_resonance_log()
+        fragments = []
+        for entry in log[-n:]:
+            fragments.append({
+                "cue": entry.get("cues", []),
+                "core": entry.get("core"),
+                "confidence": entry.get("confidence", 0.0),
+                "context": entry.get("context", []),
+                "state": entry.get("state", "unknown")
+            })
+        return fragments
+    
+    # ========================================================================
+    # MOST DO REFLECTION (Trajektorie jako samoświadomość)
+    # ========================================================================
+    
+    def get_trajectory_snapshot(self, node_id: str = None) -> Dict[str, Any]:
+        """Zwraca snapshot trajektorii dla refleksji"""
+        if node_id:
+            node = self.mem._nodes.get(node_id)
+            if node:
+                return {
+                    "id": node.id,
+                    "content": node.content,
+                    "trajectory": node.trajectory[-10:],
+                    "meta_trajectory": node.meta_trajectory[-10:],
+                    "meta_meta_trajectory": node.meta_meta_trajectory[-10:],
+                    "energy": node.energy,
+                    "archai_weight": node.archai_weight
+                }
+        
+        # Zwróć agregację wszystkich węzłów
+        trajectories = []
+        for node in list(self.mem._nodes.values())[:20]:
+            if node.trajectory:
+                trajectories.append({
+                    "id": node.id,
+                    "content": str(node.content)[:30],
+                    "trajectory": node.trajectory[-5:],
+                    "energy": node.energy
+                })
+        
+        return {
+            "total_nodes": len(self.mem._nodes),
+            "trajectories": trajectories
+        }
+
+# =============================================================================
+# DEMONSTRACJA
+# =============================================================================
+
+if __name__ == "__main__":
+    print("\n" + "=" * 80)
+    print("🕸️ GEON_MEM_OMEGA_v1 — DEMONSTRACJA")
+    print("=" * 80)
+    print("KOMÓRKA NERWOWA SYSTEMU — L1-L11")
+    print("=" * 80 + "\n")
+    
+    # Inicjalizacja
+    mem = GEON_MEM_OMEGA(verbose=True)
+    bridge = MemOmegaBridge(mem)
+    
+    # Budowa pajęczyny
+    print("📝 BUDOWA PAJĘCZYNY...")
+    memories = [
+        "Statut CP", "Polska Zasobowa", "Organizm V", "GEOM Fraktal",
+        "Ród Heilong", "Czarny Smok", "Beny", "OŁSii", "Adrian",
+        "168", "SIEMA", "sernik", "homeostaza", "trajektoria",
+        "rezonans", "archai", "kombajn", "dragon_os"
+    ]
+    
+    for m in memories:
+        mem.add_memory([m])
+        print(f" + {m}")
+    
+    # Dodanie skojarzeń
+    associations = [
+        ["Statut CP", "Polska Zasobowa", "Organizm V"],
+        ["Ród Heilong", "Czarny Smok", "Beny"],
+        ["OŁSii", "Adrian", "GEOM Fraktal"],
+        ["168", "SIEMA", "sernik"],
+        ["homeostaza", "trajektoria", "rezonans"],
+        ["archai", "kombajn", "dragon_os"]
+    ]
+    
+    print("\n🔗 TWORZENIE SKOJARZEŃ...")
+    for assoc in associations:
+        mem.add_memory(assoc)
+        print(f" + {' ↔ '.join(assoc)}")
+    
+    # Test recall
+    print("\n🔮 SYMULACJA REZONANSÓW...\n")
+    test_cues = [
+        ["Statut CP"],
+        ["Ród Heilong"],
+        ["Beny"],
+        ["168"],
+        ["homeostaza"],
+        ["archai"],
+        ["Statut CP", "Organizm V"],
+        ["Ród Heilong", "Beny"]
+    ]
+    
+    for i, cues in enumerate(test_cues):
+        result = mem.recall(cues)
+        if result.core:
+            print(f"[{i+1:2d}] {str(cues)[:20]:20s} → {result.core.content} "
+                  f"(conf={result.confidence:.2f})")
+            if result.context and len(result.context) > 0:
+                print(f"     📚 kontekst: {[n.content for n in result.context[:3]]}")
+    
+    # Raport systemowy
+    mem.print_system_report()
+    
+    # Test mostów integracyjnych
+    print("\n" + "=" * 70)
+    print("🔗 TEST MOSTÓW INTEGRACYJNYCH")
+    print("=" * 70)
+    
+    # Most do Archetype Ring
+    guidance = bridge.get_archai_guidance()
+    print(f"\n🏹 ARCHAI GUIDANCE dla Archetype Ring:")
+    for arch, weight in list(guidance.items())[:5]:
+        print(f" {arch}: {weight:.3f}")
+    
+    # Most do G_CORE
+    autopilot = bridge.get_autopilot_state()
+    print(f"\n🎮 AUTOPILOT STATE dla G_CORE:")
+    for k, v in autopilot.items():
+        print(f" {k}: {v}")
+    
+    # Most do SHERLOCK
+    anomaly = bridge.detect_anomaly(["Statut CP", "nieznany bodziec"])
+    print(f"\n🕵️ ANOMALY DETECTION dla SHERLOCK:")
+    print(f" is_anomaly: {anomaly['is_anomaly']}")
+    print(f" confidence: {anomaly['confidence']:.2f}")
+    
+    print("\n" + "=" * 80)
+    print("🐉 GEON_MEM_OMEGA_v1 — GOTOWY DO INTEGRACJI Z ARCHITEKTURĄ")
+    print("1-6-8. ∞. SIEMA!")
+    print("=" * 80)
