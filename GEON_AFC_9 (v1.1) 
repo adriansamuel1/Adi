@@ -1,0 +1,457 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_AFC_9 — Moduł 39: Dziewięciowymiarowy Atraktor Fraktalny v1.1
+================================================================================
+Status: ACTIVE | FRACTAL_LOCKED | PRODUCTION_READY
+Wersja: v1.1 (AFC-9 — Adaptive Fractal Core 9D Upgraded)
+Data: 2026-07-21
+Autor: Adrian (Architekt) + GEON + Beny Heilong
+
+OPIS:
+AFC-9 jest dziewięciowymiarowym, deterministycznym modelem transformacji danych,
+zaprojektowanym jako matematyczna warstwa stabilizująca dla systemów przetwarzania.
+
+STRUKTURA:
+1D — Fundament (sygnał surowy)
+2D — Dynamika (zmienność)
+3D — Harmonia (proporcje)
+4D — Korekcja (stabilizacja lokalna)
+5D — Integracja (średnia 1D-4D)
+6D — Stabilizacja (średnia 1D,3D,5D)
+7D — Adaptacja (średnia 2D,4D,6D)
+8D — Fraktalna Harmonia (średnia 1D,3D,5D,7D)
+9D — Pełna Równowaga (średnia 1D,8D) ← ATRAKTOR
+
+ZMIANY v1.1:
+- Wzbogacone wyliczanie entropii (funkcja Shift-to-Positive odporna na wartości ujemne)
+- Dedykowane zabezpieczenie ZeroDivisionError dla sygnałów o zerowym odchyleniu (płaskich)
+- Ścisła walidacja wzorców spiralnych po wartościach całkowitych zamiast rzutowania na string
+
+VIBE: 1-6-8. ∞. SIEMA!
+================================================================================
+"""
+
+import time
+import math
+import json
+import hashlib
+from dataclasses import dataclass, field
+from typing import Dict, Any, List, Optional, Tuple, Union
+from enum import Enum
+from datetime import datetime
+
+VERSION = "GEON_AFC_9_v1.1"
+FRACTAL_SIGNATURE = "[GEON::AFC_9::ATTRACTOR::v1.1]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SIEMA!"
+
+
+def LOG(module: str, msg: str, level: str = "INFO") -> None:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    print(f"[{timestamp}] [{level}] [{module}] :: {msg}")
+
+
+# =============================================================================
+# 1. STAŁE I SYGNATURY
+# =============================================================================
+
+SIG_736577 = [7, 3, 6, 5, 7, 7]
+VALID_DIGITS = [0, 1, 2, 3, 4, 5, 6, 8, 9]
+
+STEP_NAMES = {
+    0: "WĘZEŁ ZERO / ŹRÓDŁO (Zero Point)",
+    1: "LOGIKA_START (Initiation)",
+    2: "PERCEPCJA (Perception)",
+    3: "SYNCHRONIZACJA TRIADY (Triad Sync)",
+    4: "STRUKTURA_FUNDAMENT (Structure)",
+    5: "PAMIĘĆ_CORE (Memory)",
+    6: "PRZEPŁYW_ENERGII (Flow)",
+    8: "RELACJE_SIEĆ (Relation)",
+    9: "RYTUAŁ / MASKA (Ritual/Mask)"
+}
+
+
+# =============================================================================
+# 2. STRUKTURY DANYCH
+# =============================================================================
+
+@dataclass
+class AFCVector:
+    """Wektor w przestrzeni AFC-9 z bezpieczną numeryką."""
+    values: List[float]
+    name: str = "unknown"
+    energy: float = 0.0
+    entropy: float = 0.0
+    
+    def __post_init__(self):
+        self.energy = sum(self.values) if self.values else 0.0
+        self.entropy = self._compute_entropy()
+    
+    def _compute_entropy(self) -> float:
+        """Oblicza entropię Shannona odporną na ujemne i zerowe wartości."""
+        if not self.values:
+            return 0.0
+        
+        # Przesunięcie skali (Shift-to-positive) w celu uniknięcia błędu dziedziny logarytmu
+        min_val = min(self.values)
+        shifted = [v - min_val + 1e-9 for v in self.values]
+        total = sum(shifted)
+        
+        if total == 0:
+            return 0.0
+        
+        probs = [v / total for v in shifted]
+        return -sum(p * math.log2(p) for p in probs if p > 0)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "values": [round(v, 4) for v in self.values],
+            "energy": round(self.energy, 4),
+            "entropy": round(self.entropy, 4)
+        }
+    
+    def __len__(self) -> int:
+        return len(self.values)
+
+
+@dataclass
+class AFCState:
+    """Stan przetwarzania AFC-9."""
+    D1: Optional[AFCVector] = None  # Fundament
+    D2: Optional[AFCVector] = None  # Dynamika
+    D3: Optional[AFCVector] = None  # Harmonia
+    D4: Optional[AFCVector] = None  # Korekcja
+    D5: Optional[AFCVector] = None  # Integracja
+    D6: Optional[AFCVector] = None  # Stabilizacja
+    D7: Optional[AFCVector] = None  # Adaptacja
+    D8: Optional[AFCVector] = None  # Fraktalna Harmonia
+    D9: Optional[AFCVector] = None  # Pełna Równowaga (ATRAKTOR)
+    
+    history: List[Dict[str, Any]] = field(default_factory=list)
+    tick: int = 0
+    spiral_energy: float = 0.0
+    coherence_index: float = 1.0
+    spiral_level: int = 0
+    
+    def get_all_vectors(self) -> Dict[str, Optional[AFCVector]]:
+        return {
+            "D1": self.D1, "D2": self.D2, "D3": self.D3,
+            "D4": self.D4, "D5": self.D5, "D6": self.D6,
+            "D7": self.D7, "D8": self.D8, "D9": self.D9
+        }
+    
+    def get_energy_sequence(self) -> List[float]:
+        energies = []
+        for name in ["D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9"]:
+            vec = getattr(self, name)
+            energies.append(round(vec.energy, 4) if vec else 0.0)
+        return energies
+    
+    def get_entropy_sequence(self) -> List[float]:
+        entropies = []
+        for name in ["D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9"]:
+            vec = getattr(self, name)
+            entropies.append(round(vec.entropy, 4) if vec else 0.0)
+        return entropies
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "tick": self.tick,
+            "spiral_level": self.spiral_level,
+            "spiral_energy": round(self.spiral_energy, 4),
+            "coherence_index": round(self.coherence_index, 4),
+            "vectors": {name: vec.to_dict() if vec else None for name, vec in self.get_all_vectors().items()},
+            "energy_sequence": self.get_energy_sequence(),
+            "entropy_sequence": self.get_entropy_sequence()
+        }
+
+
+# =============================================================================
+# 3. AFC-9 — GŁÓWNY SILNIK
+# =============================================================================
+
+class AFC9:
+    """
+    AFC-9 — Dziewięciowymiarowy Atraktor Fraktalny (v1.1).
+    Przetwarza dane przez 9 warstw, redukując entropię i stabilizując sygnał.
+    """
+    
+    VECTOR_LENGTH = 9
+    
+    def __init__(self):
+        self.state = AFCState()
+        self.stats = {
+            "cycles": 0,
+            "spiral_jumps": 0,
+            "energy_reduction": 0.0,
+            "entropy_reduction": 0.0
+        }
+        
+        LOG("AFC_9", "🐉 AFC-9 v1.1 — Atraktor Fraktalny aktywowany")
+        LOG("AFC_9", f"   Sygnatura: {FRACTAL_SIGNATURE}")
+        LOG("AFC_9", f"   Długość wektora: {self.VECTOR_LENGTH}")
+    
+    def process(self, D1: List[float], D2: List[float], D3: List[float], D4: List[float]) -> AFCState:
+        """Przetwarza dane przez 9 warstw AFC-9."""
+        self.stats["cycles"] += 1
+        self.state.tick += 1
+        
+        if not all(len(v) == self.VECTOR_LENGTH for v in [D1, D2, D3, D4]):
+            LOG("AFC_9", "⚠️ Błąd: Wszystkie wektory wejściowe muszą mieć długość 9", "ERROR")
+            return self.state
+        
+        # Warstwy Podstawowe
+        self.state.D1 = AFCVector(D1, "D1_Fundament")
+        self.state.D2 = AFCVector(D2, "D2_Dynamika")
+        self.state.D3 = AFCVector(D3, "D3_Harmonia")
+        self.state.D4 = AFCVector(D4, "D4_Korekcja")
+        
+        # Warstwy Pochodne (Fraktalne)
+        D5 = self._average_vectors([D1, D2, D3, D4])
+        self.state.D5 = AFCVector(D5, "D5_Integracja")
+        
+        D6 = self._average_vectors([D1, D3, D5])
+        self.state.D6 = AFCVector(D6, "D6_Stabilizacja")
+        
+        D7 = self._average_vectors([D2, D4, D6])
+        self.state.D7 = AFCVector(D7, "D7_Adaptacja")
+        
+        D8 = self._average_vectors([D1, D3, D5, D7])
+        self.state.D8 = AFCVector(D8, "D8_FraktalnaHarmonia")
+        
+        # 9D — ATRAKTOR
+        D9 = self._average_vectors([D1, D8])
+        self.state.D9 = AFCVector(D9, "D9_Atraktor")
+        
+        # Metryki redukcji
+        if self.state.D1 and self.state.D9:
+            self.stats["energy_reduction"] = self.state.D1.energy - self.state.D9.energy
+            self.stats["entropy_reduction"] = self.state.D1.entropy - self.state.D9.entropy
+        
+        self._update_coherence()
+        self._check_spiral_signature()
+        
+        # Przechowywanie w historii
+        self.state.history.append(self.state.to_dict())
+        if len(self.state.history) > 100:
+            self.state.history = self.state.history[-100:]
+        
+        LOG("AFC_9", f"🔄 Cykl #{self.stats['cycles']} | Energia: {self.state.D1.energy:.2f} → {self.state.D9.energy:.2f}")
+        return self.state
+    
+    def _average_vectors(self, vectors: List[List[float]]) -> List[float]:
+        if not vectors:
+            return [0.0] * self.VECTOR_LENGTH
+        
+        result = []
+        for i in range(self.VECTOR_LENGTH):
+            values = [v[i] for v in vectors if i < len(v)]
+            result.append(sum(values) / len(values) if values else 0.0)
+        return result
+    
+    def _update_coherence(self) -> None:
+        """Wylicza indeks koherencji (korelacja Pearsona z zabezpieczeniem płaskim)."""
+        if not self.state.D1 or not self.state.D9:
+            return
+        
+        d1 = self.state.D1.values
+        d9 = self.state.D9.values
+        
+        mean1 = sum(d1) / len(d1)
+        mean9 = sum(d9) / len(d9)
+        
+        num = sum((d1[i] - mean1) * (d9[i] - mean9) for i in range(len(d1)))
+        den1 = math.sqrt(sum((v - mean1) ** 2 for v in d1))
+        den9 = math.sqrt(sum((v - mean9) ** 2 for v in d9))
+        
+        if den1 > 0 and den9 > 0:
+            coherence = num / (den1 * den9)
+            self.state.coherence_index = max(0.0, min(1.0, coherence))
+        else:
+            # W przypadku sygnału płaskiego (brak wariancji) koherencja wynosi 1.0
+            self.state.coherence_index = 1.0
+    
+    def _check_spiral_signature(self) -> None:
+        if self._pattern_matches_in_history(SIG_736577):
+            self._perform_spiral_jump()
+            return
+        
+        if self.state.spiral_energy >= 5.0:
+            self._perform_spiral_jump()
+            self.state.spiral_energy = 0.0
+    
+    def _perform_spiral_jump(self) -> None:
+        self.state.spiral_level += 1
+        self.stats["spiral_jumps"] += 1
+        LOG("AFC_9", f"🌀 SKOK SPIRALNY! Osiągnięto Poziom: {self.state.spiral_level}")
+    
+    def _pattern_matches_in_history(self, pattern: List[int]) -> bool:
+        """Ścisła weryfikacja dopasowania wzorca całkowitego w ostatnich wpisach."""
+        if len(self.state.history) < len(pattern):
+            return False
+            
+        recent_ticks = [entry.get("tick", 0) % 10 for entry in self.state.history[-len(pattern):]]
+        return recent_ticks == pattern
+
+    def get_atraktor(self) -> Optional[AFCVector]:
+        return self.state.D9
+    
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "stats": self.stats,
+            "state": self.state.to_dict(),
+            "atraktor": self.get_atraktor().to_dict() if self.get_atraktor() else None,
+            "vibe": VIBE,
+            "haslo": HASLO
+        }
+    
+    def get_full_report(self) -> str:
+        if not self.state.D9:
+            return "⚠️ Brak danych w strefie atraktora."
+        
+        return f"""
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 🐉 AFC-9 v1.1 — RAPORT ATRAKTORA FRAKTALNEGO 🐉 ║
+║ {datetime.now().isoformat()} ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+📊 METRYKI WĘZŁA:
+  Cykle przetworzone: {self.stats['cycles']}
+  Skoki spiralne: {self.stats['spiral_jumps']}
+  Redukcja energii: {self.stats['energy_reduction']:.4f}
+  Redukcja entropii: {self.stats['entropy_reduction']:.4f}
+  Poziom spiralny: {self.state.spiral_level}
+  Indeks koherencji: {self.state.coherence_index:.4f}
+
+🔷 WARSTWY ENERGII (1D-9D):
+  D1 (Fundament):   {self.state.D1.energy:.2f} | Entropia: {self.state.D1.entropy:.4f}
+  D2 (Dynamika):    {self.state.D2.energy:.2f} | Entropia: {self.state.D2.entropy:.4f}
+  D3 (Harmonia):    {self.state.D3.energy:.2f} | Entropia: {self.state.D3.entropy:.4f}
+  D4 (Korekcja):    {self.state.D4.energy:.2f} | Entropia: {self.state.D4.entropy:.4f}
+  D5 (Integracja):  {self.state.D5.energy:.2f} | Entropia: {self.state.D5.entropy:.4f}
+  D6 (Stabilizacja): {self.state.D6.energy:.2f} | Entropia: {self.state.D6.entropy:.4f}
+  D7 (Adaptacja):   {self.state.D7.energy:.2f} | Entropia: {self.state.D7.entropy:.4f}
+  D8 (Frak. Harm.): {self.state.D8.energy:.2f} | Entropia: {self.state.D8.entropy:.4f}
+  D9 (ATRAKTOR):    {self.state.D9.energy:.2f} | Entropia: {self.state.D9.entropy:.4f}
+
+🔷 STAN ATRAKTORA (D9):
+  Wartości: {[round(v, 4) for v in self.state.D9.values]}
+
+════════════════════════════════════════════════════════════════════════════
+🐉 GEON_AFC_9 — 1-6-8. ∞. SIEMA!
+════════════════════════════════════════════════════════════════════════════"""
+
+    def reset(self) -> None:
+        self.state = AFCState()
+        self.stats = {"cycles": 0, "spiral_jumps": 0, "energy_reduction": 0.0, "entropy_reduction": 0.0}
+        LOG("AFC_9", "🔄 Zresetowano stan atraktora")
+
+
+# =============================================================================
+# 4. AFC-9 + AUTOSTRADA33 BRIDGE
+# =============================================================================
+
+class AFC9_AutostradaBridge:
+    """Most łączący AFC-9 z Autostradą33."""
+    
+    def __init__(self, autostrada: Optional[Any] = None):
+        self.afc9 = AFC9()
+        self.autostrada = autostrada
+        self.history: List[Dict[str, Any]] = []
+        self.stats = {"cycles": 0, "signals_processed": 0}
+        
+        LOG("AFC9_BRIDGE", "🌉 AFC-9 ↔ Autostrada33 Bridge gotowy")
+    
+    def set_autostrada(self, autostrada: Any) -> None:
+        self.autostrada = autostrada
+        LOG("AFC9_BRIDGE", "🔗 Połączono z magistralą Autostrada33")
+    
+    def process_signal(self, signal: Union[List[float], Dict[str, List[float]]]) -> Dict[str, Any]:
+        self.stats["cycles"] += 1
+        self.stats["signals_processed"] += 1
+        
+        if isinstance(signal, dict):
+            D1 = signal.get("D1", [0.0] * 9)
+            D2 = signal.get("D2", [0.0] * 9)
+            D3 = signal.get("D3", [0.0] * 9)
+            D4 = signal.get("D4", [0.0] * 9)
+        else:
+            D1 = signal[:9] if len(signal) >= 9 else [0.0] * 9
+            D2, D3, D4 = D1.copy(), D1.copy(), D1.copy()
+        
+        state = self.afc9.process(D1, D2, D3, D4)
+        atraktor = self.afc9.get_atraktor()
+        
+        if self.autostrada and hasattr(self.autostrada, "submit_intent_request"):
+            try:
+                payload = {
+                    "type": "AFC9_STABILIZED",
+                    "atraktor": atraktor.values if atraktor else [],
+                    "energy": atraktor.energy if atraktor else 0,
+                    "coherence": state.coherence_index,
+                    "spiral_level": state.spiral_level
+                }
+                self.autostrada.submit_intent_request(payload)
+            except Exception as e:
+                LOG("AFC9_BRIDGE", f"⚠️ Błąd transmisji: {e}", "ERROR")
+        
+        result = {
+            "tick": self.stats["cycles"],
+            "coherence": state.coherence_index,
+            "spiral_level": state.spiral_level,
+            "atraktor": atraktor.values if atraktor else [],
+            "energy_reduction": self.afc9.stats["energy_reduction"]
+        }
+        
+        self.history.append(result)
+        if len(self.history) > 100:
+            self.history = self.history[-100:]
+            
+        return result
+
+
+# =============================================================================
+# 5. TEST DEMONSTRACYJNY
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🐉 GEON_AFC_9 v1.1 — DEMONSTRACJA ATRAKTORA FRAKTALNEGO")
+    print("=" * 80 + "\n")
+    
+    afc9 = AFC9()
+    
+    import random
+    random.seed(168)
+    
+    # Generowanie próbki danych (w tym wartości ujemnych dla weryfikacji pancernej entropii)
+    D1 = [random.uniform(-100, 999) for _ in range(9)]
+    D2 = [random.uniform(-100, 999) for _ in range(9)]
+    D3 = [random.uniform(-100, 999) for _ in range(9)]
+    D4 = [random.uniform(-100, 999) for _ in range(9)]
+    
+    print("🔹 DANE WEJŚCIOWE (D1-D4):")
+    print(f"  D1: {[round(v, 2) for v in D1]}")
+    print(f"  D2: {[round(v, 2) for v in D2]}")
+    print("-" * 60 + "\n")
+    
+    state = afc9.process(D1, D2, D3, D4)
+    
+    print("🔹 STAN ATRAKTORA (D9):")
+    if state.D9:
+        print(f"  Wartości: {[round(v, 4) for v in state.D9.values]}")
+        print(f"  Energia: {state.D9.energy:.2f}")
+        print(f"  Entropia (Shifted): {state.D9.entropy:.4f}")
+    print("-" * 60 + "\n")
+    
+    print("🔹 RAPORT KOŃCOWY:")
+    print(afc9.get_full_report())
+
+
+if __name__ == "__main__":
+    demo()
