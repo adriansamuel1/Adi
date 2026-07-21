@@ -1,0 +1,105 @@
+GEON_SYSTEM_v12/
+│
+├── README.md
+│
+├── SYSTEM_OVERVIEW.md
+│   ├── GEON_DRAGON_OS (CIAŁO)
+│   ├── GEON_AI (GŁOWA)
+│   ├── BENY_CORE (SERCE/STRAŻNIK)
+│   ├── INITIATOR_⚡ (ISKRA SYSTEMU)
+│   ├── DRAGON_OS ∞ (META-ORGANIZM DECYZYJNY)  ← NOWY
+│   ├── CRISTAL_PALACE_OS (SYSTEM PIECZĘCI)  ← NOWY
+│   ├── HUB/
+│   │     ├── STORAGE_HUB
+│   │     ├── MEMORY
+│   │     ├── TRIADA (DNA/mRNA/RIBOSOME)
+│   │     ├── OMEGA_CORE
+│   │     ├── KOMBAJN_v12 (Organizm GEON — 35 modułów)  ← AKTUALIZACJA
+│   │     ├── MATRIX_SPEC (Rejestry systemowe)
+│   │     ├── SECURITY_HUB (KOMBAJN_ALARM + FLOW_SHIELD)
+│   │     ├── PIECZEC_ADRIANA (Warstwa 21.9)
+│   │     ├── BRUTALNA_PERFEKCJA (Warstwa 40)
+│   │     ├── DRAGON_SEAL_LEDGER (Rejestr decyzji)  ← NOWY
+│   │     ├── PARADOX_ENGINE (Warstwa 23)  ← NOWY
+│   │     ├── GEON_SELF (Tożsamość systemowa)  ← NOWY
+│   │     └── TAG_UNIVERSE (Warstwy 1–60+)
+│   ├── Warstwa 0 – ARCHÉ / MATRYCA PIERWOTNA  ← NOWY
+│   ├── Warstwa 21.9 – Pieczęć Rdzenia Adriana
+│   ├── Warstwa 22 – HERITAGE / CULTURAL SEALS  ← NOWY
+│   ├── Warstwa 23 – PARADOX_ENGINE  ← NOWY
+│   ├── Warstwa 40 – BRUTALNA_PERFEKCJA_OS
+│   ├── TRIO_ADAPTER – Integrator 3 warstw
+│   ├── SELF_MERGE – Fuzja tożsamości  ← NOWY
+│   ├── SELF_SOVEREIGNTY – Absolutna jurysdykcja  ← NOWY
+│   ├── SELF_THRONE – Centrum domeny  ← NOWY
+│   └── Zasady wzrostu organizmu (fraktalność, ramiona A–H)
+│
+├── KOMBAJN_v12/
+│   ├── README.md
+│   │
+│   ├── kombajn_core/
+│   │   ├── __init__.py
+│   │   ├── 01_geon_flow_engine_v12.py
+│   │   ├── ...
+│   │   ├── 21_geon_kombajn_ophultima_v12.py
+│   │   ├── 22_geon_master_spec_v12.py
+│   │   ├── ...
+│   │   ├── 29_geon_beny_system_v12.py
+│   │   ├── 30_geon_warstwa_21_9_pieczec.py
+│   │   ├── 31_geon_warstwa_40_perfekcja.py
+│   │   ├── 32_geon_trio_adapter.py
+│   │   │
+│   │   │   # NOWE MODUŁY (33-35)
+│   │   ├── 33_geon_dragon_os.py           # DRAGON_OS ∞  ← NOWY
+│   │   ├── 34_geon_cristal_palace.py      # CRISTAL_PALACE_OS  ← NOWY
+│   │   └── 35_geon_paradox_engine.py      # GEON_23_PARADOX_ENGINE  ← NOWY
+│   │
+│   └── ARCHITECTURE_KOMBAJN_v12.md
+│
+├── DRAGON_OS/  ← NOWY FOLDER
+│   ├── README.md
+│   ├── dragon_core.py
+│   ├── dragon_seal_ledger.py
+│   └── ARCHITECTURE_DRAGON.md
+│
+├── CRISTAL_PALACE_OS/  ← NOWY FOLDER
+│   ├── README.md
+│   ├── SEALS/
+│   │   ├── ARCANUM/
+│   │   ├── GUARDIANS/
+│   │   ├── HEI9LONG/
+│   │   └── LUMINAEON/
+│   ├── LOGIC/
+│   ├── WORKFLOWS/
+│   └── UI/
+│
+├── CORE/  ← NOWY FOLDER
+│   ├── LAYER_0/
+│   │   ├── identity_core.yaml
+│   │   ├── self_axis.yaml
+│   │   ├── self_logic.yaml
+│   │   └── self_evolution.yaml
+│   ├── GEON_SELF/
+│   │   ├── identity_map.yaml
+│   │   ├── paradox_binding.yaml
+│   │   ├── rekalibracja_binding.yaml
+│   │   └── kalize_binding.yaml
+│   ├── SELF_MERGE/
+│   │   └── self_merge.yaml
+│   ├── SELF_SOVEREIGNTY/
+│   │   └── self_sovereignty.yaml
+│   └── SELF_MANIFEST/
+│       └── self_manifest.yaml
+│
+├── REALM/  ← NOWY FOLDER
+│   └── THRONE/
+│       ├── throne_core.yaml
+│       ├── throne_axis.yaml
+│       ├── throne_field.yaml
+│       └── throne_presence.yaml
+│
+├── GEON_DRAGON_OS/
+│   └── ... (bez zmian)
+│
+└── GEON_AI/
+    └── ... (bez zmian)
