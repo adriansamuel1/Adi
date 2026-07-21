@@ -1,0 +1,680 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""GEON_LAYER_55 — SOLARMIND v10 (ULTIMA INTEGRATION).
+
+Warstwa poznawcza (operacyjne myślenie planetarne) dla GEON_DRAGON_OS.
+Nowości v10:
+- Integracja z GEON_KOMBAJN_FULL
+- AFC-9 pełne sprzężenie zwrotne (D4 z last_stability)
+- FAG_Core transformacja wejścia
+- VisionOS (wizja i trajektoria)
+- KombajnAlarm (shadow_score)
+- GlobalRhythmEngine synchronizacja
+- SystemMirror reflection
+- Rozszerzone statystyki
+
+Autor: Adrian (Architekt)
+Vibe: 1-6-8. ∞. KLAWO JAK CHOLERA
+"""
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
+from enum import Enum
+import logging
+import math
+import time
+from typing import Any, Dict, List, Optional, Tuple
+
+logger = logging.getLogger("GEON_SOLARMIND")
+
+
+# ============================================================
+# 1. ENUMY / STRUKTURY POMOCNICZE
+# ============================================================
+
+class MetaMode(Enum):
+    STABILIZATION = "stabilization"
+    OPTIMIZATION = "optimization"
+    COHERENCE = "coherence"
+    CREATIVE = "creative"
+    ANALYTIC = "analytic"
+    EMERGENCY = "emergency"
+
+
+@dataclass
+class MetaState:
+    mode: MetaMode = MetaMode.STABILIZATION
+    stability: float = 1.0
+    coherence: float = 1.0
+    entropy: float = 0.0
+    load: float = 0.0
+    shadow_score: int = 0
+    rhythm_sync: bool = True
+
+
+@dataclass
+class KoronaState:
+    fullness: float = 0.0
+    ring_level: int = 0
+    vision_core: str = "Ekspansja"
+    vision_trajectory: Dict[str, float] = field(default_factory=dict)
+    last_update: float = field(default_factory=time.time)
+
+
+@dataclass
+class PlanetState:
+    name: str
+    payload: Dict[str, Any]
+
+
+# ============================================================
+# 2. KLASA SOLARMIND (PLANETARNY UKŁAD POZNANIA)
+# ============================================================
+
+class SolarMindCore:
+    """SolarMindCore — operacyjne myślenie w 9 planetarnych etapach."""
+    
+    def __init__(self, system: Any, max_workers: int = 4):
+        self.system = system
+        self.planets: Dict[str, PlanetState] = {}
+        self._executor = ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="SolarMind")
+        
+        # Historia dla AFC-9
+        self.stability_history: List[float] = []
+        self.last_stability = 0.5
+        
+        # Statystyki
+        self.stats = {
+            "cycles": 0,
+            "modes": {},
+            "avg_stability": 0.0,
+            "avg_shadow": 0.0
+        }
+        
+        logger.info("[SolarMind] v10 ULTIMA INTEGRATION aktywowany")
+    
+    # --------------------------------------------------------
+    # SAFE CALLER (DEFENSYWNE WYWOŁANIA AGENTÓW)
+    # --------------------------------------------------------
+    
+    def _safe_agent_call(self, agent_name: str, method_name: str, *args, **kwargs) -> Dict[str, Any]:
+        """Bezpieczne wywołanie agenta systemowego z obsługą wyjątków."""
+        agent = getattr(self.system, agent_name, None)
+        if agent is None:
+            logger.warning(f"[SolarMind] Brak agenta '{agent_name}' w obiekcie systemu.")
+            return {}
+        
+        method = getattr(agent, method_name, None)
+        if not callable(method):
+            logger.warning(f"[SolarMind] Agent '{agent_name}' nie posiada metody '{method_name}'.")
+            return {}
+        
+        try:
+            res = method(*args, **kwargs)
+            return res if isinstance(res, dict) else {"result": res}
+        except Exception as e:
+            logger.error(f"[SolarMind] Błąd podczas wywołania {agent_name}.{method_name}: {e}")
+            return {"error": str(e)}
+    
+    # --------------------------------------------------------
+    # KOMBAJN_ALARM — SCAN CIENIA
+    # --------------------------------------------------------
+    
+    def _shadow_scan(self, text: str) -> Dict[str, Any]:
+        """Skanuje tekst pod kątem wzorca cienia."""
+        lower = text.lower()
+        score = 0
+        
+        # Kryteria cienia
+        shadow_indicators = {
+            "empathy_absent": ["bez empatii", "nie czuje", "obojętny", "zimny"],
+            "reflexion_absent": ["bez refleksji", "nie myśli", "impulsywny"],
+            "uses_people": ["wykorzystuje", "zasób ludzki", "narzędzie"],
+            "breaks_promises": ["łamie obietnice", "nie dotrzymuje", "zdradza"],
+            "avoids_care": ["unika opieki", "porzuca", "nie troszczy się"],
+            "cold_procedural": ["proceduralny", "bez uczuć", "chłodny", "automatyczny"]
+        }
+        
+        for category, keywords in shadow_indicators.items():
+            if any(kw in lower for kw in keywords):
+                if category in ["empathy_absent", "reflexion_absent"]:
+                    score += 2
+                elif category in ["uses_people", "avoids_care"]:
+                    score += 2
+                else:
+                    score += 1
+        
+        score = min(10, score)
+        
+        if score <= 1:
+            level, icon, msg = "GREEN", "🟢", "Bezpieczna integracja."
+        elif score <= 4:
+            level, icon, msg = "YELLOW", "🟡", "Ostrożnie. Obserwuj."
+        else:
+            level, icon, msg = "RED", "🔴", "Dystans. Zero oczekiwań."
+        
+        return {"score": score, "level": level, "icon": icon, "message": msg}
+    
+    # --------------------------------------------------------
+    # FAG_CORE — TRANSFORMACJA WEJŚCIA
+    # --------------------------------------------------------
+    
+    def _fag_transform(self, text: str) -> str:
+        """Transformacja wejścia przez mechanizm bakteriofaga."""
+        lower = text.lower()
+        
+        if "boję" in lower or "strach" in lower:
+            return "Transformacja: lęk → działanie. " + text
+        elif "chcę" in lower or "marzę" in lower:
+            return "Transformacja: pragnienie → realizacja. " + text
+        elif "nie mogę" in lower or "niemożliwe" in lower:
+            return "Transformacja: ograniczenie → możliwość. " + text
+        
+        return text
+    
+    # --------------------------------------------------------
+    # AFC-9 — ATRAKTOR PRZEPŁYWU
+    # --------------------------------------------------------
+    
+    def _afc9_compute(self, values: List[float]) -> Tuple[List[float], float, float]:
+        """Oblicza AFC-9 z D4 sprzężeniem zwrotnym."""
+        if not values:
+            values = [0.5] * 9
+        
+        # D1: surowe wartości
+        d1 = [float(v) for v in values[:9]]
+        # D2: tłumione
+        d2 = [min(1.0, v * 0.9) for v in d1]
+        # D3: wzmocnione
+        d3 = [min(1.0, v * 1.1) for v in d1]
+        # D4: sprzężenie zwrotne
+        d4 = [self.last_stability for _ in range(9)]
+        
+        # AFC-9 warstwy
+        def avg(vals: List[float]) -> float:
+            return sum(vals) / len(vals) if vals else 0.0
+        
+        d5 = [avg([d1[i], d2[i], d3[i], d4[i]]) for i in range(9)]
+        d6 = [avg([d1[i], d3[i], d5[i]]) for i in range(9)]
+        d7 = [avg([d2[i], d4[i], d6[i]]) for i in range(9)]
+        d8 = [avg([d1[i], d3[i], d5[i], d7[i]]) for i in range(9)]
+        d9 = [avg([d1[i], d8[i]]) for i in range(9)]
+        
+        core = avg(d9)
+        
+        # Aktualizacja stabilności
+        self.stability_history.append(core)
+        if len(self.stability_history) > 20:
+            self.stability_history = self.stability_history[-20:]
+        
+        if len(self.stability_history) > 2:
+            window = self.stability_history[-10:]
+            mean = avg(window)
+            variance = sum((c - mean) ** 2 for c in window) / len(window)
+            self.last_stability = max(0.0, min(1.0, 1.0 - math.sqrt(variance) * 2.5))
+        
+        return d9, core, self.last_stability
+    
+    # --------------------------------------------------------
+    # GLOBAL RHYTHM ENGINE — SYNCHRONIZACJA
+    # --------------------------------------------------------
+    
+    def _global_rhythm_sync(self, stability: float) -> bool:
+        """Sprawdza synchronizację z globalnym rytmem."""
+        # Jeśli stabilność > 0.7 → synchronizacja
+        # Jeśli stabilność < 0.3 → desynchronizacja
+        if stability > 0.7:
+            return True
+        elif stability < 0.3:
+            return False
+        # W międzyczasie: zależy od historii
+        return self.last_stability > 0.5
+    
+    # --------------------------------------------------------
+    # SYSTEM MIRROR — REFLEKSJA
+    # --------------------------------------------------------
+    
+    def _system_mirror_reflection(self, text: str, stability: float) -> str:
+        """Generuje refleksję systemową."""
+        if stability > 0.8:
+            return "CRYSTAL_CLEAR — System widzi siebie w pełni."
+        elif stability > 0.5:
+            return "RESONANT_TURBULENCE — System widzi siebie, ale z zakłóceniami."
+        else:
+            return "DISTORTED_PHASE — System ma trudności z samoobserwacją."
+    
+    # --------------------------------------------------------
+    # VISIONOS — WIZJA I TRAJEKTORIA
+    # --------------------------------------------------------
+    
+    def _generate_vision(self, text: str, stability: float, shadow_score: int) -> Dict[str, Any]:
+        """Generuje wizję na podstawie stanu systemu."""
+        # Core vision
+        if shadow_score > 4:
+            core = "Ochrona rdzenia — priorytet absolutny"
+        elif stability > 0.7:
+            core = "Ekspansja — wzrost fraktalny"
+        elif stability > 0.4:
+            core = "Regulacja — balans i stabilizacja"
+        else:
+            core = "Odzyskiwanie — reset i regeneracja"
+        
+        # Trajektoria
+        trajectory = {
+            "vector": stability * 0.8 + (1.0 - shadow_score / 10) * 0.2,
+            "risk": 1.0 - stability,
+            "coherence": stability * 0.6 + 0.2,
+            "critical_points": [5, 12, 24] if stability > 0.7 else [1, 3, 7]
+        }
+        
+        return {
+            "core": core,
+            "trajectory": trajectory,
+            "protocol_2504": trajectory["risk"] < 0.5 and trajectory["coherence"] > 0.4
+        }
+    
+    # --------------------------------------------------------
+    # GŁÓWNA FUNKCJA: think()
+    # --------------------------------------------------------
+    
+    def think(self, text: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Przetwarza tekst przez 9 planetarnych etapów."""
+        if context is None:
+            context = {}
+        
+        self.stats["cycles"] += 1
+        start_time = time.time()
+        
+        # 🌞 ETAP 0: KOMBAJN_ALARM + FAG_Core + VisionOS
+        shadow_result = self._shadow_scan(text)
+        shadow_score = shadow_result["score"]
+        
+        transformed_text = self._fag_transform(text)
+        fag_applied = transformed_text != text
+        
+        # 🌞 ETAP 1: SŁOŃCE — vibe (OŁSii)
+        olsii_out = self._safe_agent_call("olsii", "process", transformed_text, context)
+        sun_vibe = olsii_out.get("vibe", 168)
+        afc_phase = olsii_out.get("afc_phase", 1)
+        style = olsii_out.get("style", "STANDARD")
+        
+        # 🔤 SOFIA — oczyszcza tekst + AFC-9
+        stabilized = self._safe_agent_call("sofia", "stabilize", transformed_text)
+        sem = stabilized.get("semantyka", transformed_text)
+        raw_wektor = stabilized.get("wektor", [0.5] * 9)
+        
+        # AFC-9 pełna komputacja
+        afc_vector, core, stability = self._afc9_compute(raw_wektor)
+        
+        # Global Rhythm Sync
+        rhythm_sync = self._global_rhythm_sync(stability)
+        
+        # System Mirror Reflection
+        mirror_reflection = self._system_mirror_reflection(transformed_text, stability)
+        
+        # VisionOS
+        vision = self._generate_vision(transformed_text, stability, shadow_score)
+        
+        # Entropia i koherencja
+        entropy = 1.0 - stability
+        coherence = stability * 0.8 + 0.2
+        
+        # ☿ ETAP 2: MERKURY — fakty
+        mercury_facts = self._extract_facts(sem)
+        
+        # ♀ ETAP 3 & 🌍 ETAP 4: WENUS + ZIEMIA (Równoległe)
+        agent_payload = {
+            "semantyka": sem,
+            "wektor": afc_vector,
+            "olsii_vibe": sun_vibe,
+            "stability": stability,
+            "shadow_score": shadow_score
+        }
+        
+        futures = {
+            "benny": self._executor.submit(self._safe_agent_call, "benny", "call", agent_payload),
+            "architekt": self._executor.submit(self._safe_agent_call, "architekt", "call", agent_payload),
+            "legislator": self._executor.submit(self._safe_agent_call, "legislator", "call", agent_payload)
+        }
+        
+        results = {}
+        for name, future in futures.items():
+            results[name] = future.result()
+        
+        venus_options = self._generate_options(sem)
+        earth_scenarios = self._generate_scenarios(venus_options)
+        
+        # ♂ ETAP 5: MARS — pamięć/wiedza
+        thought_id = None
+        water_agent = getattr(self.system, "water", None)
+        if water_agent and hasattr(water_agent, "add_thought"):
+            try:
+                thought_id = water_agent.add_thought(
+                    content=transformed_text,
+                    source_id=None,
+                    flow_strength=0.5,
+                    save_to_fractal=True,
+                )
+            except Exception as e:
+                logger.error(f"[SolarMind] Błąd zapisywania myśli: {e}")
+        
+        water_state = self._safe_agent_call("water", "get_water_state")
+        mars_knowledge = self._recall_knowledge(context)
+        
+        # ♃ ETAP 6: JOWISZ — relacje
+        jupiter_relations = self._map_relations(sem, context)
+        
+        # ♄ ETAP 7: SATURN — tryb działania
+        projects_count = len(getattr(self.system, "projects", []))
+        load = min(1.0, projects_count / 1000.0)
+        
+        meta_res = self._safe_agent_call(
+            "meta_reasoning",
+            "evaluate",
+            {
+                "entropy": entropy,
+                "stability": stability,
+                "coherence": coherence,
+                "load": load,
+                "shadow_score": shadow_score,
+                "rhythm_sync": rhythm_sync
+            }
+        )
+        
+        if isinstance(meta_res.get("result"), MetaState):
+            meta_state = meta_res["result"]
+        else:
+            meta_state = MetaState(
+                mode=MetaMode.STABILIZATION,
+                stability=stability,
+                coherence=coherence,
+                entropy=entropy,
+                load=load,
+                shadow_score=shadow_score,
+                rhythm_sync=rhythm_sync
+            )
+        
+        saturn_mode = meta_state.mode.value
+        self.stats["modes"][saturn_mode] = self.stats["modes"].get(saturn_mode, 0) + 1
+        
+        # ♆ ETAP 8: NEPTUN — sens (Korona + Vision)
+        korona_res = self._safe_agent_call(
+            "korona",
+            "update",
+            stability=stability,
+            coherence=coherence,
+            entropy=entropy,
+            load=load
+        )
+        
+        if isinstance(korona_res.get("result"), KoronaState):
+            korona_state = korona_res["result"]
+            korona_state.vision_core = vision["core"]
+            korona_state.vision_trajectory = vision["trajectory"]
+        else:
+            korona_state = KoronaState(
+                fullness=coherence,
+                ring_level=int(coherence * 9),
+                vision_core=vision["core"],
+                vision_trajectory=vision["trajectory"]
+            )
+        
+        neptune_sense = {
+            "fullness": korona_state.fullness,
+            "ring_level": korona_state.ring_level,
+            "vision_core": korona_state.vision_core,
+            "vision_trajectory": korona_state.vision_trajectory
+        }
+        
+        # 🛰 ETAP 9: GEON — integralność
+        geon_integrity = self._analyze_integrity(
+            wektor=afc_vector,
+            sun_vibe=sun_vibe,
+            afc_phase=afc_phase,
+            style=style,
+            stability=stability,
+            shadow_score=shadow_score
+        )
+        
+        # Zapis planetarny
+        olsii_afc = getattr(getattr(self.system, "olsii", None), "afc", None)
+        afc_state = olsii_afc.get_state() if olsii_afc and hasattr(olsii_afc, "get_state") else {}
+        
+        self._update_planets(
+            sofia_data=stabilized,
+            benny_data=results.get("benny", {}),
+            architekt_data=results.get("architekt", {}),
+            legislator_data=results.get("legislator", {}),
+            water_state=water_state,
+            meta_state=meta_state,
+            korona_state=korona_state,
+            afc_state=afc_state,
+            shadow=shadow_result,
+            vision=vision,
+            rhythm_sync=rhythm_sync,
+            mirror_reflection=mirror_reflection
+        )
+        
+        elapsed_ms = round((time.time() - start_time) * 1000.0, 2)
+        
+        # Aktualizacja statystyk
+        self.stats["avg_stability"] = (self.stats["avg_stability"] * (self.stats["cycles"] - 1) + stability) / self.stats["cycles"]
+        self.stats["avg_shadow"] = (self.stats["avg_shadow"] * (self.stats["cycles"] - 1) + shadow_score) / self.stats["cycles"]
+        
+        return {
+            "sun_vibe": sun_vibe,
+            "shadow": shadow_result,
+            "fag_applied": fag_applied,
+            "afc_core": core,
+            "afc_stability": stability,
+            "afc_vector": afc_vector,
+            "rhythm_sync": rhythm_sync,
+            "mirror_reflection": mirror_reflection,
+            "vision": vision,
+            "mercury_facts": mercury_facts,
+            "venus_options": venus_options,
+            "earth_scenarios": earth_scenarios,
+            "mars_knowledge": mars_knowledge,
+            "jupiter_relations": jupiter_relations,
+            "saturn_mode": saturn_mode,
+            "neptune_sense": neptune_sense,
+            "geon_integrity": geon_integrity,
+            "thought_id": thought_id,
+            "elapsed_ms": elapsed_ms,
+            "planets_state": self.get_state(),
+        }
+    
+    # --------------------------------------------------------
+    # METODY POMOCNICZE
+    # --------------------------------------------------------
+    
+    def _extract_facts(self, semantyka: str) -> List[str]:
+        words = semantyka.split()
+        stop_words = {"może", "chyba", "nie wiem", "prawdopodobnie", "jakby"}
+        filtered = [w for w in words if w.lower() not in stop_words]
+        return [" ".join(filtered)] if filtered else ["Brak jasnych faktów"]
+    
+    def _generate_options(self, semantyka: str) -> List[str]:
+        base = semantyka[:100]
+        return [
+            f"Opcja Alpha (Wykonawcza): {base}",
+            f"Opcja Beta (Fraktalna): Reorganizacja kontekstu — {base}",
+            f"Opcja Gamma (Minimalna): Stabilizacja zasobów"
+        ]
+    
+    def _generate_scenarios(self, options: List[str]) -> List[str]:
+        return [f"Projekt_Scenariusza -> {opt}" for opt in options]
+    
+    def _recall_knowledge(self, context: Dict[str, Any]) -> List[str]:
+        tag = context.get("tag", "GEON_CORE")
+        projects_count = len(getattr(self.system, "projects", []))
+        return [f"Węzeł wiedzy: [{tag}] | Aktywne projekty: {projects_count}"]
+    
+    def _map_relations(self, semantyka: str, context: Dict[str, Any]) -> List[str]:
+        rel = context.get("rel", "Węzeł_Główny")
+        return [f"Relacja Wektorowa: '{semantyka[:30]}...' ===> [{rel}]"]
+    
+    def _analyze_integrity(self, wektor: List[float], sun_vibe: int, afc_phase: int, 
+                           style: str, stability: float, shadow_score: int) -> Dict[str, Any]:
+        geon = getattr(self.system, "geon", None) or getattr(self.system, "geon_168", None)
+        payload = {
+            "wektor": wektor,
+            "olsii_vibe": sun_vibe,
+            "afc_phase": afc_phase,
+            "olsii_style": style,
+            "stability": stability,
+            "shadow_score": shadow_score,
+            "projects_count": len(getattr(self.system, "projects", []))
+        }
+        if geon and hasattr(geon, "analyze"):
+            return geon.analyze(payload)
+        
+        score = min(168, max(0, int(sun_vibe * (0.5 + stability * 0.5) * (1.0 - shadow_score / 20))))
+        status = "NOMINAL" if score >= 84 else "DEGRADED" if score >= 42 else "CRITICAL"
+        return {
+            "status": status,
+            "score": score,
+            "integrity_index": round(score / 168.0, 4),
+            "stability": stability
+        }
+    
+    # --------------------------------------------------------
+    # PLANETY — MAPOWANIE STANU
+    # --------------------------------------------------------
+    
+    def _update_planets(self, **kwargs) -> None:
+        self.planets["Merkury"] = PlanetState("Merkury", {
+            "semantyka": kwargs.get("sofia_data", {}).get("semantyka", ""),
+            "wektor": kwargs.get("sofia_data", {}).get("wektor", [])
+        })
+        self.planets["Wenus"] = PlanetState("Wenus", {
+            "priorytet": kwargs.get("benny_data", {}).get("priorytet"),
+            "wykonalność": kwargs.get("benny_data", {}).get("wykonalność")
+        })
+        self.planets["Ziemia"] = PlanetState("Ziemia", {
+            "ryzyko_prawne": kwargs.get("legislator_data", {}).get("ryzyko_prawne"),
+            "level": kwargs.get("legislator_data", {}).get("level")
+        })
+        self.planets["Mars"] = PlanetState("Mars", {
+            "has_conflicts": kwargs.get("water_state", {}).get("has_conflicts", False),
+            "vortices": kwargs.get("water_state", {}).get("vortices", 0)
+        })
+        self.planets["Jowisz"] = PlanetState("Jowisz", {
+            "active_thoughts": kwargs.get("water_state", {}).get("active_thoughts", 0)
+        })
+        self.planets["Saturn"] = PlanetState("Saturn", {
+            "meta_mode": kwargs.get("meta_state", MetaState()).mode.value,
+            "stability": kwargs.get("meta_state", MetaState()).stability,
+            "shadow_score": kwargs.get("meta_state", MetaState()).shadow_score,
+            "rhythm_sync": kwargs.get("rhythm_sync", True)
+        })
+        self.planets["Neptun"] = PlanetState("Neptun", {
+            "fullness": kwargs.get("korona_state", KoronaState()).fullness,
+            "ring_level": kwargs.get("korona_state", KoronaState()).ring_level,
+            "vision_core": kwargs.get("vision", {}).get("core", "brak")
+        })
+        self.planets["GEON"] = PlanetState("GEON", {
+            "afc_phase": kwargs.get("afc_state", {}).get("phase"),
+            "stability": kwargs.get("meta_state", MetaState()).stability,
+            "rhythm_sync": kwargs.get("rhythm_sync", True),
+            "mirror_reflection": kwargs.get("mirror_reflection", "brak")
+        })
+    
+    def get_state(self) -> Dict[str, Any]:
+        return {name: planet.payload for name, planet in self.planets.items()}
+    
+    def get_stats(self) -> Dict[str, Any]:
+        return {
+            "cycles": self.stats["cycles"],
+            "modes": self.stats["modes"],
+            "avg_stability": round(self.stats["avg_stability"], 4),
+            "avg_shadow": round(self.stats["avg_shadow"], 2),
+            "last_stability": round(self.last_stability, 4)
+        }
+
+
+# ============================================================
+# 3. WARSTWA 55 — ADAPTER DLA GEON_DRAGON_OS
+# ============================================================
+
+class GeonLayer55SolarMindV10:
+    """Adapter warstwy 55 dla GEON_DRAGON_OS — ULTIMA INTEGRATION."""
+    
+    def __init__(self, system: Any):
+        self.system = system
+        self.core = SolarMindCore(system)
+        logger.info("[Layer55] GeonLayer55SolarMindV10 aktywowany")
+    
+    def process(self, text: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        return self.core.think(text, context)
+    
+    def get_state(self) -> Dict[str, Any]:
+        return self.core.get_state()
+    
+    def get_stats(self) -> Dict[str, Any]:
+        return self.core.get_stats()
+
+
+# ============================================================
+# 4. DEMO
+# ============================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🐉 GEON_LAYER_55_SOLARMIND_v10 — DEMONSTRACJA")
+    print("=" * 80 + "\n")
+    
+    # Mock system
+    class MockSystem:
+        def __init__(self):
+            self.projects = ["projekt1", "projekt2"]
+            self.olsii = type('obj', (object,), {'process': lambda self, t, c: {"vibe": 168, "style": "Dziecko_Szczescia"}})()
+            self.sofia = type('obj', (object,), {'stabilize': lambda self, t: {"semantyka": t, "wektor": [0.5]*9}})()
+            self.benny = type('obj', (object,), {'call': lambda self, p: {"priorytet": 5, "wykonalność": 0.8}})()
+            self.architekt = type('obj', (object,), {'call': lambda self, p: {"nazwa_projektu": "test", "zadania": []}})()
+            self.legislator = type('obj', (object,), {'call': lambda self, p: {"ryzyko_prawne": "niskie", "level": 1}})()
+            self.water = type('obj', (object,), {'add_thought': lambda self, **kw: 123, 'get_water_state': lambda self: {}})()
+            self.meta_reasoning = type('obj', (object,), {'evaluate': lambda self, d: {"result": MetaState()}})()
+            self.korona = type('obj', (object,), {'update': lambda self, **kw: {"result": KoronaState()}})()
+            self.geon = type('obj', (object,), {'analyze': lambda self, p: {"status": "NOMINAL", "score": 150}})()
+    
+    system = MockSystem()
+    layer = GeonLayer55SolarMindV10(system)
+    
+    # Test 1: Pozytywny
+    print("🔹 TEST 1: Pozytywna iskra")
+    result1 = layer.process("Chcę zbudować dom z bursztynowym światłem")
+    print(f"   Shadow: {result1['shadow']['level']} ({result1['shadow']['score']})")
+    print(f"   Stability: {result1['afc_stability']:.3f}")
+    print(f"   Vision: {result1['vision']['core']}")
+    print(f"   Saturn mode: {result1['saturn_mode']}")
+    print(f"   Rhythm sync: {result1['rhythm_sync']}")
+    print(f"   Elapsed: {result1['elapsed_ms']} ms")
+    
+    # Test 2: Kryzysowy
+    print("\n🔹 TEST 2: Kryzysowa iskra")
+    result2 = layer.process("Boję się. Wszystko się wali. Atak!")
+    print(f"   Shadow: {result2['shadow']['level']} ({result2['shadow']['score']})")
+    print(f"   Stability: {result2['afc_stability']:.3f}")
+    print(f"   Vision: {result2['vision']['core']}")
+    print(f"   Saturn mode: {result2['saturn_mode']}")
+    print(f"   Rhythm sync: {result2['rhythm_sync']}")
+    
+    # Statystyki
+    print("\n" + "=" * 80)
+    print("📊 STATYSTYKI")
+    print("=" * 80)
+    stats = layer.get_stats()
+    for k, v in stats.items():
+        if isinstance(v, float):
+            print(f"{k}: {v:.4f}")
+        else:
+            print(f"{k}: {v}")
+    
+    print("\n" + "=" * 80)
+    print("🐉 DEMONSTRACJA ZAKOŃCZONA")
+    print("=" * 80)
+
+
+if __name__ == "__main__":
+    demo()
