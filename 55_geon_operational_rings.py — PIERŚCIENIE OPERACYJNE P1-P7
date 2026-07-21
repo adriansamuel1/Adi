@@ -1,0 +1,1206 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_OPERATIONAL_RINGS_v1 — MODUŁ 55: PIERŚCIENIE OPERACYJNE P1-P7
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.0 (Operational Rings — B-2, Rosomak, Sentino, Bazyliszek, Kondor, Orka, Axis)
+Data: 2026-07-21
+Autor: Adrian (Architekt) + GEON + OŁSii + Beny
+
+OPIS:
+7 pierścieni operacyjnych stanowiących warstwę wykonawczą systemu:
+P1  B-2 SPIRIT   — Oko, nawigacja, zagrożenia, decyzje lotnicze
+P2  ROSOMAK      — Sfora wilków, morale, berserk, ShadowLink
+P3  SENTINO      — Mózg, ośmiornica, kruk, pająk, atrament, emocje
+P4  BAZYLISZEK   — Wola, zwierciadło, stasis, erozja, strefa 15
+P5  ZŁOTY KONDOR — Duch, rule-shifting, reality forking, intent field
+P6  ORKA         — Stado, kultura, strategie, rezonans, synchronizacja
+P7  AXIS MUNDI   — Fundament, zasoby, cień, terytorium, energia
+
+ARCHITEKTURA:
+• Każdy pierścień to niezależny moduł z własnym stanem i logiką
+• Integrator P1-P7 zarządza synchronizacją między pierścieniami
+• Mosty do reszty architektury (GEX, G_CORE, MetaGovernor, NARRATIVE, OPH_CORE)
+
+INTEGRACJA Z ARCHITEKTURĄ:
+• GEX HEILONG — dostarcza archetypy dla pierścieni operacyjnych
+• OPH_CORE — używa pierścieni jako warstwy wykonawczej
+• HEILONG_22_ORGANISM — synchronizuje z trybami KRUK/SZCZUR/WRONA
+• ARCHANGEL-CORE — metapierścienie nadbudowane nad operacyjnymi
+• G_CORE — stan operacyjny dla autopilota
+• MetaGovernor — kontekst decyzyjny
+• NARRATIVE — źródło opowieści z pola walki
+
+VIBE: 1-6-8. ∞. SIEMA!
+================================================================================
+"""
+
+import time
+import math
+import random
+import copy
+import logging
+from typing import Dict, List, Any, Optional, Tuple, Callable, Literal
+from dataclasses import dataclass, field
+from collections import deque
+from enum import Enum
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_OPERATIONAL_RINGS_v1.0"
+FRACTAL_SIGNATURE = "[GEON::OPERATIONAL::RINGS::v1.0]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SIEMA!"
+PHI = 0.618033988749895
+
+# =============================================================================
+# LOGOWANIE
+# =============================================================================
+
+logger = logging.getLogger("GEON_OPERATIONAL_RINGS")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('🐉 [RINGS] %(message)s'))
+    logger.addHandler(handler)
+
+# =============================================================================
+# STRUKTURY POMOCNICZE
+# =============================================================================
+
+@dataclass
+class Point:
+    """Punkt w przestrzeni 2D"""
+    x: float
+    y: float
+    
+    def __add__(self, other: "Point") -> "Point":
+        return Point(self.x + other.x, self.y + other.y)
+    
+    def __sub__(self, other: "Point") -> "Point":
+        return Point(self.x - other.x, self.y - other.y)
+    
+    def scale(self, k: float) -> "Point":
+        return Point(self.x * k, self.y * k)
+    
+    def dist(self, other: "Point") -> float:
+        return math.hypot(self.x - other.x, self.y - other.y)
+    
+    def __repr__(self) -> str:
+        return f"({self.x:.1f},{self.y:.1f})"
+
+
+@dataclass
+class RectArea:
+    """Prostokątny obszar"""
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    
+    def __post_init__(self):
+        self.x1, self.x2 = min(self.x1, self.x2), max(self.x1, self.x2)
+        self.y1, self.y2 = min(self.y1, self.y2), max(self.y1, self.y2)
+    
+    def contains(self, point: Point) -> bool:
+        return self.x1 <= point.x <= self.x2 and self.y1 <= point.y <= self.y2
+
+
+@dataclass
+class Target:
+    """Cel strategiczny"""
+    id: str
+    value: float
+    priority: float
+    vector: Point
+
+
+@dataclass
+class ThreatZone:
+    """Strefa zagrożenia"""
+    id: str
+    danger_level: float
+    area: RectArea
+    signature_required: List[str] = field(default_factory=list)
+    
+    def is_dangerous_for(self, signature: str) -> bool:
+        return not self.signature_required or signature in self.signature_required
+
+
+# =============================================================================
+# PIERŚCIEŃ 1 — B-2 SPIRIT (OKO)
+# =============================================================================
+
+class FlightState:
+    """Stan lotu B-2 Spirit"""
+    def __init__(self, global_map: Any, targets: List[Target], threats: List[ThreatZone],
+                 lock_candidates: List[Target], fuel: float, risk_level: float,
+                 time_window: float, shadow_mode: bool = False):
+        self.global_map = global_map
+        self.targets = targets
+        self.threats = threats
+        self.lock_candidates = lock_candidates
+        self.fuel = fuel
+        self.risk_level = risk_level
+        self.time_window = time_window
+        self.shadow_mode = shadow_mode
+        self.nav_vector: Optional[Point] = None
+        self.no_fly: List[RectArea] = []
+        self.attack_vector: Optional[Point] = None
+        self.attack_profile: str = "NO_ATTACK"
+        self.ticks_in_threat: int = 0
+    
+    def with_nav(self, nav_output: Dict) -> "FlightState":
+        ns = FlightState(self.global_map, self.targets, self.threats, self.lock_candidates,
+                         self.fuel, self.risk_level, self.time_window, self.shadow_mode)
+        ns.nav_vector = nav_output.get("nav_vector")
+        ns.no_fly = nav_output.get("no_fly", [])
+        return ns
+    
+    def with_target(self, attack_output: Dict) -> "FlightState":
+        ns = FlightState(self.global_map, self.targets, self.threats, self.lock_candidates,
+                         self.fuel, self.risk_level, self.time_window, self.shadow_mode)
+        ns.nav_vector = self.nav_vector
+        ns.no_fly = self.no_fly
+        ns.attack_vector = attack_output.get("attack_vector")
+        ns.attack_profile = attack_output.get("attack_profile", "NO_ATTACK")
+        return ns
+    
+    def get_signature(self) -> str:
+        return "SILENT" if self.shadow_mode else "LOUD"
+    
+    def in_threat_zone(self) -> bool:
+        if not self.nav_vector:
+            return False
+        sig = self.get_signature()
+        for z in self.threats:
+            if z.area.contains(self.nav_vector) and z.is_dangerous_for(sig):
+                return True
+        return False
+    
+    def update_risk(self) -> None:
+        if self.in_threat_zone() and not self.shadow_mode:
+            self.ticks_in_threat += 1
+            self.risk_level = min(1.0, self.risk_level + 0.05 * self.ticks_in_threat)
+        else:
+            self.ticks_in_threat = max(0, self.ticks_in_threat - 1)
+            self.risk_level = max(0.0, self.risk_level - 0.02)
+
+
+class B2SpiritCore:
+    """
+    PIERŚCIEŃ 1 — B-2 SPIRIT
+    Oko systemu: nawigacja, zagrożenia, decyzje lotnicze
+    """
+    def __init__(self, base_vector: Point):
+        self.base_vector = base_vector
+        self.shadow_mode = False
+        self.fuel_remaining = 1.0
+        self.risk_level = 0.0
+        self.hold_count = 0
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+    
+    def tick(self, state: FlightState) -> Dict[str, Any]:
+        """Główny krok pierścienia B-2"""
+        self.tick_counter += 1
+        
+        # PANIC — krytyczne paliwo
+        if state.fuel < 0.1:
+            return {
+                "nav_vector": self.base_vector,
+                "no_fly": [],
+                "attack_vector": None,
+                "attack_profile": "ABORT",
+                "fire": False,
+                "mode": "RTB",
+                "shadow_mode": state.shadow_mode,
+                "hold_count": 0,
+                "risk_level": state.risk_level,
+                "handoff_to_ring2": None
+            }
+        
+        # 1. Orzeł — nawigacja strategiczna
+        e_sensed = {"terrain_map": state.global_map, "threats": state.threats, "targets": state.targets}
+        e_decided = self._eagle_decide(e_sensed)
+        e_acted = self._eagle_act(e_decided)
+        state1 = state.with_nav(e_acted)
+        
+        # 2. Jastrząb — selekcja celu
+        h_sensed = {"lock_candidates": state1.lock_candidates, "shadow_mode": state1.shadow_mode}
+        h_decided = self._hawk_decide(h_sensed)
+        h_acted = self._hawk_act(h_decided)
+        state2 = state1.with_target(h_acted)
+        
+        # 3. Sokół — decyzja o ogniu
+        f_sensed = {
+            "fuel": state2.fuel,
+            "risk": state2.risk_level,
+            "time_window": state2.time_window,
+            "shadow_mode": state2.shadow_mode,
+            "hold_count": self.hold_count
+        }
+        f_decided = self._falcon_decide(f_sensed)
+        f_acted = self._falcon_act(f_decided)
+        
+        # Wymuszenie Shadow Mode przy długim wstrzymaniu
+        if f_acted["force_shadow"]:
+            state2.shadow_mode = True
+            self.shadow_mode = True
+        
+        state2.update_risk()
+        self.risk_level = state2.risk_level
+        self.shadow_mode = state2.shadow_mode
+        self.hold_count = f_acted["hold_count"]
+        
+        # Handoff do Pierścienia 2
+        handoff = None
+        if not f_acted["fire"] and state2.risk_level > 0.8:
+            stealth = state2.shadow_mode or (state2.risk_level > 0.8)
+            handoff = {
+                "target_vector": h_acted["attack_vector"],
+                "attack_profile": h_acted["attack_profile"],
+                "fuel_remaining": state2.fuel,
+                "current_risk": state2.risk_level,
+                "stealth_handoff": stealth,
+                "reason": "HIGH_RISK_NO_FIRE"
+            }
+        
+        result = {
+            "nav_vector": e_acted["nav_vector"],
+            "no_fly": e_acted["no_fly"],
+            "attack_vector": h_acted["attack_vector"],
+            "attack_profile": h_acted["attack_profile"],
+            "fire": f_acted["fire"],
+            "mode": f_acted["mode"],
+            "shadow_mode": state2.shadow_mode,
+            "hold_count": f_acted["hold_count"],
+            "risk_level": state2.risk_level,
+            "handoff_to_ring2": handoff
+        }
+        
+        self.history.append({"tick": self.tick_counter, "result": result})
+        if len(self.history) > 50:
+            self.history = self.history[-30:]
+        
+        return result
+    
+    def _eagle_decide(self, sensed: Dict) -> Dict:
+        targets = sensed.get("targets", [])
+        threats = sensed.get("threats", [])
+        if not targets:
+            return {"priority_zone": None, "avoid_zones": threats}
+        priority_zone = max(targets, key=lambda t: t.value)
+        avoid_zones = [z for z in threats if z.danger_level > 0.6]
+        return {"priority_zone": priority_zone, "avoid_zones": avoid_zones}
+    
+    def _eagle_act(self, decision: Dict) -> Dict:
+        if decision["priority_zone"] is None:
+            return {"nav_vector": None, "no_fly": [z.area for z in decision["avoid_zones"]]}
+        return {
+            "nav_vector": decision["priority_zone"].vector,
+            "no_fly": [z.area for z in decision["avoid_zones"]]
+        }
+    
+    def _hawk_decide(self, sensed: Dict) -> Dict:
+        candidates = sensed.get("lock_candidates", [])
+        if not candidates:
+            return {"lock_target": None}
+        if sensed.get("shadow_mode", False):
+            target = max(candidates, key=lambda t: t.value * 0.7 + t.priority * 0.3)
+        else:
+            target = max(candidates, key=lambda t: t.priority)
+        return {"lock_target": target}
+    
+    def _hawk_act(self, decision: Dict) -> Dict:
+        if decision["lock_target"] is None:
+            return {"attack_vector": None, "attack_profile": "NO_ATTACK"}
+        return {
+            "attack_vector": decision["lock_target"].vector,
+            "attack_profile": "STEALTH_PRECISION"
+        }
+    
+    def _falcon_decide(self, sensed: Dict) -> Dict:
+        fuel_ok = sensed["fuel"] > 0.4
+        time_pressure = sensed["time_window"] <= 0.3
+        risk_ok = sensed["risk"] <= (0.5 if sensed["shadow_mode"] else 0.7)
+        go = fuel_ok and risk_ok and time_pressure
+        if not go:
+            self.hold_count += 1
+        else:
+            self.hold_count = 0
+        force_shadow = self.hold_count > 5 and not sensed["shadow_mode"]
+        return {"execute_now": go, "hold_count": self.hold_count, "force_shadow": force_shadow}
+    
+    def _falcon_act(self, decision: Dict) -> Dict:
+        return {
+            "fire": decision["execute_now"],
+            "mode": "INSTANT" if decision["execute_now"] else "HOLD",
+            "hold_count": decision["hold_count"],
+            "force_shadow": decision["force_shadow"]
+        }
+
+
+# =============================================================================
+# PIERŚCIEŃ 2 — ROSOMAK (SFORA WILKÓW)
+# =============================================================================
+
+class RosomakPack:
+    """
+    PIERŚCIEŃ 2 — ROSOMAK
+    Sfora wilków: morale, energia, berserk, ShadowLink, TargetMemory
+    """
+    def __init__(self, units: int = 5):
+        self.units = units
+        self.initial_units = units
+        self.morale = 1.0
+        self.energy = 1.0
+        self.target: Optional[Point] = None
+        self.formation: str = "KOLUMNA"
+        self.shadow_mode: bool = False
+        self.fire: bool = False
+        self.last_handoff: Optional[Dict] = None
+        self.last_vectors: List[Point] = []
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+    
+    def tick(self, handoff: Optional[Dict] = None) -> Dict[str, Any]:
+        """Główny krok pierścienia Rosomak"""
+        self.tick_counter += 1
+        self.last_handoff = handoff
+        
+        if handoff:
+            self.target = handoff.get("target_vector")
+            self.shadow_mode = handoff.get("stealth_handoff", False)
+        
+        # Dynamika
+        self.energy = max(0.0, self.energy - 0.05)
+        
+        if self.target:
+            self.morale = min(1.0, self.morale + 0.02)
+            self.fire = self.energy > 0.3 and random.random() > 0.6
+        else:
+            self.morale = max(0.0, self.morale - 0.03)
+            self.fire = False
+        
+        if self.shadow_mode:
+            self.energy -= 0.02
+        
+        if self.target:
+            self.last_vectors.append(self.target)
+            if len(self.last_vectors) > 5:
+                self.last_vectors.pop(0)
+        
+        result = {
+            "morale": self.morale,
+            "energia": self.energy,
+            "jednostki": self.units,
+            "initial_units": self.initial_units,
+            "ogien": self.fire,
+            "cel": self.target,
+            "ostatnie_wektory": self.last_vectors,
+            "shadow_mode": self.shadow_mode
+        }
+        
+        self.history.append({"tick": self.tick_counter, "result": result})
+        if len(self.history) > 50:
+            self.history = self.history[-30:]
+        
+        return result
+
+
+# =============================================================================
+# PIERŚCIEŃ 3 — SENTINO (MÓZG)
+# =============================================================================
+
+class SentinoCore:
+    """
+    PIERŚCIEŃ 3 — SENTINO
+    Mózg systemu: ośmiornica, kruk, pająk, atrament, emocje
+    """
+    def __init__(self):
+        self.global_state = "NORMAL"
+        self.uncertainty = 0.0
+        self.pressure = 0.0
+        self.aggression = 0.0
+        self.caution = 0.0
+        self.curiosity = 0.0
+        self.regret = 0.0
+        self.surprise = 0.0
+        self.system_mood = "NEUTRALNY"
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+        self.drgania_history: List[float] = []
+    
+    def tick(self, handoff: Dict, status: Dict) -> Dict[str, Any]:
+        """Główny krok pierścienia Sentino"""
+        self.tick_counter += 1
+        
+        risk = handoff.get("current_risk", 0.0)
+        morale = status.get("morale", 1.0)
+        energy = status.get("energia", 1.0)
+        
+        # Presja
+        self.pressure = risk * 0.6 + (1.0 - morale) * 0.4 + (1.0 - energy) * 0.2
+        self.pressure = min(1.0, self.pressure)
+        
+        # Niepewność
+        self.uncertainty = 0.3 + (self.pressure * 0.5) + random.uniform(-0.1, 0.1)
+        self.uncertainty = max(0.0, min(1.0, self.uncertainty))
+        
+        # Stan globalny
+        if self.pressure > 0.75:
+            self.global_state = "KRYZYS"
+        elif self.pressure > 0.45:
+            self.global_state = "ADAPTACJA"
+        else:
+            self.global_state = "NORMAL"
+        
+        # Drgania (pająk)
+        drganie = 0.0
+        if morale < 0.5 and status.get("jednostki", 5) == status.get("initial_units", 5) and not status.get("ogien", False):
+            drganie = 0.7
+        self.drgania_history.append(drganie)
+        if len(self.drgania_history) > 10:
+            self.drgania_history.pop(0)
+        drgania_avg = sum(self.drgania_history) / max(1, len(self.drgania_history))
+        
+        # Ghost pulse
+        ghost_pulse = self.pressure > 0.8 and self.global_state == "KRYZYS"
+        
+        # Słaby punkt
+        weak_spot = None
+        if random.random() < 0.2:
+            weak_spot = "comm_coherence" if random.random() > 0.5 else "integrity"
+        
+        # Emocje
+        self.aggression = min(1.0, self.pressure * 1.2)
+        self.caution = min(1.0, 1.0 - self.aggression + drgania_avg)
+        self.curiosity = min(1.0, self.uncertainty * (1.0 - self.aggression) * 1.5)
+        
+        if self.aggression > 0.7:
+            self.system_mood = "AGRESYWNY"
+        elif self.caution > 0.7:
+            self.system_mood = "DEFENSYWNY"
+        elif self.curiosity > 0.6:
+            self.system_mood = "BADANIE"
+        else:
+            self.system_mood = "NEUTRALNY"
+        
+        result = {
+            "global_state": self.global_state,
+            "pressure": self.pressure,
+            "uncertainty": self.uncertainty,
+            "weak_spot": weak_spot,
+            "ghost_pulse": ghost_pulse,
+            "drgania": drgania_avg,
+            "aggression": self.aggression,
+            "caution": self.caution,
+            "curiosity": self.curiosity,
+            "mood": self.system_mood,
+            "tick": self.tick_counter
+        }
+        
+        self.history.append({"tick": self.tick_counter, "result": result})
+        if len(self.history) > 50:
+            self.history = self.history[-30:]
+        
+        return result
+
+
+# =============================================================================
+# PIERŚCIEŃ 4 — BAZYLISZEK (WOLA)
+# =============================================================================
+
+class BazyliszekP4:
+    """
+    PIERŚCIEŃ 4 — BAZYLISZEK
+    Wola systemu: zwierciadło, stasis, erozja, strefa 15, auto-containment
+    """
+    def __init__(self, lethality_index: float = 0.0):
+        self.lethality_index = max(0.0, min(1.0, lethality_index))
+        self.active = False
+        self.tick_counter = 0
+        self.total_noise_generated = 0
+        self.history: List[Dict] = []
+    
+    def process_probe(self, enemy_state: Any, incoming_probe: Optional[Dict],
+                      sentino_feed: Dict) -> Dict[str, Any]:
+        """Główny krok pierścienia Bazyliszek"""
+        self.tick_counter += 1
+        
+        pressure = sentino_feed.get("pressure", 0.0)
+        global_state = sentino_feed.get("global_state", "NORMAL")
+        ghost_pulse = sentino_feed.get("ghost_pulse", False)
+        
+        activated = pressure > 0.6 or global_state in ("KRYZYS", "INTUICJA")
+        
+        if activated:
+            self.active = True
+            self.lethality_index = min(1.0, self.lethality_index + 0.08)
+            
+            # Wybór trybu
+            if ghost_pulse:
+                mode = "MIRROR"
+            elif self.lethality_index < 0.5:
+                mode = "MIRROR"
+            else:
+                mode = "STASIS"
+            
+            # Generowanie szumu
+            noise = None
+            if mode in ("MIRROR", "HYBRID"):
+                noise = {"fakery": True, "delay": 3, "source": "BAZYLISZEK"}
+                self.total_noise_generated += 1
+        else:
+            self.active = False
+            self.lethality_index = max(0.0, self.lethality_index - 0.02)
+            mode = "DORMANT"
+            noise = None
+        
+        result = {
+            "mode": mode,
+            "active": self.active,
+            "lethality_used": self.lethality_index,
+            "high_value_noise": noise,
+            "ghost_pulse": ghost_pulse,
+            "total_noise": self.total_noise_generated,
+            "tick": self.tick_counter
+        }
+        
+        self.history.append({"tick": self.tick_counter, "result": result})
+        if len(self.history) > 50:
+            self.history = self.history[-30:]
+        
+        return result
+
+
+# =============================================================================
+# PIERŚCIEŃ 5 — ZŁOTY KONDOR (DUCH)
+# =============================================================================
+
+class ArchitectP5:
+    """
+    PIERŚCIEŃ 5 — ZŁOTY KONDOR
+    Duch systemu: rule-shifting, reality forking, intent field, noise engine
+    """
+    def __init__(self, meta_index: float = 0.4):
+        self.meta_index = max(0.0, min(1.0, meta_index))
+        self.intent_echo: Dict[str, float] = {}
+        self.last_mood: str = "NEUTRALNY"
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+        self.quantum_leap_used = False
+    
+    def receive_collective_feedback(self, feedback: Dict) -> None:
+        """Odbiera feedback od Orki (P6)"""
+        self.last_mood = feedback.get("mood", "NEUTRALNY")
+        if self.last_mood == "DOMINANCE":
+            self.meta_index = min(1.0, self.meta_index + 0.05)
+        elif self.last_mood == "STEALTH":
+            self.meta_index = max(0.0, self.meta_index - 0.03)
+    
+    def process(self, world: Any, context: Dict, intent_vector: Optional[Dict] = None) -> Dict[str, Any]:
+        """Główny krok pierścienia Kondor"""
+        self.tick_counter += 1
+        
+        if intent_vector:
+            self.intent_echo = {k: v * 0.8 for k, v in intent_vector.items()}
+        
+        phase = context.get("phase", "NORMAL")
+        pressure = context.get("pressure", 0.0)
+        
+        # Wybór trybu
+        if self.meta_index > 0.8 and pressure > 0.7:
+            mode = "TRANSCEND"
+        elif phase == "IMPOSE":
+            mode = "IMPOSE"
+        else:
+            mode = "SHIFT"
+        
+        result = {
+            "mode": mode,
+            "meta_index": self.meta_index,
+            "intent_echo": self.intent_echo,
+            "quantum_leap_used": self.quantum_leap_used,
+            "mood": self.last_mood,
+            "tick": self.tick_counter
+        }
+        
+        self.history.append({"tick": self.tick_counter, "result": result})
+        if len(self.history) > 50:
+            self.history = self.history[-30:]
+        
+        return result
+
+
+# =============================================================================
+# PIERŚCIEŃ 6 — ORKA (STADO)
+# =============================================================================
+
+@dataclass
+class OrcaAgent:
+    """Agent w stadzie Orki"""
+    id: str
+    weight: float = 1.0
+    is_shadow: bool = False
+    
+    def vote(self, issue: str) -> float:
+        return self.weight * random.uniform(0.4, 1.0)
+
+
+@dataclass
+class CollectiveState:
+    """Stan kolektywny stada"""
+    culture: Dict[str, Any] = field(default_factory=dict)
+    strategies: Dict[str, Any] = field(default_factory=dict)
+    dialects: Dict[str, Any] = field(default_factory=dict)
+    memory: List[Any] = field(default_factory=list)
+    resonance_map: Dict[str, float] = field(default_factory=dict)
+    shadow_culture: Dict[str, Any] = field(default_factory=dict)
+    trauma_log: List[Any] = field(default_factory=list)
+    pods: List[Any] = field(default_factory=list)
+    last_consensus: Optional[Dict] = None
+
+
+class OrcaCore:
+    """
+    PIERŚCIEŃ 6 — ORKA
+    Stado: kultura, strategie, rezonans, synchronizacja, decyzje kolektywne
+    """
+    def __init__(self):
+        self.state = CollectiveState()
+        self.agents: List[OrcaAgent] = []
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+    
+    def register_agent(self, agent: OrcaAgent) -> None:
+        """Rejestruje agenta w stadzie"""
+        self.agents.append(agent)
+    
+    def broadcast_resonance(self, signal: str, strength: float) -> None:
+        """Rozgłasza rezonans do stada"""
+        self.state.resonance_map[signal] = strength
+    
+    def synchronize(self) -> None:
+        """Synchronizuje stan stada"""
+        # W pełnej implementacji wysyła pakiety do agentów
+        pass
+    
+    def get_collective_mood(self) -> str:
+        """Zwraca nastrój kolektywny stada"""
+        avg = sum(self.state.resonance_map.values()) / max(1, len(self.state.resonance_map))
+        if avg > 0.7:
+            return "DOMINANCE"
+        if avg < 0.3:
+            return "STEALTH"
+        return "ADAPTIVE"
+    
+    def receive_p5_sync(self, packet: Dict) -> None:
+        """Odbiera synchronizację od Kondora (P5)"""
+        self.state.culture["p5_intent"] = packet.get("intent_echo", {})
+    
+    def collective_decision(self, issue: str, options: List[str]) -> Dict[str, Any]:
+        """Podejmuje decyzję kolektywną przez głosowanie"""
+        votes = {opt: 0.0 for opt in options}
+        for agent in self.agents:
+            v = agent.vote(issue)
+            chosen = random.choices(options, weights=[1.0] * len(options))[0]
+            votes[chosen] += v * agent.weight
+        
+        total = sum(votes.values())
+        if total > 0:
+            votes = {k: v / total for k, v in votes.items()}
+        
+        winner = max(votes, key=votes.get)
+        consensus = votes[winner] > 0.6
+        
+        self.state.last_consensus = {
+            "issue": issue,
+            "winner": winner,
+            "distribution": votes,
+            "consensus_reached": consensus
+        }
+        
+        self.tick_counter += 1
+        self.history.append({"tick": self.tick_counter, "decision": self.state.last_consensus})
+        if len(self.history) > 50:
+            self.history = self.history[-30:]
+        
+        return self.state.last_consensus
+
+
+# =============================================================================
+# PIERŚCIEŃ 7 — AXIS MUNDI (FUNDAMENT)
+# =============================================================================
+
+class AxisMundi:
+    """
+    PIERŚCIEŃ 7 — AXIS MUNDI
+    Fundament: zasoby, cień, terytorium, energia, lichwa, patenty
+    """
+    def __init__(self):
+        self.assets = {
+            "PLZ_Z": 0.0,
+            "copper_reserve": 0.0,
+            "land_value": 0.0,
+            "intellectual_ip": []
+        }
+        self.shadow_assets = {
+            "shadow_PLZ": 0.0,
+            "shadow_copper": 0.0,
+            "shadow_ip": []
+        }
+        self.territory: Dict[str, Dict] = {
+            "Czekanka_130": {"status": "SECURE", "control": 1.0, "resonance_boost": 1.0}
+        }
+        self.energy_vector = [1.0, 0.5, 0.8]  # stabilność, szczytowość, rezerwa
+        self.emergency_mode = False
+        self.usury_debt = 0.0
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+    
+    def inject_resource(self, resource_type: str, amount: float, shadow: bool = False) -> None:
+        """Wstrzykuje zasób do systemu"""
+        if shadow:
+            if resource_type == "copper_reserve":
+                self.shadow_assets["shadow_copper"] += amount
+            elif resource_type == "land_value":
+                self.shadow_assets["shadow_PLZ"] += amount * 1.2
+            self._recalc_shadow()
+        else:
+            if resource_type in self.assets:
+                self.assets[resource_type] += amount
+            self._recalc()
+    
+    def _recalc(self) -> None:
+        self.assets["PLZ_Z"] = self.assets["copper_reserve"] * 0.8 + self.assets["land_value"] * 1.2
+    
+    def _recalc_shadow(self) -> None:
+        self.shadow_assets["shadow_PLZ"] = self.shadow_assets["shadow_copper"] * 0.8
+    
+    def get_power_supply(self) -> float:
+        """Zwraca aktualną moc systemu"""
+        base = self.assets["PLZ_Z"]
+        if self.emergency_mode:
+            base += self.shadow_assets["shadow_PLZ"] * 0.5
+        vortex = self.energy_vector[0] * self.energy_vector[1] + self.energy_vector[2] * 0.3
+        debt_penalty = max(0.0, 1.0 - self.usury_debt / (base + 0.01))
+        return base * vortex * debt_penalty
+    
+    def secure_zone(self, zone_id: str) -> bool:
+        """Zabezpiecza strefę"""
+        if zone_id in self.territory:
+            self.territory[zone_id]["status"] = "BASTION"
+            self.territory[zone_id]["control"] = 1.0
+            self.energy_vector[1] = min(1.0, self.energy_vector[1] + 0.1)
+            return True
+        return False
+    
+    def get_territory_pulse(self) -> float:
+        """Zwraca puls terytorialny"""
+        return sum(z["resonance_boost"] for z in self.territory.values()
+                   if z["status"] == "BASTION")
+    
+    def emergency_hoard(self, threshold: float = 20.0) -> bool:
+        """Aktywuje rezerwę awaryjną"""
+        if self.get_power_supply() < threshold and not self.emergency_mode:
+            self.emergency_mode = True
+            self.assets["PLZ_Z"] += self.shadow_assets["shadow_PLZ"] * 0.3
+            self._recalc()
+            logger.warning("⚠️ AKTYWACJA REZERWY AWARYJNEJ (SHADOW HOARD)")
+            return True
+        if self.get_power_supply() > threshold * 1.5 and self.emergency_mode:
+            self.emergency_mode = False
+            logger.info("✅ Rezerwa awaryjna wyłączona")
+            return False
+        return False
+    
+    def take_usury(self, amount: float) -> bool:
+        """Zaciąga pożyczkę (lichwa)"""
+        if amount <= 0:
+            return False
+        self.assets["PLZ_Z"] += amount
+        self.usury_debt += amount * 1.2
+        self._recalc()
+        logger.info(f"💰 Lichwa: pożyczka {amount:.1f}, dług {self.usury_debt:.1f}")
+        return True
+    
+    def register_patent(self, name: str, value: float = 10.0, shadow: bool = False) -> None:
+        """Rejestruje patent (IP)"""
+        if shadow:
+            self.shadow_assets["shadow_ip"].append({"name": name, "value": value})
+            self.shadow_assets["shadow_PLZ"] += value * 0.2
+        else:
+            self.assets["intellectual_ip"].append(name)
+            self.assets["PLZ_Z"] += value
+
+
+# =============================================================================
+# INTEGRATOR P1-P7 — HEILONG OPERATIONAL INTEGRATOR
+# =============================================================================
+
+class HeilongOperationalIntegrator:
+    """
+    Integrator 7 pierścieni operacyjnych P1-P7.
+    Zarządza synchronizacją i przepływem danych między pierścieniami.
+    """
+    def __init__(self, p1: B2SpiritCore, p2: RosomakPack, p3: SentinoCore,
+                 p4: BazyliszekP4, p5: ArchitectP5, p6: OrcaCore, p7: AxisMundi):
+        self.p1 = p1
+        self.p2 = p2
+        self.p3 = p3
+        self.p4 = p4
+        self.p5 = p5
+        self.p6 = p6
+        self.p7 = p7
+        self.tick_counter = 0
+        self.history: List[Dict] = []
+        self._step_hooks: List[Callable] = []
+    
+    def sync_p5_to_p6(self) -> None:
+        """Synchronizacja Kondor (P5) → Orka (P6)"""
+        packet = {
+            "intent_echo": getattr(self.p5, 'intent_echo', {}),
+            "meta_index": self.p5.meta_index
+        }
+        self.p6.receive_p5_sync(packet)
+    
+    def sync_p6_to_p7(self) -> None:
+        """Synchronizacja Orka (P6) → Axis (P7)"""
+        demand = self.p6.state.last_consensus or {}
+        if demand.get("winner") == "attack":
+            self.p7.energy_vector[1] = min(1.0, self.p7.energy_vector[1] + 0.1)
+        elif demand.get("winner") == "retreat":
+            self.p7.energy_vector[2] = min(1.0, self.p7.energy_vector[2] + 0.1)
+    
+    def sync_p7_to_p6(self) -> None:
+        """Synchronizacja Axis (P7) → Orka (P6)"""
+        territorial = self.p7.get_territory_pulse()
+        power = self.p7.get_power_supply()
+        strength = min(1.0, (territorial * power) / 100.0)
+        self.p6.broadcast_resonance("TERRITORIAL_POWER", strength)
+    
+    def sync_p6_to_p5(self) -> None:
+        """Synchronizacja Orka (P6) → Kondor (P5)"""
+        mood = self.p6.get_collective_mood()
+        self.p5.receive_collective_feedback({"mood": mood})
+    
+    def sync_p1_to_p6(self) -> None:
+        """Synchronizacja B-2 (P1) → Orka (P6)"""
+        shadow_flag = getattr(self.p1, 'shadow_mode', False)
+        self.p6.broadcast_resonance("SHADOW_ACTIVE", 0.8 if shadow_flag else 0.2)
+    
+    def sync_p7_to_p1(self) -> None:
+        """Synchronizacja Axis (P7) → B-2 (P1)"""
+        if self.p7.emergency_mode:
+            self.p1.fuel_remaining = min(1.0, self.p1.fuel_remaining + 0.15)
+    
+    def sync_p3_to_p5(self) -> None:
+        """Synchronizacja Sentino (P3) → Kondor (P5)"""
+        uncertainty = getattr(self.p3, 'uncertainty', 0.0)
+        self.p5.meta_index = max(0.0, self.p5.meta_index - uncertainty * 0.08)
+    
+    def heartbeat(self) -> Dict[str, Any]:
+        """Główny cykl synchronizacji między pierścieniami"""
+        self.tick_counter += 1
+        
+        self.sync_p5_to_p6()
+        self.sync_p6_to_p7()
+        self.sync_p7_to_p6()
+        self.sync_p6_to_p5()
+        self.sync_p1_to_p6()
+        self.sync_p7_to_p1()
+        self.sync_p3_to_p5()
+        self.p6.synchronize()
+        
+        result = {
+            "tick": self.tick_counter,
+            "p5_meta": self.p5.meta_index,
+            "p6_mood": self.p6.get_collective_mood(),
+            "p7_power": self.p7.get_power_supply(),
+            "p1_fuel": self.p1.fuel_remaining,
+            "p3_state": self.p3.global_state,
+            "p4_lethality": self.p4.lethality_index
+        }
+        
+        self.history.append(result)
+        if len(self.history) > 100:
+            self.history = self.history[-50:]
+        
+        self._on_step(result)
+        
+        return result
+    
+    def register_step_hook(self, hook: Callable) -> None:
+        """Rejestruje hook wołany po każdym cyklu synchronizacji"""
+        self._step_hooks.append(hook)
+    
+    def _on_step(self, data: Dict) -> None:
+        for hook in self._step_hooks:
+            try:
+                hook(data)
+            except Exception as e:
+                logger.warning(f"[HOOK ERROR] {e}")
+
+
+# =============================================================================
+# MOST INTEGRACYJNY — POŁĄCZENIE Z ARCHITEKTURĄ
+# =============================================================================
+
+class OperationalRingsBridge:
+    """
+    Most integracyjny między Pierścieniami Operacyjnymi a resztą architektury.
+    Łączy: GEX, G_CORE, MetaGovernor, NARRATIVE, OPH_CORE, TRIO_ADAPTER
+    """
+    
+    def __init__(self, integrator: HeilongOperationalIntegrator):
+        self.integrator = integrator
+    
+    # ========================================================================
+    # MOST DO GEX HEILONG (Archetype Ring)
+    # ========================================================================
+    
+    def get_archetype_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst archetypów dla GEX"""
+        return {
+            "tryb": "OPERATIONAL_RINGS",
+            "p1_shadow": self.integrator.p1.shadow_mode,
+            "p2_morale": self.integrator.p2.morale,
+            "p3_state": self.integrator.p3.global_state,
+            "p4_lethality": self.integrator.p4.lethality_index,
+            "p5_meta": self.integrator.p5.meta_index,
+            "p6_mood": self.integrator.p6.get_collective_mood(),
+            "p7_power": self.integrator.p7.get_power_supply()
+        }
+    
+    # ========================================================================
+    # MOST DO G_CORE (Autopilot)
+    # ========================================================================
+    
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        """Zwraca stan dla autopilota G_CORE"""
+        p3 = self.integrator.p3
+        p7 = self.integrator.p7
+        
+        return {
+            "mode": "OPERATIONAL_RINGS",
+            "stability": 1.0 - p3.pressure,
+            "energy": p7.get_power_supply() / 100.0,
+            "pressure": p3.pressure,
+            "resilience": 1.0 - p3.uncertainty,
+            "flow_quality": p3.aggression,
+            "p3_state": p3.global_state,
+            "p7_emergency": p7.emergency_mode
+        }
+    
+    # ========================================================================
+    # MOST DO META-GOVERNOR (Kontekst decyzyjny)
+    # ========================================================================
+    
+    def get_governor_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst dla MetaGovernor"""
+        p3 = self.integrator.p3
+        p4 = self.integrator.p4
+        p5 = self.integrator.p5
+        
+        return {
+            "intent": p3.global_state,
+            "confidence": 1.0 - p3.uncertainty,
+            "entropy": p3.pressure,
+            "lethality": p4.lethality_index,
+            "meta_index": p5.meta_index,
+            "mood": p3.system_mood
+        }
+    
+    # ========================================================================
+    # MOST DO NARRATIVE (Źródło opowieści)
+    # ========================================================================
+    
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        """Zwraca fragmenty narracyjne z pola walki"""
+        fragments = []
+        
+        # Fragment z B-2
+        fragments.append({
+            "source": "B-2_SPIRIT",
+            "content": f"Shadow: {self.integrator.p1.shadow_mode}, Fuel: {self.integrator.p1.fuel_remaining:.2f}",
+            "energy": 1.0 - self.integrator.p1.risk_level
+        })
+        
+        # Fragment z Rosomaka
+        fragments.append({
+            "source": "ROSOMAK",
+            "content": f"Morale: {self.integrator.p2.morale:.2f}, Fire: {self.integrator.p2.fire}",
+            "energy": self.integrator.p2.energy
+        })
+        
+        # Fragment z Sentino
+        fragments.append({
+            "source": "SENTINO",
+            "content": f"State: {self.integrator.p3.global_state}, Mood: {self.integrator.p3.system_mood}",
+            "energy": 1.0 - self.integrator.p3.pressure
+        })
+        
+        # Fragment z Axis
+        fragments.append({
+            "source": "AXIS_MUNDI",
+            "content": f"Power: {self.integrator.p7.get_power_supply():.2f}, Emergency: {self.integrator.p7.emergency_mode}",
+            "energy": self.integrator.p7.get_power_supply() / 100.0
+        })
+        
+        return fragments[:n]
+    
+    # ========================================================================
+    # MOST DO OPH_CORE (Optimus Praim Heilong)
+    # ========================================================================
+    
+    def get_oph_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst dla OPH_CORE"""
+        return {
+            "operational": {
+                "p1": {"shadow": self.integrator.p1.shadow_mode, "fuel": self.integrator.p1.fuel_remaining},
+                "p2": {"morale": self.integrator.p2.morale, "fire": self.integrator.p2.fire},
+                "p3": {"state": self.integrator.p3.global_state, "pressure": self.integrator.p3.pressure},
+                "p4": {"lethality": self.integrator.p4.lethality_index},
+                "p5": {"meta": self.integrator.p5.meta_index},
+                "p6": {"mood": self.integrator.p6.get_collective_mood()},
+                "p7": {"power": self.integrator.p7.get_power_supply()}
+            }
+        }
+    
+    # ========================================================================
+    # MOST DO TRIO_ADAPTER
+    # ========================================================================
+    
+    def get_trio_state(self) -> Dict[str, str]:
+        """Zwraca stan dla TRIO_ADAPTER (ISKRA + PIECZĘĆ + PERFEKCJA)"""
+        p3 = self.integrator.p3
+        p4 = self.integrator.p4
+        p7 = self.integrator.p7
+        
+        iskra = "AKTYWNA" if p3.global_state != "NORMAL" else "NIEAKTYWNA"
+        pieczec = "AKTYWNA" if p4.lethality_index > 0.3 else "NIEAKTYWNA"
+        perfekcja = "AKTYWNA" if p7.get_power_supply() > 50 else "NIEAKTYWNA"
+        
+        return {
+            "ISKRA": iskra,
+            "PIECZĘĆ": pieczec,
+            "PERFEKCJA": perfekcja,
+            "tryb": "OPERATIONAL_RINGS",
+            "p3_state": p3.global_state,
+            "p4_lethality": f"{p4.lethality_index:.2f}"
+        }
+
+
+# =============================================================================
+# FUNKCJA JEDNOLINIOWA — szybki start
+# =============================================================================
+
+def uruchom_operational_rings(kroki: int = 10) -> str:
+    """
+    Szybkie uruchomienie 7 pierścieni operacyjnych.
+    
+    Args:
+        kroki: Liczba kroków symulacji
+    
+    Returns:
+        Raport końcowy
+    """
+    # Inicjalizacja
+    p1 = B2SpiritCore(Point(0, 0))
+    p2 = RosomakPack(units=5)
+    p3 = SentinoCore()
+    p4 = BazyliszekP4(lethality_index=0.2)
+    p5 = ArchitectP5(meta_index=0.5)
+    p6 = OrcaCore()
+    p7 = AxisMundi()
+    
+    # Rejestracja agentów w Orce
+    p6.register_agent(OrcaAgent("B-2", weight=1.2, is_shadow=True))
+    p6.register_agent(OrcaAgent("Rosomak", weight=1.0, is_shadow=False))
+    p6.register_agent(OrcaAgent("Sentino", weight=1.5, is_shadow=False))
+    
+    # Zasoby fundamentalne
+    p7.inject_resource("copper_reserve", 500)
+    p7.inject_resource("land_value", 2100)
+    p7.inject_resource("copper_reserve", 200, shadow=True)
+    p7.register_patent("Silnik Magnetyczny", value=50)
+    p7.register_patent("Heilong Shadow Protocol", value=80, shadow=True)
+    p7.secure_zone("Czekanka_130")
+    p7.take_usury(30)
+    
+    # Integrator
+    integrator = HeilongOperationalIntegrator(p1, p2, p3, p4, p5, p6, p7)
+    bridge = OperationalRingsBridge(integrator)
+    
+    print("\n🐉 URUCHAMIANIE 7 PIERŚCIENI OPERACYJNYCH")
+    print("-" * 50)
+    
+    for step in range(1, kroki + 1):
+        # Symulacja celu
+        target = Target(f"ENEMY_{step}", value=0.9, priority=0.8,
+                        vector=Point(100 + step * 4, 100 + step * 2))
+        threat = ThreatZone("RADAR", 0.7, RectArea(80, 80, 130, 130), ["LOUD"])
+        state = FlightState("map", [target], [threat], [target],
+                            p1.fuel_remaining, 0.2 + step * 0.04,
+                            max(0.0, 0.9 - step * 0.04), p1.shadow_mode)
+        
+        # Krok B-2
+        p1_out = p1.tick(state)
+        p1.fuel_remaining = max(0.0, p1.fuel_remaining - 0.04)
+        p1.shadow_mode = p1_out["shadow_mode"]
+        handoff = p1_out.get("handoff_to_ring2")
+        
+        # Krok Rosomak
+        p2_out = p2.tick(handoff)
+        
+        # Krok Sentino
+        p3_out = p3.tick(handoff or {}, p2_out)
+        
+        # Krok Bazyliszek
+        p4_out = p4.process_probe(None, None, p3_out)
+        
+        # Krok Kondor
+        p5_out = p5.process(None, {"phase": "IMPOSE", "pressure": p3_out["pressure"]},
+                            intent_vector={"aggression": 0.6, "survival": 0.4})
+        
+        # Decyzja Orki co 4 kroki
+        if step % 4 == 0:
+            decision = p6.collective_decision("attack_or_retreat", ["attack", "retreat", "feint"])
+            print(f"  🐋 Decyzja stada: {decision['winner']} (konsensus: {decision['consensus_reached']})")
+        
+        # Axis — rezerwa awaryjna
+        p7.emergency_hoard(threshold=25.0)
+        
+        # Heartbeat
+        stats = integrator.heartbeat()
+        
+        # Wyświetl stan
+        print(f"\n📌 KROK {step}")
+        print(f"  ✈️ B-2: paliwo={p1.fuel_remaining:.2f}, shadow={p1.shadow_mode}, ogień={p1_out['fire']}")
+        print(f"  🐺 Rosomak: morale={p2_out['morale']:.2f}, energia={p2_out['energia']:.2f}")
+        print(f"  🧠 Sentino: stan={p3_out['global_state']}, presja={p3_out['pressure']:.2f}")
+        print(f"  🐍 Bazyliszek: tryb={p4_out['mode']}, letalność={p4_out['lethality_used']:.2f}")
+        print(f"  🦅 Kondor: meta={stats['p5_meta']:.2f}")
+        print(f"  🐋 Orka: nastrój={stats['p6_mood']}")
+        print(f"  🟫 Axis: moc={stats['p7_power']:.2f}, awaryjny={p7.emergency_mode}")
+    
+    print("\n" + "=" * 50)
+    print("🐉 7 PIERŚCIENI OPERACYJNYCH — GOTOWE")
+    print(HASLO)
+    print("=" * 50)
+    
+    return "OK"
+
+
+# =============================================================================
+# DEMONSTRACJA
+# =============================================================================
+
+if __name__ == "__main__":
+    uruchom_operational_rings(12)
