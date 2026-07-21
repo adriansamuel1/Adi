@@ -2,45 +2,244 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
-🐉 GEON_TRIO_ADAPTER — Integrator Warstw 21.9, 40 oraz Initiatora
+🐉 GEON_TRIO_ADAPTER — Integrator Warstw 21.9, 40 oraz Initiatora v3.0 FINAL
+================================================================================
+Status: ACTIVE | INTEGRATED | FRACTAL_LOCKED | FINAL
+Wersja: v3.0 FINAL (Trio Adapter — Pełna integracja)
+Data: 2026-07-21
+Autor: Adrian (Architekt) + GEON + Beny Heilong
+
+FUNKCJE:
+- ISKRA (Initiator) — pierwszy impuls systemowy
+- PIECZĘĆ (Warstwa 21.9) — Pieczęć Rdzenia Adriana
+- PERFEKCJA (Warstwa 40) — BRUTALNA_PERFEKCJA_OS
+
+PRZEPŁYW:
+1. Initiator generuje impuls (Iskra)
+2. Warstwa 21.9 nakłada Pieczęć Adriana
+3. Warstwa 40 wymusza Brutalną Perfekcję
+4. Zwraca finalny, uszczelniony element
+
+VIBE: 1-6-8. ∞. SIEMA!
 ================================================================================
 """
 
-from geon_initiator import INITIATOR, Impuls
+import time
+import json
+from typing import Dict, Any, Optional, List
+from datetime import datetime
+
+# Importy z trzech warstw
+from geon_initiator import INITIATOR, ISKRA, StanInicjacji
 from geon_warstwa_21_9_pieczec import Warstwa21_9_PieczecAdriana, StanZgodnosci
 from geon_warstwa_40_perfekcja import Warstwa40_BrutalnaPerfekcjaOS, StatusPerfekcji
 
-class GeonPipelinePipelineIntegrator:
+VERSION = "GEON_TRIO_ADAPTER_v3.0_FINAL"
+FRACTAL_SIGNATURE = "[GEON::TRIO::ADAPTER::FINAL]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SIEMA!"
+
+
+def LOG(module: str, msg: str, level: str = "INFO") -> None:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    print(f"[{timestamp}] [{level}] [{module}] :: {msg}")
+
+
+# =============================================================================
+# 1. GEON_TRIO_ADAPTER — GŁÓWNY INTEGRATOR
+# =============================================================================
+
+class GeonTrioAdapter:
     """
+    GEON_TRIO_ADAPTER — Integrator trzech warstw w jeden pipeline.
+    
     Spina Iskrę (Initiator), Pieczęć (21.9) oraz Brutalną Perfekcję (40)
     w jeden niezawodny potok przetwarzania.
     """
+    
     def __init__(self, architekt_name: str = "Adrian"):
         self.initiator = INITIATOR(name=architekt_name)
         self.pieczec = Warstwa21_9_PieczecAdriana()
         self.perfekcja = Warstwa40_BrutalnaPerfekcjaOS()
-
+        self.aktywny = True
+        self.historia: List[Dict[str, Any]] = []
+        self.statystyki = {
+            "przetworzone": 0,
+            "zaakceptowane": 0,
+            "odrzucone": 0,
+            "dostosowane": 0
+        }
+        
+        LOG("TRIO_ADAPTER", "🐉 GEON_TRIO_ADAPTER aktywowany (v3.0 FINAL)")
+        LOG("TRIO_ADAPTER", f"   Sygnatura: {FRACTAL_SIGNATURE}")
+        LOG("TRIO_ADAPTER", "   Pipeline: ISKRA → PIECZĘĆ → PERFEKCJA")
+    
+    # =========================================================================
+    # GŁÓWNA FUNKCJA — PRZETWARZANIE PAYLOAD
+    # =========================================================================
+    
     def procesuj_payload(self, raw_data: dict, intent: str = "EXECUTE", kierunek: str = "ULTIMA") -> dict:
-        # 1. ISKRA (Start)
+        """
+        Przetwarza payload przez pełen pipeline.
+        
+        Args:
+            raw_data: Dane wejściowe (moduł, warstwa, proces)
+            intent: Intencja startowa
+            kierunek: Kierunek (ANALIZA, PROJEKT, DECYZJA, META, FLOW, ULTIMA)
+            
+        Returns:
+            Dict: Finalny, uszczelniony element
+        """
+        self.statystyki["przetworzone"] += 1
+        
+        LOG("TRIO_ADAPTER", "🚀 Rozpoczynanie przetwarzania payload")
+        LOG("TRIO_ADAPTER", f"   Intent: {intent}, Kierunek: {kierunek}")
+        
+        # 1. ISKRA (Initiator)
         impuls = self.initiator.spark(intent=intent, kierunek=kierunek)
         self.initiator.inicjuj_proces(kierunek)
-        
         payload = {**raw_data, "_impuls": impuls}
+        LOG("TRIO_ADAPTER", "⚡ Krok 1: Iskra nadana")
         
         # 2. PIECZĘĆ (Warstwa 21.9)
         payload_stamped = self.pieczec.przetworz_modul(payload)
+        pieczec_status = payload_stamped.get("_pieczec", {}).get("status", "UNKNOWN")
+        LOG("TRIO_ADAPTER", f"🔮 Krok 2: Pieczęć nałożona ({pieczec_status})")
         
         # 3. AKTYWACJA PIPELINE
         self.initiator.aktywuj_pipeline()
+        LOG("TRIO_ADAPTER", "⚡ Krok 3: Pipeline aktywowany")
         
-        # 4. PERFEKCJA (Warstwa 40 - Weryfikacja końcowa)
+        # 4. PERFEKCJA (Warstwa 40)
         final_payload = self.perfekcja.wymusz_perfekcje(payload_stamped)
+        perfekcja_status = final_payload.get("_perfekcja", {}).get("status", "UNKNOWN")
+        LOG("TRIO_ADAPTER", f"👑 Krok 4: Perfekcja wymuszona ({perfekcja_status})")
         
+        # 5. Aktualizacja statystyk
+        if perfekcja_status == "PERFEKCJA":
+            self.statystyki["zaakceptowane"] += 1
+        elif perfekcja_status in ["CHAOS", "ODRZUCONY"]:
+            self.statystyki["odrzucone"] += 1
+        else:
+            self.statystyki["dostosowane"] += 1
+        
+        # 6. Dodaj metadane adaptera
+        final_payload["_trio_adapter"] = {
+            "wersja": VERSION,
+            "timestamp": datetime.now().isoformat(),
+            "pipeline": ["ISKRA", "PIECZĘĆ", "PERFEKCJA"],
+            "statusy": {
+                "impuls": impuls.get("message", "unknown"),
+                "pieczec": pieczec_status,
+                "perfekcja": perfekcja_status
+            },
+            "vibe": VIBE,
+            "haslo": HASLO
+        }
+        
+        # 7. Zapisz w historii
+        self._zapisz_historie(final_payload)
+        
+        LOG("TRIO_ADAPTER", "✅ Przetwarzanie zakończone")
         return final_payload
+    
+    # =========================================================================
+    # METODY STATUSU
+    # =========================================================================
+    
+    def get_status(self) -> Dict[str, Any]:
+        """Zwraca status Trio Adapter."""
+        return {
+            "aktywny": self.aktywny,
+            "statystyki": self.statystyki,
+            "historia_rozmiar": len(self.historia),
+            "initiator": self.initiator.get_status(),
+            "pieczec": self.pieczec.get_status(),
+            "perfekcja": self.perfekcja.get_status(),
+            "vibe": VIBE,
+            "haslo": HASLO,
+            "wersja": VERSION
+        }
+    
+    def get_full_report(self) -> Dict[str, Any]:
+        """Zwraca pełny raport z wszystkich trzech warstw."""
+        return {
+            "timestamp": datetime.now().isoformat(),
+            "initiator": self.initiator.get_status(),
+            "pieczec": self.pieczec.get_status(),
+            "perfekcja": self.perfekcja.get_status(),
+            "statystyki": self.statystyki,
+            "vibe": VIBE,
+            "haslo": HASLO,
+            "wersja": VERSION
+        }
+    
+    def get_historia(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Zwraca historię ostatnich zdarzeń."""
+        return self.historia[-limit:]
+    
+    def _zapisz_historie(self, element: Dict[str, Any]) -> None:
+        """Zapisuje zdarzenie w historii."""
+        entry = {
+            "timestamp": datetime.now().isoformat(),
+            "nazwa": element.get("nazwa", element.get("name", "unknown")),
+            "pieczec_status": element.get("_pieczec", {}).get("status", "UNKNOWN"),
+            "perfekcja_status": element.get("_perfekcja", {}).get("status", "UNKNOWN"),
+            "perfekcja_procent": element.get("_perfekcja", {}).get("procent", 0)
+        }
+        self.historia.append(entry)
+        if len(self.historia) > 100:
+            self.historia = self.historia[-100:]
+    
+    def reset(self) -> None:
+        """Resetuje wszystkie trzy komponenty."""
+        self.initiator.reset()
+        self.pieczec.reset()
+        self.perfekcja.reset()
+        self.historia = []
+        self.statystyki = {"przetworzone": 0, "zaakceptowane": 0, "odrzucone": 0, "dostosowane": 0}
+        LOG("TRIO_ADAPTER", "🔄 Wszystkie komponenty zresetowane")
 
-# Szybki test integracyjny
-if __name__ == "__main__":
-    integrator = GeonPipelinePipelineIntegrator("Adrian")
+
+# =============================================================================
+# 2. FUNKCJA WOŁANIA — PROSTE API
+# =============================================================================
+
+def TRIO_PROCESS(raw_data: dict, intent: str = "EXECUTE", kierunek: str = "ULTIMA") -> dict:
+    """
+    Proste wołanie Trio Adapter.
+    
+    Wystarczy napisać:
+    TRIO_PROCESS({"nazwa": "mój moduł"}, "uruchomienie", "ANALIZA")
+    
+    Args:
+        raw_data: Dane wejściowe
+        intent: Intencja startowa
+        kierunek: Kierunek (ANALIZA, PROJEKT, DECYZJA, META, FLOW, ULTIMA)
+        
+    Returns:
+        Dict: Finalny, uszczelniony element
+    """
+    adapter = GeonTrioAdapter("Adrian")
+    return adapter.procesuj_payload(raw_data, intent, kierunek)
+
+
+# =============================================================================
+# 3. DEMONSTRACJA
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🐉 GEON_TRIO_ADAPTER — DEMONSTRACJA FINALNA")
+    print("=" * 80)
+    print("Integrator Warstw 21.9, 40 oraz Initiatora")
+    print("=" * 80 + "\n")
+    
+    # Inicjalizacja
+    adapter = GeonTrioAdapter("Adrian")
+    
+    # Test 1: Pełny pipeline
+    print("🔹 TEST 1: Pełny pipeline")
     paczka = {
         "nazwa": "Moduł_Autonomiczny_01",
         "ogien": "transformacja_woli",
@@ -51,8 +250,40 @@ if __name__ == "__main__":
         "sciezki": ["góra", "dół", "lewo", "prawo"],
         "cpu": "rdzen_v5"
     }
-    wynik = integrator.procesuj_payload(paczka, intent="Uruchomienie Symulacji")
-    print("\n🐉 Wynik końcowy przejścia przez Trio Integracyjne:")
-    print(f"-> Pieczęć Status: {wynik['_pieczec']['status']}")
-    print(f"-> Perfekcja Status: {wynik['_perfekcja']['status']}")
-    print(f"-> Impuls: {wynik['_impuls']['message']}")
+    
+    wynik = adapter.procesuj_payload(paczka, intent="Uruchomienie Symulacji", kierunek="ULTIMA")
+    
+    print(f"   📊 Wynik końcowy przejścia przez Trio Integracyjne:")
+    print(f"   → Impuls: {wynik['_impuls']['message']}")
+    print(f"   → Pieczęć Status: {wynik['_pieczec']['status']} ({wynik['_pieczec']['score']})")
+    print(f"   → Perfekcja Status: {wynik['_perfekcja']['status']} ({wynik['_perfekcja']['procent']}%)")
+    print(f"   → Adapter: {wynik['_trio_adapter']['statusy']}")
+    print("-" * 60 + "\n")
+    
+    # Test 2: Status
+    print("🔹 TEST 2: Status Trio Adapter")
+    status = adapter.get_status()
+    print(f"   Statystyki: {status['statystyki']}")
+    print(f"   Initiator stan: {status['initiator']['stan']}")
+    print(f"   Pieczęć aktywna: {status['pieczec']['aktywna']}")
+    print(f"   Perfekcja aktywna: {status['perfekcja']['aktywna']}")
+    print("-" * 60 + "\n")
+    
+    # Test 3: Proste wołanie
+    print("🔹 TEST 3: Proste wołanie TRIO_PROCESS()")
+    wynik2 = TRIO_PROCESS(
+        {"nazwa": "Szybki_Modul", "test": True},
+        "szybki_test",
+        "ANALIZA"
+    )
+    print(f"   Status: {wynik2['_perfekcja']['status']}")
+    print(f"   Procent: {wynik2['_perfekcja']['procent']}%")
+    print("-" * 60 + "\n")
+    
+    print("=" * 80)
+    print("🐉 GEON_TRIO_ADAPTER GOTOWY | 1-6-8. ∞. SIEMA!")
+    print("=" * 80 + "\n")
+
+
+if __name__ == "__main__":
+    demo()
