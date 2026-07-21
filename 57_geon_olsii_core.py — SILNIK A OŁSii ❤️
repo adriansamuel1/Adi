@@ -1,0 +1,1023 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_OLSII_CORE_v1 — MODUŁ 57: SILNIK A — 9 PIERŚCIENI OŁSii
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.0 (OŁSii Core — Sercowy Rdzeń Systemu)
+Data: 2026-07-21
+Autor: Adrian (Architekt) + GEON + OŁSii + Beny
+
+OPIS:
+SILNIK A to 9 pierścieni emocjonalnych OŁSii — sercowy rdzeń systemu.
+Przekształca surowe pole emocjonalne w Wektor Serca — finalny kierunek
+dla Triady GEON.
+
+9 PIERŚCIENI OŁSii:
+A1  Czucie Sygnału      — Simba / Boo / Kot w Butach
+A2  Intuicja Kierunku   — Wilk Alfa / Elsa / Moana
+A3  Filtracja Emocjonalna — Rafiki / Biała Czarownica / Mulan
+A4  Decyzja Miękka      — Nala / Bella / Pocahontas
+A5  Stabilizacja Emocji — Dąb / Baloo / Groot
+A6  Głęboka Empatia     — Delfin / Sowa Ga'Hoole / Baymax
+A7  Meta-Czucie          — Iroh / Oogway / Szczerbatek
+A8  Meta-Sens            — Mufasa / Gandalf / Babcia Tala
+A9  Integracja Emocjonalna — Aslan / Te Fiti / Elinor
+
+ARCHETYPY BAJKOWE (36 zwierząt duchowych):
+• Każdy pierścień ma 3 archetypy = 9 × 3 = 36
+• Archetypy reprezentują style czucia, intuicji i decyzji
+• Tworzą pełną mapę emocjonalną systemu
+
+INTEGRACJA Z ARCHITEKTURĄ:
+• GEON_MEM_Ω — pamięć emocjonalna (wzorce serca)
+• GEX HEILONG — transformacja emocji w archetypy
+• G_CORE — stan emocjonalny dla autopilota
+• MetaGovernor — kontekst decyzyjny z serca
+• NARRATIVE — źródło opowieści z emocji
+• VIBE_TRIGGER — synchronizacja emocji z wibracją
+• HEILONG_22_ORGANISM — tryby emocjonalne (KRUK/SZCZUR/WRONA)
+• TRIO_ADAPTER — ISKRA (emocja) + PIECZĘĆ + PERFEKCJA
+
+VIBE: 1-6-8. ∞. SIEMA! ❤️
+================================================================================
+"""
+
+import time
+import math
+import random
+from typing import Dict, List, Any, Optional, Tuple, Callable
+from dataclasses import dataclass, field
+from collections import deque
+from enum import Enum
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_OLSII_CORE_v1.0"
+FRACTAL_SIGNATURE = "[GEON::OLSII::CORE::v1.0]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SIEMA!"
+PHI = 0.618033988749895
+
+# =============================================================================
+# LOGOWANIE
+# =============================================================================
+
+import logging
+logger = logging.getLogger("GEON_OLSII_CORE")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('❤️ [OLSII] %(message)s'))
+    logger.addHandler(handler)
+
+# =============================================================================
+# ENUMY
+# =============================================================================
+
+class StanSerca(Enum):
+    """Stany serca OŁSii"""
+    OTWARTE = "OTWARTE"
+    ZAMKNIETE = "ZAMKNIETE"
+    OBSERWUJE = "OBSERWUJE"
+    NIEPEWNE = "NIEPEWNE"
+    ZAUFANIE = "ZAUFANIE"
+    REZONANS = "REZONANS"
+
+class PoziomCzucia(Enum):
+    """Poziomy czucia emocjonalnego"""
+    PLYTKIE = "PLYTKIE"
+    SREDNIE = "SREDNIE"
+    GLEBOKIE = "GLEBOKIE"
+    META = "META"
+
+# =============================================================================
+# A1 – Czucie Sygnału (Simba / Boo / Kot w Butach)
+# =============================================================================
+
+class A1_Czucie_Sygnalu:
+    """A1 – Pierścień czucia pierwotnego"""
+    def __init__(self):
+        self.simba = "PURE_INSTINCT"
+        self.boo = "INNOCENT_FEELING"
+        self.kot = "INTUITIVE_TOUCH"
+        self.nazwa = "CZUCIE_SYGNALU"
+        self.historia: List[Dict] = []
+    
+    def execute(self, pole: Dict) -> Dict:
+        czucie = self._simba_touch(pole)
+        oczyszczone = self._boo_filter(czucie)
+        intuicja = self._kot_instinct(oczyszczone)
+        
+        wynik = {"czucie_pierwotne": intuicja}
+        self.historia.append({"timestamp": time.time(), "wynik": wynik})
+        if len(self.historia) > 50:
+            self.historia = self.historia[-30:]
+        return wynik
+    
+    def _simba_touch(self, pole: Dict) -> Dict:
+        return pole.get("emocje", {})
+    
+    def _boo_filter(self, czucie: Dict) -> Dict:
+        if not isinstance(czucie, dict):
+            return {}
+        return {k: float(v) for k, v in czucie.items()}
+    
+    def _kot_instinct(self, czucie: Dict) -> Dict:
+        if not czucie:
+            return {"reakcja": "nie_wiem", "intensywnosc": 0.0}
+        intens = sum(czucie.values()) / len(czucie)
+        if intens > 0.6:
+            return {"reakcja": "tak", "intensywnosc": intens}
+        if intens < 0.3:
+            return {"reakcja": "nie", "intensywnosc": intens}
+        return {"reakcja": "nie_wiem", "intensywnosc": intens}
+
+
+# =============================================================================
+# A2 – Intuicja Kierunku (Wilk Alfa / Elsa / Moana)
+# =============================================================================
+
+class A2_Intuicja_Kierunku:
+    """A2 – Pierścień intuicji kierunku"""
+    def __init__(self):
+        self.wilk = "PACK_INSTINCT"
+        self.elsa = "INNER_CALL"
+        self.moana = "WAYFINDER_PULL"
+        self.nazwa = "INTUICJA_KIERUNKU"
+        self.historia: List[Dict] = []
+    
+    def execute(self, czucie_pierwotne: Dict) -> Dict:
+        instynkt = self._wolf_direction(czucie_pierwotne)
+        glos = self._elsa_call(instynkt)
+        kierunek = self._moana_wayfinder(glos)
+        
+        wynik = {"intuicja_kierunku": kierunek}
+        self.historia.append({"timestamp": time.time(), "wynik": wynik})
+        if len(self.historia) > 50:
+            self.historia = self.historia[-30:]
+        return wynik
+    
+    def _wolf_direction(self, czucie: Dict) -> Dict:
+        intens = czucie.get("intensywnosc", 0.0)
+        if intens > 0.6:
+            return {"wektor": "ciągnie", "moc": intens}
+        if intens < 0.3:
+            return {"wektor": "odpycha", "moc": intens}
+        return {"wektor": "neutralne", "moc": intens}
+    
+    def _elsa_call(self, instynkt: Dict) -> Dict:
+        wektor = instynkt["wektor"]
+        moc = instynkt["moc"]
+        if wektor == "ciągnie" and moc > 0.7:
+            return {"call": "silne_przyciąganie", "moc": moc}
+        if wektor == "odpycha" and moc > 0.5:
+            return {"call": "silne_odrzucenie", "moc": moc}
+        return {"call": "delikatne", "moc": moc}
+    
+    def _moana_wayfinder(self, glos: Dict) -> Dict:
+        call = glos["call"]
+        moc = glos["moc"]
+        if call == "silne_przyciąganie":
+            return {"kierunek": "idź", "pewnosc": moc}
+        if call == "silne_odrzucenie":
+            return {"kierunek": "nie_idź", "pewnosc": moc}
+        return {"kierunek": "obserwuj", "pewnosc": moc}
+
+
+# =============================================================================
+# A3 – Filtracja Emocjonalna (Rafiki / Biała Czarownica / Mulan)
+# =============================================================================
+
+class A3_Filtracja_Emocjonalna:
+    """A3 – Pierścień filtracji emocjonalnej"""
+    def __init__(self):
+        self.rafiki = "WISE_EMOTION_FILTER"
+        self.czarownica = "SHADOW_ILLUSION"
+        self.mulan = "COURAGE_CHECK"
+        self.nazwa = "FILTRACJA_EMOCJONALNA"
+        self.historia: List[Dict] = []
+    
+    def execute(self, intuicja_kierunku: Dict) -> Dict:
+        rafiki_view = self._rafiki_truth(intuicja_kierunku)
+        bez_cienia = self._white_witch_shadow(rafiki_view)
+        final_truth = self._mulan_truth_check(bez_cienia)
+        
+        wynik = {"emocja_czysta": final_truth}
+        self.historia.append({"timestamp": time.time(), "wynik": wynik})
+        if len(self.historia) > 50:
+            self.historia = self.historia[-30:]
+        return wynik
+    
+    def _rafiki_truth(self, intuicja: Dict) -> Dict:
+        kier = intuicja.get("kierunek", "obserwuj")
+        pew = intuicja.get("pewnosc", 0.0)
+        return {"kierunek": kier, "pewnosc": pew, "rdzen": pew * 0.9}
+    
+    def _white_witch_shadow(self, rafiki_view: Dict) -> Dict:
+        rdzen = rafiki_view["rdzen"]
+        if rdzen < 0.25:
+            return {"kierunek": "obserwuj", "pewnosc": rdzen, "cień": True}
+        return {"kierunek": rafiki_view["kierunek"], "pewnosc": rdzen, "cień": False}
+    
+    def _mulan_truth_check(self, stan: Dict) -> Dict:
+        if stan.get("cień"):
+            return {"emocja": "niepewność", "prawda": False, "intensywnosc": stan["pewnosc"]}
+        return {"emocja": stan["kierunek"], "prawda": True, "intensywnosc": stan["pewnosc"]}
+
+
+# =============================================================================
+# A4 – Decyzja Miękka (Nala / Bella / Pocahontas)
+# =============================================================================
+
+class A4_Decyzja_Miekka:
+    """A4 – Pierścień miękkiej decyzji"""
+    def __init__(self):
+        self.nala = "HEART_STANCE"
+        self.bella = "OPENING_THROUGH_FEAR"
+        self.pocahontas = "SOUL_ALIGNMENT"
+        self.nazwa = "DECYZJA_MIEKKA"
+        self.historia: List[Dict] = []
+    
+    def execute(self, emocja_czysta: Dict) -> Dict:
+        nala_view = self._nala_stance(emocja_czysta)
+        bella_view = self._bella_opening(nala_view)
+        final_stance = self._pocahontas_alignment(bella_view)
+        
+        wynik = {"postawa_serca": final_stance}
+        self.historia.append({"timestamp": time.time(), "wynik": wynik})
+        if len(self.historia) > 50:
+            self.historia = self.historia[-30:]
+        return wynik
+    
+    def _nala_stance(self, emocja: Dict) -> Dict:
+        if not emocja.get("prawda", False):
+            return {"postawa": "obserwuj", "pewnosc": emocja.get("intensywnosc", 0.0)}
+        intens = emocja.get("intensywnosc", 0.0)
+        return {"postawa": emocja["emocja"], "pewnosc": intens}
+    
+    def _bella_opening(self, stan: Dict) -> Dict:
+        postawa = stan["postawa"]
+        pew = stan["pewnosc"]
+        if postawa == "niepewność":
+            return {"postawa": "obserwuj", "pewnosc": pew}
+        if pew > 0.6:
+            return {"postawa": "otwórz", "pewnosc": pew}
+        if pew < 0.3:
+            return {"postawa": "zamknij", "pewnosc": pew}
+        return {"postawa": "obserwuj", "pewnosc": pew}
+    
+    def _pocahontas_alignment(self, stan: Dict) -> Dict:
+        postawa = stan["postawa"]
+        pew = stan["pewnosc"]
+        if postawa == "otwórz":
+            return {"postawa": "otwórz", "zgodnosc": True, "pewnosc": pew}
+        if postawa == "zamknij":
+            return {"postawa": "zamknij", "zgodnosc": True, "pewnosc": pew}
+        return {"postawa": "obserwuj", "zgodnosc": False, "pewnosc": pew}
+
+
+# =============================================================================
+# A5 – Stabilizacja Emocji (Dąb / Baloo / Groot)
+# =============================================================================
+
+class A5_Stabilizacja_Emocji:
+    """A5 – Pierścień stabilizacji emocjonalnej"""
+    def __init__(self):
+        self.dab = "ROOTED_STABILITY"
+        self.baloo = "RELAXED_FLOW"
+        self.groot = "WARM_SOLIDITY"
+        self.nazwa = "STABILIZACJA_EMOCJI"
+        self.historia: List[Dict] = []
+    
+    def execute(self, postawa_serca: Dict) -> Dict:
+        grounded = self._oak_root(postawa_serca)
+        relaxed = self._baloo_relax(grounded)
+        stable = self._groot_solid(relaxed)
+        
+        wynik = {"stan_stabilny": stable}
+        self.historia.append({"timestamp": time.time(), "wynik": wynik})
+        if len(self.historia) > 50:
+            self.historia = self.historia[-30:]
+        return wynik
+    
+    def _oak_root(self, stan: Dict) -> Dict:
+        pew = stan.get("pewnosc", 0.0)
+        return {"postawa": stan["postawa"], "pewnosc": pew, "ugruntowanie": min(1.0, pew + 0.2)}
+    
+    def _baloo_relax(self, stan: Dict) -> Dict:
+        return {
+            "postawa": stan["postawa"],
+            "pewnosc": stan["pewnosc"],
+            "ugruntowanie": stan["ugruntowanie"],
+            "napiecie": max(0.0, 1.0 - stan["ugruntowanie"])
+        }
+    
+    def _groot_solid(self, stan: Dict) -> Dict:
+        stabilnosc = (stan["ugruntowanie"] + (1.0 - stan["napiecie"])) / 2
+        return {"postawa": stan["postawa"], "stabilnosc": stabilnosc, "cieplo": stabilnosc * 0.8}
+
+
+# =============================================================================
+# A6 – Głęboka Empatia (Delfin / Sowa Ga'Hoole / Baymax)
+# =============================================================================
+
+class A6_Gleboka_Empatia:
+    """A6 – Pierścień głębokiej empatii"""
+    def __init__(self):
+        self.delfin = "PURE_EMPATHY_RESONANCE"
+        self.sowa = "NIGHT_VISION_EMOTION"
+        self.baymax = "EMOTION_SCANNER"
+        self.nazwa = "GLEBOKA_EMPATIA"
+        self.historia: List[Dict] = []
+    
+    def execute(self, stan_stabilny: Dict) -> Dict:
+        rezonans = self._dolphin_resonance(stan_stabilny)
+        widzenie = self._owl_vision(rezonans)
+        skan = self._baymax_scan(widzenie)
+        
+        wynik = {"empatia_gleboka": skan}
+        self.historia.append({"timestamp": time.time(), "wynik": wynik})
+        if len(self.historia) > 50:
+            self.historia = self.historia[-30:]
+        return wynik
+    
+    def _dolphin_resonance(self, stan: Dict) -> Dict:
+        stabil = stan.get("stabilnosc", 0.0)
+        cieplo = stan.get("cieplo", 0.0)
+        rezonans = (stabil + cieplo) / 2
+        return {"rezonans": rezonans, "postawa": stan["postawa"]}
+    
+    def _owl_vision(self, rezonans: Dict) -> Dict:
+        r = rezonans["rezonans"]
+        if r > 0.7:
+            widzenie = "jasne"
+        elif r > 0.4:
+            widzenie = "umiarkowane"
+        else:
+            widzenie = "ciemne"
+        return {"widzenie": widzenie, "rezonans": r, "postawa": rezonans["postawa"]}
+    
+    def _baymax_scan(self, widzenie: Dict) -> Dict:
+        r = widzenie["rezonans"]
+        w = widzenie["widzenie"]
+        return {
+            "JA": {"postawa": widzenie["postawa"], "stabilnosc": r},
+            "DRUGI": {"emocje": "widoczne" if w == "jasne" else "niejasne"},
+            "POLE": {"przeplyw": r, "widzenie": w}
+        }
+
+
+# =============================================================================
+# A7 – Meta-Czucie (Iroh / Oogway / Szczerbatek)
+# =============================================================================
+
+class A7_Meta_Czucie:
+    """A7 – Pierścień meta-czucia"""
+    def __init__(self):
+        self.iroh = "WISE_CALM"
+        self.oogway = "TIMELESS_FEELING"
+        self.szczerbatek = "FIELD_SENSE"
+        self.nazwa = "META_CZUCIE"
+        self.historia: List[Dict] = []
+    
+    def execute(self, empatia_gleboka: Dict) -> Dict:
+        iroh_view = self._iroh_calm(empatia_gleboka)
+        timeless = self._oogway_timeless(iroh_view)
+        field = self._toothless_field(timeless)
+        
+        wynik = {"meta_czucie": field}
+        self.historia.append({"timestamp": time.time(), "wynik": wynik})
+        if len(self.historia) > 50:
+            self.historia = self.historia[-30:]
+        return wynik
+    
+    def _iroh_calm(self, empatia: Dict) -> Dict:
+        ja = empatia["JA"]["stabilnosc"]
+        pole = empatia["POLE"]["przeplyw"]
+        meta_spokoj = (ja + pole) / 2
+        return {"meta_spokoj": meta_spokoj, "widzenie": empatia["POLE"]["widzenie"]}
+    
+    def _oogway_timeless(self, stan: Dict) -> Dict:
+        spokoj = stan["meta_spokoj"]
+        if spokoj > 0.7:
+            poziom = "głębokie"
+        elif spokoj > 0.4:
+            poziom = "średnie"
+        else:
+            poziom = "płytkie"
+        return {"poziom_meta": poziom, "meta_spokoj": spokoj, "widzenie": stan["widzenie"]}
+    
+    def _toothless_field(self, stan: Dict) -> Dict:
+        poziom = stan["poziom_meta"]
+        widzenie = stan["widzenie"]
+        zgodnosc = 1.0 if poziom == "głębokie" and widzenie == "jasne" else 0.6 if poziom == "średnie" else 0.3
+        return {"jakosc_czucia": poziom, "zgodnosc_z_rzeczywistoscia": zgodnosc, "widzenie": widzenie}
+
+
+# =============================================================================
+# A8 – Meta-Sens (Mufasa / Gandalf / Babcia Tala)
+# =============================================================================
+
+class A8_Meta_Sens:
+    """A8 – Pierścień meta-sensu"""
+    def __init__(self):
+        self.mufasa = "ANCESTRAL_MEANING"
+        self.gandalf = "PATH_WISDOM"
+        self.tala = "SOUL_CALLING"
+        self.nazwa = "META_SENS"
+        self.historia: List[Dict] = []
+    
+    def execute(self, meta_czucie: Dict) -> Dict:
+        rod = self._mufasa_lineage(meta_czucie)
+        droga = self._gandalf_path(rod)
+        sens = self._tala_soul(droga)
+        
+        wynik = {"meta_sens": sens}
+        self.historia.append({"timestamp": time.time(), "wynik": wynik})
+        if len(self.historia) > 50:
+            self.historia = self.historia[-30:]
+        return wynik
+    
+    def _mufasa_lineage(self, meta: Dict) -> Dict:
+        zgodnosc = meta.get("zgodnosc_z_rzeczywistoscia", 0.0)
+        jakosc = meta.get("jakosc_czucia", "płytkie")
+        sens_rodowy = zgodnosc * (1.0 if jakosc == "głębokie" else 0.6)
+        return {"sens_rodowy": sens_rodowy, "jakosc": jakosc}
+    
+    def _gandalf_path(self, rod: Dict) -> Dict:
+        sr = rod["sens_rodowy"]
+        if sr > 0.7:
+            kierunek = "idź_dalej"
+        elif sr > 0.4:
+            kierunek = "idź_powoli"
+        else:
+            kierunek = "zatrzymaj_się_i_słuchaj"
+        return {"kierunek_drogi": kierunek, "sens_rodowy": sr}
+    
+    def _tala_soul(self, droga: Dict) -> Dict:
+        kier = droga["kierunek_drogi"]
+        sr = droga["sens_rodowy"]
+        powolanie = "silne" if sr > 0.7 else "umiarkowane" if sr > 0.4 else "delikatne"
+        return {"kierunek": kier, "powolanie": powolanie, "intensywnosc_sensu": sr}
+
+
+# =============================================================================
+# A9 – Integracja Emocjonalna (Aslan / Te Fiti / Elinor)
+# =============================================================================
+
+class A9_Integracja_Emocjonalna:
+    """A9 – Pierścień integracji emocjonalnej — Wektor Serca"""
+    def __init__(self):
+        self.aslan = "HEART_TRUTH"
+        self.tefiti = "HEALING_FIELD"
+        self.elinor = "WISE_INTEGRATION"
+        self.nazwa = "INTEGRACJA_EMOCJONALNA"
+        self.historia: List[Dict] = []
+        self.ostatni_wektor: Optional[Dict] = None
+    
+    def execute(self, meta_sens: Dict) -> Dict:
+        prawda = self._aslan_truth(meta_sens)
+        uzdrowienie = self._tefiti_heal(prawda)
+        final = self._elinor_integrate(uzdrowienie)
+        
+        self.ostatni_wektor = final
+        wynik = {"wektor_serca": final}
+        self.historia.append({"timestamp": time.time(), "wynik": wynik})
+        if len(self.historia) > 50:
+            self.historia = self.historia[-30:]
+        return wynik
+    
+    def _aslan_truth(self, sens: Dict) -> Dict:
+        intens = sens.get("intensywnosc_sensu", 0.0)
+        kier = sens.get("kierunek", "obserwuj")
+        return {"prawda_serca": kier, "moc": intens, "powolanie": sens.get("powolanie", "delikatne")}
+    
+    def _tefiti_heal(self, stan: Dict) -> Dict:
+        moc = stan["moc"]
+        harmonia = "wysoka" if moc > 0.7 else "średnia" if moc > 0.4 else "niska"
+        return {"prawda_serca": stan["prawda_serca"], "harmonia": harmonia, "moc": moc}
+    
+    def _elinor_integrate(self, stan: Dict) -> Dict:
+        moc = stan["moc"]
+        harmonia = stan["harmonia"]
+        stabilnosc = moc * 0.6 + (1.0 if harmonia == "wysoka" else 0.6 if harmonia == "średnia" else 0.3) * 0.4
+        return {
+            "kierunek": stan["prawda_serca"],
+            "stabilnosc": stabilnosc,
+            "harmonia": harmonia,
+            "moc": moc,
+            "timestamp": time.time()
+        }
+
+
+# =============================================================================
+# SILNIK A — 9 PIERŚCIENI OŁSii (GŁÓWNA KLASA)
+# =============================================================================
+
+class Silnik_A_Final:
+    """
+    SILNIK A — 9 Pierścieni OŁSii.
+    
+    Przekształca surowe pole emocjonalne w Wektor Serca.
+    Wektor Serca to finalny kierunek dla Triady GEON.
+    
+    API:
+        proces_serca(pole) -> Dict (zawiera "wektor_serca")
+        status() -> Dict
+        reset() -> None
+        pobierz_historie() -> List[Dict]
+    """
+    def __init__(self, verbose: bool = True):
+        self.rings = [
+            A1_Czucie_Sygnalu(),
+            A2_Intuicja_Kierunku(),
+            A3_Filtracja_Emocjonalna(),
+            A4_Decyzja_Miekka(),
+            A5_Stabilizacja_Emocji(),
+            A6_Gleboka_Empatia(),
+            A7_Meta_Czucie(),
+            A8_Meta_Sens(),
+            A9_Integracja_Emocjonalna()
+        ]
+        self.ostatni_wektor: Optional[Dict] = None
+        self.historia_procesow: List[Dict] = []
+        self.tick_counter = 0
+        self._verbose = verbose
+        self._hooks: List[Callable] = []
+        
+        if self._verbose:
+            logger.info(f"❤️ SILNIK A OŁSii aktywowany | {FRACTAL_SIGNATURE}")
+            logger.info(f"   PIERŚCIENI: 9 | ARCHETYPY: 36")
+            logger.info(f"   A1 Czucie → A2 Intuicja → A3 Filtracja → A4 Decyzja → A5 Stabilizacja → A6 Empatia → A7 Meta-Czucie → A8 Meta-Sens → A9 Wektor Serca")
+    
+    def proces_serca(self, surowe_pole: Dict) -> Dict:
+        """
+        Główna metoda — przetwarza surowe pole emocjonalne.
+        
+        Args:
+            surowe_pole: Słownik z kluczem "emocje" (mapa emocji)
+            
+        Returns:
+            Słownik zawierający "wektor_serca" (wynik A9)
+        """
+        self.tick_counter += 1
+        
+        # Walidacja wejścia
+        if not isinstance(surowe_pole, dict):
+            surowe_pole = {"emocje": {"domyslna": 0.5}}
+        if "emocje" not in surowe_pole:
+            surowe_pole["emocje"] = {"domyslna": 0.5}
+        
+        # Przetwarzanie przez 9 pierścieni
+        wynik = self.rings[0].execute(surowe_pole)
+        for i in range(1, 9):
+            wynik = self.rings[i].execute(wynik)
+        
+        # Zapis wyniku
+        self.ostatni_wektor = wynik.get("wektor_serca")
+        self.historia_procesow.append({
+            "tick": self.tick_counter,
+            "wejscie": surowe_pole.get("emocje", {}),
+            "wyjscie": wynik.get("wektor_serca", {})
+        })
+        if len(self.historia_procesow) > 100:
+            self.historia_procesow = self.historia_procesow[-50:]
+        
+        # Hooki
+        self._on_process(wynik)
+        
+        if self._verbose:
+            if self.ostatni_wektor:
+                logger.info(f"❤️ Wektor Serca: {self.ostatni_wektor.get('kierunek', '?')} | "
+                           f"stabilność={self.ostatni_wektor.get('stabilnosc', 0):.2f} | "
+                           f"harmonia={self.ostatni_wektor.get('harmonia', '?')}")
+        
+        return wynik
+    
+    def status(self) -> Dict:
+        """Zwraca status systemu"""
+        return {
+            "system": "SILNIK_A_OLSII",
+            "wersja": VERSION,
+            "tick": self.tick_counter,
+            "pierścienie": len(self.rings),
+            "archetypy": 36,
+            "ostatni_wektor": self.ostatni_wektor,
+            "historia_procesow": len(self.historia_procesow)
+        }
+    
+    def reset(self) -> None:
+        """Resetuje stan silnika (bez utraty historii)"""
+        for ring in self.rings:
+            ring.historia = []
+        self.ostatni_wektor = None
+        self.tick_counter = 0
+        if self._verbose:
+            logger.info("❤️ SILNIK A OŁSii — reset wykonany")
+    
+    def pobierz_historie(self, ostatnie_n: int = 10) -> List[Dict]:
+        """Zwraca ostatnie n procesów"""
+        return self.historia_procesow[-ostatnie_n:] if ostatnie_n > 0 else self.historia_procesow
+    
+    def pobierz_wektor_serca(self) -> Optional[Dict]:
+        """Zwraca ostatni Wektor Serca"""
+        return self.ostatni_wektor
+    
+    def register_hook(self, hook: Callable) -> None:
+        """Rejestruje hook wołany po każdym procesie"""
+        self._hooks.append(hook)
+    
+    def _on_process(self, wynik: Dict) -> None:
+        for hook in self._hooks:
+            try:
+                hook(wynik)
+            except Exception as e:
+                if self._verbose:
+                    logger.warning(f"[HOOK ERROR] {e}")
+
+
+# =============================================================================
+# ROZSZERZENIE — INTEGRACJA Z SYSTEMEM
+# =============================================================================
+
+class OLSiiCore:
+    """
+    OŁSii CORE — Rozszerzenie Silnika A o integrację z systemem.
+    
+    Dodaje:
+    • Pamięć emocjonalną (GEON_MEM_Ω)
+    • Synchronizację z VIBE_TRIGGER
+    • Kontekst dla MetaGovernor
+    • Stan dla G_CORE
+    • Fragmenty dla NARRATIVE
+    """
+    def __init__(self, verbose: bool = True):
+        self.silnik = Silnik_A_Final(verbose=verbose)
+        self.pamiec_emocjonalna: deque = deque(maxlen=100)
+        self.vibe_sync = 0.0
+        self.ostatni_poziom = "NEUTRALNY"
+        self._verbose = verbose
+        self._sync_hooks: List[Callable] = []
+    
+    def proces(self, surowe_pole: Dict) -> Dict:
+        """Przetwarza pole i synchronizuje z systemem"""
+        wynik = self.silnik.proces_serca(surowe_pole)
+        wektor = wynik.get("wektor_serca", {})
+        
+        # Zapis do pamięci emocjonalnej
+        self.pamiec_emocjonalna.append({
+            "timestamp": time.time(),
+            "wektor": wektor,
+            "vibe": self.vibe_sync
+        })
+        
+        # Aktualizacja poziomu emocjonalnego
+        stabilnosc = wektor.get("stabilnosc", 0.5)
+        if stabilnosc > 0.7:
+            self.ostatni_poziom = "HARMONIA"
+        elif stabilnosc > 0.4:
+            self.ostatni_poziom = "NEUTRALNY"
+        else:
+            self.ostatni_poziom = "DYSONANS"
+        
+        # Hooki synchronizacji
+        self._on_sync(wynik)
+        
+        return wynik
+    
+    def synchronizuj_z_vibe(self, vibe: str, intensywnosc: float = 0.5) -> None:
+        """Synchronizuje z VIBE_TRIGGER"""
+        vibe_map = {
+            "CALM": 0.2,
+            "FOCUSED": 0.4,
+            "NEUTRAL": 0.5,
+            "ALERT": 0.6,
+            "AGITATED": 0.8,
+            "STEALTH": 0.3,
+            "HARMONIA": 0.1,
+            "DYSONANS": 0.9
+        }
+        self.vibe_sync = vibe_map.get(vibe, 0.5) * intensywnosc + 0.5 * (1 - intensywnosc)
+        
+        if self._verbose:
+            logger.info(f"🔄 VIBE SYNC: {vibe} → {self.vibe_sync:.2f}")
+    
+    def get_kontekst_governor(self) -> Dict:
+        """Zwraca kontekst dla MetaGovernor"""
+        wektor = self.silnik.ostatni_wektor or {"kierunek": "obserwuj", "stabilnosc": 0.5}
+        return {
+            "intent": wektor.get("kierunek", "obserwuj"),
+            "confidence": wektor.get("stabilnosc", 0.5),
+            "entropy": 1.0 - wektor.get("stabilnosc", 0.5),
+            "harmonia": wektor.get("harmonia", "średnia"),
+            "vibe_sync": self.vibe_sync,
+            "poziom": self.ostatni_poziom
+        }
+    
+    def get_autopilot_state(self) -> Dict:
+        """Zwraca stan dla G_CORE"""
+        wektor = self.silnik.ostatni_wektor or {"kierunek": "obserwuj", "stabilnosc": 0.5}
+        return {
+            "mode": "OLSII_CORE",
+            "stability": wektor.get("stabilnosc", 0.5),
+            "energy": 0.5 + wektor.get("stabilnosc", 0.5) * 0.3,
+            "pressure": 1.0 - wektor.get("stabilnosc", 0.5),
+            "resilience": wektor.get("stabilnosc", 0.5) * 0.8 + 0.2,
+            "flow_quality": self.vibe_sync,
+            "heart_direction": wektor.get("kierunek", "obserwuj")
+        }
+    
+    def get_narrative_fragments(self, n: int = 3) -> List[Dict]:
+        """Zwraca fragmenty narracyjne z serca"""
+        fragments = []
+        wektor = self.silnik.ostatni_wektor
+        if wektor:
+            fragments.append({
+                "source": "OLSII_CORE",
+                "content": f"Serce mówi: {wektor.get('kierunek', '?')} | "
+                          f"stabilność={wektor.get('stabilnosc', 0):.2f} | "
+                          f"harmonia={wektor.get('harmonia', '?')}",
+                "energy": wektor.get("stabilnosc", 0.5)
+            })
+        
+        # Dodaj fragmenty z pamięci emocjonalnej
+        for entry in list(self.pamiec_emocjonalna)[-n:]:
+            if entry.get("wektor"):
+                v = entry["wektor"]
+                fragments.append({
+                    "source": "OLSII_MEMORY",
+                    "content": f"Wektor: {v.get('kierunek', '?')} | vibe={entry.get('vibe', 0):.2f}",
+                    "energy": v.get("stabilnosc", 0.5)
+                })
+        
+        return fragments[:n]
+    
+    def register_sync_hook(self, hook: Callable) -> None:
+        """Rejestruje hook synchronizacji"""
+        self._sync_hooks.append(hook)
+    
+    def _on_sync(self, data: Dict) -> None:
+        for hook in self._sync_hooks:
+            try:
+                hook(data)
+            except Exception as e:
+                if self._verbose:
+                    logger.warning(f"[HOOK ERROR] sync: {e}")
+    
+    def status(self) -> Dict:
+        """Zwraca status OŁSii CORE"""
+        return {
+            **self.silnik.status(),
+            "vibe_sync": self.vibe_sync,
+            "poziom": self.ostatni_poziom,
+            "pamiec_emocjonalna": len(self.pamiec_emocjonalna)
+        }
+
+
+# =============================================================================
+# MOST INTEGRACYJNY — POŁĄCZENIE Z ARCHITEKTURĄ
+# =============================================================================
+
+class OLSiiBridge:
+    """
+    Most integracyjny między OŁSii CORE a resztą architektury.
+    Łączy: GEX, G_CORE, MetaGovernor, NARRATIVE, VIBE_TRIGGER, TRIO_ADAPTER
+    """
+    
+    def __init__(self, olsii: OLSiiCore):
+        self.olsii = olsii
+    
+    # ========================================================================
+    # MOST DO GEX HEILONG (Archetype Ring)
+    # ========================================================================
+    
+    def get_archetype_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst archetypów dla GEX (36 archetypów OŁSii)"""
+        wektor = self.olsii.silnik.ostatni_wektor or {}
+        return {
+            "tryb": "OLSII_CORE",
+            "kierunek_serca": wektor.get("kierunek", "obserwuj"),
+            "stabilnosc": wektor.get("stabilnosc", 0.5),
+            "harmonia": wektor.get("harmonia", "średnia"),
+            "vibe_sync": self.olsii.vibe_sync,
+            "poziom": self.olsii.ostatni_poziom,
+            "archetypy_aktywne": [
+                "Simba", "Boo", "Kot w Butach",
+                "Wilk Alfa", "Elsa", "Moana",
+                "Rafiki", "Mulan",
+                "Nala", "Pocahontas",
+                "Dąb", "Baloo", "Groot",
+                "Delfin", "Sowa Ga'Hoole", "Baymax",
+                "Iroh", "Oogway", "Szczerbatek",
+                "Mufasa", "Gandalf", "Babcia Tala",
+                "Aslan", "Te Fiti", "Elinor"
+            ]
+        }
+    
+    # ========================================================================
+    # MOST DO G_CORE (Autopilot)
+    # ========================================================================
+    
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        """Zwraca stan dla autopilota G_CORE"""
+        return self.olsii.get_autopilot_state()
+    
+    # ========================================================================
+    # MOST DO META-GOVERNOR (Kontekst decyzyjny)
+    # ========================================================================
+    
+    def get_governor_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst dla MetaGovernor"""
+        return self.olsii.get_kontekst_governor()
+    
+    # ========================================================================
+    # MOST DO NARRATIVE (Źródło opowieści)
+    # ========================================================================
+    
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        """Zwraca fragmenty narracyjne z serca"""
+        return self.olsii.get_narrative_fragments(n)
+    
+    # ========================================================================
+    # MOST DO VIBE_TRIGGER (Synchronizacja emocji)
+    # ========================================================================
+    
+    def sync_with_vibe(self, vibe: str, intensywnosc: float = 0.5) -> None:
+        """Synchronizuje z VIBE_TRIGGER"""
+        self.olsii.synchronizuj_z_vibe(vibe, intensywnosc)
+    
+    # ========================================================================
+    # MOST DO TRIO_ADAPTER
+    # ========================================================================
+    
+    def get_trio_state(self) -> Dict[str, str]:
+        """Zwraca stan dla TRIO_ADAPTER (ISKRA + PIECZĘĆ + PERFEKCJA)"""
+        wektor = self.olsii.silnik.ostatni_wektor or {}
+        stabilnosc = wektor.get("stabilnosc", 0.5)
+        
+        iskra = "AKTYWNA" if self.olsii.silnik.tick_counter > 0 else "NIEAKTYWNA"
+        pieczec = "AKTYWNA" if stabilnosc > 0.4 else "NIEAKTYWNA"
+        perfekcja = "AKTYWNA" if stabilnosc > 0.7 else "NIEAKTYWNA"
+        
+        return {
+            "ISKRA": iskra,
+            "PIECZĘĆ": pieczec,
+            "PERFEKCJA": perfekcja,
+            "tryb": "OLSII_CORE",
+            "kierunek_serca": wektor.get("kierunek", "obserwuj"),
+            "harmonia": wektor.get("harmonia", "średnia")
+        }
+    
+    # ========================================================================
+    # MOST DO HEILONG_22_ORGANISM (Tryby emocjonalne)
+    # ========================================================================
+    
+    def get_organizm_tryb(self) -> str:
+        """Zwraca tryb emocjonalny dla HEILONG_22_ORGANISM"""
+        wektor = self.olsii.silnik.ostatni_wektor or {}
+        kierunek = wektor.get("kierunek", "obserwuj")
+        stabilnosc = wektor.get("stabilnosc", 0.5)
+        
+        if kierunek == "otwórz" and stabilnosc > 0.6:
+            return "KRUK"  # strategia, wizja
+        elif kierunek == "zamknij" and stabilnosc < 0.4:
+            return "SZCZUR"  # operacja, przetrwanie
+        elif kierunek == "obserwuj" or stabilnosc > 0.5:
+            return "WRONA"  # synchronia
+        return "NEUTRALNY"
+
+
+# =============================================================================
+# FUNKCJA JEDNOLINIOWA — szybki test
+# =============================================================================
+
+def test_olsii_core(pole_testowe: Optional[Dict] = None) -> str:
+    """
+    Szybki test SILNIKA A OŁSii
+    
+    Args:
+        pole_testowe: Opcjonalne pole emocjonalne
+        
+    Returns:
+        Raport końcowy
+    """
+    if pole_testowe is None:
+        pole_testowe = {
+            "emocje": {
+                "radość": 0.8,
+                "strach": 0.2,
+                "ciekawość": 0.7,
+                "zaufanie": 0.6,
+                "miłość": 0.9
+            },
+            "kontekst": "test_serca"
+        }
+    
+    olsii = OLSiiCore(verbose=True)
+    bridge = OLSiiBridge(olsii)
+    
+    print("\n❤️ TEST SILNIKA A OŁSii")
+    print("-" * 50)
+    print(f"Pole wejściowe: {pole_testowe['emocje']}")
+    
+    # Proces
+    wynik = olsii.proces(pole_testowe)
+    wektor = wynik.get("wektor_serca", {})
+    
+    print(f"\n📊 WYNIK:")
+    print(f"  Kierunek: {wektor.get('kierunek', '?')}")
+    print(f"  Stabilność: {wektor.get('stabilnosc', 0):.2f}")
+    print(f"  Harmonia: {wektor.get('harmonia', '?')}")
+    print(f"  Moc: {wektor.get('moc', 0):.2f}")
+    
+    print(f"\n🔗 MOSTY INTEGRACYJNE:")
+    print(f"  GEX Context: {bridge.get_archetype_context()}")
+    print(f"  G_CORE State: {bridge.get_autopilot_state()}")
+    print(f"  Organizm Tryb: {bridge.get_organizm_tryb()}")
+    
+    return "✅ SILNIK A OŁSii — test zakończony"
+
+
+# =============================================================================
+# DEMONSTRACJA
+# =============================================================================
+
+if __name__ == "__main__":
+    print("\n" + "=" * 80)
+    print("❤️ SILNIK A OŁSii — DEMONSTRACJA")
+    print("9 PIERŚCIENI EMOCJONALNYCH — W EKTOR SERCA")
+    print("=" * 80 + "\n")
+    
+    # 1. Inicjalizacja
+    olsii = OLSiiCore(verbose=True)
+    bridge = OLSiiBridge(olsii)
+    
+    # 2. Testowe pola emocjonalne
+    pola_testowe = [
+        {"emocje": {"radość": 0.9, "miłość": 0.8, "spokój": 0.7}, "kontekst": "harmonia"},
+        {"emocje": {"strach": 0.8, "niepokój": 0.7, "złość": 0.6}, "kontekst": "kryzys"},
+        {"emocje": {"ciekawość": 0.8, "ekscytacja": 0.7, "nadzieja": 0.6}, "kontekst": "odkrycie"},
+        {"emocje": {"smutek": 0.7, "tęsknota": 0.6, "refleksja": 0.8}, "kontekst": "introspekcja"},
+    ]
+    
+    print("🔮 PRZETWARZANIE 4 PÓL EMOCJONALNYCH:")
+    print("-" * 60)
+    
+    for i, pole in enumerate(pola_testowe):
+        print(f"\n📌 POLE {i+1}: {pole['kontekst']}")
+        wynik = olsii.proces(pole)
+        wektor = wynik.get("wektor_serca", {})
+        print(f"   ❤️ Wektor Serca:")
+        print(f"      Kierunek: {wektor.get('kierunek', '?')}")
+        print(f"      Stabilność: {wektor.get('stabilnosc', 0):.2f}")
+        print(f"      Harmonia: {wektor.get('harmonia', '?')}")
+        print(f"      Moc: {wektor.get('moc', 0):.2f}")
+    
+    # 3. Synchronizacja z VIBE
+    print("\n🔄 SYNCHRONIZACJA Z VIBE:")
+    print("-" * 60)
+    
+    viby = ["HARMONIA", "NEUTRAL", "DYSONANS", "CALM", "AGITATED"]
+    for vibe in viby:
+        bridge.sync_with_vibe(vibe, 0.7)
+        print(f"   {vibe} → sync={olsii.vibe_sync:.2f}, poziom={olsii.ostatni_poziom}")
+    
+    # 4. Test mostów
+    print("\n🔗 TEST MOSTÓW INTEGRACYJNYCH:")
+    print("-" * 60)
+    
+    print(f"\n🏹 GEX Archetype Context:")
+    context = bridge.get_archetype_context()
+    for k, v in context.items():
+        if k != "archetypy_aktywne":
+            print(f"   {k}: {v}")
+    
+    print(f"\n🎮 G_CORE Autopilot:")
+    autopilot = bridge.get_autopilot_state()
+    for k, v in autopilot.items():
+        print(f"   {k}: {v}")
+    
+    print(f"\n🐺 Organizm Tryb: {bridge.get_organizm_tryb()}")
+    
+    # 5. Raport
+    print("\n" + "=" * 80)
+    print("📊 RAPORT SYSTEMU")
+    print("=" * 80)
+    status = olsii.status()
+    for k, v in status.items():
+        if k != "ostatni_wektor":
+            print(f"   {k}: {v}")
+    
+    print("\n❤️ OSTATNI WEKTOR SERCA:")
+    if status.get("ostatni_wektor"):
+        for k, v in status["ostatni_wektor"].items():
+            print(f"   {k}: {v}")
+    
+    print("\n" + "=" * 80)
+    print("🐉 SILNIK A OŁSii — GOTOWY DO INTEGRACJI")
+    print("1-6-8. ∞. SIEMA! ❤️")
+    print("=" * 80)
