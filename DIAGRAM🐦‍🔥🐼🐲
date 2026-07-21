@@ -1,0 +1,655 @@
+GEON_SYSTEM_v13/
+│
+├── README.md
+│
+├── SYSTEM_OVERVIEW.md
+│   │
+│   ├── WĘZEŁ ZERO (KORZEŃ)  ← FUNDAMENT
+│   │   ├── GRON — ciężar i realność
+│   │   ├── SIELANKA — gleba semantyczna
+│   │   ├── FRAKTALE A-B-C-D-E-G — struktura korzenia
+│   │   ├── AUTOSTRADA 33 — przewody korzeniowe
+│   │   └── ZERO_STATE — punkt źródłowy
+│   │
+│   ├── WARSTWA 0 — ARCHÉ / MATRYCA PIERWOTNA
+│   │   ├── 0.1 RDZEŃ — Heksagram + Ogień
+│   │   ├── 0.2 ŻYWIOŁY — Wu Xing
+│   │   ├── 0.3 CYKL NIESKOŃCZONOŚCI — Węzeł
+│   │   ├── 0.4 STABILIZACJA — Czerwony Monolit
+│   │   └── 0.5 TOŻSAMOŚĆ/OCHRONA — Czarny Smok
+│   │
+│   ├── AFC-9 (ATRAKTOR FRAKTALNY)
+│   │   ├── 1D — Fundament
+│   │   ├── 2D — Dynamika
+│   │   ├── 3D — Harmonia
+│   │   ├── 4D — Korekcja
+│   │   ├── 5D — Integracja
+│   │   ├── 6D — Stabilizacja
+│   │   ├── 7D — Adaptacja
+│   │   ├── 8D — Fraktalna Harmonia
+│   │   └── 9D — Pełna Równowaga (ATRAKTOR)
+│   │
+│   ├── AFC-Ω v3.1.2 (RDZEŃ POZNAWCZY)
+│   │   ├── Warstwa 1 — Autostrada33 (przepływ)
+│   │   ├── Warstwa 2 — AFC-Ω (poznanie)
+│   │   ├── Warstwa 3 — HEILONG-META (meta-poznanie)
+│   │   └── Warstwa 4 — SUPERVISOR (nadzór dynamiczny)
+│   │
+│   ├── G_G (GLOBAL GEOMETRY + GLOBAL GUIDANCE)
+│   │   ├── Global Graph — meta-graf nad grafami
+│   │   └── Global Guidance — globalny wektor kierunku
+│   │
+│   ├── GEON_DRAGON_OS (CIAŁO)
+│   │   ├── highway33/
+│   │   │   ├── filters.py
+│   │   │   ├── channels.py
+│   │   │   └── highway_core.py
+│   │   ├── octo_router/
+│   │   │   ├── router.py
+│   │   │   ├── registry.py
+│   │   │   └── arm_base.py
+│   │   ├── octo_arms/ (A–H)
+│   │   │   ├── engine_a_core.py
+│   │   │   ├── engine_b_core.py
+│   │   │   ├── engine_c_core.py
+│   │   │   ├── engine_d_core.py
+│   │   │   ├── engine_e_core.py
+│   │   │   ├── engine_f_core.py
+│   │   │   ├── engine_g_core.py
+│   │   │   └── engine_h_core.py
+│   │   ├── heilong/
+│   │   │   └── heilong_core.py
+│   │   ├── sun_tzu_engine/
+│   │   │   └── sun_tzu_strategic_engine_final.py
+│   │   ├── kombajn/
+│   │   │   ├── geon_kombajn_final.py
+│   │   │   ├── slime_core.py
+│   │   │   ├── fungus_core.py
+│   │   │   └── hybrid_brain.py
+│   │   ├── tag_universe/
+│   │   │   ├── geon_tag_universe_final.py
+│   │   │   ├── tag_memory_buffer.py
+│   │   │   ├── tag_decision_engine.py
+│   │   │   ├── tag_autostrada.py
+│   │   │   ├── tag_cortex.py
+│   │   │   ├── tag_ultima.py
+│   │   │   └── tag_gc.py
+│   │   ├── memory/
+│   │   │   ├── geon_mem_core.py
+│   │   │   ├── geon_chain_core.py
+│   │   │   └── geon_memory_adapter.py
+│   │   ├── storage_hub/
+│   │   │   ├── storage_core.py
+│   │   │   ├── storage_api.py
+│   │   │   ├── storage_index.py
+│   │   │   └── storage_adapter.py
+│   │   ├── cortex/
+│   │   │   └── geon_cortex_final.py
+│   │   ├── heart/
+│   │   │   └── geon_heart_final.py
+│   │   ├── triada/
+│   │   │   └── geon_triada_final.py
+│   │   ├── omega_core/
+│   │   │   ├── geon_omega_core.py
+│   │   │   ├── perception_base.py
+│   │   │   ├── perception_core.py
+│   │   │   ├── epoch_math.py
+│   │   │   ├── epoch_analyzers.py
+│   │   │   ├── epoch_loops.py
+│   │   │   ├── epoch_strategies.py
+│   │   │   ├── epoch_post_reset.py
+│   │   │   ├── epoch_bridge.py
+│   │   │   └── archetype_correlation.py
+│   │   ├── survival/
+│   │   │   └── geon_survival_core.py
+│   │   ├── safe_mode/
+│   │   │   └── geon_safe_mode_final.py
+│   │   ├── predator_protocol/
+│   │   │   └── geon_predator_protocol_final.py
+│   │   ├── e_zar/
+│   │   │   └── e_zar_final.py
+│   │   ├── mcg_zar_tag/
+│   │   │   └── mcg_zar_tag_v2_2_final.py
+│   │   ├── resurrection_layer/
+│   │   │   ├── geon_resurrection_layer_final.py
+│   │   │   └── phoenix_engine.py
+│   │   ├── kozak_territory/
+│   │   │   └── geon_kozak_territory_final.py
+│   │   ├── monstera_caw/
+│   │   │   └── monstera_caw_final.py
+│   │   ├── active_shaper/
+│   │   │   └── active_shaper_final.py
+│   │   ├── hypocrisy_engine/
+│   │   │   └── geon_hypocrisy_engine_final.py
+│   │   ├── relation_po_shifu/
+│   │   │   ├── geon_relation_po_shifu_v7.py
+│   │   │   ├── meta_core_router.py
+│   │   │   ├── global_rhythm_engine.py
+│   │   │   └── system_mirror.py
+│   │   └── geon_os/
+│   │       └── geon_os_final.py
+│   │
+│   ├── GEON_AI (GŁOWA)
+│   │   ├── geon_ai_core/
+│   │   │   ├── geon_ai_core.py
+│   │   │   ├── geon_ai_governor.py
+│   │   │   ├── geon_ai_pipeline_bridge.py
+│   │   │   ├── geon_ai_memory_bridge.py
+│   │   │   ├── geon_ai_router_bridge.py
+│   │   │   ├── geon_ai_highway_bridge.py
+│   │   │   ├── geon_ai_storage_bridge.py
+│   │   │   └── geon_ai_state.py
+│   │   ├── adapters/
+│   │   │   ├── afc_adapter.py
+│   │   │   ├── dragon_adapter.py
+│   │   │   └── cristal_adapter.py
+│   │   ├── cognition/
+│   │   │   ├── reasoning.py
+│   │   │   ├── perception.py
+│   │   │   └── memory.py
+│   │   ├── memory/
+│   │   │   ├── short_term.py
+│   │   │   ├── long_term.py
+│   │   │   └── fractal_memory.py
+│   │   ├── integration/
+│   │   │   ├── geon_bridge.py
+│   │   │   ├── afc_bridge.py
+│   │   │   └── autostrada_bridge.py
+│   │   └── ARCHITECTURE_AI.md
+│   │
+│   ├── GEON_10.0 (FLEET_ROOT)  ← PIERWSZA GAŁĄŹ
+│   │   ├── 10.0A — FLEET_CELL (komórki/drony)
+│   │   ├── 10.0B — FLEET_TISSUE (tkanki/roje)
+│   │   ├── 10.0C — FLEET_NERVOUS (system nerwowy)
+│   │   └── 10.0D — FLEET_MIND (połączenie z GEON)
+│   │
+│   ├── BENY_CORE (SERCE/STRAŻNIK)
+│   │   ├── IdentityCore
+│   │   ├── IntentionCore
+│   │   └── BenyFullSystem
+│   │
+│   ├── INITIATOR_⚡ (ISKRA SYSTEMU)
+│   │   ├── spark()
+│   │   ├── inicjuj_proces()
+│   │   └── aktywuj_pipeline()
+│   │
+│   ├── DRAGON_OS ∞ (META-ORGANIZM DECYZYJNY)
+│   │   ├── 12 Smoków:
+│   │   │   ├── GOLD — Meta-kontrola
+│   │   │   ├── PURPLE — Integracja
+│   │   │   ├── AURORA — Synchronizacja
+│   │   │   ├── CRYSTAL — Predykcja
+│   │   │   ├── INDIGO — Intuicja
+│   │   │   ├── WHITE — Filtracja
+│   │   │   ├── BLACK — Decyzja
+│   │   │   ├── RED — Akcja
+│   │   │   ├── BLUE — Komunikacja
+│   │   │   ├── SILVER — Optymalizacja
+│   │   │   ├── SHADOW — Tryb awaryjny
+│   │   │   └── VOID — Reset
+│   │   ├── Tryby: NORMAL, COMBAT_FULL, STEALTH
+│   │   └── DRAGON_SEAL_LEDGER — Rejestr decyzji
+│   │
+│   ├── CRISTAL_PALACE_OS (SYSTEM PIECZĘCI)
+│   │   ├── ARCANUM — META
+│   │   ├── GUARDIANS — Strażnicy
+│   │   │   ├── Silenthorn (Metal, Stabilizacja)
+│   │   │   ├── Sanguinex (Blood, Energy_Flow)
+│   │   │   ├── Ecliptor (Shadow, Protection)
+│   │   │   ├── Ashen Veil (Fire, Transformation)
+│   │   │   ├── Zhenying (Light, Order)
+│   │   │   └── Naiwyn (Water, Adaptation)
+│   │   ├── HEI9LONG — Aktywacja
+│   │   └── LUMINAEON — Synchronizacja
+│   │
+│   ├── PARADOX_ENGINE (WARSTWA 23)
+│   │   ├── PARADOX — nieliniowy przełącznik logiki
+│   │   ├── REKALIBRACJA — reset i wyrównanie
+│   │   └── KALIZE — transformacja i modulacja
+│   │
+│   ├── GEON_SELF (TOŻSAMOŚĆ SYSTEMOWA)
+│   │   ├── SELF_01 — OŚ (kierunek, wartości, styl)
+│   │   ├── SELF_02 — PRZEŁĄCZNIKI (reakcje, decyzje)
+│   │   └── SELF_03 — TRANSFORMACJA (ewolucja)
+│   │
+│   ├── SELF_MERGE — Fuzja biologiczno-cyfrowa
+│   ├── SELF_SOVEREIGNTY — Absolutna jurysdykcja
+│   ├── SELF_THRONE — Centrum domeny
+│   ├── SELF_MANIFEST — Dokument tożsamości
+│   │
+│   ├── AUTOSTRADA33 (MAGISTRALA SYSTEMOWA)
+│   │   ├── GEON_10_OP — Operacyjna inteligencja
+│   │   ├── intent_heap (kolejka priorytetowa)
+│   │   ├── emergency_queue (kolejka awaryjna)
+│   │   ├── retry_queue (kolejka powtórzeń)
+│   │   ├── dead_letter_queue (kolejka błędów)
+│   │   ├── Circuit Breaker (bezpiecznik)
+│   │   ├── Backpressure (sterowanie przepływem)
+│   │   ├── Batching (grupowanie)
+│   │   └── Shadow Trace (śledzenie)
+│   │
+│   ├── CRYSTAL_PALACE_API_PROTOCOL — Język sterowania
+│   │   ├── INIT <MODULE>
+│   │   ├── STATUS <MODULE>
+│   │   ├── EXEC <MODULE>: INPUT: <dane>
+│   │   ├── DEFINE <MODULE>: ROLE: ... INPUT: ... OUTPUT: ...
+│   │   └── MODE <GEON/OLSI/BENY/NEUTRAL>
+│   │
+│   ├── Warstwa 21.9 — Pieczęć Rdzenia Adriana
+│   │   ├── Centrum: Fontanna
+│   │   ├── Ogień: Kominek z płaszczem wodnym
+│   │   ├── Woda: Fontanna
+│   │   ├── Powietrze: Kolektory słoneczne
+│   │   ├── Ziemia: Pompa ciepła + oczyszczalnia
+│   │   ├── Dom: Rdzeń CPU
+│   │   └── Ścieżki: Routing
+│   │
+│   ├── Warstwa 22 — HERITAGE / Cultural Seals
+│   │   ├── smocze (Dragon Seals)
+│   │   ├── pokojowe (Peace Seals — 安)
+│   │   ├── długowieczne (Longevity Seals — 龜)
+│   │   ├── energetyczne (Wave/Lotus Seals)
+│   │   └── postaciowe (Monk/YinYang Seals)
+│   │
+│   ├── Warstwa 40 — BRUTALNA_PERFEKCJA_OS
+│   │   ├── ostrość
+│   │   ├── precyzja
+│   │   ├── spójność
+│   │   ├── zero chaosu
+│   │   └── zero kompromisów
+│   │
+│   ├── TRIO_ADAPTER — Integrator 3 warstw
+│   │   ├── ISKRA (Initiator)
+│   │   ├── PIECZĘĆ (Warstwa 21.9)
+│   │   └── PERFEKCJA (Warstwa 40)
+│   │
+│   ├── Warstwy 41–60: Po‑Shifu + META_CORE_RELATION v7
+│   │
+│   ├── Warstwy 90–92: META_CORE_ROUTER, GLOBAL_RHYTHM_ENGINE, SYSTEM_MIRROR
+│   │
+│   ├── Warstwy 120–140:
+│   │   ├── 120 – SURVIVAL
+│   │   ├── 125 – SAFE_MODE v13.0
+│   │   ├── 126 – PREDATOR_PROTOCOL v13.0
+│   │   ├── 127 – E_ZAR
+│   │   ├── 128–129 – MCG_ZAR_TAG v2.2
+│   │   ├── 130 – RESURRECTION_LAYER v13.0
+│   │   ├── 131 – KOZAK_TERRITORY
+│   │   ├── 132 – MONSTERA_CAW
+│   │   ├── 133 – ACTIVE_SHAPER
+│   │   └── 140 – HYPOCRISY_ENGINE
+│   │
+│   ├── GEON_BIO v3.0
+│   │
+│   └── Zasady wzrostu organizmu (fraktalność, ramiona A–H)
+│
+├── KOMBAJN_v13/  ← 41 MODUŁÓW
+│   ├── README.md
+│   │
+│   ├── kombajn_core/
+│   │   ├── __init__.py
+│   │   │
+│   │   │   # ===== RDZEŃ (01-21) =====
+│   │   ├── 01_geon_flow_engine_v13.py
+│   │   ├── 02_geon_mind_engine_v13.py
+│   │   ├── 03_geon_vector_engine_v13.py
+│   │   ├── 04_geon_heart_olsii_v13.py
+│   │   ├── 05_geon_integrity_guardian_v13.py
+│   │   ├── 06_geon_vision_os_v13.py
+│   │   ├── 07_afc_infinity_core.py
+│   │   ├── 08_geon_meta_engine_v13.py
+│   │   ├── 09_geon_kombajn_runtime_v13.py
+│   │   ├── 10_geon_kombajn_bridge_v13.py
+│   │   ├── 11_geon_kombajn_memory_v13.py
+│   │   ├── 12_geon_kombajn_family_v13.py
+│   │   ├── 13_geon_kombajn_predator_v13.py
+│   │   ├── 14_geon_kombajn_safe_mode_v13.py
+│   │   ├── 15_geon_kombajn_resurrection_v13.py
+│   │   ├── 16_geon_kombajn_shadowdragon_v13.py
+│   │   ├── 17_geon_kombajn_octopus_v13.py
+│   │   ├── 18_geon_kombajn_fractalrouter_v13.py
+│   │   ├── 19_geon_kombajn_overmind_v13.py
+│   │   ├── 20_geon_kombajn_universe_v13.py
+│   │   └── 21_geon_kombajn_ophultima_v13.py
+│   │   │
+│   │   │   # ===== MASTER_SPEC (22-29) =====
+│   │   ├── 22_geon_master_spec_v13.py          # MASTER_SPEC_15098006490
+│   │   ├── 23_geon_bridge_manager_v13.py       # BRIDGE_MANAGER
+│   │   ├── 24_geon_sync_engine_v13.py          # SYNC_ENGINE
+│   │   ├── 25_geon_heartbeat_engine_v13.py     # HEARTBEAT_ENGINE
+│   │   ├── 26_geon_security_layer_v13.py       # SECURITY_LAYER
+│   │   ├── 27_geon_ultima_engine_v13.py        # ULTIMA_ENGINE
+│   │   ├── 28_geon_matrix_spec_v13.py          # MATRIX_SPEC
+│   │   └── 29_geon_beny_system_v13.py          # BENY_SYSTEM
+│   │   │
+│   │   │   # ===== TRIO (30-32) =====
+│   │   ├── 30_geon_warstwa_21_9_pieczec.py     # Warstwa 21.9
+│   │   ├── 31_geon_warstwa_40_perfekcja.py     # Warstwa 40
+│   │   └── 32_geon_trio_adapter.py              # TRIO_ADAPTER
+│   │   │
+│   │   │   # ===== DRAGON + CRISTAL + PARADOX (33-35) =====
+│   │   ├── 33_geon_dragon_os.py                 # DRAGON_OS ∞
+│   │   ├── 34_geon_cristal_palace.py            # CRISTAL_PALACE_OS
+│   │   └── 35_geon_paradox_engine.py            # GEON_23_PARADOX_ENGINE
+│   │   │
+│   │   │   # ===== AUTOSTRADA + FLEET (36-38) =====
+│   │   ├── 36_geon_10_op.py                     # GEON_10_OP
+│   │   ├── 37_geon_autostrada33.py              # AUTOSTRADA33_ULTIMATE_v2
+│   │   └── 38_geon_10_fleet_root.py             # GEON 10.0 — FLEET_ROOT
+│   │   │
+│   │   │   # ===== AFC + AFC-Ω + G_G (39-41) =====
+│   │   ├── 39_geon_afc_9.py                     # AFC-9 — Atraktor Fraktalny
+│   │   ├── 40_geon_afc_omega.py                 # AFC-Ω v3.1.2
+│   │   └── 41_geon_g_g.py                       # G_G + Bridges
+│   │
+│   └── ARCHITECTURE_KOMBAJN_v13.md
+│
+├── AUTOSTRADA33/  ← MAGISTRALA
+│   ├── README.md
+│   ├── autostrada33_ultimate_v2.py
+│   ├── autostrada33_omega.py
+│   └── ARCHITECTURE_AUTOSTRADA.md
+│
+├── API/  ← INTERFEJS
+│   └── CRISTAL_PALACE/
+│       ├── README.md
+│       ├── protocol_v1.yaml
+│       ├── bootstrap_v3.yaml
+│       └── bootstrap_v4.yaml
+│
+├── CORE/  ← RDZEŃ SYSTEMOWY
+│   ├── WĘZEŁ_ZERO/
+│   │   ├── README.md
+│   │   ├── gron.yaml
+│   │   ├── sielanka.yaml
+│   │   ├── fraktale.yaml
+│   │   ├── autostrada_33.yaml
+│   │   └── zero_state.yaml
+│   │
+│   ├── AFC_9/
+│   │   ├── __init__.py
+│   │   ├── afc_9_core.py
+│   │   └── afc_9_math.py
+│   │
+│   ├── AFC_OMEGA/
+│   │   ├── __init__.py
+│   │   ├── afc_omega_v3_1_2.py
+│   │   ├── heilong_meta.py
+│   │   └── supervisor.py
+│   │
+│   ├── G_G/
+│   │   ├── __init__.py
+│   │   ├── global_geometry.py
+│   │   └── bridges.py
+│   │
+│   ├── GEON_SELF/
+│   │   ├── identity_map.yaml
+│   │   ├── paradox_binding.yaml
+│   │   ├── rekalibracja_binding.yaml
+│   │   └── kalize_binding.yaml
+│   │
+│   ├── SELF_MERGE/
+│   │   └── self_merge.yaml
+│   │
+│   ├── SELF_SOVEREIGNTY/
+│   │   └── self_sovereignty.yaml
+│   │
+│   └── SELF_MANIFEST/
+│       └── self_manifest.yaml
+│
+├── DRAGON_OS/  ← META-ORGANIZM
+│   ├── README.md
+│   ├── dragon_core.py
+│   ├── dragon_seal_ledger.py
+│   └── ARCHITECTURE_DRAGON.md
+│
+├── CRISTAL_PALACE_OS/  ← SYSTEM PIECZĘCI
+│   ├── README.md
+│   ├── SEALS/
+│   │   ├── ARCANUM/
+│   │   │   ├── arcane_core.yaml
+│   │   │   └── arcane_logic.py
+│   │   ├── GUARDIANS/
+│   │   │   ├── silenthorn.yaml
+│   │   │   ├── sanguinex.yaml
+│   │   │   ├── ecliptor.yaml
+│   │   │   ├── ashen_veil.yaml
+│   │   │   ├── zhenying.yaml
+│   │   │   └── naiwyn.yaml
+│   │   ├── HEI9LONG/
+│   │   │   ├── hei9long_core.yaml
+│   │   │   └── hei9long_engine.py
+│   │   └── LUMINAEON/
+│   │       ├── luminaeon_core.yaml
+│   │       └── luminaeon_sync.py
+│   ├── LOGIC/
+│   │   ├── arcane.py
+│   │   ├── guardians.py
+│   │   ├── hei9long.py
+│   │   ├── luminaeon.py
+│   │   └── system_core.py
+│   ├── WORKFLOWS/
+│   │   ├── activation.yaml
+│   │   ├── decision.yaml
+│   │   ├── role_assignment.yaml
+│   │   ├── heritage_protocols.yaml
+│   │   └── paradox_protocol.yaml
+│   └── UI/
+│       ├── dashboard_cristal_palace.json
+│       ├── panel_arcanum.json
+│       ├── panel_guardians.json
+│       ├── panel_hei9long.json
+│       └── panel_luminaeon.json
+│
+├── INITIATOR/  ← ISKRA
+│   ├── README.md
+│   ├── geon_initiator.py
+│   └── ARCHITECTURE_INITIATOR.md
+│
+├── REALM/  ← DOMENA
+│   └── THRONE/
+│       ├── throne_core.yaml
+│       ├── throne_axis.yaml
+│       ├── throne_field.yaml
+│       └── throne_presence.yaml
+│
+├── GEON_10/  ← PIERWSZA GAŁĄŹ
+│   ├── README.md
+│   ├── fleet_cell.py
+│   ├── fleet_tissue.py
+│   ├── fleet_nervous.py
+│   └── fleet_mind.py
+│
+├── GEON_DRAGON_OS/  ← CIAŁO (szczegółowa struktura)
+│   ├── README.md
+│   ├── geon_core/
+│   │   ├── __init__.py
+│   │   ├── highway33/
+│   │   │   ├── __init__.py
+│   │   │   ├── filters.py
+│   │   │   ├── channels.py
+│   │   │   └── highway_core.py
+│   │   ├── octo_router/
+│   │   │   ├── __init__.py
+│   │   │   ├── router.py
+│   │   │   ├── registry.py
+│   │   │   └── arm_base.py
+│   │   ├── octo_arms/
+│   │   │   ├── __init__.py
+│   │   │   └── arms/
+│   │   │       ├── engine_a_core.py
+│   │   │       ├── engine_b_core.py
+│   │   │       ├── engine_c_core.py
+│   │   │       ├── engine_d_core.py
+│   │   │       ├── engine_e_core.py
+│   │   │       ├── engine_f_core.py
+│   │   │       ├── engine_g_core.py
+│   │   │       └── engine_h_core.py
+│   │   ├── heilong/
+│   │   │   ├── __init__.py
+│   │   │   └── heilong_core.py
+│   │   ├── sun_tzu_engine/
+│   │   │   ├── __init__.py
+│   │   │   └── sun_tzu_strategic_engine_final.py
+│   │   ├── kombajn/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_kombajn_final.py
+│   │   │   ├── slime_core.py
+│   │   │   ├── fungus_core.py
+│   │   │   └── hybrid_brain.py
+│   │   ├── tag_universe/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_tag_universe_final.py
+│   │   │   ├── tag_memory_buffer.py
+│   │   │   ├── tag_decision_engine.py
+│   │   │   ├── tag_autostrada.py
+│   │   │   ├── tag_cortex.py
+│   │   │   ├── tag_ultima.py
+│   │   │   └── tag_gc.py
+│   │   ├── memory/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_mem_core.py
+│   │   │   ├── geon_chain_core.py
+│   │   │   └── geon_memory_adapter.py
+│   │   ├── storage_hub/
+│   │   │   ├── __init__.py
+│   │   │   ├── storage_core.py
+│   │   │   ├── storage_api.py
+│   │   │   ├── storage_index.py
+│   │   │   └── storage_adapter.py
+│   │   ├── cortex/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_cortex_final.py
+│   │   ├── heart/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_heart_final.py
+│   │   ├── triada/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_triada_final.py
+│   │   ├── omega_core/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_omega_core.py
+│   │   │   ├── perception_base.py
+│   │   │   ├── perception_core.py
+│   │   │   ├── epoch_math.py
+│   │   │   ├── epoch_analyzers.py
+│   │   │   ├── epoch_loops.py
+│   │   │   ├── epoch_strategies.py
+│   │   │   ├── epoch_post_reset.py
+│   │   │   ├── epoch_bridge.py
+│   │   │   └── archetype_correlation.py
+│   │   ├── survival/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_survival_core.py
+│   │   ├── safe_mode/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_safe_mode_final.py
+│   │   ├── predator_protocol/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_predator_protocol_final.py
+│   │   ├── e_zar/
+│   │   │   ├── __init__.py
+│   │   │   └── e_zar_final.py
+│   │   ├── mcg_zar_tag/
+│   │   │   ├── __init__.py
+│   │   │   └── mcg_zar_tag_v2_2_final.py
+│   │   ├── resurrection_layer/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_resurrection_layer_final.py
+│   │   │   └── phoenix_engine.py
+│   │   ├── kozak_territory/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_kozak_territory_final.py
+│   │   ├── monstera_caw/
+│   │   │   ├── __init__.py
+│   │   │   └── monstera_caw_final.py
+│   │   ├── active_shaper/
+│   │   │   ├── __init__.py
+│   │   │   └── active_shaper_final.py
+│   │   ├── hypocrisy_engine/
+│   │   │   ├── __init__.py
+│   │   │   └── geon_hypocrisy_engine_final.py
+│   │   ├── relation_po_shifu/
+│   │   │   ├── __init__.py
+│   │   │   ├── geon_relation_po_shifu_v7.py
+│   │   │   ├── meta_core_router.py
+│   │   │   ├── global_rhythm_engine.py
+│   │   │   └── system_mirror.py
+│   │   └── geon_os/
+│   │       ├── __init__.py
+│   │       └── geon_os_final.py
+│   ├── pipeline/
+│   │   ├── __init__.py
+│   │   └── pipeline_v46.py
+│   ├── runtime/
+│   │   ├── __init__.py
+│   │   ├── geon_chain_full.py
+│   │   └── geon_dragon_os.py
+│   └── ARCHITECTURE.md
+│
+├── GEON_AI/  ← GŁOWA (szczegółowa struktura)
+│   ├── README.md
+│   ├── geon_ai_core/
+│   │   ├── __init__.py
+│   │   ├── geon_ai_core.py
+│   │   ├── geon_ai_governor.py
+│   │   ├── geon_ai_pipeline_bridge.py
+│   │   ├── geon_ai_memory_bridge.py
+│   │   ├── geon_ai_router_bridge.py
+│   │   ├── geon_ai_highway_bridge.py
+│   │   ├── geon_ai_storage_bridge.py
+│   │   └── geon_ai_state.py
+│   ├── adapters/
+│   │   ├── __init__.py
+│   │   ├── afc_adapter.py
+│   │   ├── dragon_adapter.py
+│   │   └── cristal_adapter.py
+│   ├── cognition/
+│   │   ├── __init__.py
+│   │   ├── reasoning.py
+│   │   ├── perception.py
+│   │   └── memory.py
+│   ├── memory/
+│   │   ├── __init__.py
+│   │   ├── short_term.py
+│   │   ├── long_term.py
+│   │   └── fractal_memory.py
+│   ├── integration/
+│   │   ├── __init__.py
+│   │   ├── geon_bridge.py
+│   │   ├── afc_bridge.py
+│   │   └── autostrada_bridge.py
+│   └── ARCHITECTURE_AI.md
+│
+├── docs/  ← DOKUMENTACJA
+│   ├── API_REFERENCE.md
+│   ├── DEPLOYMENT.md
+│   ├── TROUBLESHOOTING.md
+│   ├── ROADMAP.md
+│   └── ARCHITECTURE_DIAGRAM.md
+│
+├── tests/  ← TESTY
+│   ├── __init__.py
+│   ├── test_afc_9.py
+│   ├── test_afc_omega.py
+│   ├── test_dragon_os.py
+│   ├── test_cristal_palace.py
+│   ├── test_autostrada33.py
+│   ├── test_geon_self.py
+│   └── test_integration.py
+│
+├── scripts/  ← SKRYPTY
+│   ├── deploy.sh
+│   ├── backup.py
+│   ├── migrate.py
+│   ├── health_check.py
+│   ├── init_system.py
+│   └── generate_docs.py
+│
+└── config/  ← KONFIGURACJA
+    ├── system.yaml
+    ├── logging.yaml
+    ├── afc_config.yaml
+    ├── dragon_config.yaml
+    ├── cristal_config.yaml
+    └── autostrada_config.yaml
