@@ -1,0 +1,108 @@
+GEON_SYSTEM/
+│
+├── README.md
+│
+├── SYSTEM_OVERVIEW.md
+│   ├── GEON_DRAGON_OS (CIAŁO)
+│   ├── GEON_AI (GŁOWA)
+│   ├── HUB:
+│   │     ├── STORAGE_HUB
+│   │     ├── MEMORY
+│   │     ├── TRIADA (DNA/mRNA/RIBOSOME)
+│   │     ├── OMEGA_CORE
+│   │     ├── KOMBAJN (Slime/Fungus/Hybrid Brain)
+│   │     └── TAG_UNIVERSE (Warstwy 1–60+)
+│   ├── Ośmiornica A–H v2.0
+│   ├── Autostrada 33
+│   ├── Warstwy 41–60: Po‑Shifu + META_CORE_RELATION v7
+│   │     ├── 41 – Po‑Shifu
+│   │     ├── 42 – MetaCoreRelation v7
+│   │     ├── 43 – SystemMirror
+│   │     ├── 44 – GlobalRhythmEngine
+│   │     ├── 45 – TagUniverse Cortex
+│   │     ├── 46 – TagDecisionEngine
+│   │     ├── 47 – TagAutostrada
+│   │     ├── 48 – TagUltima
+│   │     ├── 49 – TagGC
+│   │     ├── 55 – **SOLARMIND v10 (Warstwa Poznawcza)**
+│   │     ├── 56 – **HYDROMIND v11 (Warstwa Pamięci Wodnej)**
+│   │     └── 57 – **SYNTHMIND v11 (Warstwa Meta‑Syntezy)**
+│   ├── Warstwy 90–92:
+│   │     ├── META_CORE_ROUTER
+│   │     ├── GLOBAL_RHYTHM_ENGINE
+│   │     └── SYSTEM_MIRROR
+│   ├── Warstwy 120–140:
+│   │     ├── 120 – SURVIVAL
+│   │     ├── 125 – SAFE_MODE v2.0
+│   │     ├── 126 – PREDATOR_PROTOCOL
+│   │     ├── 127 – E_ZAR (Fraktalny algorytm zaradności)
+│   │     ├── 128–129 – MCG_ZAR_TAG v2.2
+│   │     ├── 130 – RESURRECTION_LAYER
+│   │     ├── 131 – KOZAK_TERRITORY
+│   │     ├── 132 – MONSTERA_CAW
+│   │     ├── 133 – ACTIVE_SHAPER
+│   │     └── 140 – HYPOCRISY_ENGINE
+│   ├── GEON_BIO v3.0
+│   └── Zasady wzrostu organizmu (fraktalność, ramiona A–H)
+│
+├── GEON_DRAGON_OS/
+│   ├── geon_core/
+│   │   ├── highway33/
+│   │   ├── octo_router/
+│   │   ├── octo_arms/
+│   │   ├── heilong/
+│   │   ├── sun_tzu_engine/
+│   │   ├── kombajn/
+│   │   ├── tag_universe/
+│   │   ├── memory/
+│   │   │   ├── geon_mem_core.py
+│   │   │   ├── geon_chain_core.py
+│   │   │   ├── geon_memory_adapter.py
+│   │   │   ├── **geon_layer_56_hydromind_v11.py**
+│   │   ├── cortex/
+│   │   ├── heart/
+│   │   ├── triada/
+│   │   ├── omega_core/
+│   │   ├── survival/
+│   │   ├── safe_mode/
+│   │   ├── predator_protocol/
+│   │   ├── e_zar/
+│   │   ├── mcg_zar_tag/
+│   │   ├── resurrection_layer/
+│   │   ├── kozak_territory/
+│   │   ├── monstera_caw/
+│   │   ├── active_shaper/
+│   │   ├── hypocrisy_engine/
+│   │   ├── relation_po_shifu/
+│   │   │   ├── meta_core_router.py
+│   │   │   ├── global_rhythm_engine.py
+│   │   │   ├── system_mirror.py
+│   │   ├── geon_os/
+│   │   │   ├── geon_os_final.py
+│   │   ├── **geon_layer_55_solarmind_v10.py**
+│   │   ├── **geon_layer_57_synthmind_v11.py (NOWY MODUŁ)**
+│   │
+│   ├── pipeline/
+│   ├── runtime/
+│   │   ├── geon_chain_full.py
+│   │   └── geon_dragon_os.py
+│   │       ├── integracja warstw:
+│   │       │     ├── self.layer_55_solarmind = GeonLayer55SolarMindV10(self)
+│   │       │     ├── self.layer_56_hydromind = GeonLayer56HydroMindV11(self)
+│   │       │     └── self.layer_57_synthmind = GeonLayer57SynthMindV11(self)
+│   │       └── pełny przepływ runtime:
+│   │             SolarMind → HydroMind → SynthMind → GEON_CORE
+│   │
+│   └── ARCHITECTURE.md
+│
+├── GEON_AI/
+│   ├── geon_ai_core/
+│   ├── geon_ai_governor.py
+│   ├── geon_ai_pipeline_bridge.py
+│   ├── geon_ai_memory_bridge.py
+│   ├── geon_ai_router_bridge.py
+│   ├── geon_ai_highway_bridge.py
+│   ├── geon_ai_storage_bridge.py
+│   └── geon_ai_state.py
+│
+└── README.md
