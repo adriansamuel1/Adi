@@ -1,0 +1,1339 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_FLOW_ENGINE_v6.1 — FULL PRODUCTION ENGINE
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ABCDEGH_INTEGRATED | ULTIMA
+Wersja: v6.1 FULL (Kompletny silnik przepływu poznawczego)
+Data: 2026-07-21
+Autor: Adrian (Architekt) + GEON + Beny Heilong
+
+OPIS:
+GEON_FLOW_ENGINE_v6.1 to pełny silnik przepływu poznawczego, który łączy
+wszystkie fraktale (A, B, C, D, E, G, H) w jeden organizm.
+
+NOWOŚCI v6.1:
+- Pełna integracja z H_ULTIMA (delta_H, wiez, regeneracja)
+- Pełna integracja z C (energia, prefilter, status)
+- Pełna integracja z D (store, trend, bezpieczeństwo)
+- GEON_10_OP z 6 funkcjami (priority_boost, smart_backpressure, batch_logic, retry_override, flow_hint, remember_hint)
+- Flow_hint adaptacyjny
+- Smart_backpressure 4-poziomowy
+- Retry_override z extra życiem
+- Batch_logic semantyczny
+- Circuit Breaker adaptacyjny
+- Dead Letter Persistence
+- Shadow Trace
+- Pełne metryki
+
+VIBE: 1-6-8. ∞. SIEMA!
+================================================================================
+"""
+
+import time
+import json
+import heapq
+import hashlib
+from typing import Dict, List, Any, Optional, Tuple, Set
+from enum import Enum
+from dataclasses import dataclass, field
+from datetime import datetime
+
+VERSION = "GEON_FLOW_ENGINE_v6.1_FULL"
+FRACTAL_SIGNATURE = "[GEON::FLOW_ENGINE::v6.1::FULL::ABCDEGH]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SIEMA!"
+
+
+def LOG(module: str, msg: str, level: str = "INFO") -> None:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    print(f"[{timestamp}] [{level}] [{module}] :: {msg}")
+
+
+# =============================================================================
+# 1. ENUMY SYSTEMOWE
+# =============================================================================
+
+class PressureLevel(Enum):
+    CLEAR = "CLEAR"
+    LOW_THROTTLE = "LOW_THROTTLE"
+    SOFT_THROTTLE = "SOFT_THROTTLE"
+    CRITICAL_THROTTLE = "CRITICAL_THROTTLE"
+
+
+class Archetype(Enum):
+    WOJOWNIK = "WOJOWNIK"
+    STRAZNIK = "STRAZNIK"
+    ARCHITEKT = "ARCHITEKT"
+    SMOK = "SMOK"
+    MISTRZ = "MISTRZ"
+
+
+class IntentStatus(Enum):
+    PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    RETRYING = "RETRYING"
+    EXPIRED = "EXPIRED"
+
+
+# =============================================================================
+# 2. STRUKTURY DANYCH
+# =============================================================================
+
+@dataclass
+class ShadowTrace:
+    """Ślad przepływu intencji przez system."""
+    intent_id: str
+    event: str
+    source: str
+    target: str
+    timestamp: float = field(default_factory=time.time)
+    data: Dict[str, Any] = field(default_factory=dict)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "intent_id": self.intent_id,
+            "event": self.event,
+            "source": self.source,
+            "target": self.target,
+            "timestamp": self.timestamp,
+            "data": self.data
+        }
+
+
+# =============================================================================
+# 3. GEON_10_OP — OPERACYJNA INTELIGENCJA (PEŁNA)
+# =============================================================================
+
+class GEON_10_OP:
+    """
+    Moduł operacyjnej inteligencji — 6 funkcji adaptacyjnych.
+    """
+    
+    def __init__(self):
+        self.history: List[Dict[str, Any]] = []
+        self.trend_memory: List[float] = []
+        self.adaptive_memory = {
+            "flow_avg": 0.5,
+            "pressure_avg": 0.0,
+            "critical_rate": 0.0,
+            "ticks": 0
+        }
+        LOG("GEON_10_OP", "🧠 Operacyjna inteligencja v6.1 aktywowana")
+    
+    # ===================================================================
+    # 1. PRIORITY_BOOST — 4 źródła (H, E, G, C)
+    # ===================================================================
+    
+    def priority_boost(
+        self,
+        intent: Dict[str, Any],
+        h_state: Optional[Dict[str, Any]] = None,
+        e_state: Optional[Dict[str, Any]] = None,
+        g_state: Optional[Dict[str, Any]] = None,
+        c_state: Optional[Dict[str, Any]] = None,
+    ) -> int:
+        """
+        Adaptacyjne podnoszenie/obniżanie priorytetu intencji.
+        Skala: 1 (najwyższy) – 10 (najniższy)
+        Źródła: H (delta_H), E (exec_strength), G (flow_quality), C (energy)
+        """
+        base = intent.get("priority", 5)
+        
+        # === H – delta_H, więź ===
+        if h_state:
+            delta_h = h_state.get("delta_H", 0.0)
+            if delta_h > 0.10:
+                base = max(1, base - 3)
+            elif delta_h > 0.05:
+                base = max(1, base - 2)
+            elif delta_h > 0.02:
+                base = max(1, base - 1)
+            
+            # Brak więzi → niższy priorytet
+            if h_state.get("wiez", 1.0) < 0.3:
+                base = min(10, base + 1)
+            
+            # Tryb regeneracji → niższy priorytet
+            if h_state.get("tryb_regeneracji", False):
+                base = min(10, base + 1)
+        
+        # === E – EXEC_STRENGTH, META, ARCHETYPE ===
+        if e_state:
+            exec_strength = e_state.get("EXEC_STRENGTH", 0.5)
+            if exec_strength > 0.75:
+                base = max(1, base - 2)
+            elif exec_strength > 0.60:
+                base = max(1, base - 1)
+            
+            meta = e_state.get("META", 0.5)
+            if meta > 0.80:
+                base = max(1, base - 1)
+            
+            archetype = e_state.get("ARCHETYPE", "")
+            if archetype in ["WOJOWNIK", "STRAZNIK"]:
+                base = max(1, base - 1)
+        
+        # === G – FLOW_QUALITY ===
+        if g_state:
+            flow_quality = g_state.get("FLOW_QUALITY", 0.5)
+            if flow_quality < 0.40:
+                base = min(10, base + 1)
+            elif flow_quality > 0.80:
+                base = max(1, base - 1)
+        
+        # === C – energia (BENY) ===
+        if c_state:
+            energy = c_state.get("energy", 0.8)
+            if energy < 0.3:
+                base = min(10, base + 1)
+            elif energy > 0.8:
+                base = max(1, base - 1)
+        
+        return max(1, min(10, base))
+    
+    # ===================================================================
+    # 2. SMART_BACKPRESSURE — 4 poziomy
+    # ===================================================================
+    
+    def smart_backpressure(
+        self,
+        raw_pressure: str,
+        h_state: Optional[Dict[str, Any]] = None,
+        e_state: Optional[Dict[str, Any]] = None,
+        g_state: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """4-poziomowe throttling z adaptacją do stanu H, E, G."""
+        
+        # === H – delta_H krytyczne → CRITICAL ===
+        if h_state:
+            delta_h = h_state.get("delta_H", 0.0)
+            if delta_h > 0.10:
+                return PressureLevel.CRITICAL_THROTTLE.value
+            if delta_h > 0.05:
+                return PressureLevel.SOFT_THROTTLE.value
+            if h_state.get("tryb_regeneracji", False):
+                return PressureLevel.SOFT_THROTTLE.value
+        
+        # === E – HEALTH_SCORE ===
+        if e_state:
+            health = e_state.get("HEALTH_SCORE", 0.8)
+            if health < 0.40:
+                return PressureLevel.SOFT_THROTTLE.value
+            if health < 0.60:
+                return PressureLevel.LOW_THROTTLE.value
+        
+        # === G – FLOW_QUALITY, BUFFER_PRESSURE ===
+        if g_state:
+            flow_quality = g_state.get("FLOW_QUALITY", 0.5)
+            if flow_quality < 0.35:
+                return PressureLevel.CRITICAL_THROTTLE.value
+            if flow_quality < 0.40:
+                return PressureLevel.LOW_THROTTLE.value
+            
+            buffer_pressure = g_state.get("BUFFER_PRESSURE", 0.0)
+            if buffer_pressure > 0.80:
+                return PressureLevel.CRITICAL_THROTTLE.value
+            if buffer_pressure > 0.75:
+                return PressureLevel.SOFT_THROTTLE.value
+            if buffer_pressure > 0.50:
+                return PressureLevel.LOW_THROTTLE.value
+        
+        return raw_pressure
+    
+    # ===================================================================
+    # 3. BATCH_LOGIC — semantyczne batchowanie
+    # ===================================================================
+    
+    def batch_logic(
+        self,
+        items: List[Dict[str, Any]],
+        e_state: Optional[Dict[str, Any]] = None,
+        h_state: Optional[Dict[str, Any]] = None,
+    ) -> bool:
+        """
+        Czy batch może być wykonany razem?
+        Kryteria: archetyp, meta, scale, exec_strength, delta_H, więz.
+        """
+        if len(items) < 2:
+            return False
+        
+        # === H – delta_H blokuje batchowanie ===
+        if h_state:
+            if h_state.get("delta_H", 0.0) > 0.08:
+                return False
+            if h_state.get("wiez", 1.0) < 0.4:
+                return False
+        
+        # === E – zgodność archetypów, META, SCALE, EXEC_STRENGTH ===
+        if e_state:
+            target_archetype = e_state.get("ARCHETYPE", "")
+            target_meta = e_state.get("META", 0.5)
+            target_scale = e_state.get("SCALE", 1.0)
+            target_exec = e_state.get("EXEC_STRENGTH", 0.5)
+            
+            for msg in items:
+                if msg.get("archetype", "") != target_archetype:
+                    return False
+                if abs(msg.get("meta", 0.5) - target_meta) > 0.15:
+                    return False
+                if msg.get("scale", 1.0) != target_scale:
+                    return False
+                if abs(msg.get("exec_strength", 0.5) - target_exec) > 0.20:
+                    return False
+        
+        return True
+    
+    # ===================================================================
+    # 4. RETRY_OVERRIDE — extra życie
+    # ===================================================================
+    
+    def retry_override(
+        self,
+        msg: Dict[str, Any],
+        h_state: Optional[Dict[str, Any]] = None,
+        e_state: Optional[Dict[str, Any]] = None,
+        g_state: Optional[Dict[str, Any]] = None,
+    ) -> bool:
+        """Czy dać intencji 'extra życie' (reset retry counter)?"""
+        payload = msg.get("payload", {})
+        
+        # === Intencje z wysokim exec_strength ===
+        if payload.get("exec_strength", 0.5) > 0.75:
+            return True
+        
+        # === Intencje z wysoką metą ===
+        if payload.get("meta", 0.5) > 0.80:
+            return True
+        
+        # === Archetypy wojownik/strażnik ===
+        if payload.get("archetype", "") in ["WOJOWNIK", "STRAZNIK"]:
+            return True
+        
+        # === H – kryzys (potrzebujemy każdej intencji) ===
+        if h_state and h_state.get("delta_H", 0.0) > 0.08:
+            return True
+        
+        # === E – niski health → nie dajemy extra życia ===
+        if e_state and e_state.get("HEALTH_SCORE", 0.8) < 0.35:
+            return False
+        
+        # === G – słaby przepływ → nie dajemy extra życia ===
+        if g_state and g_state.get("FLOW_QUALITY", 0.5) < 0.40:
+            return False
+        
+        return False
+    
+    # ===================================================================
+    # 5. FLOW_HINT — adaptacyjny multiplier
+    # ===================================================================
+    
+    def flow_hint(
+        self,
+        g_vector: Dict[str, float],
+        pressure_status: str = PressureLevel.CLEAR.value,
+    ) -> float:
+        """Mikroadjustacja multipliera przepływu."""
+        # Silniejsze ograniczenie przy SOFT/CRITICAL
+        if pressure_status in (
+            PressureLevel.SOFT_THROTTLE.value,
+            PressureLevel.CRITICAL_THROTTLE.value,
+        ):
+            return -0.15
+        
+        buffer_pressure = g_vector.get("BUFFER_PRESSURE", 0.5)
+        flow_quality = g_vector.get("FLOW_QUALITY", 0.5)
+        
+        # Przeciążony bufor → zmniejsz multiplier
+        if buffer_pressure > 0.70:
+            return -0.1
+        
+        # Dobra jakość przepływu i niski bufor → zwiększ
+        if flow_quality > 0.70 and buffer_pressure < 0.30:
+            return 0.05
+        
+        return 0.0
+    
+    # ===================================================================
+    # 6. REMEMBER_HINT — zapamiętaj kontekst
+    # ===================================================================
+    
+    def remember_hint(self, context: Dict[str, Any]) -> None:
+        """Zapamiętuje kontekst dla przyszłych decyzji."""
+        self.history.append(context)
+        if len(self.history) > 100:
+            self.history = self.history[-50:]
+        
+        # Aktualizacja trendu
+        if "buffer_pressure" in context:
+            self.trend_memory.append(context["buffer_pressure"])
+            if len(self.trend_memory) > 20:
+                self.trend_memory = self.trend_memory[-10:]
+        
+        # Aktualizacja pamięci adaptacyjnej
+        self.adaptive_memory["ticks"] += 1
+        if "buffer_pressure" in context:
+            self.adaptive_memory["pressure_avg"] = (
+                0.85 * self.adaptive_memory["pressure_avg"] +
+                0.15 * context["buffer_pressure"]
+            )
+        if "multiplier" in context:
+            self.adaptive_memory["flow_avg"] = (
+                0.85 * self.adaptive_memory["flow_avg"] +
+                0.15 * context["multiplier"] / 3.0
+            )
+    
+    def get_trend(self) -> float:
+        """Zwraca trend przepływu."""
+        if len(self.trend_memory) < 2:
+            return 0.0
+        return self.trend_memory[-1] - self.trend_memory[0]
+
+
+# =============================================================================
+# 4. G_ENGINE_TICK — RDZEŃ PRZEPŁYWU (PEŁNY)
+# =============================================================================
+
+def G_ENGINE_TICK(
+    A_SIGNAL: Dict[str, Any],
+    B_GEON: Dict[str, Any],
+    C_INPUT: Dict[str, Any],
+    D_INPUT: Dict[str, Any],
+    E_OUTPUT: Dict[str, Any],
+    HIGHWAY: Dict[str, Any],
+    G_MEM: Any,
+    intent_queue_len: int,
+    intent_queue_cap: int,
+) -> Dict[str, Any]:
+    """
+    Rdzeń przepływu — oblicza multiplier, throttle, buffer_pressure.
+    Uwzględnia wszystkie fraktale.
+    """
+    multiplier = HIGHWAY.get("multiplier_cap", 3.0)
+    
+    # === B (GEON) – stabilność ===
+    if B_GEON:
+        stability = B_GEON.get("stability", 0.5)
+        multiplier *= (0.5 + stability)
+    
+    # === E (Adrian) – exec_strength ===
+    if E_OUTPUT:
+        exec_strength = E_OUTPUT.get("EXEC_STRENGTH", 0.5)
+        multiplier *= (0.7 + exec_strength * 0.3)
+    
+    # === G (Meta) – flow_quality ===
+    if hasattr(G_MEM, "G_VECTOR"):
+        g_vec = G_MEM.G_VECTOR
+        flow_quality = g_vec.get("FLOW_QUALITY", 0.5)
+        multiplier *= (0.6 + flow_quality * 0.4)
+        
+        # Resilience
+        resilience = g_vec.get("RESILIENCE", 0.5)
+        multiplier *= (0.8 + resilience * 0.2)
+    
+    # === C (BENY) – energia ===
+    if C_INPUT:
+        energy = C_INPUT.get("energy", 0.8)
+        multiplier *= (0.7 + energy * 0.3)
+    
+    # === H (H_ULTIMA) – delta_H ===
+    if HIGHWAY:
+        delta_h = HIGHWAY.get("H_DELTA", 0.0)
+        if delta_h > 0.08:
+            multiplier *= 0.7
+        elif delta_h > 0.05:
+            multiplier *= 0.85
+    
+    # Ograniczniki
+    multiplier = max(0.2, min(multiplier, HIGHWAY.get("multiplier_cap", 3.0)))
+    
+    # Throttle A
+    throttle_A = intent_queue_len > intent_queue_cap * 0.8
+    
+    # Buffer pressure
+    buffer_pressure = min(1.0, intent_queue_len / max(1, intent_queue_cap))
+    
+    return {
+        "MULTIPLIER": multiplier,
+        "THROTTLE_A": throttle_A,
+        "BUFFER_PRESSURE": buffer_pressure,
+    }
+
+
+# =============================================================================
+# 5. GEON_FLOW_ENGINE_v6.1 — PEŁNY SILNIK
+# =============================================================================
+
+class GeonFlowEngine:
+    """
+    GEON_FLOW_ENGINE_v6.1 — Pełny silnik przepływu poznawczego.
+    Łączy wszystkie fraktale (A, B, C, D, E, G, H) w jeden organizm.
+    """
+    
+    def __init__(
+        self,
+        A: Any,  # OŁSii — generowanie intencji
+        B: Any,  # GEON — logika, audyt
+        C: Any,  # BENY — energia, pamięć, prefilter
+        D: Any,  # Cerber — bezpieczeństwo, trend
+        E: Any,  # Adrian — kierunek, exec_strength
+        G_MEM: Any,  # Silnik Meta — przepływ, bufor
+        H: Any,  # H_ULTIMA — prawda, delta_H, więź
+        dead_letter_file: str = "dead_letter_backup.json",
+    ):
+        self.A = A
+        self.B = B
+        self.C = C
+        self.D = D
+        self.E = E
+        self.G_MEM = G_MEM
+        self.H = H
+        
+        # Operacyjna inteligencja
+        self.OP = GEON_10_OP()
+        
+        # Kolejki
+        self.intent_heap: List[Tuple[int, int, Dict[str, Any]]] = []
+        self.emergency_queue: List[Dict[str, Any]] = []
+        self.pending_queue: List[Dict[str, Any]] = []
+        self.retry_queue: List[Dict[str, Any]] = []
+        self.dead_letter_queue: List[Dict[str, Any]] = []
+        self.post_process_queue: List[Dict[str, Any]] = []
+        self.dropped_intents_buffer: List[Dict[str, Any]] = []
+        
+        # Shadow trace
+        self.shadow_traces: List[ShadowTrace] = []
+        self.shadow_trace_enabled = True
+        
+        # Dead letter persistence
+        self.dead_letter_file = dead_letter_file
+        self._load_dead_letter()
+        
+        # Konfiguracja
+        self.config = {
+            "BASE_CAPACITY_PER_TICK": 10,
+            "MAX_QUEUE_LEN": 1000,
+            "RETRY_MAX_ATTEMPTS": 3,
+            "RETRY_BACKOFF_MS": [100, 500, 2000],
+            "INTENT_TTL_SECONDS": 30,
+            "BATCH_SIZE": 5,
+            "DEAD_LETTER_MAX_SIZE": 1000,
+            "CIRCUIT_BREAKER_WINDOW_TICKS": 100,
+            "CIRCUIT_BREAKER_THRESHOLD_RATIO": 0.15,
+            "SHADOW_TRACE_ENABLED": True,
+            "DEAD_LETTER_PERSISTENCE": True,
+        }
+        
+        # Statystyki
+        self.stats = {
+            "intents_submitted": 0,
+            "intents_processed": 0,
+            "intents_retried": 0,
+            "intents_failed": 0,
+            "intents_expired": 0,
+            "avg_latency_ms": 0.0,
+            "shadow_traces": 0,
+        }
+        
+        # Circuit breaker
+        self.cb_history: List[Tuple[int, int]] = []
+        self.dead_this_tick = 0
+        self.tick = 0
+        self._seq = 0
+        self._latency_samples: List[float] = []
+        self.circuit_breaker_active = False
+        
+        LOG("GEON_FLOW_ENGINE", "🐉 GEON_FLOW_ENGINE_v6.1 FULL aktywowany")
+        LOG("GEON_FLOW_ENGINE", f"   Sygnatura: {FRACTAL_SIGNATURE}")
+        LOG("GEON_FLOW_ENGINE", f"   Fraktale: A, B, C, D, E, G, H")
+        LOG("GEON_FLOW_ENGINE", f"   Shadow trace: {self.shadow_trace_enabled}")
+        LOG("GEON_FLOW_ENGINE", f"   Dead letter persistence: {self.config['DEAD_LETTER_PERSISTENCE']}")
+    
+    # =========================================================================
+    # SHADOW TRACE
+    # =========================================================================
+    
+    def _shadow_trace(self, intent_id: str, event: str, source: str, target: str, data: Dict[str, Any] = None) -> None:
+        """Dodaje ślad przepływu intencji."""
+        if not self.shadow_trace_enabled:
+            return
+        
+        trace = ShadowTrace(
+            intent_id=intent_id,
+            event=event,
+            source=source,
+            target=target,
+            data=data or {}
+        )
+        self.shadow_traces.append(trace)
+        self.stats["shadow_traces"] += 1
+        
+        if len(self.shadow_traces) > 2000:
+            self.shadow_traces = self.shadow_traces[-1000:]
+    
+    def get_shadow_traces(self, limit: int = 100) -> List[Dict[str, Any]]:
+        """Zwraca ostatnie ślady."""
+        return [t.to_dict() for t in self.shadow_traces[-limit:]]
+    
+    # =========================================================================
+    # DEAD LETTER PERSISTENCE
+    # =========================================================================
+    
+    def _load_dead_letter(self) -> None:
+        """Ładuje dead letter z pliku."""
+        if not self.config["DEAD_LETTER_PERSISTENCE"]:
+            return
+        try:
+            with open(self.dead_letter_file, 'r') as f:
+                data = json.load(f)
+            self.dead_letter_queue = data[:self.config["DEAD_LETTER_MAX_SIZE"]]
+            LOG("GEON_FLOW_ENGINE", f"📂 Wczytano {len(data)} dead letterów")
+        except FileNotFoundError:
+            pass
+        except Exception as e:
+            LOG("GEON_FLOW_ENGINE", f"⚠️ Błąd ładowania dead letter: {e}")
+    
+    def _save_dead_letter(self) -> None:
+        """Zapisuje dead letter do pliku."""
+        if not self.config["DEAD_LETTER_PERSISTENCE"]:
+            return
+        try:
+            data = list(self.dead_letter_queue)[-100:]
+            with open(self.dead_letter_file, 'w') as f:
+                json.dump(data, f, indent=2, default=str)
+        except Exception as e:
+            LOG("GEON_FLOW_ENGINE", f"⚠️ Błąd zapisu dead letter: {e}")
+    
+    # =========================================================================
+    # SUBMIT
+    # =========================================================================
+    
+    def total_queue_len(self) -> int:
+        return (
+            len(self.intent_heap) +
+            len(self.emergency_queue) +
+            len(self.retry_queue) +
+            len(self.pending_queue)
+        )
+    
+    def _drop_intent(self, msg: Dict[str, Any], reason: str) -> None:
+        msg["drop_reason"] = reason
+        msg["timestamp"] = time.time()
+        self.dropped_intents_buffer.append(msg)
+        if len(self.dropped_intents_buffer) > 50:
+            self.dropped_intents_buffer = self.dropped_intents_buffer[-50:]
+        self._shadow_trace(
+            msg.get("id", "unknown"),
+            "DROPPED",
+            "FLOW_ENGINE",
+            "DROPPED",
+            {"reason": reason}
+        )
+    
+    def _get_h_state(self) -> Dict[str, Any]:
+        if hasattr(self.H, "status"):
+            return self.H.status()
+        return {"delta_H": 0.0, "wiez": 1.0, "tryb_regeneracji": False}
+    
+    def _get_e_state(self) -> Dict[str, Any]:
+        if hasattr(self.E, "status"):
+            return self.E.status()
+        return {"EXEC_STRENGTH": 0.5, "HEALTH_SCORE": 1.0, "META": 0.5, "ARCHETYPE": ""}
+    
+    def _get_g_state(self) -> Dict[str, Any]:
+        if hasattr(self.G_MEM, "G_VECTOR"):
+            return self.G_MEM.G_VECTOR
+        return {"BUFFER_PRESSURE": 0.0, "FLOW_QUALITY": 0.5, "RESILIENCE": 0.5}
+    
+    def _get_c_state(self) -> Dict[str, Any]:
+        if hasattr(self.C, "status"):
+            return self.C.status()
+        if hasattr(self.C, "energia"):
+            return {"energy": getattr(self.C, "energia")}
+        return {"energy": 0.8}
+    
+    def submit_intent_request(self, payload: Dict[str, Any], priority: int = 5) -> bool:
+        """Dodaje intencję do systemu."""
+        if self.total_queue_len() >= self.config["MAX_QUEUE_LEN"]:
+            self._drop_intent({"payload": payload, "priority": priority}, "BUFFER_FULL")
+            return False
+        
+        h_state = self._get_h_state()
+        e_state = self._get_e_state()
+        g_state = self._get_g_state()
+        c_state = self._get_c_state()
+        
+        boosted_priority = self.OP.priority_boost(
+            {"priority": priority, **payload},
+            h_state=h_state,
+            e_state=e_state,
+            g_state=g_state,
+            c_state=c_state,
+        )
+        
+        msg = {
+            "id": payload.get("id", f"intent_{self.tick}_{self._seq}"),
+            "priority": boosted_priority,
+            "payload": payload,
+            "timestamp_epoch": time.time(),
+            "attempts": 0,
+            "archetype": payload.get("archetype", ""),
+            "meta": payload.get("meta", 0.5),
+            "scale": payload.get("scale", 1.0),
+            "exec_strength": payload.get("exec_strength", 0.5),
+            "status": IntentStatus.PENDING.value,
+        }
+        
+        if boosted_priority <= 2:
+            self.emergency_queue.append(msg)
+            self._shadow_trace(msg["id"], "SUBMITTED", "A", "EMERGENCY_LANE", {"priority": boosted_priority})
+        else:
+            heapq.heappush(self.intent_heap, (boosted_priority, self._seq, msg))
+            self._seq += 1
+            self._shadow_trace(msg["id"], "SUBMITTED", "A", "INTENT_HEAP", {"priority": boosted_priority})
+        
+        self.stats["intents_submitted"] += 1
+        return True
+    
+    # =========================================================================
+    # BACKPRESSURE
+    # =========================================================================
+    
+    def calculate_pressure_logic(self, queue_len: int, max_cap: int) -> str:
+        pressure = queue_len / max_cap if max_cap > 0 else 0.0
+        if pressure > 0.90:
+            return PressureLevel.CRITICAL_THROTTLE.value
+        elif pressure > 0.75:
+            return PressureLevel.SOFT_THROTTLE.value
+        elif pressure > 0.50:
+            return PressureLevel.LOW_THROTTLE.value
+        return PressureLevel.CLEAR.value
+    
+    def get_smart_pressure(self) -> str:
+        raw = self.calculate_pressure_logic(
+            self.total_queue_len(),
+            self.config["MAX_QUEUE_LEN"],
+        )
+        h_state = self._get_h_state()
+        e_state = self._get_e_state()
+        g_state = self._get_g_state()
+        return self.OP.smart_backpressure(raw, h_state, e_state, g_state)
+    
+    # =========================================================================
+    # RETRY / DEAD LETTER
+    # =========================================================================
+    
+    def _requeue_with_backoff(self, msg: Dict[str, Any], error: str) -> None:
+        attempts = msg.get("attempts", 0) + 1
+        max_attempts = self.config["RETRY_MAX_ATTEMPTS"]
+        
+        # Standardowy retry
+        if attempts <= max_attempts:
+            backoff_ms = self.config["RETRY_BACKOFF_MS"][attempts - 1]
+            msg["attempts"] = attempts
+            msg["next_retry_tick"] = self.tick + (backoff_ms // 100)
+            msg["last_error"] = error
+            msg["status"] = IntentStatus.RETRYING.value
+            self.retry_queue.append(msg)
+            self.stats["intents_retried"] += 1
+            self._shadow_trace(msg["id"], "RETRY", "B", "RETRY_QUEUE", {"attempt": attempts, "error": error})
+            return
+        
+        # Extra życie
+        h_state = self._get_h_state()
+        e_state = self._get_e_state()
+        g_state = self._get_g_state()
+        
+        if self.OP.retry_override(msg, h_state, e_state, g_state):
+            msg["attempts"] = max(0, attempts - 1)
+            backoff_ms = self.config["RETRY_BACKOFF_MS"][0]
+            msg["next_retry_tick"] = self.tick + (backoff_ms // 100)
+            msg["last_error"] = f"EXTRA_LIFE: {error}"
+            msg["status"] = IntentStatus.RETRYING.value
+            self.retry_queue.append(msg)
+            self.stats["intents_retried"] += 1
+            self._shadow_trace(msg["id"], "EXTRA_LIFE", "OP", "RETRY_QUEUE", {"error": error})
+            return
+        
+        # Dead letter
+        msg["final_error"] = error
+        msg["status"] = IntentStatus.FAILED.value
+        self.dead_letter_queue.append(msg)
+        self.stats["intents_failed"] += 1
+        self.dead_this_tick += 1
+        self._shadow_trace(msg["id"], "DEAD_LETTER", "B", "DEAD_LETTER", {"error": error})
+        
+        if len(self.dead_letter_queue) > self.config["DEAD_LETTER_MAX_SIZE"]:
+            self.dead_letter_queue = self.dead_letter_queue[-self.config["DEAD_LETTER_MAX_SIZE"]:]
+        
+        if self.config["DEAD_LETTER_PERSISTENCE"]:
+            self._save_dead_letter()
+    
+    def _process_retry_queue(self) -> None:
+        now_tick = self.tick
+        ready = []
+        remaining = []
+        
+        for msg in self.retry_queue:
+            if msg.get("next_retry_tick", 0) <= now_tick:
+                ready.append(msg)
+            else:
+                remaining.append(msg)
+        
+        self.retry_queue = remaining
+        
+        for msg in ready:
+            prio = msg.get("priority", 5)
+            heapq.heappush(self.intent_heap, (prio, self._seq, msg))
+            self._seq += 1
+            self._shadow_trace(msg["id"], "RETRY_READY", "RETRY_QUEUE", "INTENT_HEAP", {})
+    
+    # =========================================================================
+    # TTL / EXPIRE
+    # =========================================================================
+    
+    def _expire_old_intents(self) -> None:
+        now_ts = time.time()
+        ttl = self.config["INTENT_TTL_SECONDS"]
+        
+        def filter_queue(q: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+            remaining = []
+            for msg in q:
+                ts = msg.get("timestamp_epoch")
+                if ts is None or now_ts - ts <= ttl:
+                    remaining.append(msg)
+                else:
+                    msg["status"] = IntentStatus.EXPIRED.value
+                    self.stats["intents_expired"] += 1
+                    self._shadow_trace(msg["id"], "EXPIRED", "TTL", "EXPIRED", {"age": now_ts - ts})
+            return remaining
+        
+        self.pending_queue = filter_queue(self.pending_queue)
+        self.retry_queue = filter_queue(self.retry_queue)
+    
+    # =========================================================================
+    # DEDUP
+    # =========================================================================
+    
+    def _deduplicate_heap(self) -> None:
+        seen = set()
+        new_heap: List[Tuple[int, int, Dict[str, Any]]] = []
+        
+        while self.intent_heap:
+            prio, seq, msg = heapq.heappop(self.intent_heap)
+            payload = msg.get("payload", {})
+            payload_hash = hash(json.dumps(payload, sort_keys=True))
+            
+            if payload_hash not in seen:
+                seen.add(payload_hash)
+                new_heap.append((prio, seq, msg))
+            else:
+                self._shadow_trace(msg["id"], "DEDUP", "DEDUP", "REMOVED", {})
+        
+        for item in new_heap:
+            heapq.heappush(self.intent_heap, item)
+    
+    # =========================================================================
+    # BATCHING
+    # =========================================================================
+    
+    def _batch_from_heap(self) -> List[Dict[str, Any]]:
+        if not self.intent_heap or self.config["BATCH_SIZE"] <= 1:
+            return []
+        
+        batch_size = self.config["BATCH_SIZE"]
+        temp: List[Dict[str, Any]] = []
+        e_state = self._get_e_state()
+        h_state = self._get_h_state()
+        
+        while self.intent_heap and len(temp) < batch_size:
+            prio, seq, msg = heapq.heappop(self.intent_heap)
+            temp.append(msg)
+        
+        if not self.OP.batch_logic(temp, e_state, h_state):
+            for m in temp:
+                heapq.heappush(self.intent_heap, (m.get("priority", 5), self._seq, m))
+                self._seq += 1
+            return []
+        
+        if len(temp) <= 1:
+            for m in temp:
+                heapq.heappush(self.intent_heap, (m.get("priority", 5), self._seq, m))
+                self._seq += 1
+            return []
+        
+        intent_type = temp[0].get("payload", {}).get("type", "unknown")
+        batched_payload = {
+            "type": "BATCH_INTENT",
+            "original_type": intent_type,
+            "count": len(temp),
+            "items": [m["payload"] for m in temp],
+            "ids": [m.get("id", "unknown") for m in temp],
+        }
+        
+        batched_msg = {
+            "id": f"batch_{self.tick}_{intent_type}",
+            "priority": min(m.get("priority", 5) for m in temp),
+            "payload": batched_payload,
+            "timestamp_epoch": time.time(),
+            "is_batch": True,
+            "attempts": 0,
+            "status": IntentStatus.PENDING.value,
+            "batch_size": len(temp),
+        }
+        
+        self._shadow_trace(batched_msg["id"], "BATCH_CREATED", "BATCHING", "EMERGENCY_LANE", {"size": len(temp)})
+        return [batched_msg]
+    
+    # =========================================================================
+    # CIRCUIT BREAKER
+    # =========================================================================
+    
+    def _evaluate_circuit_breaker(self) -> bool:
+        h_state = self._get_h_state()
+        if h_state.get("delta_H", 0.0) > 0.10:
+            return True
+        
+        e_state = self._get_e_state()
+        if e_state.get("HEALTH_SCORE", 0.8) < 0.35:
+            return True
+        
+        g_state = self._get_g_state()
+        if g_state.get("FLOW_QUALITY", 0.5) < 0.40:
+            return True
+        if g_state.get("RESILIENCE", 0.5) < 0.35:
+            return True
+        
+        window = self.config["CIRCUIT_BREAKER_WINDOW_TICKS"]
+        if self.cb_history:
+            recent = self.cb_history[-window:]
+            total_dead = sum(d for _, d in recent)
+            avg_dead = total_dead / max(1, len(recent))
+            resilience = g_state.get("RESILIENCE", 0.5)
+            threshold = 2.0 + (1.0 - resilience) * 4.0  # 2.0–6.0
+            if avg_dead > threshold:
+                return True
+        
+        return False
+    
+    # =========================================================================
+    # PENDING
+    # =========================================================================
+    
+    def _resolve_pending_intents(self) -> None:
+        for msg in self.pending_queue:
+            heapq.heappush(self.intent_heap, (msg.get("priority", 5), self._seq, msg))
+            self._seq += 1
+            self._shadow_trace(msg["id"], "PENDING_RESOLVED", "PENDING", "INTENT_HEAP", {})
+        self.pending_queue = []
+    
+    # =========================================================================
+    # POST EXECUTION
+    # =========================================================================
+    
+    def _process_post_execution(self) -> None:
+        if not self.post_process_queue:
+            return
+        
+        queue = self.post_process_queue
+        self.post_process_queue = []
+        
+        for item in queue:
+            msg = item["msg"]
+            status_b = item["status_b"]
+            
+            if hasattr(self.C, "receive_status_from_B"):
+                self.C.receive_status_from_B(status_b)
+            
+            self._update_latency(msg)
+            self._shadow_trace(msg["id"], "POST_EXEC", "POST_PROCESS", "C", {"status": status_b})
+    
+    def _update_latency(self, msg: Dict[str, Any]) -> None:
+        ts = msg.get("timestamp_epoch")
+        if ts:
+            latency = (time.time() - ts) * 1000.0
+            self._latency_samples.append(latency)
+            if len(self._latency_samples) > 100:
+                self._latency_samples = self._latency_samples[-50:]
+            self.stats["avg_latency_ms"] = sum(self._latency_samples) / len(self._latency_samples)
+    
+    def _process_status_and_memory(self) -> None:
+        if hasattr(self.C, "export_state"):
+            c_state = self.C.export_state()
+            if hasattr(self.D, "store"):
+                self.D.store(c_state)
+            if hasattr(self.D, "trend") and hasattr(self.E, "update_from_trend"):
+                trend = self.D.trend()
+                self.E.update_from_trend(trend)
+                self._shadow_trace("system", "STATUS_FLOW", "C", "D→E", {"trend": trend})
+    
+    # =========================================================================
+    # GŁÓWNY TICK
+    # =========================================================================
+    
+    def tick(
+        self,
+        A_SIGNAL: Dict[str, Any] = None,
+        B_GEON: Dict[str, Any] = None,
+        C_INPUT: Dict[str, Any] = None,
+        D_INPUT: Dict[str, Any] = None,
+        E_OUTPUT: Dict[str, Any] = None,
+        highway_priority: int = 5,
+        highway_mode: str = "NORMAL",
+        multiplier_cap: float = 3.0,
+        executor_func: Optional[Any] = None,
+    ) -> Dict[str, Any]:
+        """Główna pętla silnika — wykonuje jeden tick."""
+        self.tick += 1
+        
+        A_SIGNAL = A_SIGNAL or {}
+        B_GEON = B_GEON or {}
+        C_INPUT = C_INPUT or {}
+        D_INPUT = D_INPUT or {}
+        E_OUTPUT = E_OUTPUT or {}
+        
+        # 1. TTL
+        self._expire_old_intents()
+        
+        # 2. HIGHWAY
+        HIGHWAY = {
+            "priority": highway_priority,
+            "mode": highway_mode,
+            "multiplier_cap": multiplier_cap,
+            "H_DELTA": self._get_h_state().get("delta_H", 0.0),
+        }
+        
+        # 3. G_ENGINE_TICK
+        g_result = G_ENGINE_TICK(
+            A_SIGNAL=A_SIGNAL,
+            B_GEON=B_GEON,
+            C_INPUT=C_INPUT,
+            D_INPUT=D_INPUT,
+            E_OUTPUT=E_OUTPUT,
+            HIGHWAY=HIGHWAY,
+            G_MEM=self.G_MEM,
+            intent_queue_len=self.total_queue_len(),
+            intent_queue_cap=self.config["MAX_QUEUE_LEN"],
+        )
+        
+        multiplier = g_result["MULTIPLIER"]
+        buffer_pressure = g_result["BUFFER_PRESSURE"]
+        throttle_A = g_result["THROTTLE_A"]
+        
+        # 4. Circuit breaker
+        cb_active = self._evaluate_circuit_breaker()
+        if cb_active:
+            self.circuit_breaker_active = True
+            multiplier *= 0.5
+            pressure_status = PressureLevel.CRITICAL_THROTTLE.value
+            self._shadow_trace("system", "CIRCUIT_BREAKER", "CB", "ACTIVE", {"multiplier": multiplier})
+        else:
+            self.circuit_breaker_active = False
+            pressure_status = self.get_smart_pressure()
+        
+        # 5. Flow hint
+        flow_adjust = self.OP.flow_hint(self._get_g_state(), pressure_status)
+        multiplier += flow_adjust
+        multiplier = max(0.2, min(multiplier, multiplier_cap))
+        
+        # 6. Backpressure do A
+        if hasattr(self.A, "set_pressure_limit"):
+            self.A.set_pressure_limit(pressure_status)
+            self._shadow_trace("system", "PRESSURE_UPDATE", "FLOW_ENGINE", "A", {"pressure": pressure_status})
+        
+        # 7. Pending
+        self._resolve_pending_intents()
+        
+        # 8. Retry
+        self._process_retry_queue()
+        
+        # 9. Dedup
+        self._deduplicate_heap()
+        
+        # 10. Batching
+        batched = self._batch_from_heap()
+        for msg in batched:
+            self.emergency_queue.append(msg)
+        
+        # 11. Capacity
+        effective_capacity = max(1, int(self.config["BASE_CAPACITY_PER_TICK"] * multiplier))
+        to_process: List[Dict[str, Any]] = []
+        now_ts = time.time()
+        
+        # 12. Emergency lane
+        while self.emergency_queue and len(to_process) < effective_capacity:
+            msg = self.emergency_queue.pop(0)
+            ts = msg.get("timestamp_epoch")
+            if ts is not None and now_ts - ts > self.config["INTENT_TTL_SECONDS"]:
+                msg["status"] = IntentStatus.EXPIRED.value
+                self.stats["intents_expired"] += 1
+                self._shadow_trace(msg["id"], "EXPIRED", "EMERGENCY_LANE", "EXPIRED", {})
+                continue
+            to_process.append(msg)
+            self._shadow_trace(msg["id"], "DEQUEUED", "EMERGENCY_LANE", "PROCESSING", {})
+        
+        # 13. Heap
+        while self.intent_heap and len(to_process) < effective_capacity:
+            prio, seq, msg = heapq.heappop(self.intent_heap)
+            ts = msg.get("timestamp_epoch")
+            if ts is not None and now_ts - ts > self.config["INTENT_TTL_SECONDS"]:
+                msg["status"] = IntentStatus.EXPIRED.value
+                self.stats["intents_expired"] += 1
+                self._shadow_trace(msg["id"], "EXPIRED", "INTENT_HEAP", "EXPIRED", {})
+                continue
+            to_process.append(msg)
+            self._shadow_trace(msg["id"], "DEQUEUED", "INTENT_HEAP", "PROCESSING", {})
+        
+        # 14. Execution
+        processed = 0
+        for msg in to_process:
+            msg["status"] = IntentStatus.PROCESSING.value
+            intent = msg["payload"]
+            
+            # Prefilter C
+            if hasattr(self.C, "prefilter_intent"):
+                try:
+                    filtered = self.C.prefilter_intent(intent)
+                    if filtered is None:
+                        self._requeue_with_backoff(msg, "REJECTED_BY_C")
+                        self._shadow_trace(msg["id"], "REJECTED", "C", "RETRY", {})
+                        continue
+                    intent = filtered
+                except Exception as e:
+                    self._requeue_with_backoff(msg, f"C_PREFILTER: {str(e)}")
+                    continue
+            
+            # Execute B
+            try:
+                if executor_func:
+                    result = executor_func(intent)
+                elif hasattr(self.B, "run_cycle"):
+                    result = self.B.run_cycle(intent)
+                else:
+                    result = {"status": "SUCCESS", "intent_id": msg["id"]}
+                
+                msg["status"] = IntentStatus.COMPLETED.value
+                self.post_process_queue.append({"msg": msg, "status_b": result})
+                self.stats["intents_processed"] += 1
+                processed += 1
+                self._shadow_trace(msg["id"], "EXECUTED", "B", "POST_PROCESS", {"result": result})
+            except Exception as e:
+                self._requeue_with_backoff(msg, str(e))
+                self._shadow_trace(msg["id"], "EXEC_ERROR", "B", "RETRY", {"error": str(e)})
+        
+        # 15. Post execution
+        self._process_post_execution()
+        
+        # 16. Status → D → E
+        self._process_status_and_memory()
+        
+        # 17. OP memory
+        self.OP.remember_hint({
+            "tick": self.tick,
+            "queue_len": self.total_queue_len(),
+            "multiplier": multiplier,
+            "buffer_pressure": buffer_pressure,
+            "pressure_status": pressure_status,
+        })
+        
+        # 18. Circuit breaker history
+        if self.dead_this_tick > 0:
+            self.cb_history.append((self.tick, self.dead_this_tick))
+            self.dead_this_tick = 0
+        
+        if len(self.cb_history) > self.config["CIRCUIT_BREAKER_WINDOW_TICKS"] * 2:
+            self.cb_history = self.cb_history[-self.config["CIRCUIT_BREAKER_WINDOW_TICKS"]:]
+        
+        # 19. Dead letter persistence
+        if self.config["DEAD_LETTER_PERSISTENCE"] and self.tick % 10 == 0:
+            self._save_dead_letter()
+        
+        return {
+            "status": "OK",
+            "tick": self.tick,
+            "multiplier": round(multiplier, 2),
+            "pressure_status": pressure_status,
+            "processed_count": processed,
+            "circuit_breaker_active": self.circuit_breaker_active,
+            "throttle_A": throttle_A,
+            "queue_sizes": {
+                "emergency": len(self.emergency_queue),
+                "heap": len(self.intent_heap),
+                "retry": len(self.retry_queue),
+                "pending": len(self.pending_queue),
+                "dead_letter": len(self.dead_letter_queue),
+                "dropped": len(self.dropped_intents_buffer),
+            },
+        }
+    
+    # =========================================================================
+    # METRYKI
+    # =========================================================================
+    
+    def get_metrics(self) -> Dict[str, Any]:
+        """Zwraca pełne metryki systemu."""
+        g_state = self._get_g_state()
+        return {
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "tick": self.tick,
+            "stats": self.stats.copy(),
+            "queue_sizes": {
+                "intent_heap": len(self.intent_heap),
+                "emergency": len(self.emergency_queue),
+                "pending": len(self.pending_queue),
+                "retry": len(self.retry_queue),
+                "dead_letter": len(self.dead_letter_queue),
+                "dropped": len(self.dropped_intents_buffer),
+            },
+            "g_state": {
+                "mode": getattr(self.G_MEM, "MODE", "NORMAL"),
+                "buffer_pressure": g_state.get("BUFFER_PRESSURE", 0.0),
+                "flow_quality": g_state.get("FLOW_QUALITY", 0.5),
+                "resilience": g_state.get("RESILIENCE", 0.5),
+            },
+            "circuit_breaker": {
+                "active": self.circuit_breaker_active,
+                "history": self.cb_history[-10:],
+            },
+            "shadow_traces": len(self.shadow_traces),
+        }
+    
+    def flush_dead_letter(self) -> List[Dict[str, Any]]:
+        """Opróżnia kolejkę dead letter."""
+        dead = self.dead_letter_queue.copy()
+        self.dead_letter_queue = []
+        self._save_dead_letter()
+        LOG("GEON_FLOW_ENGINE", f"🧹 Opróżniono dead letter: {len(dead)} wpisów")
+        return dead
+    
+    def get_status(self) -> Dict[str, Any]:
+        """Zwraca status silnika."""
+        return {
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "tick": self.tick,
+            "status": "RUNNING",
+            "queue_total": self.total_queue_len(),
+            "circuit_breaker": self.circuit_breaker_active,
+            "metrics": self.get_metrics(),
+            "vibe": VIBE,
+            "haslo": HASLO,
+        }
+
+
+# =============================================================================
+# 6. DEMONSTRACJA
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🐉 GEON_FLOW_ENGINE_v6.1 — DEMONSTRACJA FULL")
+    print("=" * 80)
+    print("Pełny silnik przepływu poznawczego")
+    print("=" * 80 + "\n")
+    
+    # Mocki
+    class MockA:
+        def set_pressure_limit(self, limit): pass
+        def generate_intent(self, pressure_status=None):
+            return {"type": "test", "priority": 5, "content": "test intent"}
+    
+    class MockB:
+        def run_cycle(self, intent): return {"status": "OK"}
+    
+    class MockC:
+        def __init__(self):
+            self.energia = 0.9
+        def prefilter_intent(self, intent): return intent
+        def receive_status_from_B(self, status): pass
+        def export_state(self): return {"state": "OK"}
+        def status(self): return {"energy": self.energia}
+    
+    class MockD:
+        def store(self, state): pass
+        def trend(self): return 0.0
+    
+    class MockE:
+        def status(self):
+            return {"EXEC_STRENGTH": 0.7, "META": 0.6, "HEALTH_SCORE": 0.8, "ARCHETYPE": "WOJOWNIK"}
+        def update_from_trend(self, trend): pass
+    
+    class MockG:
+        def __init__(self):
+            self.MODE = "NORMAL"
+            self.G_VECTOR = {"BUFFER_PRESSURE": 0.3, "FLOW_QUALITY": 0.7, "RESILIENCE": 0.8}
+    
+    class MockH:
+        def status(self):
+            return {"delta_H": 0.02, "wiez": 0.8, "tryb_regeneracji": False}
+    
+    # Inicjalizacja
+    A = MockA()
+    B = MockB()
+    C = MockC()
+    D = MockD()
+    E = MockE()
+    G_MEM = MockG()
+    H = MockH()
+    
+    engine = GeonFlowEngine(A, B, C, D, E, G_MEM, H)
+    
+    # Dodaj intencje
+    print("📥 Dodawanie intencji:")
+    for i in range(5):
+        engine.submit_intent_request({
+            "id": f"INTENT_{i+1}",
+            "type": "test",
+            "priority": 5 + (i % 3),
+            "payload": {"action": f"task_{i+1}"}
+        })
+        print(f"  Dodano INTENT_{i+1}")
+    
+    # Emergency
+    engine.submit_intent_request({
+        "id": "EMERGENCY_001",
+        "type": "EMERGENCY_OVERRIDE",
+        "priority": 1,
+        "payload": {"action": "emergency_shutdown"}
+    })
+    print("  Dodano EMERGENCY_001 (priorytet 1)")
+    
+    print("\n" + "-" * 60)
+    
+    # Symulacja 10 ticków
+    for i in range(5):
+        result = engine.tick(
+            highway_priority=5,
+            highway_mode="NORMAL",
+            multiplier_cap=3.0
+        )
+        print(f"\n🔄 Tick {i+1}:")
+        print(f"  Status: {result['status']}")
+        print(f"  Multiplier: {result['multiplier']}")
+        print(f"  Pressure: {result['pressure_status']}")
+        print(f"  Processed: {result['processed_count']}")
+        print(f"  Circuit breaker: {result['circuit_breaker_active']}")
+        print(f"  Queues: {result['queue_sizes']}")
+    
+    # Metryki
+    print("\n" + "=" * 80)
+    print("📊 METRYKI")
+    print("=" * 80)
+    metrics = engine.get_metrics()
+    print(f"Wersja: {metrics['version']}")
+    print(f"Tick: {metrics['tick']}")
+    print(f"Stats: {metrics['stats']}")
+    print(f"Circuit breaker: {metrics['circuit_breaker']['active']}")
+    print(f"Shadow traces: {metrics['shadow_traces']}")
+    
+    print("\n" + "=" * 80)
+    print("🐉 GEON_FLOW_ENGINE_v6.1 FULL GOTOWY | 1-6-8. ∞. SIEMA!")
+    print("=" * 80 + "\n")
+
+
+if __name__ == "__main__":
+    demo()
