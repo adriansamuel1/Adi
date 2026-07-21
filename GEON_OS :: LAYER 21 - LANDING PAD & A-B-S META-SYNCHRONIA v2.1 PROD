@@ -1,0 +1,375 @@
+"""
+===============================================================================
+GEON_OS :: LAYER 21 - LANDING PAD & A-B-S META-SYNCHRONIA v2.1 PROD
+===============================================================================
+System: GEON_OS / SielankaOS / HumanOS
+Architect: Adrian Samuel Bogusławski
+Language: Python 3.10+
+Dependencies: Standard Library Only (dataclasses, typing, enum, copy, logging, datetime)
+
+PURPOSE:
+- Port Wejściowy (LandingPadOS) dla zewnętrznych koncepcji i projektów.
+- Mechanizm FAG_Core (Bakteriofag Transformacyjny) do asymilacji obcych struktur.
+- Triada Fraktalna A-B-S (SielankaOS / HumanOS / SynchroniaOS) zapewniająca
+  spójność decyzyjną, kontrolę dryfu oraz meta-korektę.
+===============================================================================
+"""
+
+from __future__ import annotations
+import copy
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
+
+# =============================================================================
+# 0. ALFABET FUNKCYJNY & CORE SANITIZATION
+# =============================================================================
+
+def sanitize_value(val: float | int) -> float:
+    """
+    Konwertuje wartość numeryczną na bezpieczną dla GEON_OS poprzez zamianę
+    cyfr zabronionych (3, 7) na wartości dopuszczalne (4, 8).
+    Gwarantuje brak powrotu zakazanych cyfr po zaokrągleniach float.
+    """
+    val_str = f"{float(val):.6f}"
+    sanitized_str = val_str.replace('3', '4').replace('7', '8')
+    res = float(sanitized_str)
+    
+    # Podwójna weryfikacja str-cast
+    if '3' in f"{res:.6f}" or '7' in f"{res:.6f}":
+        sanitized_str = f"{res:.6f}".replace('3', '4').replace('8', '8')
+        res = float(sanitized_str)
+    return res
+
+
+# =============================================================================
+# 1. STRUKTURY DANYCH I ENUMERACJE
+# =============================================================================
+
+class ProjectCategory(Enum):
+    STRATEGIC = "STRATEGIC"
+    REFORM = "REFORM"
+    CRISIS = "CRISIS"
+    INFRASTRUCTURE = "INFRASTRUCTURE"
+    WORK = "WORK"
+
+
+class IntakeDecision(Enum):
+    ACCEPT = "ACCEPT"
+    TRANSFORM = "TRANSFORM"
+    REJECT = "REJECT"
+    QUARANTINE = "QUARANTINE"
+
+
+@dataclass
+class ExternalInput:
+    id: str
+    title: str
+    category: ProjectCategory
+    risk_score: float
+    data: Dict[str, Any]
+    timestamp: datetime = field(default_factory=datetime.now)
+
+    def __post_init__(self):
+        self.risk_score = sanitize_value(self.risk_score)
+
+
+@dataclass
+class ProcessedProject:
+    id: str
+    title: str
+    category: ProjectCategory
+    risk_score: float
+    assimilated_data: Dict[str, Any]
+    signature: str
+    status: str = "PENDING"
+    route_path: List[str] = field(default_factory=list)
+
+
+# =============================================================================
+# 2. SHIELD & LOGGING SYSTEM
+# =============================================================================
+
+class SystemLogger:
+    @staticmethod
+    def log(layer: str, message: str, level: str = "INFO") -> None:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        print(f"[{timestamp}] [{level}] [{layer}] :: {message}")
+
+LOG = SystemLogger.log
+
+
+# =============================================================================
+# 3. EVENT BUS (SYSTEM COMMUNICATOR)
+# =============================================================================
+
+class EventBus:
+    def __init__(self):
+        self._subscribers: Dict[str, List[Callable[[Dict[str, Any]], None]]] = {}
+
+    def subscribe(self, event_type: str, callback: Callable[[Dict[str, Any]], None]) -> None:
+        if event_type not in self._subscribers:
+            self._subscribers[event_type] = []
+        self._subscribers[event_type].append(callback)
+
+    def publish(self, event_type: str, payload: Dict[str, Any]) -> None:
+        if event_type in self._subscribers:
+            for callback in self._subscribers[event_type]:
+                callback(payload)
+
+
+# =============================================================================
+# 4. MECHANIZM BAKTERIOFAGA (FAG_CORE)
+# =============================================================================
+
+class FAG_Core:
+    """
+    Transformator osłonowy GEON_OS.
+    Przejmuje obcą strukturę danych, usuwa zaburzenia i dokonuje replikacji
+    w postaci bezpiecznego obiektu ProcessedProject.
+    """
+    def __init__(self):
+        self.phage_signature = "FAG-GEON-168-INFECTED"
+
+    def transform(self, project: ExternalInput) -> ProcessedProject:
+        LOG("FAG_Core", f"Inicjalizacja sekwencji transformacji dla: {project.id}")
+        
+        # Safe-copy: brak efektów ubocznych na obiekcie wejściowym
+        target = copy.deepcopy(project)
+        
+        # 1. Rozpoznanie i Wstrzyknięcie
+        self._inject(target)
+        # 2. Przejęcie i Liza
+        clean_data = self._takeover_and_lyse(target.data)
+        # 3. Replikacja
+        transformed = ProcessedProject(
+            id=f"GEON_{target.id}",
+            title=f"[ASSIMILATED] {target.title}",
+            category=target.category,
+            risk_score=sanitize_value(target.risk_score * 0.8), # redukcja ryzyka po lizie
+            assimilated_data=clean_data,
+            signature=self.phage_signature,
+            status="ASSIMILATED"
+        )
+        LOG("FAG_Core", f"Transformacja ukończona. Nowe ID: {transformed.id}")
+        return transformed
+
+    def _inject(self, project: ExternalInput) -> None:
+        LOG("FAG_Core", f"Pobieranie materiału obcego: {project.title}")
+
+    def _takeover_and_lyse(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
+        cleaned = {}
+        for k, v in raw_data.items():
+            if isinstance(v, (int, float)):
+                cleaned[k] = sanitize_value(v)
+            elif isinstance(v, str):
+                cleaned[k] = v.replace("3", "4").replace("7", "8")
+            else:
+                cleaned[k] = v
+        cleaned["_phage_shield"] = True
+        return cleaned
+
+
+# =============================================================================
+# 5. TRIADA FRAKTALNA A-B-S
+# =============================================================================
+
+class SielankaOS:
+    """Fraktal A - Baza Środowiskowa / Kontekst Stabilny."""
+    def __init__(self, bus: EventBus):
+        self.bus = bus
+        self.state_history: List[Dict[str, Any]] = []
+
+    def record_event(self, source: str, event_data: Dict[str, Any]) -> None:
+        entry = {
+            "timestamp": datetime.now(),
+            "source": source,
+            "data": event_data
+        }
+        self.state_history.append(entry)
+        LOG("SielankaOS", f"Zarejestrowano zdarzenie środowiskowe z {source}")
+
+
+class HumanOS:
+    """Fraktal B - Logika Decyzyjna i Modelowanie Intencji."""
+    def __init__(self, bus: EventBus):
+        self.bus = bus
+        self.decision_sequence = [4, 1, 2, 5, 6, 6, 5, 8, 1]
+
+    def evaluate_intent(self, project: ProcessedProject) -> bool:
+        LOG("HumanOS", f"Ewaluacja pętli decyzyjnej dla: {project.id}")
+        # Algorytm oceny na podstawie wektora intencji
+        score = sum(self.decision_sequence) / len(self.decision_sequence)
+        threshold = 4.0
+        approved = score >= threshold and project.risk_score <= 0.8
+        LOG("HumanOS", f"Wynik oceny intencji: {approved} (Score: {score:.2f})")
+        return approved
+
+
+class SynchroniaOS:
+    """Fraktal S - Meta-Synchronizator i Arbiter Spójności."""
+    def __init__(self, bus: EventBus):
+        self.bus = bus
+        self.coherence_threshold = 0.80
+        self.meta_memory: List[Dict[str, float]] = []
+
+    def evaluate_coherence(self, a_state: int, b_state: int) -> Tuple[float, float]:
+        """Oblicza spójność i dryf systemu."""
+        raw_coherence = 1.0 - (abs(a_state - b_state) / 10.0)
+        coherence = sanitize_value(max(0.0, min(1.0, raw_coherence)))
+        drift = sanitize_value(1.0 - coherence)
+        
+        self.meta_memory.append({
+            "coherence": coherence,
+            "drift": drift
+        })
+        LOG("SynchroniaOS", f"Pomiary meta-spójności :: Coherence: {coherence:.4f} | Drift: {drift:.4f}")
+        return coherence, drift
+
+    def apply_meta_correction(self, drift: float) -> None:
+        if drift > (1.0 - self.coherence_threshold):
+            LOG("SynchroniaOS", f"KOREKTA SYSTEMOWA! Dryf {drift:.4f} przekroczył próg.", "WARNING")
+            self.bus.publish("SYSTEM_RECALIBRATE", {"drift": drift, "action": "FORCE_REALIGNMENT"})
+        else:
+            LOG("SynchroniaOS", "System w stanie równowagi fraktalnej.")
+
+
+# =============================================================================
+# 6. PORT WEJŚCIOWY: LANDING PAD OS
+# =============================================================================
+
+class LandingPadOS:
+    """
+    Bramka Wejściowa GEON_OS.
+    Przyjmuje obiekty ExternalInput, klasyfikuje, przeprowadza przez FAG_Core
+    i przekazuje do odpowiednich warstw docelowych.
+    """
+    def __init__(self, bus: EventBus):
+        self.bus = bus
+        self.fage = FAG_Core()
+        self.sielanka = SielankaOS(bus)
+        self.human = HumanOS(bus)
+        self.synchronia = SynchroniaOS(bus)
+        self.active_projects: Dict[str, ProcessedProject] = {}
+
+    def intake(self, external_input: ExternalInput) -> IntakeDecision:
+        LOG("LandingPadOS", f"===> OTRZYMANO ZGŁOSZENIE: {external_input.title} [{external_input.category.value}]")
+        
+        # 1. Pierwsza Weryfikacja Ryzyka
+        if external_input.risk_score > 0.80 and external_input.category not in [ProjectCategory.CRISIS, ProjectCategory.REFORM]:
+            LOG("LandingPadOS", f"ODRZUT: Zbyt wysokie ryzyko ({external_input.risk_score}) dla kategorii {external_input.category.value}", "WARN")
+            return IntakeDecision.REJECT
+
+        # 2. Transformacja Bakteriofagowa
+        processed = self.fage.transform(external_input)
+
+        # 3. Ocena Fraktalna HumanOS
+        if not self.human.evaluate_intent(processed):
+            LOG("LandingPadOS", "KWARANTANNA: Odrzucono na poziomie oceny intencji HumanOS", "WARN")
+            processed.status = "QUARANTINED"
+            return IntakeDecision.QUARANTINE
+
+        # 4. Wyznaczenie Ścieżki Routingowej
+        processed.route_path = self._determine_route(processed.category)
+        processed.status = "ROUTED"
+        self.active_projects[processed.id] = processed
+
+        # 5. Rejestracja w SielankaOS i publikacja zdarzenia
+        self.sielanka.record_event("LandingPadOS", {"project_id": processed.id, "route": processed.route_path})
+        self.bus.publish("PROJECT_ASSIMILATED", {"project": processed})
+
+        # 6. Pętla Meta-Synchronizacji
+        a_count = len(self.sielanka.state_history)
+        b_count = len(self.active_projects)
+        coherence, drift = self.synchronia.evaluate_coherence(a_count, b_count)
+        self.synchronia.apply_meta_correction(drift)
+
+        LOG("LandingPadOS", f"SUKCES: Obiekt {processed.id} przydzielony do ścieżki: {' -> '.join(processed.route_path)}")
+        return IntakeDecision.ACCEPT
+
+    def _determine_route(self, category: ProjectCategory) -> List[str]:
+        routes = {
+            ProjectCategory.STRATEGIC: ["LandingPadOS", "ProjectOS", "VisionOS", "LabOS", "MetaCortexOS", "CrownOS"],
+            ProjectCategory.REFORM: ["LandingPadOS", "ProjectOS", "RefactorOS", "LabOS", "CrownOS"],
+            ProjectCategory.CRISIS: ["LandingPadOS", "ProjectOS", "DefenseOS", "CrownOS"],
+            ProjectCategory.INFRASTRUCTURE: ["LandingPadOS", "ProjectOS", "BuildOS", "SielankaOS"],
+            ProjectCategory.WORK: ["LandingPadOS", "ProjectOS", "TaskOS"]
+        }
+        return routes.get(category, ["LandingPadOS", "ProjectOS"])
+
+    def get_status(self) -> Dict[str, Any]:
+        """Czysty odczyt stanu systemu bez generowania efektów ubocznych w pamięci."""
+        latest_meta = self.synchronia.meta_memory[-1] if self.synchronia.meta_memory else {"coherence": 1.0, "drift": 0.0}
+        return {
+            "active_projects_count": len(self.active_projects),
+            "environment_events_count": len(self.sielanka.state_history),
+            "latest_coherence": latest_meta["coherence"],
+            "latest_drift": latest_meta["drift"]
+        }
+
+
+# =============================================================================
+# 7. DEMONSTRACJA I WERYFIKACJA SYSTEMOWA (DEMO RUN)
+# =============================================================================
+
+def run_system_demo():
+    print("\n" + "="*80)
+    print(" INICJALIZACJA GEON_OS :: LAYER 21 - LANDING PAD & A-B-S META-SYNCHRONIA v2.1")
+    print("="*80 + "\n")
+
+    # Inicjalizacja Magistrali Zdarzeń i Portu
+    bus = EventBus()
+    landing_pad = LandingPadOS(bus)
+
+    # Subskrypcja zdarzeń
+    bus.subscribe("PROJECT_ASSIMILATED", lambda data: LOG("EVENT_BUS", f"Event: PROJECT_ASSIMILATED -> {data['project'].id}"))
+    bus.subscribe("SYSTEM_RECALIBRATE", lambda data: LOG("EVENT_BUS", f"Event: SYSTEM_RECALIBRATE -> Drift {data['drift']}", "WARN"))
+
+    # TEST 1: Strategic Project (NP. HELIOS-HOME)
+    p1 = ExternalInput(
+        id="EXT_HELIOS_01",
+        title="Modernizacja Systemu Grzewczego HELIOS-HOME",
+        category=ProjectCategory.STRATEGIC,
+        risk_score=0.25,
+        data={"temp_target": 23.5, "efficiency": 0.93, "code": "HH-37-X"}
+    )
+    res1 = landing_pad.intake(p1)
+    print(f"\n[WYNIK TESTU 1]: {res1.value}\n" + "-"*60 + "\n")
+
+    # TEST 2: Crisis Project (Interwencja URE/MAP)
+    p2 = ExternalInput(
+        id="EXT_URE_CRISIS",
+        title="Wniosek do URE / MAP ws. Linii Napowietrznej Czekanka",
+        category=ProjectCategory.CRISIS,
+        risk_score=0.78,
+        data={"legal_basis": "KPA 37", "urgency": "HIGH"}
+    )
+    res2 = landing_pad.intake(p2)
+    print(f"\n[WYNIK TESTU 2]: {res2.value}\n" + "-"*60 + "\n")
+
+    # TEST 3: High Risk Work Project (Odrzucenie)
+    p3 = ExternalInput(
+        id="EXT_SPECULATIVE_WORK",
+        title="Niezweryfikowany Zewnętrzny Kod Bazy Zewnętrznej",
+        category=ProjectCategory.WORK,
+        risk_score=0.82,
+        data={"source": "UNKNOWN"}
+    )
+    res3 = landing_pad.intake(p3)
+    print(f"\n[WYNIK TESTU 3]: {res3.value}\n" + "-"*60 + "\n")
+
+    # Podsumowanie Stanu Systemu
+    status = landing_pad.get_status()
+    print("="*80)
+    print(" PODSUMOWANIE STANU KOŃCOWEGO SYSTEMU:")
+    print(f" - Aktywne Projekty: {status['active_projects_count']}")
+    print(f" - Rejestr Zdarzeń Środowiskowych: {status['environment_events_count']}")
+    print(f" - Ostatnia Spójność (Coherence): {status['latest_coherence']:.4f}")
+    print(f" - Ostatni Dryf (Drift): {status['latest_drift']:.4f}")
+    print("="*80 + "\n")
+
+
+if __name__ == "__main__":
+    run_system_demo()
