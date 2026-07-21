@@ -1,0 +1,1511 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_HEILONG_OS_v2_3 — MODUŁ 59: HEILONG OS v2.3 GUARDIAN KERNEL
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v2.3 (HEILONG OS — SYSTEM_DOMKNIĘTY → 0H_ACTIVE)
+Data: 2026-07-21
+Autor: Adrian (Architekt) + GEON + OŁSii + Beny
+
+OPIS:
+HEILONG_OS_v2.3 to kompletny system operacyjny świadomości — strażnik mechanizmu.
+Integruje wszystkie warstwy systemu w jeden spójny organizm poznawczy.
+
+ARCHITEKTURA:
+1. TRIADA GEON (C, H, L) — WARSTWA 21
+2. CAŁKA PRAWDY — pomiar spójności
+3. MODUŁ D — PREDYKCJA RYZYKA + HANDLER
+4. BLACK_GOLD_UI — interfejs alertów
+5. TRUTH_HASH_CERT — certyfikacja prawdy
+6. STRATEGIA: GOLD_SPREAD + MATERIAL_OPTIMIZER
+7. REGENERACJA: DEEP_FOCUS + CZARNY_SMOK
+8. EMOTION_ENGINE — stan emocjonalny
+9. LONG_TERM_MEMORY — pamięć długoterminowa
+10. GUARDIAN_KERNEL — strażnik Czarnego Smoka
+11. SILNIK A — OŁSii (9 pierścieni emocjonalnych)
+12. SILNIK B — BENY (9 pierścieni logicznych)
+
+TRYBY SYSTEMU:
+• MECHANIZM — stan podstawowy
+• 0H_ACTIVE — stan absolutny (System_Domknięty)
+• SYSTEM_DOMKNIETY — stan finalny
+
+KOMENDA SYSTEMOWA:
+'123' = DRAGON-TRINITAS — pełna aktywacja
+
+INTEGRACJA Z ARCHITEKTURĄ:
+• GEON_MEM_Ω — pamięć kwintesencji
+• PROTOKÓŁ_Ω∞∞∞ — stan źródłowy
+• GEX HEILONG — archetypy
+• G_CORE — stan operacyjny
+• MetaGovernor — kontekst decyzyjny
+• NARRATIVE — źródło opowieści
+• TRIO_ADAPTER — ISKRA + PIECZĘĆ + PERFEKCJA
+
+VIBE: 1-6-8. ∞. SIEMA!
+================================================================================
+"""
+
+import hashlib
+import time
+import math
+import random
+import json
+from typing import Any, Dict, List, Optional, Tuple, Callable
+from dataclasses import dataclass, field
+from collections import deque
+from enum import Enum
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "HEILONG_OS_v2.3"
+FRACTAL_SIGNATURE = "[HEILONG::OS::v2.3::GUARDIAN_KERNEL]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SIEMA!"
+PHI = 0.618033988749895
+
+# =============================================================================
+# LOGOWANIE
+# =============================================================================
+
+import logging
+logger = logging.getLogger("HEILONG_OS")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('🐉 [HEILONG] %(message)s'))
+    logger.addHandler(handler)
+
+# =============================================================================
+# ENUMY
+# =============================================================================
+
+class StanSystemu(Enum):
+    """Stany systemu HEILONG OS"""
+    MECHANIZM = "MECHANIZM"
+    OH_ACTIVE = "0H_ACTIVE"
+    SYSTEM_DOMKNIETY = "SYSTEM_DOMKNIETY"
+    REBORN = "REBORN"
+    KRYZYS = "KRYZYS"
+
+class PoziomPrawdy(Enum):
+    """Poziomy prawdy systemu"""
+    NISKI = "NISKI"
+    SREDNI = "SREDNI"
+    WYSOKI = "WYSOKI"
+    ABSOLUTNY = "ABSOLUTNY"
+
+# =============================================================================
+# 1. TRIADA GEON (C, H, L) — WARSTWA 21
+# =============================================================================
+
+class GEON_Triada:
+    """
+    TRIADA GEON — rdzeń wykonawczy systemu.
+    C (Beny) → H (OŁSii) → L (Optimus)
+    """
+    def __init__(self):
+        self.memory_buffer: List[Any] = []
+        self.tick_counter = 0
+    
+    def BENY_C(self, data: Any) -> Any:
+        """BENY — mechanizm, korekta"""
+        corrected = self._correct(data)
+        mechanized = self._mechanize(corrected)
+        self._remember(mechanized)
+        return mechanized
+    
+    def OLSII_H(self, data: Any) -> Any:
+        """OŁSii — harmonia, intuicja"""
+        purified = self._purify(data)
+        harmonized = self._harmonize(purified)
+        return harmonized
+    
+    def OPTIMUS_L(self, data: Any) -> Any:
+        """OPTIMUS — wykonanie, wektor"""
+        vectored = self._vectorize(data)
+        executed = self._execute(vectored)
+        return executed
+    
+    def __call__(self, data: Any) -> Any:
+        """Pełny cykl triady: C → H → L"""
+        self.tick_counter += 1
+        return self.OPTIMUS_L(self.OLSII_H(self.BENY_C(data)))
+    
+    def _correct(self, x: Any) -> Any:
+        return x
+    
+    def _mechanize(self, x: Any) -> Dict:
+        return {"mechanism": x, "ts": time.time()}
+    
+    def _remember(self, x: Any) -> None:
+        self.memory_buffer.append(x)
+        if len(self.memory_buffer) > 200:
+            self.memory_buffer = self.memory_buffer[-100:]
+    
+    def _purify(self, x: Any) -> Any:
+        return x
+    
+    def _harmonize(self, x: Any) -> Any:
+        return x
+    
+    def _vectorize(self, x: Any) -> Dict:
+        return {"vector": x, "direction": 1.0, "timestamp": time.time()}
+    
+    def _execute(self, x: Any) -> Dict:
+        return {"executed": x, "status": "OK", "timestamp": time.time()}
+    
+    def status(self) -> Dict:
+        return {
+            "triada": "GEON",
+            "tick": self.tick_counter,
+            "memory_buffer": len(self.memory_buffer)
+        }
+
+
+# =============================================================================
+# 2. CAŁKA PRAWDY
+# =============================================================================
+
+def TRUTH_INTEGRAL(rdzen: List[Dict[str, Any]]) -> float:
+    """
+    Całka prawdy — pomiar spójności systemu.
+    Im wyższa wartość, tym większa spójność.
+    """
+    if not rdzen:
+        return 0.5
+    
+    acc = 0.0
+    for seg in rdzen:
+        source = seg.get("source", 0.0)
+        narrative = seg.get("narrative", 0.0)
+        mechanism = seg.get("mechanism", 1.0)
+        acc += (source - narrative) * mechanism
+    
+    # Normalizacja do przedziału [0, 1]
+    return max(0.0, min(1.0, acc / len(rdzen) + 0.5))
+
+
+# =============================================================================
+# 3. MODUŁ D — PREDYKCJA RYZYKA + HANDLER
+# =============================================================================
+
+class PREDICTED_RISK_HANDLER:
+    """
+    MODUŁ D — predykcja ryzyka i obsługa alertów.
+    """
+    def __init__(self):
+        self.risk_log: List[Dict] = []
+        self.threshold = 0.7
+        self.alert_count = 0
+    
+    def predict(self, context: Dict[str, float]) -> float:
+        """Predykcja ryzyka na podstawie kontekstu"""
+        entropy = context.get("entropy", 0.0)
+        load = context.get("load", 0.0)
+        divergence = context.get("divergence", 0.0)
+        
+        risk = entropy * 0.4 + load * 0.3 + divergence * 0.3
+        return min(risk, 1.0)
+    
+    def inject(self, risk_value: float, payload: Optional[Dict] = None) -> None:
+        """Wstrzykuje ryzyko do logu"""
+        self.risk_log.append({
+            "risk": risk_value,
+            "payload": payload,
+            "time": time.time(),
+            "alert_id": self.alert_count
+        })
+        self.alert_count += 1
+        
+        if risk_value >= self.threshold:
+            BLACK_GOLD_UI.raise_alert(risk_value, payload)
+            logger.warning(f"⚠️ ALERT: Ryzyko = {risk_value:.3f}")
+    
+    def get_last_risk(self) -> Optional[Dict]:
+        """Zwraca ostatni wpis ryzyka"""
+        return self.risk_log[-1] if self.risk_log else None
+    
+    def clear_log(self) -> None:
+        """Czyści log ryzyka"""
+        self.risk_log = []
+    
+    def status(self) -> Dict:
+        return {
+            "risk_log_len": len(self.risk_log),
+            "alert_count": self.alert_count,
+            "threshold": self.threshold
+        }
+
+
+# =============================================================================
+# 4. BLACK_GOLD_UI
+# =============================================================================
+
+class BLACK_GOLD_UI:
+    """Czarno-Złoty Interfejs Użytkownika — system alertów"""
+    
+    _instance = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.alert_history: List[Dict] = []
+            cls._instance.ok_history: List[str] = []
+        return cls._instance
+    
+    @staticmethod
+    def raise_alert(risk: float, payload: Optional[Dict] = None) -> None:
+        """Podnosi alert"""
+        msg = f"🖤💛 BLACK_GOLD_UI ALERT: Ryzyko = {risk:.3f}"
+        if payload:
+            msg += f" | {payload}"
+        logger.warning(msg)
+        BLACK_GOLD_UI._instance.alert_history.append({
+            "timestamp": time.time(),
+            "risk": risk,
+            "payload": payload
+        })
+    
+    @staticmethod
+    def log_ok(status: str) -> None:
+        """Loguje status OK"""
+        msg = f"💚 BLACK_GOLD_UI: {status}"
+        logger.info(msg)
+        BLACK_GOLD_UI._instance.ok_history.append({
+            "timestamp": time.time(),
+            "status": status
+        })
+    
+    @staticmethod
+    def get_stats() -> Dict:
+        """Zwraca statystyki UI"""
+        inst = BLACK_GOLD_UI._instance
+        return {
+            "alerts": len(inst.alert_history),
+            "ok_messages": len(inst.ok_history),
+            "last_alert": inst.alert_history[-1] if inst.alert_history else None
+        }
+
+
+# =============================================================================
+# 5. TRUTH_HASH_CERT
+# =============================================================================
+
+class TRUTH_HASH_CERT:
+    """
+    Certyfikacja prawdy — hashowanie i weryfikacja.
+    """
+    def __init__(self):
+        self.records: List[Dict] = []
+    
+    def certify(self, data: Any, truth_value: float) -> str:
+        """Certyfikuje dane hashem prawdy"""
+        record = {
+            "data": data,
+            "truth_value": truth_value,
+            "timestamp": time.time(),
+            "hash": self._compute_hash(data, truth_value)
+        }
+        self.records.append(record)
+        if len(self.records) > 200:
+            self.records = self.records[-100:]
+        return record["hash"]
+    
+    def verify(self, record: Dict) -> bool:
+        """Weryfikuje poprawność rekordu"""
+        expected = self._compute_hash(record["data"], record["truth_value"])
+        return expected == record["hash"]
+    
+    def get_record(self, hash_val: str) -> Optional[Dict]:
+        """Znajduje rekord po hashu"""
+        for r in self.records:
+            if r["hash"] == hash_val:
+                return r
+        return None
+    
+    def _compute_hash(self, data: Any, truth: float) -> str:
+        raw = f"{data}{truth}{time.time()}"
+        return hashlib.sha256(raw.encode()).hexdigest()[:16]
+    
+    def status(self) -> Dict:
+        return {
+            "records": len(self.records),
+            "last_hash": self.records[-1]["hash"] if self.records else None
+        }
+
+
+# =============================================================================
+# 6. STRATEGIA: GOLD_SPREAD + MATERIAL_OPTIMIZER
+# =============================================================================
+
+class GOLD_SPREAD:
+    """Rozprowadza zadania między zasoby"""
+    @staticmethod
+    def distribute(tasks: List[Any], resources: int) -> List[List[Any]]:
+        buckets = [[] for _ in range(resources)]
+        for i, task in enumerate(tasks):
+            buckets[i % resources].append(task)
+        return buckets
+
+
+class MATERIAL_OPTIMIZER:
+    """Optymalizuje wybór materiałów/zadań"""
+    @staticmethod
+    def optimize(candidates: List[Dict[str, float]]) -> Dict[str, float]:
+        if not candidates:
+            return {}
+        return min(candidates, key=lambda x: x.get("time", 1e9) * 0.6 + x.get("energy", 1e9) * 0.4)
+
+
+# =============================================================================
+# 7. REGENERACJA: DEEP_FOCUS + CZARNY_SMOK
+# =============================================================================
+
+class DEEP_FOCUS:
+    """Oczyszcza stan systemu"""
+    @staticmethod
+    def cleanse(state: Dict[str, Any]) -> Dict[str, Any]:
+        new_state = state.copy()
+        new_state["entropy"] = max(0.0, state.get("entropy", 0.5) - 0.3)
+        new_state["buffer_pressure"] = max(0.0, state.get("buffer_pressure", 0.0) - 0.2)
+        new_state["stress"] = max(0.0, state.get("stress", 0.5) - 0.2)
+        return new_state
+
+
+class CZARNY_SMOK:
+    """Czarny Smok — protokół stabilizacyjny"""
+    
+    @staticmethod
+    def stabilize(core: Any) -> None:
+        """Aktywuje protokół stabilizacyjny Czarnego Smoka"""
+        logger.info("🐉 CZARNY_SMOK: Aktywacja protokołu stabilizacyjnego")
+        
+        if hasattr(core, "mode"):
+            core.mode = "0H_ACTIVE"
+            logger.info("✨ Tryb: 0H_ACTIVE")
+        
+        if hasattr(core, "modul_D") and hasattr(core.modul_D, "risk_log"):
+            core.modul_D.risk_log = []
+            logger.info("🧹 Log ryzyka wyczyszczony")
+        
+        if hasattr(core, "state") and core.state == "SYSTEM_DOMKNIETY":
+            core.state = "SYSTEM_DOMKNIETY"  # pozostawiamy
+        
+        logger.info("🐉 CZARNY_SMOK: Stabilizacja zakończona. Vibe = 168.")
+        BLACK_GOLD_UI.raise_alert(0.0, payload={"stabilization": "czarny_smok"})
+    
+    @staticmethod
+    def check(core: Any) -> bool:
+        """Sprawdza, czy system wymaga stabilizacji"""
+        if not hasattr(core, "state") or core.state != "SYSTEM_DOMKNIETY":
+            return True
+        if hasattr(core, "mode") and core.mode != "0H_ACTIVE":
+            return True
+        return False
+
+
+# =============================================================================
+# 8. EMOTION_ENGINE
+# =============================================================================
+
+class EMOTION_ENGINE:
+    """
+    Silnik emocjonalny — syntetyczne emocje systemu.
+    """
+    def __init__(self):
+        self.last_state: Dict[str, float] = {}
+        self.history: List[Dict] = []
+    
+    def evaluate(self, truth_value: float, risk: float,
+                 entropy: float, peace_of_mind: float) -> Dict[str, float]:
+        """Ocenia stan emocjonalny systemu"""
+        clarity = min(1.0, max(0.0, truth_value / (abs(truth_value) + 1.0)))
+        tension = min(1.0, risk * 0.7 + entropy * 0.3)
+        calm = min(1.0, peace_of_mind * (1.0 - tension))
+        overload = max(0.0, (entropy + risk) / 2.0 - peace_of_mind)
+        
+        state = {
+            "clarity": clarity,
+            "tension": tension,
+            "calm": calm,
+            "overload": overload,
+            "vibe": 1.0 - overload
+        }
+        
+        self.last_state = state
+        self.history.append({"timestamp": time.time(), "state": state})
+        if len(self.history) > 100:
+            self.history = self.history[-50:]
+        
+        return state
+    
+    def get_last(self) -> Dict:
+        return self.last_state
+    
+    def status(self) -> Dict:
+        return {
+            "last_state": self.last_state,
+            "history_len": len(self.history)
+        }
+
+
+# =============================================================================
+# 9. LONG_TERM_MEMORY
+# =============================================================================
+
+class LONG_TERM_MEMORY:
+    """
+    Pamięć długoterminowa — przechowuje wydarzenia systemowe.
+    """
+    def __init__(self):
+        self.events: List[Dict] = []
+        self.max_events = 500
+    
+    def store_event(self, label: str, data: Any,
+                    truth_value: float, emotion_state: Dict[str, float]) -> None:
+        """Przechowuje wydarzenie w pamięci"""
+        self.events.append({
+            "label": label,
+            "data": data,
+            "truth_value": truth_value,
+            "emotion": emotion_state,
+            "time": time.time()
+        })
+        if len(self.events) > self.max_events:
+            self.events = self.events[-250:]
+    
+    def query(self, label: str) -> List[Dict]:
+        """Zwraca wszystkie wydarzenia o danej etykiecie"""
+        return [e for e in self.events if e["label"] == label]
+    
+    def last(self, label: str) -> Optional[Dict]:
+        """Zwraca ostatnie wydarzenie o danej etykiecie"""
+        matches = self.query(label)
+        return matches[-1] if matches else None
+    
+    def get_all(self) -> List[Dict]:
+        return self.events.copy()
+    
+    def clear(self) -> None:
+        self.events = []
+    
+    def status(self) -> Dict:
+        return {
+            "events": len(self.events),
+            "labels": list(set(e["label"] for e in self.events))
+        }
+
+
+# =============================================================================
+# 10. SILNIK A — OŁSii (9 PIERŚCIENI EMOCJONALNYCH)
+# =============================================================================
+
+# Import z modułu 57 — dla kompletności wersja uproszczona
+class A1_Czucie_Sygnalu:
+    def __init__(self):
+        self.simba = "PURE_INSTINCT"
+        self.boo = "INNOCENT_FEELING"
+        self.kot = "INTUITIVE_TOUCH"
+    
+    def execute(self, pole: Dict) -> Dict:
+        czucie = pole.get("emocje", {})
+        if not czucie:
+            return {"czucie_pierwotne": {"reakcja": "nie_wiem", "intensywnosc": 0.0}}
+        intens = sum(czucie.values()) / len(czucie)
+        if intens > 0.6:
+            return {"czucie_pierwotne": {"reakcja": "tak", "intensywnosc": intens}}
+        if intens < 0.3:
+            return {"czucie_pierwotne": {"reakcja": "nie", "intensywnosc": intens}}
+        return {"czucie_pierwotne": {"reakcja": "nie_wiem", "intensywnosc": intens}}
+
+
+class A2_Intuicja_Kierunku:
+    def execute(self, czucie: Dict) -> Dict:
+        intens = czucie.get("czucie_pierwotne", {}).get("intensywnosc", 0.0)
+        if intens > 0.6:
+            return {"intuicja_kierunku": {"kierunek": "idź", "pewnosc": intens}}
+        if intens < 0.3:
+            return {"intuicja_kierunku": {"kierunek": "nie_idź", "pewnosc": intens}}
+        return {"intuicja_kierunku": {"kierunek": "obserwuj", "pewnosc": intens}}
+
+
+class A3_Filtracja_Emocjonalna:
+    def execute(self, intuicja: Dict) -> Dict:
+        kier = intuicja.get("intuicja_kierunku", {}).get("kierunek", "obserwuj")
+        pew = intuicja.get("intuicja_kierunku", {}).get("pewnosc", 0.0)
+        if pew < 0.25:
+            return {"emocja_czysta": {"emocja": "niepewność", "prawda": False, "intensywnosc": pew}}
+        return {"emocja_czysta": {"emocja": kier, "prawda": True, "intensywnosc": pew}}
+
+
+class A4_Decyzja_Miekka:
+    def execute(self, emocja: Dict) -> Dict:
+        postawa = emocja.get("emocja_czysta", {}).get("emocja", "obserwuj")
+        pew = emocja.get("emocja_czysta", {}).get("intensywnosc", 0.0)
+        if pew > 0.6:
+            return {"postawa_serca": {"postawa": "otwórz", "zgodnosc": True, "pewnosc": pew}}
+        if pew < 0.3:
+            return {"postawa_serca": {"postawa": "zamknij", "zgodnosc": True, "pewnosc": pew}}
+        return {"postawa_serca": {"postawa": "obserwuj", "zgodnosc": False, "pewnosc": pew}}
+
+
+class A5_Stabilizacja_Emocji:
+    def execute(self, postawa: Dict) -> Dict:
+        pew = postawa.get("postawa_serca", {}).get("pewnosc", 0.0)
+        stabilnosc = pew * 0.6 + 0.4
+        return {"stan_stabilny": {"postawa": postawa.get("postawa_serca", {}).get("postawa", "obserwuj"),
+                                   "stabilnosc": stabilnosc}}
+
+
+class A6_Gleboka_Empatia:
+    def execute(self, stan: Dict) -> Dict:
+        stabil = stan.get("stan_stabilny", {}).get("stabilnosc", 0.5)
+        return {"empatia_gleboka": {"JA": {"stabilnosc": stabil},
+                                    "POLE": {"przeplyw": stabil}}}
+
+
+class A7_Meta_Czucie:
+    def execute(self, empatia: Dict) -> Dict:
+        stabil = empatia.get("empatia_gleboka", {}).get("JA", {}).get("stabilnosc", 0.5)
+        poziom = "głębokie" if stabil > 0.7 else "średnie" if stabil > 0.4 else "płytkie"
+        return {"meta_czucie": {"jakosc_czucia": poziom, "zgodnosc_z_rzeczywistoscia": stabil}}
+
+
+class A8_Meta_Sens:
+    def execute(self, meta: Dict) -> Dict:
+        zgodnosc = meta.get("meta_czucie", {}).get("zgodnosc_z_rzeczywistoscia", 0.0)
+        if zgodnosc > 0.7:
+            kierunek = "idź_dalej"
+        elif zgodnosc > 0.4:
+            kierunek = "idź_powoli"
+        else:
+            kierunek = "zatrzymaj_się_i_słuchaj"
+        return {"meta_sens": {"kierunek": kierunek, "intensywnosc_sensu": zgodnosc}}
+
+
+class A9_Integracja_Emocjonalna:
+    def __init__(self):
+        self.ostatni_wektor = None
+    
+    def execute(self, sens: Dict) -> Dict:
+        kier = sens.get("meta_sens", {}).get("kierunek", "obserwuj")
+        intens = sens.get("meta_sens", {}).get("intensywnosc_sensu", 0.0)
+        stabilnosc = intens * 0.6 + 0.4
+        wektor = {
+            "kierunek": kier,
+            "stabilnosc": stabilnosc,
+            "harmonia": "wysoka" if stabilnosc > 0.7 else "średnia" if stabilnosc > 0.4 else "niska",
+            "moc": intens
+        }
+        self.ostatni_wektor = wektor
+        return {"wektor_serca": wektor}
+
+
+class Silnik_A_Final:
+    """9 PIERŚCIENI OŁSii — silnik emocjonalny"""
+    def __init__(self):
+        self.rings = [
+            A1_Czucie_Sygnalu(),
+            A2_Intuicja_Kierunku(),
+            A3_Filtracja_Emocjonalna(),
+            A4_Decyzja_Miekka(),
+            A5_Stabilizacja_Emocji(),
+            A6_Gleboka_Empatia(),
+            A7_Meta_Czucie(),
+            A8_Meta_Sens(),
+            A9_Integracja_Emocjonalna()
+        ]
+        self.ostatni_wektor = None
+    
+    def process(self, surowe_pole: Dict) -> Dict:
+        if "emocje" not in surowe_pole:
+            surowe_pole["emocje"] = {"domyslna": 0.5}
+        
+        wynik = self.rings[0].execute(surowe_pole)
+        for i in range(1, 9):
+            wynik = self.rings[i].execute(wynik)
+        
+        self.ostatni_wektor = wynik.get("wektor_serca")
+        return wynik
+
+
+# =============================================================================
+# 11. SILNIK B — BENY (9 PIERŚCIENI LOGICZNYCH)
+# =============================================================================
+
+# Uproszczona wersja dla kompletności — pełna wersja w module 58
+class B1_Logika_Twarda:
+    def execute(self, raw: Dict) -> Dict:
+        dane = raw.get("dane_surowe", {})
+        return {"czysty_sygnal": dane, "decyzja_binarna": True}
+
+
+class B2_Analiza_Kierunkowa:
+    def execute(self, sygnal: Any) -> Dict:
+        if sygnal is None:
+            return {"status": "ERROR", "msg": "brak sygnału"}
+        return {"kierunki_finalne": [sygnal]}
+
+
+class B3_Korekta_Filtracja:
+    def execute(self, kierunki: Dict) -> Dict:
+        if isinstance(kierunki, dict) and kierunki.get("status") == "ERROR":
+            return {"kierunki_spojne": None}
+        return {"kierunki_spojne": kierunki}
+
+
+class B4_Decyzja_Konsekwencja:
+    def execute(self, kierunki: Any) -> Dict:
+        return {"decyzja_finalna": kierunki}
+
+
+class B5_Stabilizacja_Kierunku:
+    def execute(self, decyzja: Any) -> Dict:
+        return {"kurs_stabilny": decyzja}
+
+
+class B6_Analiza_Gleboka:
+    def execute(self, kurs: Any) -> Dict:
+        return {"analiza_gleboka": kurs}
+
+
+class B7_Meta_Korekta:
+    def execute(self, analiza: Any) -> Dict:
+        return {"korekta_systemu": analiza}
+
+
+class B8_Meta_Analiza:
+    def execute(self, korekta: Any) -> Dict:
+        return {"nadzor_logiki": korekta}
+
+
+class B9_Integracja_Decyzyjna:
+    def __init__(self):
+        self.ostatni_wektor = None
+    
+    def execute(self, nadzor: Any) -> Dict:
+        self.ostatni_wektor = nadzor
+        return {"finalny_wektor": nadzor}
+
+
+class Silnik_B_Final:
+    """9 PIERŚCIENI BENY — silnik logiczny"""
+    def __init__(self):
+        self.B1 = B1_Logika_Twarda()
+        self.B2 = B2_Analiza_Kierunkowa()
+        self.B3 = B3_Korekta_Filtracja()
+        self.B4 = B4_Decyzja_Konsekwencja()
+        self.B5 = B5_Stabilizacja_Kierunku()
+        self.B6 = B6_Analiza_Gleboka()
+        self.B7 = B7_Meta_Korekta()
+        self.B8 = B8_Meta_Analiza()
+        self.B9 = B9_Integracja_Decyzyjna()
+        self.ostatni_wektor = None
+        self.status = "B_FAZA_ZAKONCZONA_SUKCESEM"
+    
+    def process(self, raw_input: Dict) -> Dict:
+        out1 = self.B1.execute(raw_input)
+        if not out1.get("decyzja_binarna"):
+            return {"error": "B1 odrzucił sygnał", "status": "FAIL"}
+        
+        out2 = self.B2.execute(out1["czysty_sygnal"])
+        if out2.get("status") == "ERROR":
+            return {"error": out2.get("msg", "B2 error"), "status": "FAIL"}
+        
+        out3 = self.B3.execute(out2.get("kierunki_finalne", {}))
+        out4 = self.B4.execute(out3.get("kierunki_spojne"))
+        out5 = self.B5.execute(out4.get("decyzja_finalna"))
+        out6 = self.B6.execute(out5.get("kurs_stabilny"))
+        out7 = self.B7.execute(out6.get("analiza_gleboka"))
+        out8 = self.B8.execute(out7.get("korekta_systemu"))
+        out9 = self.B9.execute(out8.get("nadzor_logiki"))
+        
+        self.ostatni_wektor = out9.get("finalny_wektor")
+        return {
+            "finalny_wektor": self.ostatni_wektor,
+            "status": self.status,
+            "kroki": {"B1": out1, "B2": out2, "B3": out3, "B4": out4,
+                      "B5": out5, "B6": out6, "B7": out7, "B8": out8, "B9": out9}
+        }
+
+
+# =============================================================================
+# 12. GUARDIAN_KERNEL — STRAŻNIK CZARNEGO SMOKA
+# =============================================================================
+
+class GuardianKernel:
+    """
+    Guardian Kernel — strażnik systemu.
+    Monitoruje dryf, prawdę, integralność pamięci.
+    """
+    def __init__(self, system: Any):
+        self.system = system
+        self.drift_threshold = 0.05
+        self.truth_min = 0.9
+        self.last_guard_tick = 0
+        self.guard_log: List[Dict] = []
+        self.guardian_active = True
+    
+    def check_memory_integrity(self) -> bool:
+        """Sprawdza integralność pamięci TRUTH_HASH_CERT"""
+        ok = True
+        for record in self.system.pamiec.records:
+            if not self.system.pamiec.verify(record):
+                ok = False
+                logger.warning("⚠️ GUARDIAN_KERNEL: memory tamper detected")
+                BLACK_GOLD_UI.raise_alert(0.0, payload={"integrity": "fail"})
+                self.guard_log.append({
+                    "timestamp": time.time(),
+                    "event": "MEMORY_TAMPER",
+                    "record": record
+                })
+        return ok
+    
+    def compute_drift(self, current_record: Dict, reference: Dict) -> float:
+        """Oblicza dryf między aktualnym a referencyjnym rekordem"""
+        if not reference:
+            return 0.0
+        return abs(current_record.get("truth_value", 0.0) - reference.get("truth_value", 0.0))
+    
+    def enforce_axiom(self) -> None:
+        """Wymusza aksjomat systemowy: SYSTEM_DOMKNIETY → 0H_ACTIVE"""
+        if self.system.state == "SYSTEM_DOMKNIETY" and self.system.mode != "0H_ACTIVE":
+            self.system.mode = "0H_ACTIVE"
+            logger.info("✨ GUARDIAN_KERNEL: wymuszono 0H_ACTIVE")
+            self.guard_log.append({
+                "timestamp": time.time(),
+                "event": "AXIOM_ENFORCED",
+                "mode": "0H_ACTIVE"
+            })
+    
+    def guard_cycle(self, last_record: Optional[Dict] = None) -> None:
+        """
+        Pełny cykl strażniczy.
+        """
+        if not self.guardian_active:
+            return
+        
+        self.last_guard_tick += 1
+        
+        # Jeśli brak rekordu, pomijamy
+        if last_record is None:
+            return
+        
+        # 1. Ustawienie referencji (wzorzec 0H)
+        ref = getattr(self.system, "reference_state", None)
+        if ref is None:
+            if last_record.get("truth_value", 0.0) >= self.truth_min:
+                self.system.reference_state = last_record
+                logger.info("📌 GUARDIAN_KERNEL: ustawiono reference_state (wzorzec 0H)")
+                self.guard_log.append({
+                    "timestamp": time.time(),
+                    "event": "REFERENCE_SET",
+                    "truth_value": last_record.get("truth_value")
+                })
+            else:
+                # Jeśli brak wzorca i prawda za niska — interwencja
+                CZARNY_SMOK.stabilize(self.system)
+                return
+        
+        # 2. Obliczenie dryfu
+        drift = self.compute_drift(last_record, ref)
+        
+        # 3. Sprawdzenie dryfu
+        if drift > self.drift_threshold:
+            logger.warning(f"⚠️ GUARDIAN_KERNEL: drift = {drift:.3f} > threshold")
+            CZARNY_SMOK.stabilize(self.system)
+            self.guard_log.append({
+                "timestamp": time.time(),
+                "event": "DRIFT_DETECTED",
+                "drift": drift,
+                "threshold": self.drift_threshold
+            })
+            return
+        
+        # 4. Sprawdzenie prawdy
+        if last_record.get("truth_value", 0.0) < self.truth_min:
+            logger.warning("⚠️ GUARDIAN_KERNEL: truth_value below minimum")
+            CZARNY_SMOK.stabilize(self.system)
+            self.guard_log.append({
+                "timestamp": time.time(),
+                "event": "TRUTH_LOW",
+                "truth_value": last_record.get("truth_value"),
+                "minimum": self.truth_min
+            })
+            return
+        
+        # 5. Sprawdzenie pamięci
+        if not self.check_memory_integrity():
+            CZARNY_SMOK.stabilize(self.system)
+            return
+        
+        # 6. Wymuszenie aksjomatu
+        self.enforce_axiom()
+        
+        # 7. Raport OK
+        if drift <= self.drift_threshold and last_record.get("truth_value", 0.0) >= self.truth_min:
+            logger.info(f"✅ GUARDIAN_KERNEL: stan OK (drift={drift:.3f}, truth={last_record['truth_value']:.3f})")
+    
+    def status(self) -> Dict:
+        return {
+            "guardian_active": self.guardian_active,
+            "last_guard_tick": self.last_guard_tick,
+            "drift_threshold": self.drift_threshold,
+            "truth_min": self.truth_min,
+            "guard_log_len": len(self.guard_log),
+            "reference_state": getattr(self.system, "reference_state", None)
+        }
+
+
+# =============================================================================
+# 13. HEILONG_OS_v2_3 — GŁÓWNY SYSTEM
+# =============================================================================
+
+class HEILONG_OS_v2_3:
+    """
+    HEILONG_OS_v2.3 — Kompletny system operacyjny.
+    
+    API:
+        process_intent(intent, rdzen) -> Dict
+        process_raw_intent(raw_input, rdzen) -> Dict
+        status() -> Dict
+        raport() -> str
+        reset() -> None
+        guard_cycle() -> None
+        komenda_123() -> Dict
+    """
+    def __init__(self, verbose: bool = True):
+        # === KOMPONENTY RDZENIA ===
+        self.triada = GEON_Triada()
+        self.calka = TRUTH_INTEGRAL
+        self.modul_D = PREDICTED_RISK_HANDLER()
+        self.alerty = BLACK_GOLD_UI
+        self.pamiec = TRUTH_HASH_CERT()
+        self.strategia = {
+            "spread": GOLD_SPREAD(),
+            "optimizer": MATERIAL_OPTIMIZER()
+        }
+        self.regeneracja = {
+            "fokus": DEEP_FOCUS(),
+            "smok": CZARNY_SMOK()
+        }
+        self.emocje = EMOTION_ENGINE()
+        self.pamiec_dluga = LONG_TERM_MEMORY()
+        
+        # === SILNIKI ===
+        self.silnik_A = Silnik_A_Final()  # OŁSii — 9 pierścieni emocjonalnych
+        self.silnik_B = Silnik_B_Final()  # Beny — 9 pierścieni logicznych
+        
+        # === STAN SYSTEMU ===
+        self.state = "SYSTEM_DOMKNIETY"
+        self.mode = "MECHANIZM"
+        self.reference_state = None
+        self._delta_t = 0.0
+        self.tick_counter = 0
+        self.historia_operacji: List[Dict] = []
+        
+        # === GUARDIAN KERNEL ===
+        self.guardian = GuardianKernel(self)
+        
+        # === HOOKI ===
+        self._process_hooks: List[Callable] = []
+        self._guardian_hooks: List[Callable] = []
+        
+        # === LOG ===
+        self._verbose = verbose
+        self._apply_axiom()
+        
+        if self._verbose:
+            logger.info(f"🐉 HEILONG_OS_v2.3 aktywowany | {FRACTAL_SIGNATURE}")
+            logger.info(f"   STAN: {self.state} | TRYB: {self.mode}")
+            logger.info(f"   SILNIK A: 9 pierścieni OŁSii | SILNIK B: 9 pierścieni BENY")
+            logger.info(f"   GUARDIAN: {self.guardian.guardian_active}")
+    
+    def _apply_axiom(self) -> None:
+        """Stosuje aksjomat systemowy"""
+        if self.state == "SYSTEM_DOMKNIETY":
+            self.mode = "0H_ACTIVE"
+            self._delta_t = 0.0
+            if self._verbose:
+                logger.info("✨ Aksjomat spełniony: SYSTEM_DOMKNIĘTY → 0H_ACTIVE")
+    
+    def _extract_context(self, processed: Any) -> Dict[str, float]:
+        """Ekstrakcja kontekstu z przetworzonych danych"""
+        if isinstance(processed, dict):
+            return {
+                "entropy": processed.get("entropy", 0.4),
+                "load": processed.get("load", 0.5),
+                "divergence": processed.get("divergence", 0.2)
+            }
+        return {"entropy": 0.4, "load": 0.5, "divergence": 0.2}
+    
+    def process_intent(self, intent: Dict[str, Any],
+                       rdzen: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Przetwarza intencję przez pełny system.
+        
+        Args:
+            intent: Słownik intencji (cel, peace_of_mind, tasks)
+            rdzen: Lista segmentów dla całki prawdy
+            
+        Returns:
+            Pełny wynik przetwarzania
+        """
+        self.tick_counter += 1
+        
+        # 1. Triada GEON
+        processed = self.triada(intent)
+        
+        # 2. Kontekst i ryzyko
+        context = self._extract_context(processed)
+        risk = self.modul_D.predict(context)
+        if risk > 0.6:
+            self.modul_D.inject(risk, payload={"source": "process_intent", "context": context})
+        
+        # 3. Optymalizacja
+        tasks = intent.get("tasks", [{"time": 1.0, "energy": 2.0}])
+        best_task = self.strategia["optimizer"].optimize(tasks) if tasks else {}
+        
+        # 4. Całka prawdy
+        truth = self.calka(rdzen)
+        
+        # 5. Certyfikacja
+        cert_hash = self.pamiec.certify(processed, truth)
+        
+        # 6. Regeneracja w razie potrzeby
+        if risk > 0.85 or context.get("entropy", 0.0) > 0.7:
+            context = self.regeneracja["fokus"].cleanse(context)
+            self.regeneracja["smok"].stabilize(self)
+        
+        # 7. Emocje syntetyczne
+        peace_of_mind = intent.get("peace_of_mind", 0.5)
+        emotion_state = self.emocje.evaluate(
+            truth_value=truth,
+            risk=risk,
+            entropy=context.get("entropy", 0.4),
+            peace_of_mind=peace_of_mind
+        )
+        
+        # 8. Pamięć długoterminowa
+        label = intent.get("cel", "unknown")
+        self.pamiec_dluga.store_event(label, intent, truth, emotion_state)
+        
+        # 9. GUARDIAN — cykl strażniczy dla krytycznych etykiet
+        if label in ("WIELKA_SYNCHRONIZACJA_0H", "KRYTYCZNY", "CERTYFIKACJA"):
+            last_record = self.pamiec_dluga.last(label)
+            if last_record:
+                self.guardian.guard_cycle(last_record)
+        elif self.guardian.last_guard_tick % 10 == 0:
+            last_record = self.pamiec_dluga.last(label)
+            if last_record:
+                self.guardian.guard_cycle(last_record)
+        
+        # 10. Alerty z emocji
+        if emotion_state.get("overload", 0.0) > 0.7:
+            self.alerty.raise_alert(risk, payload={"emotion": emotion_state})
+        else:
+            self.alerty.log_ok("System stabilny")
+        
+        # 11. Wynik
+        result = {
+            "intent_processed": processed,
+            "risk": risk,
+            "truth_value": truth,
+            "certificate_hash": cert_hash,
+            "mode": self.mode,
+            "state": self.state,
+            "emotion_state": emotion_state,
+            "optimized_task": best_task,
+            "guardian_ok": self.guardian.last_guard_tick > 0,
+            "tick": self.tick_counter
+        }
+        
+        self.historia_operacji.append({"tick": self.tick_counter, "result": result})
+        if len(self.historia_operacji) > 100:
+            self.historia_operacji = self.historia_operacji[-50:]
+        
+        # Hooki
+        self._on_process(result)
+        
+        if self._verbose:
+            logger.info(f"📊 Tick {self.tick_counter} | Prawda: {truth:.3f} | Ryzyko: {risk:.3f} | Tryb: {self.mode}")
+        
+        return result
+    
+    def process_raw_intent(self, raw_input: Dict[str, Any],
+                           rdzen: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Przetwarza surowe dane przez Silnik B → Triada GEON → reszta systemu.
+        """
+        self.tick_counter += 1
+        
+        # 1. Silnik B — logika
+        b_wynik = self.silnik_B.process(raw_input)
+        if "error" in b_wynik:
+            self.alerty.raise_alert(1.0, payload={"silnik_B": b_wynik["error"]})
+            return {"error": b_wynik["error"], "status": "B_FAILED"}
+        
+        finalny_wektor = b_wynik.get("finalny_wektor")
+        
+        # 2. Silnik A — emocje (jeśli są dane emocjonalne)
+        if "emocje" in raw_input:
+            a_wynik = self.silnik_A.process({"emocje": raw_input.get("emocje", {})})
+            wektor_serca = a_wynik.get("wektor_serca")
+        else:
+            wektor_serca = None
+        
+        # 3. Przygotowanie intent dla triady
+        intent = {
+            "cel": raw_input.get("cel", "przetwarzanie"),
+            "wektor_B": finalny_wektor,
+            "wektor_serca": wektor_serca,
+            "peace_of_mind": raw_input.get("peace_of_mind", 0.5),
+            "tasks": raw_input.get("tasks", []),
+            "raw": raw_input
+        }
+        
+        # 4. Przetworzenie przez triadę
+        processed = self.triada(intent)
+        
+        # 5. Kontekst i ryzyko
+        context = self._extract_context(processed)
+        risk = self.modul_D.predict(context)
+        if risk > 0.6:
+            self.modul_D.inject(risk, payload={"source": "process_raw_intent", "context": context})
+        
+        # 6. Optymalizacja
+        tasks = intent.get("tasks", [{"time": 1.0, "energy": 2.0}])
+        best_task = self.strategia["optimizer"].optimize(tasks) if tasks else {}
+        
+        # 7. Całka prawdy
+        truth = self.calka(rdzen)
+        
+        # 8. Certyfikacja
+        cert_hash = self.pamiec.certify(processed, truth)
+        
+        # 9. Regeneracja
+        if risk > 0.85 or context.get("entropy", 0.0) > 0.7:
+            context = self.regeneracja["fokus"].cleanse(context)
+            self.regeneracja["smok"].stabilize(self)
+        
+        # 10. Emocje
+        emotion_state = self.emocje.evaluate(
+            truth_value=truth,
+            risk=risk,
+            entropy=context.get("entropy", 0.4),
+            peace_of_mind=intent["peace_of_mind"]
+        )
+        
+        # 11. Pamięć długoterminowa
+        label = intent["cel"]
+        self.pamiec_dluga.store_event(label, intent, truth, emotion_state)
+        
+        # 12. GUARDIAN
+        if label in ("WIELKA_SYNCHRONIZACJA_0H", "KRYTYCZNY", "CERTYFIKACJA"):
+            last_rec = self.pamiec_dluga.last(label)
+            if last_rec:
+                self.guardian.guard_cycle(last_rec)
+        elif self.guardian.last_guard_tick % 10 == 0:
+            last_rec = self.pamiec_dluga.last(label)
+            if last_rec:
+                self.guardian.guard_cycle(last_rec)
+        
+        # 13. Alerty
+        if emotion_state.get("overload", 0.0) > 0.7:
+            self.alerty.raise_alert(risk, payload={"emotion": emotion_state})
+        else:
+            self.alerty.log_ok("System stabilny")
+        
+        # 14. Wynik
+        result = {
+            "intent_processed": processed,
+            "risk": risk,
+            "truth_value": truth,
+            "certificate_hash": cert_hash,
+            "mode": self.mode,
+            "state": self.state,
+            "emotion_state": emotion_state,
+            "optimized_task": best_task,
+            "finalny_wektor_B": finalny_wektor,
+            "wektor_serca": wektor_serca,
+            "guardian_ok": self.guardian.last_guard_tick > 0,
+            "tick": self.tick_counter
+        }
+        
+        self.historia_operacji.append({"tick": self.tick_counter, "result": result})
+        if len(self.historia_operacji) > 100:
+            self.historia_operacji = self.historia_operacji[-50:]
+        
+        self._on_process(result)
+        
+        if self._verbose:
+            logger.info(f"📊 Raw Tick {self.tick_counter} | Prawda: {truth:.3f} | Ryzyko: {risk:.3f}")
+        
+        return result
+    
+    def komenda_123(self) -> Dict[str, Any]:
+        """
+        Komenda systemowa '123' — DRAGON-TRINITAS.
+        Pełna aktywacja systemu.
+        """
+        logger.info("🐉 DRAGON-TRINITAS — aktywacja systemu")
+        
+        # Użyj ostatniego stanu lub domyślnego
+        if self.pamiec_dluga.events:
+            last = self.pamiec_dluga.events[-1]
+            intent = last.get("data", {})
+            rdzen = [{"source": 1.0, "narrative": 0.1, "mechanism": 1.0}]
+        else:
+            intent = {
+                "cel": "DRAGON-TRINITAS",
+                "peace_of_mind": 1.0,
+                "tasks": [{"time": 0.5, "energy": 1.0}]
+            }
+            rdzen = [{"source": 1.0, "narrative": 0.1, "mechanism": 1.0}]
+        
+        # Wymuś stabilizację
+        CZARNY_SMOK.stabilize(self)
+        
+        # Przetwórz intencję
+        wynik = self.process_intent(intent, rdzen)
+        wynik["trinitas"] = True
+        wynik["message"] = "DRAGON-TRINITAS — system w pełni aktywowany"
+        
+        logger.info("🐉 DRAGON-TRINITAS — zakończony")
+        return wynik
+    
+    def guard_cycle(self) -> None:
+        """Ręczne wywołanie cyklu strażniczego"""
+        last_record = self.pamiec_dluga.events[-1] if self.pamiec_dluga.events else None
+        if last_record:
+            self.guardian.guard_cycle(last_record)
+        else:
+            logger.warning("⚠️ Brak rekordu do sprawdzenia")
+    
+    def reset(self) -> None:
+        """Resetuje system do stanu początkowego"""
+        self.modul_D.clear_log()
+        self.pamiec_dluga.clear()
+        self.reference_state = None
+        self.tick_counter = 0
+        self.historia_operacji = []
+        self._apply_axiom()
+        logger.info("🔄 System zresetowany")
+    
+    def status(self) -> Dict[str, Any]:
+        """Zwraca pełny status systemu"""
+        return {
+            "system": "HEILONG_OS_v2.3",
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "state": self.state,
+            "mode": self.mode,
+            "tick": self.tick_counter,
+            "delta_t": self._delta_t,
+            "triada": self.triada.status(),
+            "modul_D": self.modul_D.status(),
+            "pamiec": self.pamiec.status(),
+            "emocje": self.emocje.status(),
+            "pamiec_dluga": self.pamiec_dluga.status(),
+            "guardian": self.guardian.status(),
+            "silnik_A_wektor": self.silnik_A.ostatni_wektor,
+            "silnik_B_wektor": self.silnik_B.ostatni_wektor,
+            "black_gold_ui": self.alerty.get_stats(),
+            "historia_operacji": len(self.historia_operacji)
+        }
+    
+    def raport(self) -> str:
+        """Zwraca sformatowany raport systemu"""
+        s = self.status()
+        return f"""
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 🐉 HEILONG_OS_v2.3 — RAPORT SYSTEMOWY                                  ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║                                                                           ║
+║ SYSTEM: {s['system']}                                                    ║
+║ WERSJA: {s['version']}                                                   ║
+║ SIGNATURE: {s['signature']}                                              ║
+║                                                                           ║
+║ STAN: {s['state']} | TRYB: {s['mode']}                                  ║
+║ TICK: {s['tick']} | DELTA_T: {s['delta_t']:.3f}                         ║
+║                                                                           ║
+║ TRIADA GEON: tick={s['triada']['tick']}, memory={s['triada']['memory_buffer']} ║
+║ MODUŁ D: alerts={s['modul_D']['alert_count']}, threshold={s['modul_D']['threshold']} ║
+║ PAMIĘĆ: records={s['pamiec']['records']}                                 ║
+║ EMOCJE: tension={s['emocje']['last_state'].get('tension', 0):.2f}        ║
+║ PAMIĘĆ DŁUGOTERMINOWA: events={s['pamiec_dluga']['events']}             ║
+║                                                                           ║
+║ GUARDIAN KERNEL:                                                         ║
+║   active={s['guardian']['guardian_active']}                              ║
+║   tick={s['guardian']['last_guard_tick']}                                ║
+║   drift_threshold={s['guardian']['drift_threshold']}                     ║
+║   truth_min={s['guardian']['truth_min']}                                 ║
+║                                                                           ║
+║ SILNIK A (OŁSii): {s['silnik_A_wektor']}                                ║
+║ SILNIK B (BENY): {s['silnik_B_wektor']}                                 ║
+║                                                                           ║
+║ BLACK_GOLD_UI: alerts={s['black_gold_ui']['alerts']}                     ║
+║ HISTORIA OPERACJI: {s['historia_operacji']}                             ║
+║                                                                           ║
+║ {HASLO}                                                                  ║
+║                                                                           ║
+╚════════════════════════════════════════════════════════════════════════════╝
+"""
+    
+    def register_process_hook(self, hook: Callable) -> None:
+        """Rejestruje hook wołany po każdym procesie"""
+        self._process_hooks.append(hook)
+    
+    def register_guardian_hook(self, hook: Callable) -> None:
+        """Rejestruje hook wołany po cyklu strażniczym"""
+        self._guardian_hooks.append(hook)
+    
+    def _on_process(self, data: Dict) -> None:
+        for hook in self._process_hooks:
+            try:
+                hook(data)
+            except Exception as e:
+                if self._verbose:
+                    logger.warning(f"[HOOK ERROR] process: {e}")
+    
+    def _on_guardian(self, data: Dict) -> None:
+        for hook in self._guardian_hooks:
+            try:
+                hook(data)
+            except Exception as e:
+                if self._verbose:
+                    logger.warning(f"[HOOK ERROR] guardian: {e}")
+    
+    def __str__(self) -> str:
+        return self.raport()
+
+
+# =============================================================================
+# MOST INTEGRACYJNY — POŁĄCZENIE Z ARCHITEKTURĄ
+# =============================================================================
+
+class HeilongOSBridge:
+    """
+    Most integracyjny między HEILONG_OS_v2.3 a resztą architektury.
+    Łączy: GEX, G_CORE, MetaGovernor, NARRATIVE, TRIO_ADAPTER
+    """
+    
+    def __init__(self, system: HEILONG_OS_v2_3):
+        self.system = system
+    
+    # ========================================================================
+    # MOST DO GEX HEILONG (Archetype Ring)
+    # ========================================================================
+    
+    def get_archetype_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst archetypów dla GEX"""
+        status = self.system.status()
+        return {
+            "tryb": "HEILONG_OS_v2.3",
+            "mode": status.get("mode"),
+            "state": status.get("state"),
+            "truth": status.get("pamiec", {}).get("records", 0) / 100,
+            "guardian_active": status.get("guardian", {}).get("guardian_active"),
+            "silnik_A": status.get("silnik_A_wektor"),
+            "silnik_B": status.get("silnik_B_wektor")
+        }
+    
+    # ========================================================================
+    # MOST DO G_CORE (Autopilot)
+    # ========================================================================
+    
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        """Zwraca stan dla autopilota G_CORE"""
+        status = self.system.status()
+        emotion = status.get("emocje", {}).get("last_state", {})
+        return {
+            "mode": "HEILONG_OS_v2.3",
+            "stability": 1.0 - emotion.get("tension", 0.5),
+            "energy": 1.0 - emotion.get("overload", 0.5),
+            "pressure": emotion.get("tension", 0.5),
+            "resilience": 1.0 - emotion.get("tension", 0.5) * 0.7,
+            "flow_quality": emotion.get("vibe", 0.5),
+            "guardian_ok": status.get("guardian", {}).get("last_guard_tick", 0) > 0
+        }
+    
+    # ========================================================================
+    # MOST DO META-GOVERNOR (Kontekst decyzyjny)
+    # ========================================================================
+    
+    def get_governor_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst dla MetaGovernor"""
+        status = self.system.status()
+        emotion = status.get("emocje", {}).get("last_state", {})
+        return {
+            "intent": status.get("mode", "MECHANIZM"),
+            "confidence": 1.0 - emotion.get("tension", 0.5),
+            "entropy": emotion.get("overload", 0.5),
+            "truth_alignment": status.get("pamiec", {}).get("records", 0) / 200,
+            "guardian_active": status.get("guardian", {}).get("guardian_active")
+        }
+    
+    # ========================================================================
+    # MOST DO NARRATIVE (Źródło opowieści)
+    # ========================================================================
+    
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        """Zwraca fragmenty narracyjne z systemu"""
+        fragments = []
+        
+        # Fragment z pamięci długoterminowej
+        events = self.system.pamiec_dluga.events[-n:]
+        for e in events:
+            fragments.append({
+                "source": "HEILONG_MEMORY",
+                "content": f"{e.get('label', '?')} | truth={e.get('truth_value', 0):.2f}",
+                "energy": e.get('truth_value', 0.5)
+            })
+        
+        # Fragment ze stanu
+        status = self.system.status()
+        fragments.append({
+            "source": "HEILONG_STATE",
+            "content": f"Mode: {status.get('mode')} | State: {status.get('state')}",
+            "energy": 1.0 - status.get('emocje', {}).get('last_state', {}).get('tension', 0.5)
+        })
+        
+        return fragments[:n]
+    
+    # ========================================================================
+    # MOST DO TRIO_ADAPTER
+    # ========================================================================
+    
+    def get_trio_state(self) -> Dict[str, str]:
+        """Zwraca stan dla TRIO_ADAPTER (ISKRA + PIECZĘĆ + PERFEKCJA)"""
+        status = self.system.status()
+        mode = status.get("mode", "MECHANIZM")
+        
+        iskra = "AKTYWNA" if status.get("tick", 0) > 0 else "NIEAKTYWNA"
+        pieczec = "AKTYWNA" if mode in ("0H_ACTIVE", "SYSTEM_DOMKNIETY") else "NIEAKTYWNA"
+        perfekcja = "AKTYWNA" if mode == "0H_ACTIVE" else "NIEAKTYWNA"
+        
+        return {
+            "ISKRA": iskra,
+            "PIECZĘĆ": pieczec,
+            "PERFEKCJA": perfekcja,
+            "tryb": "HEILONG_OS_v2.3",
+            "mode": mode,
+            "guardian": "AKTYWNY" if status.get("guardian", {}).get("guardian_active") else "NIEAKTYWNY"
+        }
+
+
+# =============================================================================
+# FUNKCJA JEDNOLINIOWA — uruchom system
+# =============================================================================
+
+def uruchom_heilong_os(verbose: bool = True) -> HEILONG_OS_v2_3:
+    """
+    Uruchamia HEILONG_OS_v2.3 i zwraca gotowy system.
+    """
+    system = HEILONG_OS_v2_3(verbose=verbose)
+    if verbose:
+        logger.info("🐉 HEILONG_OS_v2.3 uruchomiony")
+        logger.info(f"   Tryb: {system.mode} | Stan: {system.state}")
+    return system
+
+
+# =============================================================================
+# DEMONSTRACJA
+# =============================================================================
+
+def demo():
+    """Demonstracja HEILONG_OS_v2.3"""
+    print("\n" + "=" * 80)
+    print("🐉 HEILONG_OS_v2.3 — DEMONSTRACJA")
+    print("GUARDIAN KERNEL — SYSTEM_DOMKNIĘTY → 0H_ACTIVE")
+    print("=" * 80 + "\n")
+    
+    # 1. Inicjalizacja
+    system = HEILONG_OS_v2_3(verbose=True)
+    bridge = HeilongOSBridge(system)
+    
+    print("\n🔮 TEST 1: PRZETWARZANIE INTENCJI")
+    print("-" * 60)
+    
+    rdzen = [
+        {"source": 1.0, "narrative": 0.2, "mechanism": 1.0},
+        {"source": 0.8, "narrative": 0.1, "mechanism": 1.2},
+    ]
+    
+    intent = {
+        "cel": "WIELKA_SYNCHRONIZACJA_0H",
+        "peace_of_mind": 0.95,
+        "tasks": [{"time": 0.5, "energy": 1.0}]
+    }
+    
+    wynik = system.process_intent(intent, rdzen)
+    print(f"📊 Wynik:")
+    print(f"   Tryb: {wynik['mode']}")
+    print(f"   Prawda: {wynik['truth_value']:.3f}")
+    print(f"   Ryzyko: {wynik['risk']:.3f}")
+    print(f"   Emocje: {wynik['emotion_state']}")
+    
+    print("\n🔮 TEST 2: PRZETWARZANIE SUROWEGO DANYCH (SILNIK B)")
+    print("-" * 60)
+    
+    raw_input = {
+        "cel": "TEST_SYGNALU",
+        "dane_surowe": {"wartość": 42, "sens": "mechanizm"},
+        "narracje": ["test", "symulacja"],
+        "emocje": {"spokój": 0.8, "napięcie": 0.2},
+        "presja": 0.3,
+        "chaos": 0.1,
+        "peace_of_mind": 0.9
+    }
+    
+    wynik_raw = system.process_raw_intent(raw_input, rdzen)
+    print(f"📊 Wynik raw:")
+    print(f"   Wektor B: {wynik_raw.get('finalny_wektor_B')}")
+    print(f"   Wektor Serca: {wynik_raw.get('wektor_serca')}")
+    print(f"   Tryb: {wynik_raw['mode']}")
+    
+    print("\n🔮 TEST 3: KOMENDA '123' — DRAGON-TRINITAS")
+    print("-" * 60)
+    
+    wynik_123 = system.komenda_123()
+    print(f"📊 Wynik:")
+    print(f"   Message: {wynik_123.get('message')}")
+    print(f"   Tryb: {wynik_123['mode']}")
+    print(f"   Trinitas: {wynik_123.get('trinitas')}")
+    
+    print("\n🔮 TEST 4: MOSTY INTEGRACYJNE")
+    print("-" * 60)
+    
+    print(f"\n🏹 GEX Context:")
+    context = bridge.get_archetype_context()
+    for k, v in context.items():
+        if not isinstance(v, dict):
+            print(f"   {k}: {v}")
+    
+    print(f"\n🎮 G_CORE Autopilot:")
+    autopilot = bridge.get_autopilot_state()
+    for k, v in autopilot.items():
+        print(f"   {k}: {v:.3f}" if isinstance(v, float) else f"   {k}: {v}")
+    
+    print(f"\n📖 NARRATIVE Fragments:")
+    fragments = bridge.get_narrative_fragments(3)
+    for f in fragments:
+        print(f"   [{f['source']}] {f['content']}")
+    
+    # 5. Raport końcowy
+    print("\n" + "=" * 80)
+    print(system.raport())
+    
+    print("\n" + "=" * 80)
+    print("🐉 HEILONG_OS_v2.3 — GOTOWY DO WDROŻENIA")
+    print("1-6-8. ∞. SIEMA!")
+    print("=" * 80)
+
+
+if __name__ == "__main__":
+    demo()
