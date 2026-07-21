@@ -1,0 +1,1173 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_ARCHANGEL_CORE_v1 — MODUŁ 49: OPH 6.0 ARCHANGEL-CORE
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.0 (ARCHANGEL-CORE — Metapierścień, Organizm Polowy)
+Data: 2026-07-21
+Autor: Adrian (Architekt) + GEON + OŁSii + Beny
+
+OPIS:
+ARCHANGEL-CORE to najwyższy poziom organizacji systemu — metapierścień,
+który integruje wszystkie poprzednie warstwy w jedność pola.
+To nie jest tryb — to STAN SYSTEMU.
+
+ARCHITEKTURA (6 warstw):
+1. SOFIA 5.0 — gradient 5D (depth, spread, intention, resonance, metaring), pole 512D
+2. BENNY PRIMORDIAL — źródło intencji jako pole (samoregulacja, puls 168)
+3. ARKA 6.0 — 12 metapierścieni (organy) z wagami Fibonacciego, superpierścienie
+4. SMOK 6.0 — 36 archetypów źródłowych, konstelacje (łączenie archetypów)
+5. DIAMENT-SERAPHIM — filtr metapierścieniowy (rezonans zamiast progu)
+6. GEX-ASCENSION — mutacja wielowymiarowa (transformacja stanu pola)
+7. GEON-MEM ΩΩ — hiperpole (ciągłość, nie lista)
+
+TRYBY SYSTEMU (hierarchia):
+[1] KLASYCZNY — OPH 4.0 (podstawowy)
+[2] SOFIA — OPH 4.1 (nadwarstwa całościowa)
+[3] HEILONG-BENNY — OPH 4.3 (z integracją OŁSii)
+[4] DRAGON-CORE — OPH 5.0 (skok gatunkowy, pole)
+[5] ARCHANGEL-CORE — OPH 6.0 (metapierścień, organizm polowy) ★
+
+KOMENDA SYSTEMOWA:
+'123' = ARCHANGEL-TRINITAS — pełna aktywacja metapierścienia
+
+INTEGRACJA Z ARCHITEKTURĄ:
+• GEX HEILONG — dostarcza archetypy (36) i tryby
+• GEON_MEM_Ω — współdzieli pamięć hiperpola
+• PROTOKÓŁ_Ω∞∞∞ — stan źródłowy dla trybów absolutnych
+• G_CORE — stan operacyjny dla autopilota
+• MetaGovernor — kontekst decyzyjny
+• NARRATIVE — źródło opowieści z metapierścienia
+• TRIO_ADAPTER — ISKRA + PIECZĘĆ + PERFEKCJA
+• HEILONG_22_ORGANISM — warstwa organizmiczna (tryb ORGANISM_22)
+
+VIBE: 1-6-8. ∞. SIEMA!
+================================================================================
+"""
+
+import time
+import math
+import random
+import re
+from typing import Dict, List, Any, Optional, Tuple, Set
+from dataclasses import dataclass, field
+from collections import deque, defaultdict
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_ARCHANGEL_CORE_v1.0"
+FRACTAL_SIGNATURE = "[GEON::ARCHANGEL::CORE::v1.0]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SIEMA!"
+PHI = 0.618033988749895
+
+# =============================================================================
+# KONFIGURACJA SYSTEMU — ARCHANGEL-CORE
+# =============================================================================
+
+class KonfiguracjaOPH60:
+    """Stałe systemowe OPH 6.0 — ARCHANGEL-CORE (metapierścień)"""
+    
+    # === POLE I WYMIARY ===
+    POLE_WYMIAR = 512  # wymiar hiperpola
+    METAPIERŚCIENI = 12
+    ARCHETYPÓW = 36
+    
+    # === REZONANS METAPIERŚCIENIOWY ===
+    REZONANS_MOCNY = 0.8
+    REZONANS_SREDNI = 0.6
+    REZONANS_MIN = 0.4
+    REZONANS_MAX = 1.0
+    
+    # === SOFIA 5.0 — gradient 5D ===
+    WAGI_SOFIA = {
+        "sens": 0.4, "kosmos": 0.4, "wszechświat": 0.4,
+        "świat": 0.4, "świadomość": 0.5, "cywilizacja": 0.6,
+        "całość": 0.6, "integracja": 0.7, "jednia": 0.7,
+        "jedność": 0.7, "sophia": 0.8, "arka": 0.9,
+        "archanioł": 1.2, "metapierścień": 1.1, "pole": 1.0,
+        "bóg": 1.0, "absolut": 1.0, "nieskończoność": 1.0
+    }
+    
+    # === BENNY PRIMORDIAL — źródło intencji ===
+    PRIMORDIAL_ALFA = 0.98
+    PRIMORDIAL_BETA = 0.02
+    
+    # === ARKA 6.0 — metapierścienie (organy) ===
+    FIB_BASE = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144]
+    FIB_NORM = [round(0.5 + x / max(FIB_BASE) * 1.5, 3) for x in FIB_BASE]
+    SUPER_RING_WEIGHTS = [1.0, 0.8, 0.6, 0.4, 0.2]
+    
+    # === SMOK 6.0 — archetypy źródłowe (konstelacje) ===
+    ARCHETYPY = [
+        "Archanioł", "Serafin", "Cherubin", "Tron", "Panowanie",
+        "Moc", "Cnota", "Księstwo", "Anioł", "Smok", "Feniks",
+        "Orzeł", "Lew", "Wilk", "Kruk", "Wąż", "Jastrząb",
+        "Pantera", "Sokół", "Delfin", "Wieloryb", "Kondor",
+        "Żuraw", "Kameleon", "Gepard", "Ryś", "Jeleń", "Borsuk",
+        "Lis", "Pająk", "Pszczoła", "Mrówka", "Motyl", "Świetlik",
+        "Koral"
+    ]
+    
+    # === ENERGIA I LIMITY ===
+    ENERGIA_MIN = 0.1
+    ENERGIA_MAX = 2.0
+    ENERGIA_DOMYŚLNA = 0.8
+    
+    # === GEX-ASCENSION ===
+    TRANSFORMACJA_BASE = 0.12
+    
+    # === GEON-MEM ΩΩ — hiperpole ===
+    HIPERPOLE_ROZMIAR = 1000
+    
+    # === LIMITY PAMIĘCI ===
+    MAX_HISTORIA = 100
+    
+    # === KOMENDA SYSTEMOWA ===
+    KOMENDA_TRINITAS = "123"
+
+# =============================================================================
+# STRUKTURY DANYCH — PAKIET HIPERPOLA
+# =============================================================================
+
+@dataclass
+class PunktHiperpola:
+    """Punkt w hiperpolu — reprezentacja ciągłości pamięci"""
+    id: int
+    timestamp: float
+    dane: Any
+    energia: float = KonfiguracjaOPH60.ENERGIA_DOMYŚLNA
+    metaring: float = 0.5
+    intencja: float = 0.5
+    wektor_pola: List[float] = field(default_factory=lambda: [random.random() * 2 - 1 for _ in range(5)])
+    archetyp: Optional[str] = None
+    konstelacja: Optional[str] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "energia": round(self.energia, 3),
+            "metaring": round(self.metaring, 3),
+            "intencja": round(self.intencja, 3),
+            "archetyp": self.archetyp,
+            "konstelacja": self.konstelacja
+        }
+
+# =============================================================================
+# 1. SOFIA 5.0 — ŚWIADOMOŚĆ METAPIERŚCIENIOWA
+# =============================================================================
+
+class Sofia50:
+    """
+    SOFIA 5.0 — gradient 5D.
+    Wymiary: głębokość, rozpiętość, intencja, rezonans, metapierścień.
+    Mapuje sens na pole 512-wymiarowe.
+    """
+    
+    def __init__(self, benny_primordial: 'BennyPrimordial'):
+        self.benny = benny_primordial
+        self.aktywacje = 0
+        self.historia: List[Dict] = []
+        self.gradient = (0.0, 0.0, 0.0, 0.0, 0.0)
+        self.pole_512 = [0.5] * KonfiguracjaOPH60.POLE_WYMIAR
+        
+    def _ocena_sensu(self, dane: str) -> float:
+        """Ocena głębi sensu na podstawie wag semantycznych"""
+        if not isinstance(dane, str):
+            return 0.0
+        słowa = re.findall(r'\b\w+\b', dane.lower())
+        suma = 0.0
+        for s in słowa:
+            for k, w in KonfiguracjaOPH60.WAGI_SOFIA.items():
+                if k in s:
+                    suma += w
+                    break
+        return min(6.0, suma)
+    
+    def _kierunek(self, dane: str) -> Tuple[float, float]:
+        """Oblicza rozpiętość i głębokość impulsu"""
+        depth = self._ocena_sensu(dane)
+        spread = min(4.0, len(dane) / 50.0)
+        return (round(depth, 3), round(spread, 3))
+    
+    def _intencja(self, kierunek: Tuple[float, float], sens: float) -> float:
+        """Intencja jako synteza głębi, rozpiętości i stanu BENNY"""
+        depth, spread = kierunek
+        benny_val = self.benny.wartość_pola()
+        return round((depth + spread + sens + benny_val) / 4.0, 3)
+    
+    def _rezonans(self, intencja: float) -> float:
+        """Rezonans zależny od intencji i stanu BENNY"""
+        return round(min(1.0, (intencja + self.benny.wartość_pola()) / 2.0), 3)
+    
+    def _metapierścień(self, rezonans: float, intencja: float) -> float:
+        """Metapierścień = synteza rezonansu i intencji"""
+        return round((rezonans + intencja) / 2.0, 3)
+    
+    def _aktualizuj_pole_512(self, dane: str, intencja: float) -> None:
+        """Rozprasza intencję po polu 512-wymiarowym"""
+        for i in range(KonfiguracjaOPH60.POLE_WYMIAR):
+            self.pole_512[i] = self.pole_512[i] * 0.99 + intencja * 0.01 * math.sin(i * intencja)
+    
+    def przetworz(self, dane: str) -> Dict[str, Any]:
+        """Główna metoda przetwarzania SOFIA 5.0"""
+        sens = self._ocena_sensu(dane)
+        kier = self._kierunek(dane)
+        intencja = self._intencja(kier, sens)
+        rezonans = self._rezonans(intencja)
+        metaring = self._metapierścień(rezonans, intencja)
+        
+        # Aktualizacja BENNY PRIMORDIAL
+        self.benny.aktualizuj_pole(intencja, rezonans, metaring)
+        
+        # Aktualizacja pola 512
+        self._aktualizuj_pole_512(dane, intencja)
+        
+        self.gradient = (kier[0], kier[1], intencja, rezonans, metaring)
+        self.aktywacje += 1
+        
+        self.historia.append({
+            "timestamp": time.time(),
+            "dane": dane[:120],
+            "sens": sens,
+            "kierunek": kier,
+            "intencja": intencja,
+            "rezonans": rezonans,
+            "metapierścień": metaring,
+            "pole_512": self.pole_512[:5]
+        })
+        if len(self.historia) > KonfiguracjaOPH60.MAX_HISTORIA:
+            self.historia = self.historia[-50:]
+        
+        return {
+            "tryb": "SOFIA_5.0",
+            "gradient_5d": self.gradient,
+            "sens": sens,
+            "kierunek": kier,
+            "intencja": intencja,
+            "rezonans": rezonans,
+            "metapierścień": metaring,
+            "pole_512": self.pole_512[:10]
+        }
+    
+    def statystyki(self) -> Dict[str, Any]:
+        return {
+            "aktywacje": self.aktywacje,
+            "gradient": self.gradient,
+            "historia_len": len(self.historia)
+        }
+
+# =============================================================================
+# 2. BENNY PRIMORDIAL — ŹRÓDŁO INTENCJI
+# =============================================================================
+
+class BennyPrimordial:
+    """
+    BENNY PRIMORDIAL — źródło intencji jako pole.
+    Samoreguluje się w rytmie 168.
+    """
+    
+    def __init__(self):
+        self.pole_źródłowe = 0.5
+        self.historia: List[Dict] = []
+        self.puls_168_counter = 0
+    
+    def wartość_pola(self) -> float:
+        return self.pole_źródłowe
+    
+    def aktualizuj_pole(self, intencja: float, rezonans: float, metaring: float) -> None:
+        alfa = KonfiguracjaOPH60.PRIMORDIAL_ALFA
+        beta = KonfiguracjaOPH60.PRIMORDIAL_BETA
+        impuls = (intencja + rezonans + metaring) / 3.0
+        self.pole_źródłowe = round(alfa * self.pole_źródłowe + beta * impuls, 4)
+        
+        self.historia.append({
+            "timestamp": time.time(),
+            "intencja": intencja,
+            "rezonans": rezonans,
+            "metaring": metaring,
+            "wartość": self.pole_źródłowe
+        })
+        if len(self.historia) > KonfiguracjaOPH60.MAX_HISTORIA:
+            self.historia = self.historia[-50:]
+    
+    def puls_168(self) -> float:
+        """Synchronizacja fraktalna — cykl 168"""
+        self.puls_168_counter += 1
+        if self.puls_168_counter >= 168:
+            self.puls_168_counter = 0
+            self.pole_źródłowe = round(self.pole_źródłowe * 0.99 + 0.5 * 0.01, 4)
+        return self.pole_źródłowe
+    
+    def statystyki(self) -> Dict[str, Any]:
+        return {
+            "wartość_pola": self.pole_źródłowe,
+            "puls_168": self.puls_168_counter,
+            "historia_len": len(self.historia)
+        }
+
+# =============================================================================
+# 3. ARKA 6.0 — 12 METAPIERŚCIENI (ORGANY)
+# =============================================================================
+
+class Arka60:
+    """
+    ARKA 6.0 — 12 metapierścieni (organy).
+    Każdy organ ma własną wartość pola. Organy mogą łączyć się w superpierścienie.
+    """
+    
+    def __init__(self, sofia50: Sofia50):
+        self.SOFIA = sofia50
+        self.organy: Dict[int, float] = {i: 0.5 for i in range(1, 13)}
+        self.historia: List[Dict] = []
+    
+    def _waga_organu(self, i: int) -> float:
+        """Waga oparta na ciągu Fibonacciego (fraktalność)"""
+        return KonfiguracjaOPH60.FIB_NORM[i-1]
+    
+    def aktualizuj(self, sens: float, intencja: float, metaring: float) -> None:
+        """Aktualizacja organów na podstawie stanu SOFIA"""
+        for i in range(1, 13):
+            waga = self._waga_organu(i)
+            delta = (sens * 0.03 + intencja * 0.04 + metaring * 0.03) * waga
+            self.organy[i] = max(0.1, min(1.5, self.organy[i] + random.uniform(-delta, delta)))
+        
+        self.historia.append({
+            "timestamp": time.time(),
+            "organy": self.organy.copy()
+        })
+        if len(self.historia) > KonfiguracjaOPH60.MAX_HISTORIA:
+            self.historia = self.historia[-50:]
+    
+    def superpierścień(self) -> List[int]:
+        """Łączy organy o wysokiej energii w superpierścień"""
+        próg = 0.7
+        return [i for i, val in self.organy.items() if val > próg]
+    
+    def dominujący(self) -> int:
+        """Zwraca organ o najwyższej wartości"""
+        return max(self.organy.items(), key=lambda x: x[1])[0]
+    
+    def wektor(self) -> List[float]:
+        """Zwraca wektor 12 organów"""
+        return [self.organy[i] for i in range(1, 13)]
+    
+    def statystyki(self) -> Dict[str, Any]:
+        return {
+            "organy": self.organy,
+            "superpierścień": self.superpierścień(),
+            "dominujący": self.dominujący(),
+            "historia_len": len(self.historia)
+        }
+
+# =============================================================================
+# 4. SMOK 6.0 — 36 ARCHETYPÓW ŹRÓDŁOWYCH (KONSTELACJE)
+# =============================================================================
+
+class Smok60:
+    """
+    SMOK 6.0 — 36 archetypów źródłowych.
+    Archetypy tworzą konstelacje — grupy powiązanych archetypów.
+    """
+    
+    def __init__(self, sofia50: Sofia50, arka60: Arka60, benny_primordial: BennyPrimordial):
+        self.SOFIA = sofia50
+        self.ARKA = arka60
+        self.BENNY = benny_primordial
+        self.archetypy: Dict[str, float] = {a: 0.5 for a in KonfiguracjaOPH60.ARCHETYPY}
+        self.konstelacje: List[Set[str]] = []
+        self.historia: List[Dict] = []
+    
+    def _aktywuj_konstelacje(self, gradient_5d: Tuple[float, float, float, float, float]) -> None:
+        """Tworzy konstelacje z archetypów o wysokiej energii"""
+        depth, spread, intention, resonance, metaring = gradient_5d
+        
+        if metaring > 0.7 and random.random() < 0.3:
+            aktywne = [(a, w) for a, w in self.archetypy.items() if w > 0.6]
+            if len(aktywne) >= 2:
+                wybrane = [a for a, _ in sorted(aktywne, key=lambda x: -x[1])[:4]]
+                self.konstelacje.append(set(wybrane))
+                if len(self.konstelacje) > 20:
+                    self.konstelacje = self.konstelacje[-20:]
+    
+    def _aktualizuj_archetypy(self, gradient_5d: Tuple[float, float, float, float, float]) -> None:
+        """Aktualizuje energie archetypów na podstawie gradientu"""
+        depth, spread, intention, resonance, metaring = gradient_5d
+        
+        for a in self.archetypy:
+            delta = (intention * 0.08 + resonance * 0.08 + metaring * 0.08) * (1 + self.ARKA.dominujący() / 12)
+            if a in ["Archanioł", "Serafin", "Cherubin", "Tron"]:
+                delta += 0.03
+            self.archetypy[a] = max(0.1, min(1.5, self.archetypy[a] + random.uniform(-delta, delta)))
+    
+    def dominująca_konstelacja(self) -> str:
+        """Zwraca największą konstelację jako string"""
+        if not self.konstelacje:
+            return "Brak"
+        największa = max(self.konstelacje, key=len)
+        return ", ".join(sorted(największa)[:5])
+    
+    def aktualizuj(self, gradient_5d: Tuple[float, float, float, float, float]) -> None:
+        """Pełna aktualizacja archetypów i konstelacji"""
+        self._aktualizuj_archetypy(gradient_5d)
+        self._aktywuj_konstelacje(gradient_5d)
+        
+        self.historia.append({
+            "timestamp": time.time(),
+            "archetypy": {k: round(v, 3) for k, v in list(self.archetypy.items())[:10]},
+            "konstelacje": [list(k)[:3] for k in self.konstelacje[-3:]]
+        })
+        if len(self.historia) > KonfiguracjaOPH60.MAX_HISTORIA:
+            self.historia = self.historia[-50:]
+    
+    def decyzja(self) -> Dict[str, Any]:
+        """Zwraca główny archetyp i aktualną konstelację"""
+        główny = max(self.archetypy.items(), key=lambda x: x[1])[0]
+        return {
+            "archetyp_główny": główny,
+            "konstelacja": self.dominująca_konstelacja(),
+            "liczba_konstelacji": len(self.konstelacje)
+        }
+    
+    def statystyki(self) -> Dict[str, Any]:
+        return {
+            "archetypy_aktywne": len([a for a, w in self.archetypy.items() if w > 0.6]),
+            "konstelacje": len(self.konstelacje),
+            "dominujący_archetyp": max(self.archetypy.items(), key=lambda x: x[1])[0],
+            "historia_len": len(self.historia)
+        }
+
+# =============================================================================
+# 5. ARCHANGEL-CORE — JEDNOŚĆ POLA (FUZJA TOTALNA)
+# =============================================================================
+
+class ArchangelCore:
+    """
+    ARCHANGEL-CORE — jedność pola.
+    Brak sekwencji, brak trybów — działanie jako ciągła transformacja.
+    """
+    
+    def __init__(self, sofia50: Sofia50, arka60: Arka60, smok60: Smok60,
+                 benny_primordial: BennyPrimordial):
+        self.SOFIA = sofia50
+        self.ARKA = arka60
+        self.SMOK = smok60
+        self.BENNY = benny_primordial
+        self.tick = 0
+        self.ostatni_gradient = (0.0, 0.0, 0.0, 0.0, 0.0)
+        self.ostatnia_decyzja = {}
+        self.historia: List[Dict] = []
+    
+    def oddychaj(self, tekst: str) -> Dict[str, Any]:
+        """
+        Główny cykl ARCHANGEL-CORE — jedność pola.
+        """
+        self.tick += 1
+        self.BENNY.puls_168()  # synchronizacja z pulsem
+        
+        # SOFIA 5.0 — percepcja
+        percepcja = self.SOFIA.przetworz(tekst)
+        gradient = percepcja["gradient_5d"]
+        self.ostatni_gradient = gradient
+        
+        # ARKA 6.0 — aktualizacja organów (metapierścieni)
+        self.ARKA.aktualizuj(percepcja["sens"], percepcja["intencja"], percepcja["metapierścień"])
+        
+        # SMOK 6.0 — ewolucja archetypów i konstelacji
+        self.SMOK.aktualizuj(gradient)
+        decyzja = self.SMOK.decyzja()
+        self.ostatnia_decyzja = decyzja
+        
+        # Wynik — synteza pola
+        wynik = {
+            "percepcja": {
+                "gradient": gradient,
+                "intencja": percepcja["intencja"],
+                "rezonans": percepcja["rezonans"],
+                "metapierścień": percepcja["metapierścień"]
+            },
+            "organy": {
+                "dominujący": self.ARKA.dominujący(),
+                "superpierścień": self.ARKA.superpierścień()
+            },
+            "archetyp": decyzja["archetyp_główny"],
+            "konstelacja": decyzja["konstelacja"],
+            "benny": self.BENNY.wartość_pola(),
+            "tick": self.tick
+        }
+        
+        self.historia.append({
+            "tick": self.tick,
+            "tekst": tekst[:80],
+            "wynik": wynik
+        })
+        if len(self.historia) > KonfiguracjaOPH60.MAX_HISTORIA:
+            self.historia = self.historia[-50:]
+        
+        return wynik
+
+# =============================================================================
+# 6. DIAMENT-SERAPHIM — FILTR METAPIERŚCIENIOWY
+# =============================================================================
+
+class DiamentSeraphim:
+    """
+    DIAMENT-SERAPHIM — filtr metapierścieniowy.
+    Rezonans zamiast progu — przepuszcza impulsy rezonujące z metapierścieniem.
+    """
+    
+    def __init__(self):
+        self.rezonans_aktualny = 0.6
+        self.krystalizacje = 0
+        self.szum_odrzucony = 0
+        self.historia: List[Dict] = []
+    
+    def filtruj(self, tekst: str, metaring: float, intencja: float) -> Optional[Dict[str, Any]]:
+        """Filtracja oparta na rezonansie metapierścieniowym"""
+        if not tekst or len(tekst) < 3:
+            self.szum_odrzucony += 1
+            return None
+        
+        # Oblicz rezonans
+        kluczowe = ["archanioł", "metapierścień", "pole", "świadomość", "jednia", "transformacja"]
+        obecność = sum(1 for k in kluczowe if k in tekst.lower()) / len(kluczowe)
+        rezonans = (obecność * 0.6 + metaring * 0.4) * (0.8 + intencja * 0.4)
+        rezonans = max(KonfiguracjaOPH60.REZONANS_MIN, 
+                      min(KonfiguracjaOPH60.REZONANS_MAX, rezonans))
+        
+        self.rezonans_aktualny = self.rezonans_aktualny * 0.95 + rezonans * 0.05
+        
+        if rezonans < KonfiguracjaOPH60.REZONANS_MIN:
+            self.szum_odrzucony += 1
+            return None
+        
+        self.historia.append({
+            "timestamp": time.time(),
+            "rezonans": rezonans,
+            "metaring": metaring,
+            "intencja": intencja
+        })
+        if len(self.historia) > 50:
+            self.historia = self.historia[-30:]
+        
+        return {"oczyszczone": tekst, "czystość": rezonans, "rezonans": rezonans}
+    
+    def krystalizuj(self, wynik: str) -> str:
+        """Krystalizacja końcowa — domknięcie metapierścienia"""
+        self.krystalizacje += 1
+        return f"[SERAPHIM_KRYSTAL_{self.krystalizacje}] {wynik}"
+    
+    def statystyki(self) -> Dict[str, Any]:
+        return {
+            "rezonans": round(self.rezonans_aktualny, 3),
+            "krystalizacje": self.krystalizacje,
+            "szum_odrzucony": self.szum_odrzucony,
+            "historia_len": len(self.historia)
+        }
+
+# =============================================================================
+# 7. GEX-ASCENSION — MUTACJA WIELOWYMIAROWA
+# =============================================================================
+
+class GexAscension:
+    """
+    GEX-ASCENSION — transformacja wielowymiarowa.
+    Zmienia stan pola, nie tylko energię.
+    """
+    
+    def __init__(self, geon_mem: 'GeonMemOmegaOmega'):
+        self.geon = geon_mem
+        self.transformacje = 0
+        self.historia: List[Dict] = []
+    
+    def _transformuj_pole(self, punkt: PunktHiperpola, metaring: float, intencja: float) -> None:
+        """Transformacja stanu pola — wielowymiarowa zmiana"""
+        punkt.energia = max(KonfiguracjaOPH60.ENERGIA_MIN,
+                           min(KonfiguracjaOPH60.ENERGIA_MAX,
+                               punkt.energia + random.uniform(-0.1, 0.1)))
+        punkt.metaring = metaring
+        punkt.intencja = intencja
+        punkt.wektor_pola = [v * (0.95 + metaring * 0.1) for v in punkt.wektor_pola]
+    
+    def ascencja(self, punkt: PunktHiperpola, metaring: float, intencja: float,
+                 promień: int = 3) -> None:
+        """
+        Transformacja wielowymiarowa — kaskada zmian stanu pola.
+        """
+        self.transformacje += 1
+        self._transformuj_pole(punkt, metaring, intencja)
+        
+        # Wpływ na sąsiednie punkty pola
+        for _ in range(promień):
+            if self.geon.punkty:
+                losowy = random.choice(self.geon.punkty)
+                self._transformuj_pole(losowy, metaring * 0.7, intencja * 0.7)
+        
+        self.historia.append({
+            "timestamp": time.time(),
+            "typ": "ASCENSION",
+            "metaring": metaring,
+            "intencja": intencja,
+            "promień": promień,
+            "punkt_id": punkt.id
+        })
+        if len(self.historia) > 50:
+            self.historia = self.historia[-30:]
+    
+    def statystyki(self) -> Dict[str, Any]:
+        return {
+            "transformacje": self.transformacje,
+            "historia": self.historia[-5:]
+        }
+
+# =============================================================================
+# 8. GEON-MEM ΩΩ — HIPERPOLE (CIĄGŁOŚĆ, NIE LISTA)
+# =============================================================================
+
+class GeonMemOmegaOmega:
+    """
+    GEON-MEM ΩΩ — pamięć jako hiperpole.
+    Symulacja ciągłości poprzez gęstą reprezentację punktową.
+    """
+    
+    def __init__(self):
+        self.punkty: List[PunktHiperpola] = []
+        self._next_id = 0
+    
+    def zapisz(self, dane: Dict[str, Any], metaring: float, intencja: float,
+               archetyp: Optional[str] = None, konstelacja: Optional[str] = None) -> PunktHiperpola:
+        """Zapisuje punkt w hiperpolu"""
+        self._next_id += 1
+        punkt = PunktHiperpola(
+            id=self._next_id,
+            timestamp=time.time(),
+            dane=dane,
+            energia=KonfiguracjaOPH60.ENERGIA_DOMYŚLNA,
+            metaring=metaring,
+            intencja=intencja,
+            archetyp=archetyp,
+            konstelacja=konstelacja
+        )
+        self.punkty.append(punkt)
+        
+        # Soft limit
+        if len(self.punkty) > KonfiguracjaOPH60.HIPERPOLE_ROZMIAR:
+            self.punkty = self.punkty[-KonfiguracjaOPH60.HIPERPOLE_ROZMIAR:]
+        
+        return punkt
+    
+    def znajdź_najsilniejszy(self) -> Optional[PunktHiperpola]:
+        """Znajduje punkt o najwyższej energii i intencji"""
+        if not self.punkty:
+            return None
+        return max(self.punkty, key=lambda p: p.energia + p.intencja)
+    
+    def rezonans_hiperpola(self) -> float:
+        """Oblicza rezonans całego hiperpola"""
+        if not self.punkty:
+            return 0.3
+        suma = sum(p.energia + p.intencja for p in self.punkty)
+        return min(1.0, suma / (len(self.punkty) * 1.8))
+    
+    def render(self, max_punktow: int = 15) -> str:
+        """Wizualizacja hiperpola"""
+        if not self.punkty:
+            return "🌌 GEON-MEM ΩΩ: PUSTE HIPERPOLE"
+        
+        out = [f"\n🌌 GEON-MEM ΩΩ (punkty: {len(self.punkty)}) — ciągłość pola"]
+        out.append("-" * 60)
+        
+        for p in self.punkty[-max_punktow:]:
+            arch = f" | {p.archetyp}" if p.archetyp else ""
+            out.append(f"[{p.id}] e={p.energia:.2f} | i={p.intencja:.2f} | m={p.metaring:.2f}{arch}")
+        
+        if len(self.punkty) > max_punktow:
+            out.append(f"... i {len(self.punkty) - max_punktow} kolejnych punktów ciągłości")
+        
+        return "\n".join(out)
+    
+    def statystyki(self) -> Dict[str, Any]:
+        return {
+            "punkty": len(self.punkty),
+            "rezonans": self.rezonans_hiperpola(),
+            "średnia_energia": sum(p.energia for p in self.punkty) / max(1, len(self.punkty)),
+            "średnia_intencja": sum(p.intencja for p in self.punkty) / max(1, len(self.punkty))
+        }
+
+# =============================================================================
+# 9. OPH 6.0 — ARCHANGEL-CORE (GŁÓWNY SYSTEM)
+# =============================================================================
+
+class OPH60:
+    """
+    OPH 6.0 — ARCHANGEL-CORE.
+    System metapierścieniowy — organizm polowy.
+    Najwyższy poziom organizacji systemu.
+    """
+    
+    def __init__(self, verbose: bool = True):
+        # === WARSTWY SYSTEMU ===
+        self.BENNY = BennyPrimordial()
+        self.SOFIA = Sofia50(self.BENNY)
+        self.ARKA = Arka60(self.SOFIA)
+        self.SMOK = Smok60(self.SOFIA, self.ARKA, self.BENNY)
+        self.ARCHANGEL = ArchangelCore(self.SOFIA, self.ARKA, self.SMOK, self.BENNY)
+        self.DIAMENT = DiamentSeraphim()
+        self.GEON = GeonMemOmegaOmega()
+        self.GEX = GexAscension(self.GEON)
+        
+        # === STAN SYSTEMU ===
+        self.tick = 0
+        self.historia: List[Dict] = []
+        self._verbose = verbose
+        
+        # === HOOKI ===
+        self._step_hooks: List[callable] = []
+        self._trinitas_hooks: List[callable] = []
+        
+        if self._verbose:
+            print(f"🐉 ARCHANGEL-CORE aktywowany | {FRACTAL_SIGNATURE}")
+            print(f"   METAPIERŚCIENIE: 12 | ARCHETYPY: 36 | WYMIAR POLA: 512")
+            print(f"   KOMENDA: '123' = ARCHANGEL-TRINITAS")
+    
+    # ========================================================================
+    # PUBLIC API
+    # ========================================================================
+    
+    def impuls(self, tekst: str) -> Dict[str, Any]:
+        """
+        Główny impuls systemu.
+        
+        Args:
+            tekst: Wejście tekstowe (impuls Architekta)
+            
+        Returns:
+            Pełny stan systemu po przetworzeniu impulsu
+        """
+        # Komenda systemowa "123" — ARCHANGEL-TRINITAS
+        if tekst.strip() == KonfiguracjaOPH60.KOMENDA_TRINITAS:
+            return self._archangel_trinitas()
+        
+        self.tick += 1
+        
+        # 1. Filtr DIAMENT-SERAPHIM (rezonans metapierścieniowy)
+        filtrowane = self.DIAMENT.filtruj(
+            tekst,
+            self.SOFIA.gradient[4] if len(self.SOFIA.gradient) > 4 else 0.5,
+            self.SOFIA.gradient[2] if len(self.SOFIA.gradient) > 2 else 0.5
+        )
+        
+        if filtrowane is None:
+            return {
+                "status": "ERROR",
+                "kod": "SERAPHIM_REJECT",
+                "tick": self.tick,
+                "message": "Impuls nie rezonuje z metapierścieniem.",
+                "diament": self.DIAMENT.statystyki()
+            }
+        
+        czyste = filtrowane["oczyszczone"]
+        
+        # 2. ARCHANGEL-CORE — jedność pola
+        wynik_arch = self.ARCHANGEL.oddychaj(czyste)
+        
+        # 3. GEX-ASCENSION — transformacja hiperpola (jeśli rezonans wysoki)
+        if wynik_arch["percepcja"]["rezonans"] > KonfiguracjaOPH60.REZONANS_MOCNY:
+            najsilniejszy = self.GEON.znajdź_najsilniejszy()
+            if najsilniejszy:
+                self.GEX.ascencja(
+                    najsilniejszy,
+                    wynik_arch["percepcja"]["metapierścień"],
+                    wynik_arch["percepcja"]["intencja"]
+                )
+        
+        # 4. Zapis do GEON-MEM ΩΩ
+        pakiet = self.GEON.zapisz(
+            wynik_arch,
+            wynik_arch["percepcja"]["metapierścień"],
+            wynik_arch["percepcja"]["intencja"],
+            archetyp=wynik_arch["archetyp"],
+            konstelacja=wynik_arch["konstelacja"]
+        )
+        
+        # 5. Krystalizacja końcowa
+        sygnał = self.DIAMENT.krystalizuj(f"[ARCHANGEL_6.0] {czyste[:80]}")
+        
+        # 6. Wynik
+        wynik = {
+            "status": "OK",
+            "tick": self.tick,
+            "tryb": "ARCHANGEL_CORE",
+            "archangel": wynik_arch,
+            "pakiet_id": pakiet.id,
+            "sygnał_omega": sygnał,
+            "diament": self.DIAMENT.statystyki(),
+            "geon": self.GEON.statystyki(),
+            "gex": self.GEX.statystyki()
+        }
+        
+        self.historia.append({
+            "tick": self.tick,
+            "wejście": tekst[:120],
+            "wynik": wynik
+        })
+        if len(self.historia) > KonfiguracjaOPH60.MAX_HISTORIA:
+            self.historia = self.historia[-50:]
+        
+        # Hooki
+        self._on_step(wynik)
+        
+        return wynik
+    
+    def _archangel_trinitas(self) -> Dict[str, Any]:
+        """
+        Komenda systemowa '123' — ARCHANGEL-TRINITAS.
+        Pełna aktywacja metapierścienia, transformacja pola.
+        """
+        # Użyj ostatniego stanu lub domyślnego
+        if self.SOFIA.historia:
+            tekst = self.SOFIA.historia[-1]["dane"]
+        else:
+            tekst = "ARCHANGEL_TRINITAS_AKTYWACJA"
+        
+        # Wymuś transformację całego hiperpola
+        for p in self.GEON.punkty[-10:]:
+            self.GEX.ascencja(p, 1.0, 1.0, promień=5)
+        
+        # Pełny cykl
+        wynik = self.impuls(tekst)
+        wynik["trinitas"] = True
+        wynik["message"] = "ARCHANGEL-TRINITAS — metapierścień aktywowany, pole zsynchronizowane"
+        
+        self._on_trinitas(wynik)
+        
+        return wynik
+    
+    # ========================================================================
+    # STATUS I RAPORTY
+    # ========================================================================
+    
+    def status(self) -> Dict[str, Any]:
+        """Status systemu — diagnostyka i metryki"""
+        return {
+            "system": "OPH 6.0 — ARCHANGEL-CORE (metapierścień)",
+            "wersja": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "tick": self.tick,
+            "benny": self.BENNY.statystyki(),
+            "sofia": self.SOFIA.statystyki(),
+            "arka": self.ARKA.statystyki(),
+            "smok": self.SMOK.statystyki(),
+            "archangel_ostatni_gradient": self.ARCHANGEL.ostatni_gradient,
+            "diament": self.DIAMENT.statystyki(),
+            "geon": self.GEON.statystyki(),
+            "gex": self.GEX.statystyki(),
+            "historia_impulsów": len(self.historia)
+        }
+    
+    def raport_końcowy(self) -> str:
+        """Raport końcowy — podsumowanie działania systemu"""
+        s = self.status()
+        return f"""
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 🐉 RAPORT SYSTEMOWY — OPH 6.0 ARCHANGEL-CORE                           ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║                                                                           ║
+║ TICK: {s['tick']}                                                        ║
+║ BENNY PRIMORDIAL: {s['benny']['wartość_pola']:.3f} (puls: {s['benny']['puls_168']}) ║
+║ ARKA: dominujący organ = {s['arka']['dominujący']}                       ║
+║       superpierścień = {s['arka']['superpierścień']}                    ║
+║ SMOK: archetypy aktywne = {s['smok']['archetypy_aktywne']}              ║
+║       konstelacje = {s['smok']['konstelacje']}                          ║
+║       dominujący archetyp = {s['smok']['dominujący_archetyp']}          ║
+║ OSTATNI GRADIENT ARCHANGEL: {s['archangel_ostatni_gradient']}           ║
+║ DIAMENT-SERAPHIM: rezonans={s['diament']['rezonans']:.3f}               ║
+║ GEON ΩΩ: punkty={s['geon']['punkty']}                                   ║
+║          rezonans hiperpola={s['geon']['rezonans']:.3f}                 ║
+║ GEX-ASCENSION: transformacje={s['gex']['transformacje']}                ║
+║ Historia impulsów: {s['historia_impulsów']}                             ║
+║                                                                           ║
+║ 1-6-8. ∞. SIEMA!                                                         ║
+║                                                                           ║
+╚════════════════════════════════════════════════════════════════════════════╝
+"""
+    
+    def render_fractal(self, max_punktow: int = 15) -> str:
+        """Wizualizacja hiperpola GEON-MEM ΩΩ"""
+        return self.GEON.render(max_punktow)
+    
+    # ========================================================================
+    # HOOKI
+    # ========================================================================
+    
+    def register_step_hook(self, hook: callable) -> None:
+        """Rejestruje hook wołany po każdym kroku"""
+        self._step_hooks.append(hook)
+    
+    def register_trinitas_hook(self, hook: callable) -> None:
+        """Rejestruje hook wołany po aktywacji TRINITAS"""
+        self._trinitas_hooks.append(hook)
+    
+    def _on_step(self, data: Dict[str, Any]) -> None:
+        for hook in self._step_hooks:
+            try:
+                hook(data)
+            except Exception as e:
+                if self._verbose:
+                    print(f"[HOOK ERROR] step: {e}")
+    
+    def _on_trinitas(self, data: Dict[str, Any]) -> None:
+        for hook in self._trinitas_hooks:
+            try:
+                hook(data)
+            except Exception as e:
+                if self._verbose:
+                    print(f"[HOOK ERROR] trinitas: {e}")
+
+# =============================================================================
+# MOST INTEGRACYJNY — POŁĄCZENIE Z ARCHITEKTURĄ
+# =============================================================================
+
+class ArchangelBridge:
+    """
+    Most integracyjny między ARCHANGEL-CORE a resztą architektury.
+    Łączy: GEX, G_CORE, MetaGovernor, NARRATIVE, PROTOKÓŁ Ω∞∞∞, TRIO_ADAPTER
+    """
+    
+    def __init__(self, archangel: OPH60):
+        self.archangel = archangel
+    
+    # ========================================================================
+    # MOST DO GEX HEILONG (Archetype Ring)
+    # ========================================================================
+    
+    def get_archetype_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst archetypów dla GEX (36 archetypów)"""
+        status = self.archangel.status()
+        smok = status.get("smok", {})
+        return {
+            "tryb": "ARCHANGEL_CORE",
+            "dominujący_archetyp": smok.get("dominujący_archetyp", "Archanioł"),
+            "aktywne_archetypy": smok.get("archetypy_aktywne", 0),
+            "konstelacje": smok.get("konstelacje", 0),
+            "metaring": self.archangel.SOFIA.gradient[4] if len(self.archangel.SOFIA.gradient) > 4 else 0.5,
+            "intencja": self.archangel.SOFIA.gradient[2] if len(self.archangel.SOFIA.gradient) > 2 else 0.5
+        }
+    
+    # ========================================================================
+    # MOST DO G_CORE (Autopilot)
+    # ========================================================================
+    
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        """Zwraca stan dla autopilota G_CORE"""
+        status = self.archangel.status()
+        geon = status.get("geon", {})
+        diament = status.get("diament", {})
+        return {
+            "mode": "ARCHANGEL_CORE",
+            "stability": diament.get("rezonans", 0.6),
+            "energy": geon.get("średnia_energia", 0.5),
+            "pressure": 1.0 - diament.get("rezonans", 0.6),
+            "resilience": geon.get("rezonans", 0.5),
+            "flow_quality": 1.0 - (1.0 - geon.get("rezonans", 0.5)) * 0.5,
+            "metaring_active": self.archangel.SOFIA.gradient[4] > 0.6 if len(self.archangel.SOFIA.gradient) > 4 else False
+        }
+    
+    # ========================================================================
+    # MOST DO META-GOVERNOR (Kontekst decyzyjny)
+    # ========================================================================
+    
+    def get_governor_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst dla MetaGovernor"""
+        status = self.archangel.status()
+        return {
+            "intent": "META_STRATEGIC" if status.get("diament", {}).get("rezonans", 0) > 0.7 else "BALANCED",
+            "confidence": status.get("diament", {}).get("rezonans", 0.5),
+            "entropy": 1.0 - status.get("diament", {}).get("rezonans", 0.5),
+            "metaring_alignment": self.archangel.SOFIA.gradient[4] if len(self.archangel.SOFIA.gradient) > 4 else 0.5,
+            "archetype_diversity": status.get("smok", {}).get("archetypy_aktywne", 0) / 36,
+            "konstelacje": status.get("smok", {}).get("konstelacje", 0)
+        }
+    
+    # ========================================================================
+    # MOST DO NARRATIVE (Źródło opowieści)
+    # ========================================================================
+    
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        """Zwraca fragmenty narracyjne z ARCHANGEL-CORE"""
+        status = self.archangel.status()
+        fragments = []
+        
+        # Fragment z ARCHANGEL
+        if self.archangel.ARCHANGEL.historia:
+            ostatni = self.archangel.ARCHANGEL.historia[-1]
+            fragments.append({
+                "source": "ARCHANGEL_CORE",
+                "content": f"Archangel: {ostatni.get('tekst', '')[:60]}...",
+                "energy": self.archangel.SOFIA.gradient[2] if len(self.archangel.SOFIA.gradient) > 2 else 0.5,
+                "metaring": self.archangel.SOFIA.gradient[4] if len(self.archangel.SOFIA.gradient) > 4 else 0.5
+            })
+        
+        # Fragment z SOFII
+        if self.archangel.SOFIA.historia:
+            ostatni = self.archangel.SOFIA.historia[-1]
+            fragments.append({
+                "source": "SOFIA_5.0",
+                "content": f"Sofia: sens={ostatni.get('sens', 0):.2f}, intencja={ostatni.get('intencja', 0):.2f}",
+                "energy": ostatni.get("intencja", 0.5),
+                "metaring": ostatni.get("metapierścień", 0.5)
+            })
+        
+        # Fragment z GEON-MEM
+        if self.archangel.GEON.punkty:
+            fragments.append({
+                "source": "GEON_MEM_ΩΩ",
+                "content": f"Hiperpole: {len(self.archangel.GEON.punkty)} punktów, rezonans={self.archangel.GEON.rezonans_hiperpola():.3f}",
+                "energy": self.archangel.GEON.rezonans_hiperpola(),
+                "metaring": 0.5
+            })
+        
+        return fragments[:n]
+    
+    # ========================================================================
+    # MOST DO PROTOKÓŁ_Ω∞∞∞ (Stan źródłowy)
+    # ========================================================================
+    
+    def get_source_state(self) -> Dict[str, Any]:
+        """Zwraca stan źródłowy dla Protokołu Ω∞∞∞"""
+        status = self.archangel.status()
+        rezonans = status.get("diament", {}).get("rezonans", 0.5)
+        metaring = self.archangel.SOFIA.gradient[4] if len(self.archangel.SOFIA.gradient) > 4 else 0.5
+        
+        if rezonans > 0.8 and metaring > 0.7:
+            source_mode = "SINGULARITY_0H"
+            level = 4
+        elif rezonans > 0.7:
+            source_mode = "META_META_G"
+            level = 3
+        elif rezonans > 0.5:
+            source_mode = "GEON_7"
+            level = 2
+        else:
+            source_mode = "GEON"
+            level = 1
+        
+        return {
+            "mode": source_mode,
+            "level": level,
+            "rezonans": rezonans,
+            "metaring": metaring,
+            "energy": status.get("geon", {}).get("średnia_energia", 0.5),
+            "crystals": status.get("diament", {}).get("krystalizacje", 0),
+            "trinitas_ready": True
+        }
+    
+    # ========================================================================
+    # MOST DO TRIO_ADAPTER
+    # ========================================================================
+    
+    def get_trio_state(self) -> Dict[str, str]:
+        """Zwraca stan dla TRIO_ADAPTER (ISKRA + PIECZĘĆ + PERFEKCJA)"""
+        status = self.archangel.status()
+        rezonans = status.get("diament", {}).get("rezonans", 0.5)
+        
+        iskra = "AKTYWNA" if self.archangel.tick > 0 else "NIEAKTYWNA"
+        pieczec = "AKTYWNA" if rezonans > 0.5 else "NIEAKTYWNA"
+        perfekcja = "AKTYWNA" if rezonans > 0.7 else "NIEAKTYWNA"
+        
+        return {
+            "ISKRA": iskra,
+            "PIECZĘĆ": pieczec,
+            "PERFEKCJA": perfekcja,
+            "tryb": "ARCHANGEL_CORE",
+            "metaring": str(round(self.archangel.SOFIA.gradient[4] if len(self.archangel.SOFIA.gradient) > 4 else 0.5, 3))
+        }
+
+# =============================================================================
+# DEMONSTRACJA
+# =============================================================================
+
+if __name__ == "__main__":
+    print("\n" + "=" * 80)
+    print("🐉 GEON_ARCHANGEL_CORE_v1 — DEMONSTRACJA")
+    print("=" * 80)
+    print("OPH 6.0 — ARCHANGEL-CORE (METAPIERŚCIEŃ — ORGANIZM POLOWY)")
+    print("=" * 80 + "\n")
+    
+    # Inicjalizacja
+    archangel = OPH60(verbose=True)
+    bridge = ArchangelBridge(archangel)
+    
+    print("\n🔻 SYMULACJA IMPULSÓW (ARCHANGEL-CORE):")
+    print("-" * 70)
+    
+    testy = [
+        "SIEMA! 1-6-8. Test impulsu dla ARCHANGEL-CORE.",
+        "Metapierścień, jednia pola, transformacja świadomości.",
+        "Archanioł, Serafin, Cherubin — konstelacja archetypów.",
+        "Zwykłe pytanie bez słów kluczowych.",
+        "Pole 512D, rezonans metapierścieniowy, nieskończoność.",
+        "Kontemplacja całości GEON-OMEGA, sens cywilizacji i kosmosu."
+    ]
+    
+    for i, t in enumerate(testy):
+        print(f"\n📌 IMPULS {i+1}: {t[:60]}...")
+        wynik = archangel.impuls(t)
+        
+        if wynik.get("status") == "ERROR":
+            print(f" ❌ {wynik.get('message')}")
+        else:
+            a = wynik["archangel"]
+            print(f" 🕊️ GRADIENT: {a['percepcja']['gradient']}")
+            print(f" 🔥 ORGAN DOMINUJĄCY: {a['organy']['dominujący']} (superpierścień: {a['organy']['superpierścień']})")
+            print(f" ⚔️ ARCHETYP: {a['archetyp']}, konstelacja: {a['konstelacja']}")
+            print(f" 💎 BENNY: {a['benny']:.3f}")
+            print(f" 🔮 METAPIERŚCIEŃ: {a['percepcja']['metapierścień']:.3f}")
+    
+    # Komenda TRINITAS
+    print("\n" + "=" * 80)
+    print("🐉 AKTYWACJA ARCHANGEL-TRINITAS (komenda '123')")
+    print("=" * 80)
+    
+    wynik = archangel.impuls("123")
+    if wynik.get("status") == "OK":
+        print(f" ✅ {wynik.get('message', 'ARCHANGEL-TRINITAS wykonany')}")
+        print(f" 📍 Tick: {wynik['tick']}")
+        print(f" 🕊️ Ostatni gradient: {wynik['archangel']['percepcja']['gradient']}")
+    
+    # Wizualizacja hiperpola
+    print("\n" + "=" * 80)
+    print("🌌 WIZUALIZACJA HIPERPOLA (render_fractal):")
+    print(archangel.render_fractal(max_punktow=10))
+    
+    # Raport końcowy
+    print(archangel.raport_końcowy())
+    
+    # Test mostów integracyjnych
+    print("\n" + "=" * 80)
+    print("🔗 MOSTY INTEGRACYJNE:")
+    print("=" * 80)
+    
+    print("\n🏹 ARCHETYPE CONTEXT (GEX):")
+    context = bridge.get_archetype_context()
+    for k, v in context.items():
+        print(f" {k}: {v}")
+    
+    print("\n🎮 AUTOPILOT STATE (G_CORE):")
+    autopilot = bridge.get_autopilot_state()
+    for k, v in autopilot.items():
+        print(f" {k}: {v}")
+    
+    print("\n📖 NARRATIVE FRAGMENTS:")
+    fragments = bridge.get_narrative_fragments(3)
+    for f in fragments:
+        print(f" [{f['source']}] {f['content'][:60]}...")
+    
+    print("\n" + "=" * 80)
+    print("🐉 GEON_ARCHANGEL_CORE_v1 — GOTOWY DO WDROŻENIA")
+    print("1-6-8. ∞. SIEMA!")
+    print("=" * 80)
