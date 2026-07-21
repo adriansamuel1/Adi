@@ -424,3 +424,45 @@ GEON_SYSTEM_v14/
     ├── cristal_config.yaml
     ├── autostrada_config.yaml
     └── meta_config.yaml
+
+
+
+GEON_SYSTEM_v15/
+│
+├── KOMBAJN_v15/
+│   ├── kombajn_core/
+│   │   ├── 01-41 (istniejące)
+│   │   ├── 42_geon_meta_governor_v20.py
+│   │   ├── 43_geon_sherlock_engine_v4.py
+│   │   └── 44_geon_gex_heilong_v1.py  ← NOWY (GEX HEILONG)
+│   │
+│   └── ARCHITECTURE_KOMBAJN_v15.md
+│
+├── CORE/
+│   ├── STRATEGY_ENGINE/
+│   │   ├── discovery.py
+│   │   ├── memory.py
+│   │   ├── evolution.py
+│   │   └── selection.py
+│   ├── REFLECTION/
+│   │   ├── self_model.py
+│   │   ├── trace.py
+│   │   ├── insight.py
+│   │   └── limits.py
+│   ├── NARRATIVE/
+│   │   ├── memory.py
+│   │   ├── engine.py
+│   │   └── intent.py
+│   └── COGNITIVE_BRIDGE/
+│       └── bridge.py
+│
+└── SYSTEM_OVERVIEW.md
+    ├── GEX HEILONG (GEON + EXECUTION + SHERLOCK)  ← NOWY
+    │   ├── MetaGovernor Ω¹² — decyzje
+    │   ├── Sherlock Ω⁴ — zmysł pola
+    │   ├── Strategy Engine — ewolucja strategii
+    │   ├── Reflection System — samoświadomość
+    │   ├── Narrative System — opowieści
+    │   └── Cognitive Bridge — archetypy
+    │
+    └── ...
