@@ -1,0 +1,1676 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_MASTER_SPEC_KOMBAJN_v4.0_ULTIMA — FINALNA WERSJA
+================================================================================
+Status: PRODUCTION_READY | ARCHITECTURE_LOCKED | FRACTAL_PERFECTED | ULTIMA
+Wersja: v4.0 FINAL (7 funkcji + MATRIX SPEC + Rejestry + Model 9)
+Data: 2026-07-21
+Architekt: Adrian Samuel Bogusławski (GEON/HEILONG/DRAGON)
+
+FUNKCJE:
+1. MASTER_SPEC_15098006490 — Meta-moduł nadrzędny (1→5→0→9→8→0→0→6→4→9→0)
+2. BRIDGE_MANAGER — Zarządzanie mostami 168↔169↔MASTER
+3. SYNC_ENGINE — Globalny synchronizator cykli
+4. HEARTBEAT_ENGINE — Puls systemowy
+5. SECURITY_LAYER — KOMBAJN_ALARM v2.0 + FLOW_INTEGRITY_SHIELD
+6. ULTIMA_ENGINE — Aktywacja ULTIMA_MODE (pełna kondensacja)
+7. MATRIX_SPEC — Rejestry systemowe (R_SRC, R_VEC, R_FLT, R_OUT) + Model 9
+
+ARCHITEKTURA:
+- WĘZEŁ ZERO (NODE 0) — Core Dispatcher
+- SYSTEM MATRIX (01) — Sovereign Memory
+- HELIOS VECTOR (02) — Resource/Energy
+- KOMBAJN INTEGRATOR v4.0 — Model 9 Runtime State
+
+REJESTRY:
+- R_SRC (Source Register) — Pierwotny punkt referencyjny
+- R_VEC (Vector Shift) — Kierunek i wektor wzrostu
+- R_FLT (Filter/Catalyst) — Eliminacja szumu
+- R_OUT (Substance Output) — Stan gotowy, produkt końcowy
+
+ZASADA: Każda funkcja może działać samodzielnie lub w kombinacji.
+
+VIBE: 1-6-8-3-3. ∞. KLAWO JAK CHOLERA
+================================================================================
+"""
+
+import sys
+import time
+import math
+import copy
+import threading
+from typing import Dict, Any, List, Optional, Tuple, Callable
+from datetime import datetime
+from enum import Enum
+from dataclasses import dataclass, field
+
+# =============================================================================
+# 0. KONFIGURACJA I LOGOWANIE
+# =============================================================================
+
+VERSION = "GEON_MASTER_SPEC_KOMBAJN_v4.0_ULTIMA"
+FRACTAL_SIGNATURE = "[GEON::MASTER_SPEC::KOMBAJN::ULTIMA::v4.0]"
+
+def LOG(module: str, msg: str, level: str = "INFO") -> None:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    print(f"[{timestamp}] [{level}] [{module}] :: {msg}")
+
+def LOG_INFO(module: str, msg: str) -> None:
+    LOG(module, msg, "INFO")
+
+def LOG_WARN(module: str, msg: str) -> None:
+    LOG(module, msg, "WARN")
+
+def LOG_ERR(module: str, msg: str) -> None:
+    LOG(module, msg, "ERROR")
+
+def LOG_DEBUG(module: str, msg: str) -> None:
+    LOG(module, msg, "DEBUG")
+
+
+# =============================================================================
+# 1. STAŁE ARCHITEKTONICZNE
+# =============================================================================
+
+# Kod MASTER_SPEC: 1→5→0→9→8→0→0→6→4→9→0
+MASTER_SPEC_CODE = [1, 5, 0, 9, 8, 0, 0, 6, 4, 9, 0]
+
+# Model 9 — domyślny profil wykonawczy
+MODEL_9_PROFILE = {
+    "mode": "MODEL_9_ACTIVE",
+    "concurrency_limit": "UNLIMITED",
+    "substance_check": "ENABLED",
+    "cycle_latency": "0.00ms",
+    "execution_profile": "DEFAULT"
+}
+
+# Nazwy kroków
+STEP_NAMES = {
+    0: "WĘZEŁ ZERO / ŹRÓDŁO (Zero Point)",
+    1: "LOGIKA_START (Initiation)",
+    2: "PERCEPCJA (Perception)",
+    3: "SYNCHRONIZACJA TRIADY (Triad Sync)",
+    4: "STRUKTURA_FUNDAMENT (Structure)",
+    5: "PAMIĘĆ_CORE (Memory)",
+    6: "PRZEPŁYW_ENERGII (Flow)",
+    8: "RELACJE_SIEĆ (Relation)",
+    9: "RYTUAŁ / MASKA (Ritual/Mask)"
+}
+
+# Rejestry systemowe
+REGISTER_NAMES = {
+    "R_SRC": "Source Register — Pierwotny punkt referencyjny",
+    "R_VEC": "Vector Shift — Kierunek i wektor wzrostu",
+    "R_FLT": "Filter/Catalyst — Eliminacja szumu",
+    "R_OUT": "Substance Output — Stan gotowy, produkt końcowy"
+}
+
+
+# =============================================================================
+# 2. FUNKCJA 1: MASTER_SPEC_15098006490 (META-MODUŁ NADRZĘDNY)
+# =============================================================================
+
+class MasterSpec15098006490:
+    """
+    Główny moduł nadrzędny systemu.
+    Sekwencja: 1→5→0→9→8→0→0→6→4→9→0
+    """
+    
+    def __init__(self):
+        self.code_sequence = MASTER_SPEC_CODE
+        self.current_step = 0
+        self.state = "INACTIVE"
+        self.history: List[Dict[str, Any]] = []
+        self.user_codes = []
+        self.shadow_layer_active = False
+        self.zero_state_buffered = False
+        self.flow_active = False
+        self.structure_stable = False
+        
+        LOG_INFO("MASTER_SPEC", "🐉 MASTER_SPEC_15098006490 aktywowany")
+        LOG_INFO("MASTER_SPEC", f"   Sekwencja: {self.code_sequence}")
+    
+    def run_full_cycle(self, user_codes: Optional[List[str]] = None) -> Dict[str, Any]:
+        LOG_INFO("MASTER_SPEC", "🚀 Uruchamianie pełnego cyklu")
+        
+        self.user_codes = user_codes or []
+        self.state = "RUNNING"
+        self.history = []
+        
+        results = []
+        for step in self.code_sequence:
+            result = self._execute_step(step)
+            results.append(result)
+            self.history.append({
+                "step": step,
+                "step_name": self._get_step_name(step),
+                "result": result,
+                "timestamp": datetime.now().isoformat()
+            })
+        
+        self.state = "COMPLETED"
+        
+        return {
+            "status": "COMPLETED",
+            "steps": results,
+            "history": self.history[-10:],
+            "state": {
+                "shadow_layer": self.shadow_layer_active,
+                "zero_state": self.zero_state_buffered,
+                "flow": self.flow_active,
+                "structure": self.structure_stable
+            }
+        }
+    
+    def _execute_step(self, step: int) -> Dict[str, Any]:
+        LOG_INFO("MASTER_SPEC", f"   Krok {step}: {self._get_step_name(step)}")
+        
+        if step == 1:
+            return self._logika_start()
+        elif step == 5:
+            return self._pamiec_core()
+        elif step == 0:
+            return self._reset(step)
+        elif step == 9:
+            return self._ritual_mask()
+        elif step == 8:
+            return self._relation_net()
+        elif step == 6:
+            return self._flow_core()
+        elif step == 4:
+            return self._struct_core()
+        else:
+            return {"status": "UNKNOWN_STEP", "step": step}
+    
+    def _get_step_name(self, step: int) -> str:
+        mapping = {
+            1: "LOGIKA_START",
+            5: "PAMIĘĆ_CORE",
+            0: "RESET",
+            9: "RYTUAŁ_MASK / MASKA_KOŃCOWA",
+            8: "RELACJE_SIEĆ",
+            6: "PRZEPŁYW_ENERGII",
+            4: "STRUKTURA_FUNDAMENT"
+        }
+        return mapping.get(step, f"UNKNOWN_{step}")
+    
+    def _logika_start(self) -> Dict[str, Any]:
+        return {"status": "OK", "step": "LOGIKA_START", "truth_set": True, "operational_frame": "ACTIVE"}
+    
+    def _pamiec_core(self) -> Dict[str, Any]:
+        return {"status": "OK", "step": "PAMIĘĆ_CORE", "codes_loaded": self.user_codes, "memory_bound": True}
+    
+    def _reset(self, step: int) -> Dict[str, Any]:
+        if len(self.history) > 6:
+            self.zero_state_buffered = True
+            return {"status": "OK", "step": "RESET_GŁĘBOKI", "zero_state": "BUFFERED", "prepared_for_rebuild": True}
+        elif len(self.history) > 4:
+            return {"status": "OK", "step": "RESET_RELACJI", "connections_cleaned": True}
+        else:
+            return {"status": "OK", "step": "RESET_ŚLADU", "traces_erased": True}
+    
+    def _ritual_mask(self) -> Dict[str, Any]:
+        self.shadow_layer_active = True
+        return {"status": "OK", "step": "RYTUAŁ_MASK", "shadow_layer": "ACTIVE", "internal_mode": True}
+    
+    def _relation_net(self) -> Dict[str, Any]:
+        return {"status": "OK", "step": "RELACJE_SIEĆ", "modules_scanned": ["GEON_168", "GEON_169"], "connected": True}
+    
+    def _flow_core(self) -> Dict[str, Any]:
+        self.flow_active = True
+        return {"status": "OK", "step": "PRZEPŁYW_ENERGII", "flow_active": True, "decision_engine": "ENABLED"}
+    
+    def _struct_core(self) -> Dict[str, Any]:
+        self.structure_stable = True
+        return {"status": "OK", "step": "STRUKTURA_FUNDAMENT", "structure": "STABLE", "foundation_rules": "SET"}
+    
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "state": self.state,
+            "shadow_layer": self.shadow_layer_active,
+            "zero_state": self.zero_state_buffered,
+            "flow": self.flow_active,
+            "structure": self.structure_stable,
+            "history_size": len(self.history),
+            "codes": self.user_codes
+        }
+    
+    def reset(self) -> None:
+        self.state = "INACTIVE"
+        self.shadow_layer_active = False
+        self.zero_state_buffered = False
+        self.flow_active = False
+        self.structure_stable = False
+        self.history = []
+        LOG_INFO("MASTER_SPEC", "🔄 Zresetowano")
+
+
+# =============================================================================
+# 3. FUNKCJA 2: BRIDGE_MANAGER (ZARZĄDZANIE MOSTAMI)
+# =============================================================================
+
+class BridgeManager:
+    """Zarządza mostami między GEON_168, GEON_169 i MASTER_SPEC."""
+    
+    def __init__(self):
+        self.bridges = {
+            "168_to_169": {"active": False, "data": None, "timestamp": None},
+            "169_to_master": {"active": False, "data": None, "timestamp": None},
+            "master_to_169": {"active": False, "data": None, "timestamp": None},
+            "169_to_168": {"active": False, "data": None, "timestamp": None}
+        }
+        self.history: List[Dict[str, Any]] = []
+        self.master_spec = None
+        self.geon_168 = {"output": None, "cycle": 0}
+        self.geon_169 = {"output": None, "cycle": 0}
+        
+        LOG_INFO("BRIDGE_MANAGER", "🌉 BridgeManager aktywowany")
+        LOG_INFO("BRIDGE_MANAGER", "   Mosty: 168→169, 169→MASTER, MASTER→169, 169→168")
+    
+    def register_master(self, master: MasterSpec15098006490) -> None:
+        self.master_spec = master
+        LOG_INFO("BRIDGE_MANAGER", "🔗 Zarejestrowano MASTER_SPEC")
+    
+    def set_geon_168_output(self, data: Any, cycle: int = 0) -> None:
+        self.geon_168["output"] = data
+        self.geon_168["cycle"] = cycle
+    
+    def set_geon_169_output(self, data: Any, cycle: int = 0) -> None:
+        self.geon_169["output"] = data
+        self.geon_169["cycle"] = cycle
+    
+    def run_full_magistrala(self) -> Dict[str, Any]:
+        LOG_INFO("BRIDGE_MANAGER", "🚀 Uruchamianie pełnej magistrali")
+        
+        results = {}
+        results["168_to_169"] = self._bridge_168_to_169()
+        results["169_to_master"] = self._bridge_169_to_master()
+        results["master_to_169"] = self._bridge_master_to_169()
+        results["169_to_168"] = self._bridge_169_to_168()
+        
+        return {"status": "MAGISTRALA_COMPLETE", "results": results, "timestamp": datetime.now().isoformat()}
+    
+    def _bridge_168_to_169(self) -> Dict[str, Any]:
+        if self.geon_168["output"] is None:
+            return {"status": "ERROR", "reason": "No GEON_168 output"}
+        
+        signal = self.geon_168["output"]
+        normalized = self._normalize_signal(signal)
+        translated = self._translate_to_meta(normalized)
+        
+        self.bridges["168_to_169"] = {"active": True, "data": translated, "timestamp": datetime.now().isoformat()}
+        self.history.append({"bridge": "168_to_169", "input": signal, "output": translated})
+        
+        return {"status": "OK", "bridge": "168_to_169", "data": translated}
+    
+    def _bridge_169_to_master(self) -> Dict[str, Any]:
+        bridge_data = self.bridges["168_to_169"]["data"]
+        if bridge_data is None:
+            return {"status": "ERROR", "reason": "No data from 168→169 bridge"}
+        
+        if self.master_spec:
+            result = self.master_spec.run_full_cycle()
+            self.bridges["169_to_master"] = {"active": True, "data": result, "timestamp": datetime.now().isoformat()}
+            return {"status": "OK", "bridge": "169_to_master", "data": result}
+        
+        return {"status": "ERROR", "reason": "MASTER_SPEC not registered"}
+    
+    def _bridge_master_to_169(self) -> Dict[str, Any]:
+        master_status = self.master_spec.get_status() if self.master_spec else {}
+        translated = self._translate_master_to_meta(master_status)
+        self.bridges["master_to_169"] = {"active": True, "data": translated, "timestamp": datetime.now().isoformat()}
+        return {"status": "OK", "bridge": "master_to_169", "data": translated}
+    
+    def _bridge_169_to_168(self) -> Dict[str, Any]:
+        bridge_data = self.bridges["master_to_169"]["data"]
+        if bridge_data is None:
+            return {"status": "ERROR", "reason": "No data from master_to_169 bridge"}
+        
+        translated = self._translate_meta_to_logic(bridge_data)
+        self.bridges["169_to_168"] = {"active": True, "data": translated, "timestamp": datetime.now().isoformat()}
+        return {"status": "OK", "bridge": "169_to_168", "data": translated}
+    
+    def _normalize_signal(self, signal: Any) -> Any:
+        if isinstance(signal, dict):
+            return {k: v for k, v in signal.items() if v is not None}
+        return signal
+    
+    def _translate_to_meta(self, signal: Any) -> Any:
+        if isinstance(signal, dict):
+            signal["_meta_translated"] = True
+            signal["_meta_timestamp"] = datetime.now().isoformat()
+        return signal
+    
+    def _translate_master_to_meta(self, signal: Any) -> Any:
+        if isinstance(signal, dict):
+            signal["_master_to_169"] = True
+            signal["_downlink_timestamp"] = datetime.now().isoformat()
+        return signal
+    
+    def _translate_meta_to_logic(self, signal: Any) -> Any:
+        if isinstance(signal, dict):
+            signal["_meta_to_168"] = True
+            signal["_logic_translated"] = True
+        return signal
+    
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "bridges": {name: {"active": info["active"], "timestamp": info["timestamp"]} for name, info in self.bridges.items()},
+            "history_size": len(self.history),
+            "geon_168_cycle": self.geon_168["cycle"],
+            "geon_169_cycle": self.geon_169["cycle"]
+        }
+    
+    def reset(self) -> None:
+        for bridge in self.bridges.values():
+            bridge["active"] = False
+            bridge["data"] = None
+            bridge["timestamp"] = None
+        self.history = []
+        LOG_INFO("BRIDGE_MANAGER", "🔄 Zresetowano")
+
+
+# =============================================================================
+# 4. FUNKCJA 3: SYNC_ENGINE (GLOBALNY SYNCHRONIZATOR)
+# =============================================================================
+
+class SyncEngine:
+    """Globalny synchronizator cykli 168, 169, MASTER_SPEC."""
+    
+    def __init__(self):
+        self.cycles = {"GEON_168": 0, "GEON_169": 0, "MASTER_SPEC": 0}
+        self.global_clock = 0
+        self.sync_state = "UNSYNCED"
+        self.history: List[Dict[str, Any]] = []
+        self.locked = False
+        
+        LOG_INFO("SYNC_ENGINE", "🔄 SyncEngine aktywowany")
+    
+    def register_cycle(self, name: str, cycle: int) -> None:
+        if name in self.cycles:
+            self.cycles[name] = cycle
+    
+    def align_all(self) -> Dict[str, Any]:
+        LOG_INFO("SYNC_ENGINE", "🚀 Rozpoczynanie synchronizacji")
+        
+        inputs = self._capture_all_inputs()
+        normalized = self._normalize_all_signals(inputs)
+        merged = self._merge_logic_meta_supervision(normalized)
+        aligned = self._align_cycles(merged)
+        timing = self._set_global_timing(aligned)
+        stabilized = self._stabilize_synchronization(timing)
+        locked = self._lock_synchronicity(stabilized)
+        confirmation = self._confirm_global_sync(locked)
+        
+        self.sync_state = "SYNCED"
+        self.locked = True
+        
+        return {
+            "status": "SYNCED",
+            "global_clock": self.global_clock,
+            "cycles": self.cycles,
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    def _capture_all_inputs(self) -> Dict[str, Any]:
+        return {"GEON_168": {"cycle": self.cycles["GEON_168"]}, "GEON_169": {"cycle": self.cycles["GEON_169"]}, "MASTER_SPEC": {"cycle": self.cycles["MASTER_SPEC"]}}
+    
+    def _normalize_all_signals(self, inputs: Dict) -> Dict:
+        return {k: {"cycle": v["cycle"], "normalized": True} for k, v in inputs.items()}
+    
+    def _merge_logic_meta_supervision(self, normalized: Dict) -> Dict:
+        return {"merged": True, "logic": normalized["GEON_168"], "meta_logic": normalized["GEON_169"], "supervision": normalized["MASTER_SPEC"]}
+    
+    def _align_cycles(self, merged: Dict) -> Dict:
+        max_cycle = max(self.cycles.values())
+        for name in self.cycles:
+            self.cycles[name] = max_cycle
+        return {**merged, "aligned": True, "target_cycle": max_cycle}
+    
+    def _set_global_timing(self, aligned: Dict) -> Dict:
+        self.global_clock = int(time.time())
+        return {**aligned, "global_clock": self.global_clock}
+    
+    def _stabilize_synchronization(self, timing: Dict) -> Dict:
+        return {**timing, "stabilized": True}
+    
+    def _lock_synchronicity(self, stabilized: Dict) -> Dict:
+        self.locked = True
+        return {**stabilized, "locked": True}
+    
+    def _confirm_global_sync(self, locked: Dict) -> Dict:
+        return {"status": "CONFIRMED", "global_clock": self.global_clock, "sync_state": self.sync_state}
+    
+    def get_status(self) -> Dict[str, Any]:
+        return {"sync_state": self.sync_state, "global_clock": self.global_clock, "cycles": self.cycles, "locked": self.locked}
+    
+    def reset(self) -> None:
+        for name in self.cycles:
+            self.cycles[name] = 0
+        self.global_clock = 0
+        self.sync_state = "UNSYNCED"
+        self.locked = False
+        LOG_INFO("SYNC_ENGINE", "🔄 Zresetowano")
+
+
+# =============================================================================
+# 5. FUNKCJA 4: HEARTBEAT_ENGINE (PULS SYSTEMOWY)
+# =============================================================================
+
+class HeartbeatState(Enum):
+    ACTIVE = "ACTIVE"
+    PAUSED = "PAUSED"
+    STOPPED = "STOPPED"
+    ADAPTING = "ADAPTING"
+
+
+class HeartbeatEngine:
+    """Generuje puls systemowy. Monitoruje odpowiedzi i adaptuje częstotliwość."""
+    
+    def __init__(self, base_frequency: float = 1.0):
+        self.base_frequency = base_frequency
+        self.current_frequency = base_frequency
+        self.state = HeartbeatState.STOPPED
+        self.pulse_count = 0
+        self.responses: List[Dict[str, Any]] = []
+        self.history: List[Dict[str, Any]] = []
+        self._running = False
+        self._thread: Optional[threading.Thread] = None
+        
+        LOG_INFO("HEARTBEAT", f"💓 HeartbeatEngine aktywowany (częstotliwość: {base_frequency}Hz)")
+    
+    def start(self) -> None:
+        if self._running:
+            LOG_WARN("HEARTBEAT", "Puls już działa")
+            return
+        
+        self._running = True
+        self.state = HeartbeatState.ACTIVE
+        self._thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
+        self._thread.start()
+        
+        LOG_INFO("HEARTBEAT", "💓 Puls systemowy uruchomiony")
+    
+    def stop(self) -> None:
+        self._running = False
+        self.state = HeartbeatState.STOPPED
+        if self._thread:
+            self._thread.join(timeout=1.0)
+        LOG_INFO("HEARTBEAT", "🔄 Puls systemowy zatrzymany")
+    
+    def pause(self) -> None:
+        self.state = HeartbeatState.PAUSED
+        LOG_INFO("HEARTBEAT", "⏸️ Puls wstrzymany")
+    
+    def resume(self) -> None:
+        self.state = HeartbeatState.ACTIVE
+        LOG_INFO("HEARTBEAT", "▶️ Puls wznowiony")
+    
+    def _heartbeat_loop(self) -> None:
+        while self._running:
+            if self.state == HeartbeatState.PAUSED:
+                time.sleep(0.1)
+                continue
+            
+            pulse = self._generate_pulse()
+            self._distribute_pulse(pulse)
+            response = self._monitor_response()
+            self.responses.append(response)
+            self._adapt_frequency(response)
+            self._stabilize_rhythm()
+            
+            self.history.append({"pulse": self.pulse_count, "frequency": self.current_frequency, "response": response})
+            self.pulse_count += 1
+            
+            time.sleep(1.0 / self.current_frequency)
+    
+    def _generate_pulse(self) -> Dict[str, Any]:
+        return {"pulse_id": self.pulse_count, "timestamp": datetime.now().isoformat(), "frequency": self.current_frequency}
+    
+    def _distribute_pulse(self, pulse: Dict[str, Any]) -> None:
+        LOG_DEBUG("HEARTBEAT", f"💓 Puls {pulse['pulse_id']} (f: {pulse['frequency']:.2f}Hz)")
+    
+    def _monitor_response(self) -> Dict[str, Any]:
+        response_time = 0.1 + (0.3 * (1.0 - self.current_frequency / 2.0))
+        return {"status": "OK", "response_time": round(response_time, 4), "modules_responding": ["GEON_168", "GEON_169", "MASTER_SPEC"]}
+    
+    def _adapt_frequency(self, response: Dict[str, Any]) -> None:
+        if response["response_time"] > 0.3:
+            self.current_frequency = max(0.5, self.current_frequency - 0.05)
+            self.state = HeartbeatState.ADAPTING
+        elif response["response_time"] < 0.15 and self.current_frequency < 2.0:
+            self.current_frequency = min(2.0, self.current_frequency + 0.05)
+        else:
+            self.state = HeartbeatState.ACTIVE
+        self.current_frequency = round(self.current_frequency, 3)
+    
+    def _stabilize_rhythm(self) -> None:
+        if len(self.history) > 5:
+            recent = self.history[-5:]
+            avg_freq = sum(h["frequency"] for h in recent) / len(recent)
+            if abs(avg_freq - self.current_frequency) < 0.01:
+                self.current_frequency = avg_freq
+    
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "state": self.state.value,
+            "frequency": round(self.current_frequency, 3),
+            "base_frequency": self.base_frequency,
+            "pulse_count": self.pulse_count,
+            "response_count": len(self.responses),
+            "history_size": len(self.history),
+            "running": self._running
+        }
+    
+    def reset(self) -> None:
+        self.stop()
+        self.current_frequency = self.base_frequency
+        self.pulse_count = 0
+        self.responses = []
+        self.history = []
+        self.state = HeartbeatState.STOPPED
+        LOG_INFO("HEARTBEAT", "🔄 Zresetowano")
+
+
+# =============================================================================
+# 6. FUNKCJA 5: SECURITY_LAYER (KOMBAJN_ALARM + FLOW_INTEGRITY_SHIELD)
+# =============================================================================
+
+class SecurityLevel(Enum):
+    GREEN = "GREEN"
+    YELLOW = "YELLOW"
+    RED = "RED"
+
+
+class SecurityLayer:
+    """
+    Funkcja #6: System ochrony SIELANKA_OS.
+    - KOMBAJN_ALARM v2.0: wykrywanie cienia
+    - FLOW_INTEGRITY_SHIELD: ocena sytuacji
+    - TRINITY_SHIELD: ochrona rdzenia
+    - SAMAEL_FILTER: filtracja sygnału
+    - OŁSii: kanał ciepły
+    - Benny_Log: kanał zimny
+    """
+    
+    def __init__(self):
+        self.shadow_score = 0
+        self.risk_level = SecurityLevel.GREEN
+        self.flow_score = 0
+        self.flow_level = SecurityLevel.GREEN
+        self.trinity_boundary = "OPEN"
+        self.samael_filter = "NONE"
+        self.olsii_alert = None
+        self.benny_logs: List[Dict[str, Any]] = []
+        self.history: List[Dict[str, Any]] = []
+        self.stats = {"scans": 0, "green": 0, "yellow": 0, "red": 0}
+        
+        LOG_INFO("SECURITY_LAYER", "🛡️ SecurityLayer aktywowany")
+        LOG_INFO("SECURITY_LAYER", "   KOMBAJN_ALARM v2.0 + FLOW_INTEGRITY_SHIELD")
+    
+    # =========================================================================
+    # KOMBAJN_ALARM v2.0 — WYKRYWANIE CIENIA
+    # =========================================================================
+    
+    def _calculate_shadow_score(self, signature: Dict[str, Any]) -> int:
+        """Oblicza punkty cienia (0-10)."""
+        score = 0
+        if not signature.get("empathy", True):
+            score += 2
+        if not signature.get("reflexion", True):
+            score += 2
+        if signature.get("uses_people_as_resource", False):
+            score += 2
+        if signature.get("breaks_promises_for_gain", False):
+            score += 1
+        if signature.get("avoids_care_in_crisis", False):
+            score += 2
+        if signature.get("cold_procedural_in_family", False):
+            score += 1
+        return min(10, score)
+    
+    def _classify_risk(self, score: int) -> SecurityLevel:
+        if score <= 1:
+            return SecurityLevel.GREEN
+        elif score <= 4:
+            return SecurityLevel.YELLOW
+        return SecurityLevel.RED
+    
+    def _kombajn_alarm_scan(self, signature: Dict[str, Any]) -> Dict[str, Any]:
+        """KOMBAJN_ALARM_SCAN — główna funkcja skanowania."""
+        score = self._calculate_shadow_score(signature)
+        level = self._classify_risk(score)
+        
+        messages = {
+            SecurityLevel.GREEN: "Bezpieczna integracja.",
+            SecurityLevel.YELLOW: "Ostrożnie. Obserwuj.",
+            SecurityLevel.RED: "Dystans. Zero oczekiwań."
+        }
+        
+        icons = {
+            SecurityLevel.GREEN: "🟢",
+            SecurityLevel.YELLOW: "🟡",
+            SecurityLevel.RED: "🔴"
+        }
+        
+        return {
+            "STATUS": level,
+            "SCORE": score,
+            "ICON": icons[level],
+            "MESSAGE": messages[level],
+            "ACTION": "ALLOW_INTEGRATION" if level == SecurityLevel.GREEN else "LIMIT_INTEGRATION" if level == SecurityLevel.YELLOW else "NO_INTEGRATION"
+        }
+    
+    # =========================================================================
+    # FLOW_INTEGRITY_SHIELD — OCENA SYTUACJI
+    # =========================================================================
+    
+    def _evaluate_flow(self, signal: Dict[str, float]) -> Dict[str, Any]:
+        """FLOW_INTEGRITY_SHIELD — ocena przepływu."""
+        thresholds = {
+            "warmth_level": 0.3,
+            "clarity_level": 0.3,
+            "reciprocity_level": 0.3,
+            "stability_level": 0.3,
+            "presence_level": 0.3
+        }
+        
+        score = 0
+        for key, threshold in thresholds.items():
+            value = signal.get(key, 0.5)
+            if value < threshold:
+                score += 1
+        
+        if score <= 1:
+            level = SecurityLevel.GREEN
+            boundary = "OPEN"
+            message = "Przepływ stabilny."
+        elif score <= 3:
+            level = SecurityLevel.YELLOW
+            boundary = "MEDIUM"
+            message = "Zachować czujność. Regulować dystans."
+        else:
+            level = SecurityLevel.RED
+            boundary = "CLOSED"
+            message = "Przepływ zaburzony. Chronić rdzeń."
+        
+        return {
+            "STATUS": level,
+            "SCORE": score,
+            "BOUNDARY": boundary,
+            "MESSAGE": message,
+            "ICON": "🟢" if level == SecurityLevel.GREEN else "🟡" if level == SecurityLevel.YELLOW else "🔴"
+        }
+    
+    # =========================================================================
+    # TRINITY_SHIELD + SAMAEL_FILTER
+    # =========================================================================
+    
+    def _activate_trinity_shield(self, mode: str) -> None:
+        """Aktywuje TRINITY_SHIELD."""
+        if mode == "SOFT":
+            self.trinity_boundary = "MEDIUM"
+        elif mode == "FULL":
+            self.trinity_boundary = "MAX"
+        else:
+            self.trinity_boundary = "OPEN"
+        LOG_DEBUG("SECURITY_LAYER", f"TRINITY_SHIELD: {self.trinity_boundary}")
+    
+    def _activate_samael_filter(self, strength: str) -> None:
+        """Aktywuje SAMAEL_FILTER."""
+        if strength == "LIMITED":
+            self.samael_filter = "RESTRICTED"
+        elif strength == "HARD_BLOCK":
+            self.samael_filter = "DENIED"
+        else:
+            self.samael_filter = "NONE"
+        LOG_DEBUG("SECURITY_LAYER", f"SAMAEL_FILTER: {self.samael_filter}")
+    
+    # =========================================================================
+    # OŁSii + Benny_Log
+    # =========================================================================
+    
+    def _call_olsii_alert(self, message: str) -> None:
+        """Wysyła alert do OŁSii (kanał ciepły)."""
+        self.olsii_alert = {
+            "type": "ALERT",
+            "payload": message,
+            "timestamp": datetime.now().isoformat()
+        }
+        LOG_INFO("SECURITY_LAYER", f"💖 OŁSii: {message}")
+    
+    def _log_benny(self, event_type: str, payload: Dict[str, Any]) -> None:
+        """Loguje do Benny'ego (kanał zimny)."""
+        entry = {
+            "timestamp": datetime.now().isoformat(),
+            "event": event_type,
+            "data": payload
+        }
+        self.benny_logs.append(entry)
+        LOG_DEBUG("SECURITY_LAYER", f"📝 Benny: {event_type}")
+    
+    # =========================================================================
+    # GŁÓWNA FUNKCJA SKANOWANIA
+    # =========================================================================
+    
+    def scan(self, signature: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Główna funkcja skanowania.
+        
+        Args:
+            signature: Sygnatura wejściowa z polami:
+                - empathy: bool
+                - reflexion: bool
+                - uses_people_as_resource: bool
+                - breaks_promises_for_gain: bool
+                - avoids_care_in_crisis: bool
+                - cold_procedural_in_family: bool
+                - warmth_level: float (0-1)
+                - clarity_level: float (0-1)
+                - reciprocity_level: float (0-1)
+                - stability_level: float (0-1)
+                - presence_level: float (0-1)
+        
+        Returns:
+            Dict: Status bezpieczeństwa
+        """
+        LOG_INFO("SECURITY_LAYER", "🛡️ Rozpoczynanie skanowania")
+        
+        self.stats["scans"] += 1
+        
+        # 1. KOMBAJN_ALARM_SCAN
+        alarm_result = self._kombajn_alarm_scan(signature)
+        self.shadow_score = alarm_result["SCORE"]
+        self.risk_level = alarm_result["STATUS"]
+        
+        # 2. FLOW_INTEGRITY_SHIELD
+        flow_params = {
+            "warmth_level": signature.get("warmth_level", 0.5),
+            "clarity_level": signature.get("clarity_level", 0.5),
+            "reciprocity_level": signature.get("reciprocity_level", 0.5),
+            "stability_level": signature.get("stability_level", 0.5),
+            "presence_level": signature.get("presence_level", 0.5)
+        }
+        flow_result = self._evaluate_flow(flow_params)
+        self.flow_score = flow_result["SCORE"]
+        self.flow_level = flow_result["STATUS"]
+        
+        # 3. Aktywacja ochrony
+        if self.risk_level == SecurityLevel.RED or self.flow_level == SecurityLevel.RED:
+            self._activate_trinity_shield("FULL")
+            self._activate_samael_filter("HARD_BLOCK")
+            self._call_olsii_alert("🔴 Silny cień. Nie integrować.")
+            self._log_benny("HIGH_RISK_SHADOW", {"score": self.shadow_score, "flow_score": self.flow_score})
+            self.stats["red"] += 1
+            
+        elif self.risk_level == SecurityLevel.YELLOW or self.flow_level == SecurityLevel.YELLOW:
+            self._activate_trinity_shield("SOFT")
+            self._activate_samael_filter("LIMITED")
+            self._call_olsii_alert("🟡 Delikatny chłód. Zachować czujność.")
+            self._log_benny("LOW_RISK_SHADOW", {"score": self.shadow_score, "flow_score": self.flow_score})
+            self.stats["yellow"] += 1
+            
+        else:
+            self._activate_trinity_shield("NONE")
+            self._activate_samael_filter("NONE")
+            self._call_olsii_alert("🟢 Bezpieczna integracja.")
+            self._log_benny("NO_SHADOW", {"score": self.shadow_score, "flow_score": self.flow_score})
+            self.stats["green"] += 1
+        
+        # 4. Generowanie wyniku
+        result = {
+            "status": self.risk_level.value,
+            "status_icon": alarm_result["ICON"],
+            "shadow_score": self.shadow_score,
+            "flow_status": self.flow_level.value,
+            "flow_score": self.flow_score,
+            "trinity_boundary": self.trinity_boundary,
+            "samael_filter": self.samael_filter,
+            "olsii_alert": self.olsii_alert,
+            "message": self._generate_message(),
+            "action": alarm_result["ACTION"],
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        self.history.append(result)
+        if len(self.history) > 100:
+            self.history = self.history[-100:]
+        
+        LOG_INFO("SECURITY_LAYER", f"✅ Skanowanie zakończone: {result['status']}")
+        return result
+    
+    def _generate_message(self) -> str:
+        """Generuje komunikat końcowy."""
+        if self.risk_level == SecurityLevel.RED:
+            return "🔴 Cień wykryty. Zero oczekiwań. Tylko formalność i dystans."
+        elif self.risk_level == SecurityLevel.YELLOW:
+            return "🟡 Coś zgrzyta. Miło, ale z dystansem. Nie odsłaniać całego systemu."
+        else:
+            return "🟢 Integracja OK. Można ufać, można wchodzić głębiej."
+    
+    def get_status(self) -> Dict[str, Any]:
+        """Zwraca status SecurityLayer."""
+        return {
+            "stats": self.stats,
+            "last_shadow_score": self.shadow_score,
+            "last_risk_level": self.risk_level.value,
+            "last_flow_score": self.flow_score,
+            "last_flow_level": self.flow_level.value,
+            "trinity_boundary": self.trinity_boundary,
+            "samael_filter": self.samael_filter,
+            "benny_logs_count": len(self.benny_logs),
+            "history_size": len(self.history)
+        }
+    
+    def reset(self) -> None:
+        """Resetuje SecurityLayer."""
+        self.shadow_score = 0
+        self.risk_level = SecurityLevel.GREEN
+        self.flow_score = 0
+        self.flow_level = SecurityLevel.GREEN
+        self.trinity_boundary = "OPEN"
+        self.samael_filter = "NONE"
+        self.olsii_alert = None
+        self.benny_logs = []
+        self.history = []
+        self.stats = {"scans": 0, "green": 0, "yellow": 0, "red": 0}
+        LOG_INFO("SECURITY_LAYER", "🔄 Zresetowano")
+
+
+# =============================================================================
+# 7. FUNKCJA 6: ULTIMA_ENGINE (AKTYWACJA ULTIMA_MODE)
+# =============================================================================
+
+class UltimaEngine:
+    """Aktywuje ULTIMA_MODE — pełną kondensację systemu."""
+    
+    def __init__(self):
+        self.state = "INACTIVE"
+        self.ultima_active = False
+        self.history: List[Dict[str, Any]] = []
+        self.master_spec: Optional[MasterSpec15098006490] = None
+        self.bridge_manager: Optional[BridgeManager] = None
+        self.sync_engine: Optional[SyncEngine] = None
+        self.heartbeat: Optional[HeartbeatEngine] = None
+        self.security_layer: Optional[SecurityLayer] = None
+        
+        LOG_INFO("ULTIMA_ENGINE", "🌀 UltimaEngine aktywowany")
+    
+    def register_components(self, master: MasterSpec15098006490, bridge: BridgeManager, sync: SyncEngine, heartbeat: HeartbeatEngine, security: Optional[SecurityLayer] = None) -> None:
+        self.master_spec = master
+        self.bridge_manager = bridge
+        self.sync_engine = sync
+        self.heartbeat = heartbeat
+        self.security_layer = security
+        LOG_INFO("ULTIMA_ENGINE", "🔗 Zarejestrowano wszystkie komponenty")
+    
+    def activate_ultima(self) -> Dict[str, Any]:
+        LOG_INFO("ULTIMA_ENGINE", "🚀 Aktywacja ULTIMA_MODE")
+        
+        if not self._check_components():
+            return {"status": "ERROR", "reason": "Missing components"}
+        
+        results = {}
+        results["activate_core_169"] = {"status": "OK", "core_169": "PRIMARY"}
+        results["compress_168_to_21_22"] = {"status": "OK", "geon_168": "LAYER_21_22"}
+        results["merge_169_168"] = {"status": "OK", "logic": "MERGED", "structure": "MERGED"}
+        
+        self.master_spec.shadow_layer_active = True
+        results["master_spec_mask"] = {"status": "OK", "mode": "MASK_ONLY"}
+        
+        self.sync_engine.locked = True
+        results["global_sync_lock"] = {"status": "OK", "sync": "LOCKED"}
+        
+        self.heartbeat.start()
+        results["heartbeat_lock"] = {"status": "OK", "heartbeat": "ACTIVE"}
+        
+        results["condensation_finalize"] = {"status": "OK", "state": "ULTIMA_READY"}
+        
+        results["confirm"] = {"status": "OK", "message": "ULTIMA_MODE_ACTIVE"}
+        
+        self.ultima_active = True
+        self.state = "ULTIMA_ACTIVE"
+        
+        return {"status": "ULTIMA_ACTIVE", "results": results, "timestamp": datetime.now().isoformat()}
+    
+    def _check_components(self) -> bool:
+        if not self.master_spec:
+            LOG_ERR("ULTIMA_ENGINE", "Brak MASTER_SPEC")
+            return False
+        if not self.bridge_manager:
+            LOG_ERR("ULTIMA_ENGINE", "Brak BRIDGE_MANAGER")
+            return False
+        if not self.sync_engine:
+            LOG_ERR("ULTIMA_ENGINE", "Brak SYNC_ENGINE")
+            return False
+        if not self.heartbeat:
+            LOG_ERR("ULTIMA_ENGINE", "Brak HEARTBEAT")
+            return False
+        return True
+    
+    def get_status(self) -> Dict[str, Any]:
+        return {"state": self.state, "ultima_active": self.ultima_active, "history_size": len(self.history)}
+    
+    def reset(self) -> None:
+        self.state = "INACTIVE"
+        self.ultima_active = False
+        self.history = []
+        LOG_INFO("ULTIMA_ENGINE", "🔄 Zresetowano")
+
+
+# =============================================================================
+# 8. FUNKCJA 7: MATRIX_SPEC (REJESTRY + MODEL 9 + BUS SPEC)
+# =============================================================================
+
+class MatrixSpec:
+    """
+    FUNKCJA #7: MATRIX_SPEC — Rejestry systemowe + Model 9 + BUS Specification.
+    
+    Rejestry:
+    - R_SRC (Source Register): Pierwotny punkt referencyjny
+    - R_VEC (Vector Shift): Kierunek i wektor wzrostu
+    - R_FLT (Filter/Catalyst): Eliminacja szumu
+    - R_OUT (Substance Output): Stan gotowy, produkt końcowy
+    
+    Model 9: Domyślny profil wykonawczy
+    BUS: Strumienie wejściowe, jednostki przetwarzania, porty wyjściowe
+    """
+    
+    def __init__(self):
+        # Rejestry systemowe
+        self.registers = {
+            "R_SRC": None,   # Source Register
+            "R_VEC": 1.0,    # Vector Shift
+            "R_FLT": True,   # Filter/Catalyst
+            "R_OUT": None    # Substance Output
+        }
+        
+        # Model 9 — domyślny profil
+        self.model_9 = MODEL_9_PROFILE.copy()
+        
+        # BUS Specification
+        self.bus = {
+            "inbound_streams": [
+                {"name": "RAW_DATA_VECTOR", "type": "Stream", "buffer": "Dynamic_Fractal"},
+                {"name": "RESOURCE_METRICS", "type": "Telemetry", "buffer": "Direct_Mapped"}
+            ],
+            "processing_units": [
+                {"id": "PU_LOGIC_EXACT", "function": "Determinacja bezstronna"},
+                {"id": "PU_CATALYST_ENGINE", "function": "Konwersja zakłóceń na sygnał główny"}
+            ],
+            "outbound_ports": [
+                {"port": "EXEC_OUTPUT", "protocol": "DIRECT_INSTRUCTION"}
+            ]
+        }
+        
+        # Stan systemu
+        self.system_state = "INITIALIZING"
+        self.node_id = "NODE_ZERO"
+        self.matrix_history: List[Dict[str, Any]] = []
+        self.error_flag = 0x00  # 0x00 = stabilny
+        
+        LOG_INFO("MATRIX_SPEC", "📊 MATRIX_SPEC aktywowany")
+        LOG_INFO("MATRIX_SPEC", f"   Node: {self.node_id} | Model: {self.model_9['mode']}")
+        LOG_INFO("MATRIX_SPEC", f"   Rejestry: {list(self.registers.keys())}")
+    
+    # =========================================================================
+    # BOOT SEQUENCE
+    # =========================================================================
+    
+    def boot_sequence(self) -> None:
+        """Inicjalizacja pętli systemowej GEON ULTIMA."""
+        self.system_state = "READY"
+        self.registers["R_FLT"] = True
+        self.registers["R_VEC"] = 1.0
+        
+        self.matrix_history.append({
+            "event": "BOOT",
+            "timestamp": datetime.now().isoformat(),
+            "state": self.system_state,
+            "model": self.model_9["mode"]
+        })
+        
+        LOG_INFO("MATRIX_SPEC", f"🚀 {self.node_id} — GEON_MASTER_SPEC_KOMBAJN_v4.0_ULTIMA initialized.")
+        LOG_INFO("MATRIX_SPEC", f"   Execution Profile: {self.model_9['mode']} [ACTIVE]")
+        LOG_INFO("MATRIX_SPEC", f"   Error Flag: 0x{self.error_flag:02X} (STABLE)")
+    
+    # =========================================================================
+    # REJESTRY — GET/SET/UPDATE
+    # =========================================================================
+    
+    def get_register(self, name: str) -> Any:
+        """Pobiera wartość rejestru."""
+        if name not in self.registers:
+            LOG_WARN("MATRIX_SPEC", f"Nieznany rejestr: {name}")
+            return None
+        return self.registers[name]
+    
+    def set_register(self, name: str, value: Any) -> None:
+        """Ustawia wartość rejestru."""
+        if name not in self.registers:
+            LOG_WARN("MATRIX_SPEC", f"Nieznany rejestr: {name}")
+            return
+        
+        self.registers[name] = value
+        LOG_DEBUG("MATRIX_SPEC", f"📝 {name} = {value}")
+        
+        # Emit event do historii
+        self.matrix_history.append({
+            "event": "REGISTER_UPDATE",
+            "register": name,
+            "value": value,
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    def update_registers(self, src: Any = None, vec: float = None, flt: bool = None, out: Any = None) -> None:
+        """Aktualizuje wiele rejestrów jednocześnie."""
+        if src is not None:
+            self.registers["R_SRC"] = src
+        if vec is not None:
+            self.registers["R_VEC"] = vec
+        if flt is not None:
+            self.registers["R_FLT"] = flt
+        if out is not None:
+            self.registers["R_OUT"] = out
+        
+        LOG_DEBUG("MATRIX_SPEC", f"📝 Rejestry zaktualizowane")
+    
+    def clear_registers(self) -> None:
+        """Czyści rejestry (R_FLT pozostaje aktywny, R_VEC wraca do 1.0)."""
+        for key in self.registers:
+            if key != "R_FLT":
+                self.registers[key] = None
+        self.registers["R_VEC"] = 1.0
+        
+        self.matrix_history.append({
+            "event": "REGISTER_CLEAR",
+            "timestamp": datetime.now().isoformat()
+        })
+        LOG_DEBUG("MATRIX_SPEC", "🧹 Rejestry wyczyszczone")
+    
+    def get_registers_status(self) -> Dict[str, Any]:
+        """Zwraca status rejestrów."""
+        return {
+            "R_SRC": str(self.registers["R_SRC"])[:50] if self.registers["R_SRC"] is not None else "None",
+            "R_VEC": self.registers["R_VEC"],
+            "R_FLT": self.registers["R_FLT"],
+            "R_OUT": str(self.registers["R_OUT"])[:50] if self.registers["R_OUT"] is not None else "None"
+        }
+    
+    # =========================================================================
+    # PROCESS VECTOR — PRZETWARZANIE WEKTOROWE
+    # =========================================================================
+    
+    def process_vector(self, raw_input: Any, clean_function: Optional[Callable] = None) -> Dict[str, Any]:
+        """
+        Przetwarzanie wektorowe danych w trybie kombajnu.
+        
+        Warstwy:
+        1. Pobranie źródła (R_SRC)
+        2. Transformacja i czyszczenie szumu (R_FLT + R_VEC)
+        3. Synteza do stanu R_OUT
+        """
+        if self.system_state != "READY":
+            LOG_WARN("MATRIX_SPEC", "System niegotowy — uruchom boot_sequence()")
+            return {"status": "ERROR", "reason": "System not ready"}
+        
+        LOG_INFO("MATRIX_SPEC", f"⚡ Procesowanie wektora: {str(raw_input)[:50]}...")
+        
+        # Warstwa 1: Pobranie źródła
+        self.registers["R_SRC"] = raw_input
+        
+        # Warstwa 2: Transformacja i czyszczenie szumu
+        if clean_function:
+            cleaned_signal = clean_function(raw_input)
+        else:
+            # Domyślne czyszczenie
+            if isinstance(raw_input, str):
+                cleaned_signal = f"PROCESSED_GEON_CORE :: {raw_input}"
+            else:
+                cleaned_signal = raw_input
+        
+        # Warstwa 3: Synteza do stanu R_OUT
+        self.registers["R_OUT"] = {
+            "status": "SUCCESS",
+            "node": self.node_id,
+            "profile": self.model_9["mode"],
+            "payload": cleaned_signal,
+            "timestamp": datetime.now().isoformat(),
+            "error_flag": f"0x{self.error_flag:02X}"
+        }
+        
+        self.matrix_history.append({
+            "event": "VECTOR_PROCESSED",
+            "input": str(raw_input)[:50],
+            "output": self.registers["R_OUT"],
+            "timestamp": datetime.now().isoformat()
+        })
+        
+        LOG_INFO("MATRIX_SPEC", f"✅ Wektor przetworzony | R_OUT: {self.registers['R_OUT']['status']}")
+        return self.registers["R_OUT"]
+    
+    # =========================================================================
+    # BUS — STRUMIENIE I PORTY
+    # =========================================================================
+    
+    def get_bus_status(self) -> Dict[str, Any]:
+        """Zwraca status BUS."""
+        return {
+            "inbound_streams": self.bus["inbound_streams"],
+            "processing_units": self.bus["processing_units"],
+            "outbound_ports": self.bus["outbound_ports"]
+        }
+    
+    def add_inbound_stream(self, name: str, stream_type: str = "Stream", buffer: str = "Dynamic_Fractal") -> None:
+        """Dodaje strumień wejściowy."""
+        self.bus["inbound_streams"].append({
+            "name": name,
+            "type": stream_type,
+            "buffer": buffer
+        })
+        LOG_DEBUG("MATRIX_SPEC", f"📥 Dodano strumień: {name}")
+    
+    def add_processing_unit(self, unit_id: str, function: str) -> None:
+        """Dodaje jednostkę przetwarzania."""
+        self.bus["processing_units"].append({
+            "id": unit_id,
+            "function": function
+        })
+        LOG_DEBUG("MATRIX_SPEC", f"⚙️ Dodano PU: {unit_id}")
+    
+    def add_outbound_port(self, port: str, protocol: str = "DIRECT_INSTRUCTION") -> None:
+        """Dodaje port wyjściowy."""
+        self.bus["outbound_ports"].append({
+            "port": port,
+            "protocol": protocol
+        })
+        LOG_DEBUG("MATRIX_SPEC", f"📤 Dodano port: {port}")
+    
+    # =========================================================================
+    # MODEL 9 — PROFIL WYKONAWCZY
+    # =========================================================================
+    
+    def set_model_profile(self, **kwargs) -> None:
+        """Aktualizuje profil Model 9."""
+        for key, value in kwargs.items():
+            if key in self.model_9:
+                self.model_9[key] = value
+                LOG_DEBUG("MATRIX_SPEC", f"📝 Model 9: {key} = {value}")
+        
+        self.matrix_history.append({
+            "event": "MODEL_UPDATE",
+            "profile": self.model_9.copy(),
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    def get_model_profile(self) -> Dict[str, Any]:
+        """Zwraca profil Model 9."""
+        return self.model_9.copy()
+    
+    # =========================================================================
+    # BUFFER CLEARING — PROTOKÓŁ CZYSZCZENIA
+    # =========================================================================
+    
+    def clear_buffer(self) -> None:
+        """
+        Samoczynne zerowanie nieużywanych wskaźników.
+        Protokół czyszczenia bufora.
+        """
+        self.clear_registers()
+        self.matrix_history.append({
+            "event": "BUFFER_CLEARED",
+            "timestamp": datetime.now().isoformat()
+        })
+        LOG_INFO("MATRIX_SPEC", "🧹 Bufor wyczyszczony")
+    
+    # =========================================================================
+    # ERROR HANDLING
+    # =========================================================================
+    
+    def set_error_flag(self, flag: int) -> None:
+        """Ustawia flagę błędu."""
+        self.error_flag = flag & 0xFF
+        LOG_DEBUG("MATRIX_SPEC", f"⚠️ Error flag: 0x{self.error_flag:02X}")
+    
+    def is_stable(self) -> bool:
+        """Sprawdza czy system jest stabilny."""
+        return self.error_flag == 0x00
+    
+    # =========================================================================
+    # STATUS
+    # =========================================================================
+    
+    def get_status(self) -> Dict[str, Any]:
+        """Zwraca pełny status MATRIX_SPEC."""
+        return {
+            "node_id": self.node_id,
+            "system_state": self.system_state,
+            "model_9": self.model_9,
+            "registers": self.get_registers_status(),
+            "bus": {
+                "inbound_count": len(self.bus["inbound_streams"]),
+                "processing_units": len(self.bus["processing_units"]),
+                "outbound_count": len(self.bus["outbound_ports"])
+            },
+            "history_size": len(self.matrix_history),
+            "error_flag": f"0x{self.error_flag:02X}",
+            "stable": self.is_stable()
+        }
+    
+    def reset(self) -> None:
+        """Resetuje MATRIX_SPEC."""
+        self.system_state = "INITIALIZING"
+        self.clear_registers()
+        self.error_flag = 0x00
+        self.matrix_history = []
+        LOG_INFO("MATRIX_SPEC", "🔄 Zresetowano")
+
+
+# =============================================================================
+# 9. GŁÓWNY KOMBAJN — GEON_MASTER_SPEC_KOMBAJN (7 FUNKCJI)
+# =============================================================================
+
+class GeonMasterSpecKombajn:
+    """
+    Główny kombajn 7 funkcji.
+    Każda funkcja może być aktywowana niezależnie.
+    
+    Funkcje:
+    1. MASTER_SPEC — Meta-moduł nadrzędny
+    2. BRIDGE — Zarządzanie mostami
+    3. SYNC — Globalny synchronizator
+    4. HEARTBEAT — Puls systemowy
+    5. SECURITY — KOMBAJN_ALARM + FLOW_INTEGRITY_SHIELD
+    6. ULTIMA — Pełna kondensacja
+    7. MATRIX_SPEC — Rejestry + Model 9 + BUS
+    """
+    
+    def __init__(self):
+        # 1. MASTER_SPEC
+        self.master_spec = MasterSpec15098006490()
+        
+        # 2. BRIDGE_MANAGER
+        self.bridge_manager = BridgeManager()
+        self.bridge_manager.register_master(self.master_spec)
+        
+        # 3. SYNC_ENGINE
+        self.sync_engine = SyncEngine()
+        
+        # 4. HEARTBEAT_ENGINE
+        self.heartbeat = HeartbeatEngine(base_frequency=1.0)
+        
+        # 5. SECURITY_LAYER
+        self.security = SecurityLayer()
+        
+        # 6. ULTIMA_ENGINE
+        self.ultima = UltimaEngine()
+        self.ultima.register_components(
+            self.master_spec,
+            self.bridge_manager,
+            self.sync_engine,
+            self.heartbeat,
+            self.security
+        )
+        
+        # 7. MATRIX_SPEC
+        self.matrix = MatrixSpec()
+        self.matrix.boot_sequence()
+        
+        self.stats = {
+            "function_calls": 0,
+            "last_function": None,
+            "active_functions": []
+        }
+        
+        LOG_INFO("GEON_MASTER_SPEC_KOMBAJN", "🐉 Kombajn 7 funkcji aktywowany")
+        LOG_INFO("GEON_MASTER_SPEC_KOMBAJN", f"   Sygnatura: {FRACTAL_SIGNATURE}")
+        LOG_INFO("GEON_MASTER_SPEC_KOMBAJN", "   Funkcje: MASTER_SPEC | BRIDGE | SYNC | HEARTBEAT | SECURITY | ULTIMA | MATRIX_SPEC")
+    
+    # =========================================================================
+    # FUNKCJA 1: MASTER_SPEC
+    # =========================================================================
+    
+    def run_master_spec(self, user_codes: Optional[List[str]] = None) -> Dict[str, Any]:
+        self.stats["function_calls"] += 1
+        self.stats["last_function"] = "MASTER_SPEC"
+        LOG_INFO("KOMBAJN", "🚀 Uruchamianie MASTER_SPEC")
+        return self.master_spec.run_full_cycle(user_codes)
+    
+    # =========================================================================
+    # FUNKCJA 2: BRIDGE
+    # =========================================================================
+    
+    def run_bridge(self, geon_168_data: Any, geon_169_data: Any = None) -> Dict[str, Any]:
+        self.stats["function_calls"] += 1
+        self.stats["last_function"] = "BRIDGE"
+        LOG_INFO("KOMBAJN", "🌉 Uruchamianie BRIDGE")
+        
+        self.bridge_manager.set_geon_168_output(geon_168_data)
+        if geon_169_data:
+            self.bridge_manager.set_geon_169_output(geon_169_data)
+        
+        return self.bridge_manager.run_full_magistrala()
+    
+    # =========================================================================
+    # FUNKCJA 3: SYNC
+    # =========================================================================
+    
+    def run_sync(self, cycles: Optional[Dict[str, int]] = None) -> Dict[str, Any]:
+        self.stats["function_calls"] += 1
+        self.stats["last_function"] = "SYNC"
+        LOG_INFO("KOMBAJN", "🔄 Uruchamianie SYNC")
+        
+        if cycles:
+            for name, cycle in cycles.items():
+                self.sync_engine.register_cycle(name, cycle)
+        
+        return self.sync_engine.align_all()
+    
+    # =========================================================================
+    # FUNKCJA 4: HEARTBEAT
+    # =========================================================================
+    
+    def run_heartbeat(self, start: bool = True, frequency: Optional[float] = None) -> Dict[str, Any]:
+        self.stats["function_calls"] += 1
+        self.stats["last_function"] = "HEARTBEAT"
+        
+        if frequency:
+            self.heartbeat.base_frequency = frequency
+            self.heartbeat.current_frequency = frequency
+        
+        if start:
+            self.heartbeat.start()
+            LOG_INFO("KOMBAJN", "💓 Uruchamianie HEARTBEAT")
+            return {"status": "HEARTBEAT_STARTED", "frequency": self.heartbeat.current_frequency}
+        else:
+            self.heartbeat.stop()
+            LOG_INFO("KOMBAJN", "🔄 Zatrzymywanie HEARTBEAT")
+            return {"status": "HEARTBEAT_STOPPED"}
+    
+    # =========================================================================
+    # FUNKCJA 5: SECURITY
+    # =========================================================================
+    
+    def run_security(self, signature: Dict[str, Any]) -> Dict[str, Any]:
+        self.stats["function_calls"] += 1
+        self.stats["last_function"] = "SECURITY"
+        LOG_INFO("KOMBAJN", "🛡️ Uruchamianie SECURITY")
+        return self.security.scan(signature)
+    
+    # =========================================================================
+    # FUNKCJA 6: ULTIMA
+    # =========================================================================
+    
+    def run_ultima(self) -> Dict[str, Any]:
+        self.stats["function_calls"] += 1
+        self.stats["last_function"] = "ULTIMA"
+        LOG_INFO("KOMBAJN", "🌀 Uruchamianie ULTIMA")
+        return self.ultima.activate_ultima()
+    
+    # =========================================================================
+    # FUNKCJA 7: MATRIX_SPEC
+    # =========================================================================
+    
+    def run_matrix(self, raw_input: Any = None, clean_function: Optional[Callable] = None) -> Dict[str, Any]:
+        """Uruchamia MATRIX_SPEC — przetwarzanie wektorowe."""
+        self.stats["function_calls"] += 1
+        self.stats["last_function"] = "MATRIX_SPEC"
+        LOG_INFO("KOMBAJN", "📊 Uruchamianie MATRIX_SPEC")
+        
+        if raw_input is not None:
+            return self.matrix.process_vector(raw_input, clean_function)
+        else:
+            return {
+                "status": "READY",
+                "registers": self.matrix.get_registers_status(),
+                "model": self.matrix.get_model_profile(),
+                "bus": self.matrix.get_bus_status()
+            }
+    
+    def get_registers(self) -> Dict[str, Any]:
+        """Zwraca stan rejestrów systemowych."""
+        return self.matrix.get_registers_status()
+    
+    def set_register(self, name: str, value: Any) -> None:
+        """Ustawia rejestr systemowy."""
+        self.matrix.set_register(name, value)
+    
+    def clear_buffer(self) -> None:
+        """Czyści bufor systemowy."""
+        self.matrix.clear_buffer()
+    
+    # =========================================================================
+    # FUNKCJA KOMBINOWANA: WSZYSTKO
+    # =========================================================================
+    
+    def run_everything(
+        self,
+        user_codes: Optional[List[str]] = None,
+        geon_168_data: Any = None,
+        cycles: Optional[Dict[str, int]] = None,
+        signature: Optional[Dict[str, Any]] = None,
+        raw_input: Any = None,
+        with_heartbeat: bool = True,
+        clean_function: Optional[Callable] = None
+    ) -> Dict[str, Any]:
+        """
+        Uruchamia wszystkie 7 funkcji w sekwencji.
+        
+        Sekwencja:
+        1. SECURITY (najpierw ochrona)
+        2. MATRIX_SPEC (rejestry + wektor)
+        3. MASTER_SPEC
+        4. BRIDGE
+        5. SYNC
+        6. HEARTBEAT (jeśli włączony)
+        7. ULTIMA
+        """
+        LOG_INFO("KOMBAJN", "🚀 Uruchamianie WSZYSTKICH 7 funkcji")
+        
+        results = {}
+        
+        # 1. SECURITY — najpierw ochrona
+        if signature:
+            results["security"] = self.run_security(signature)
+        else:
+            results["security"] = {"status": "SKIPPED", "reason": "No signature provided"}
+        
+        # 2. MATRIX_SPEC — rejestry + wektor
+        if raw_input is not None:
+            results["matrix"] = self.matrix.process_vector(raw_input, clean_function)
+        else:
+            results["matrix"] = {
+                "status": "READY",
+                "registers": self.matrix.get_registers_status(),
+                "model": self.matrix.get_model_profile()
+            }
+        
+        # 3. MASTER_SPEC
+        results["master_spec"] = self.run_master_spec(user_codes)
+        
+        # 4. BRIDGE
+        if geon_168_data:
+            results["bridge"] = self.run_bridge(geon_168_data)
+        else:
+            results["bridge"] = {"status": "SKIPPED", "reason": "No GEON_168 data"}
+        
+        # 5. SYNC
+        results["sync"] = self.run_sync(cycles)
+        
+        # 6. HEARTBEAT
+        if with_heartbeat:
+            results["heartbeat"] = self.run_heartbeat(start=True)
+        
+        # 7. ULTIMA
+        results["ultima"] = self.run_ultima()
+        
+        return {
+            "status": "ALL_7_FUNCTIONS_COMPLETE",
+            "results": results,
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    # =========================================================================
+    # STATUS
+    # =========================================================================
+    
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "timestamp": datetime.now().isoformat(),
+            "stats": self.stats,
+            "master_spec": self.master_spec.get_status(),
+            "bridge": self.bridge_manager.get_status(),
+            "sync": self.sync_engine.get_status(),
+            "heartbeat": self.heartbeat.get_status(),
+            "security": self.security.get_status(),
+            "ultima": self.ultima.get_status(),
+            "matrix": self.matrix.get_status()
+        }
+    
+    def reset(self) -> None:
+        self.master_spec.reset()
+        self.bridge_manager.reset()
+        self.sync_engine.reset()
+        self.heartbeat.reset()
+        self.security.reset()
+        self.ultima.reset()
+        self.matrix.reset()
+        self.stats = {"function_calls": 0, "last_function": None, "active_functions": []}
+        LOG_INFO("KOMBAJN", "🔄 Wszystkie komponenty zresetowane")
+
+
+# =============================================================================
+# 10. DEMONSTRACJA
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🐉 GEON_MASTER_SPEC_KOMBAJN — FINALNA WERSJA 7 FUNKCJI")
+    print(f"   {VERSION}")
+    print("=" * 80)
+    print("Funkcje: MASTER_SPEC | BRIDGE | SYNC | HEARTBEAT | SECURITY | ULTIMA | MATRIX_SPEC")
+    print("=" * 80 + "\n")
+    
+    # Inicjalizacja
+    kombajn = GeonMasterSpecKombajn()
+    
+    # =====================================================================
+    # TEST 1: MATRIX_SPEC — Rejestry i Boot
+    # =====================================================================
+    
+    print("🔹 TEST 1: MATRIX_SPEC — Rejestry i Boot")
+    matrix_status = kombajn.matrix.get_status()
+    print(f"   Node: {matrix_status['node_id']}")
+    print(f"   State: {matrix_status['system_state']}")
+    print(f"   Model: {matrix_status['model_9']['mode']}")
+    print(f"   Registers: {matrix_status['registers']}")
+    print(f"   Error flag: {matrix_status['error_flag']}")
+    print("-" * 60 + "\n")
+    
+    # =====================================================================
+    # TEST 2: MATRIX_SPEC — Process Vector
+    # =====================================================================
+    
+    print("🔹 TEST 2: MATRIX_SPEC — Process Vector")
+    vector_result = kombajn.run_matrix("EXECUTE_PRIMARY_TASK")
+    print(f"   Status: {vector_result['status']}")
+    print(f"   Node: {vector_result['node']}")
+    print(f"   Profile: {vector_result['profile']}")
+    print(f"   Payload: {vector_result['payload'][:50]}...")
+    print("-" * 60 + "\n")
+    
+    # =====================================================================
+    # TEST 3: SECURITY — sygnał bezpieczny (GREEN)
+    # =====================================================================
+    
+    print("🔹 TEST 3: SECURITY — sygnał bezpieczny (GREEN)")
+    safe_signature = {
+        "empathy": True,
+        "reflexion": True,
+        "uses_people_as_resource": False,
+        "breaks_promises_for_gain": False,
+        "avoids_care_in_crisis": False,
+        "cold_procedural_in_family": False,
+        "warmth_level": 0.8,
+        "clarity_level": 0.9,
+        "reciprocity_level": 0.8,
+        "stability_level": 0.9,
+        "presence_level": 0.8
+    }
+    result3 = kombajn.run_security(safe_signature)
+    print(f"   Status: {result3['status']} {result3['status_icon']}")
+    print(f"   Shadow score: {result3['shadow_score']}")
+    print(f"   Flow status: {result3['flow_status']}")
+    print(f"   Trinity: {result3['trinity_boundary']}")
+    print(f"   SAMAEL: {result3['samael_filter']}")
+    print("-" * 60 + "\n")
+    
+    # =====================================================================
+    # TEST 4: WSZYSTKIE 7 FUNKCJI
+    # =====================================================================
+    
+    print("🔹 TEST 4: WSZYSTKIE 7 FUNKCJI")
+    result7 = kombajn.run_everything(
+        user_codes=["150980", "16062006", "6490", "168", "169"],
+        geon_168_data={"mode": "AUTONOMOUS", "value": 168},
+        cycles={"GEON_168": 10, "GEON_169": 10, "MASTER_SPEC": 10},
+        signature=safe_signature,
+        raw_input="FULL_SYSTEM_EXECUTION",
+        with_heartbeat=True
+    )
+    print(f"   Status: {result7['status']}")
+    for func_name, func_result in result7['results'].items():
+        if isinstance(func_result, dict):
+            status = func_result.get('status', 'COMPLETED')
+            print(f"     {func_name}: {status}")
+    print("-" * 60 + "\n")
+    
+    # =====================================================================
+    # STATUS KOŃCOWY
+    # =====================================================================
+    
+    print("=" * 80)
+    print("📊 STATUS KOŃCOWY KOMBAJNA")
+    print("=" * 80)
+    
+    status = kombajn.get_status()
+    print(f"Wersja: {status['version']}")
+    print(f"Sygnatura: {status['signature']}")
+    print(f"\n--- STATYSTYKI ---")
+    for key, value in status['stats'].items():
+        print(f"  {key}: {value}")
+    
+    print(f"\n--- MATRIX_SPEC ---")
+    for key, value in status['matrix'].items():
+        if key != "registers" and key != "bus":
+            print(f"  {key}: {value}")
+    
+    print(f"\n--- REJESTRY ---")
+    for key, value in status['matrix']['registers'].items():
+        print(f"  {key}: {value}")
+    
+    print(f"\n--- SECURITY ---")
+    for key, value in status['security'].items():
+        if key != "benny_logs_count":
+            print(f"  {key}: {value}")
+    
+    print(f"\n--- HEARTBEAT ---")
+    print(f"  state: {status['heartbeat']['state']}")
+    print(f"  frequency: {status['heartbeat']['frequency']}Hz")
+    print(f"  pulse_count: {status['heartbeat']['pulse_count']}")
+    
+    print("\n" + "=" * 80)
+    print("🐉 PERFEKCYJNY KOMBAJN 7 FUNKCJI GOTOWY | 1-6-8-3-3. ∞")
+    print("=" * 80 + "\n")
+
+
+# =============================================================================
+# 11. URUCHOMIENIE
+# =============================================================================
+
+if __name__ == "__main__":
+    demo()
