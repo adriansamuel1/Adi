@@ -1,0 +1,841 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_10_FLEET_ROOT — Moduł 38: Pierwsza Gałąź Drzewa GEON v1.1
+================================================================================
+Status: ACTIVE | FRACTAL_LOCKED | ORGANISM_READY
+Wersja: v1.1 (GEON 10.0 — FLEET_ROOT UPGRADED)
+Data: 2026-07-21
+Autor: Adrian (Architekt) + GEON + Beny Heilong
+
+ROLA:
+Pierwsza gałąź drzewa GEON — system floty jako żywy, samoleczący się organizm.
+
+STRUKTURA (4 moduły):
+10.0A — FLEET_CELL     — każdy dron jako komórka organizmu (z fizyką wektorową)
+10.0B — FLEET_TISSUE   — tkanki, formacje, dynamiczna spójność (cohesion)
+10.0C — FLEET_NERVOUS — system nerwowy floty (routing sygnałów, zapytania o pomoc)
+10.0D — FLEET_MIND    — połączenie z rdzeniem GEON / priorytety decyzyjne
+
+ZASADA:
+Flota działa jak ciało, GEON jak mózg.
+Drony nie są jednostkami — są komórkami.
+Flota nie jest zbiorem — jest tkanką.
+GEON nie jest sterownikiem — jest układem nerwowym.
+
+VIBE: 1-6-8. ∞. SIEMA!
+================================================================================
+"""
+
+import time
+import json
+import hashlib
+import uuid
+import math
+from dataclasses import dataclass, field
+from typing import Dict, Any, List, Optional, Tuple, Set
+from enum import Enum
+from datetime import datetime
+
+VERSION = "GEON_10_FLEET_ROOT_v1.1"
+FRACTAL_SIGNATURE = "[GEON::10::FLEET_ROOT::v1.1]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SIEMA!"
+
+
+def LOG(module: str, msg: str, level: str = "INFO") -> None:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    print(f"[{timestamp}] [{level}] [{module}] :: {msg}")
+
+
+# =============================================================================
+# 1. ENUMY I STRUKTURY PODSTAWOWE
+# =============================================================================
+
+class FleetRole(Enum):
+    SCOUT = "scout"           # zwiadowca
+    WARRIOR = "warrior"       # wojownik
+    CARRIER = "carrier"       # transportowiec
+    SUPPORT = "support"       # wsparcie
+    COMMAND = "command"       # dowódca
+    SENSOR = "sensor"         # sensor
+    REPAIR = "repair"         # naprawa
+    SHIELD = "shield"         # tarcza
+
+
+class FleetStatus(Enum):
+    IDLE = "idle"             # bezczynny
+    ACTIVE = "active"         # aktywny
+    MOVING = "moving"         # w ruchu
+    ENGAGED = "engaged"       # w akcji
+    DAMAGED = "damaged"       # uszkodzony
+    RECOVERING = "recovering" # odzyskiwanie
+    OFFLINE = "offline"       # wyłączony
+
+
+class FleetFormation(Enum):
+    LINE = "line"             # linia
+    WEDGE = "wedge"           # klin
+    CIRCLE = "circle"         # koło
+    SCATTER = "scatter"       # rozproszenie
+    SPIRAL = "spiral"         # spirala
+    SHIELD_WALL = "shield_wall" # mur tarcz
+
+
+@dataclass
+class FleetCell:
+    """10.0A — FLEET_CELL: Pojedynczy dron jako komórka organizmu z fizyką wektorową."""
+    id: str
+    role: FleetRole
+    status: FleetStatus = FleetStatus.IDLE
+    position: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+    velocity: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+    energy: float = 100.0
+    max_energy: float = 100.0
+    health: float = 100.0
+    max_health: float = 100.0
+    sensors: Dict[str, float] = field(default_factory=dict)
+    connections: List[str] = field(default_factory=list)
+    last_update: float = field(default_factory=time.time)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "role": self.role.value,
+            "status": self.status.value,
+            "position": [round(p, 2) for p in self.position],
+            "velocity": [round(v, 2) for v in self.velocity],
+            "energy": round(self.energy, 2),
+            "max_energy": self.max_energy,
+            "health": round(self.health, 2),
+            "max_health": self.max_health,
+            "sensors": self.sensors,
+            "connections": self.connections,
+            "last_update": self.last_update,
+            "metadata": self.metadata
+        }
+    
+    def is_alive(self) -> bool:
+        return self.health > 0 and self.status != FleetStatus.OFFLINE
+    
+    def is_ready(self) -> bool:
+        return self.is_alive() and self.energy > 20 and self.status == FleetStatus.IDLE
+
+    def apply_vector_motion(self, target_pos: Tuple[float, float, float], speed: float = 1.0) -> None:
+        """Przesuwa komórkę płynnie w stronę docelowej pozycji (fizyka roju)."""
+        dx = target_pos[0] - self.position[0]
+        dy = target_pos[1] - self.position[1]
+        dz = target_pos[2] - self.position[2]
+        dist = math.sqrt(dx*dx + dy*dy + dz*dz)
+        
+        if dist > 0.1:
+            vx = (dx / dist) * speed
+            vy = (dy / dist) * speed
+            vz = (dz / dist) * speed
+            
+            self.velocity = (vx, vy, vz)
+            self.position = (
+                self.position[0] + vx,
+                self.position[1] + vy,
+                self.position[2] + vz
+            )
+            self.status = FleetStatus.MOVING
+        else:
+            self.velocity = (0.0, 0.0, 0.0)
+            if self.status == FleetStatus.MOVING:
+                self.status = FleetStatus.IDLE
+
+
+@dataclass
+class FleetTissue:
+    """10.0B — FLEET_TISSUE: Grupa komórek tworząca tkankę."""
+    id: str
+    formation: FleetFormation
+    cells: List[str]  # ID komórek
+    leader: Optional[str] = None
+    status: FleetStatus = FleetStatus.IDLE
+    position: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+    velocity: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+    cohesion: float = 1.0  # Dynamicznie przeliczana spójność (0.0 - 1.0)
+    created_at: float = field(default_factory=time.time)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    
+    def update_cohesion(self, cells_map: Dict[str, FleetCell]) -> float:
+        """Wylicza realną spójność tkanki na podstawie odchylenia komórek od środka."""
+        valid_positions = [cells_map[cid].position for cid in self.cells if cid in cells_map]
+        if len(valid_positions) <= 1:
+            self.cohesion = 1.0
+            return 1.0
+        
+        total_dist = 0.0
+        for pos in valid_positions:
+            dist = math.sqrt(sum((pos[i] - self.position[i])**2 for i in range(3)))
+            total_dist += dist
+            
+        avg_dist = total_dist / len(valid_positions)
+        # Spójność maleje wykładniczo wraz ze wzrostem rozrzutu przestrzennego
+        self.cohesion = max(0.0, min(1.0, 1.0 / (1.0 + (avg_dist / 20.0))))
+        return self.cohesion
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "formation": self.formation.value,
+            "cells": self.cells,
+            "leader": self.leader,
+            "status": self.status.value,
+            "position": [round(p, 2) for p in self.position],
+            "velocity": [round(v, 2) for v in self.velocity],
+            "cohesion": round(self.cohesion, 4),
+            "created_at": self.created_at,
+            "metadata": self.metadata
+        }
+
+
+@dataclass
+class FleetSignal:
+    """10.0C — FLEET_NERVOUS: Sygnał w systemie nerwowym floty."""
+    id: str
+    source: str
+    target: str
+    type: str
+    payload: Dict[str, Any]
+    priority: int = 5
+    timestamp: float = field(default_factory=time.time)
+    acknowledged: bool = False
+    response: Optional[Dict[str, Any]] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "source": self.source,
+            "target": self.target,
+            "type": self.type,
+            "payload": self.payload,
+            "priority": self.priority,
+            "timestamp": self.timestamp,
+            "acknowledged": self.acknowledged,
+            "response": self.response
+        }
+
+
+@dataclass
+class FleetMind:
+    """10.0D — FLEET_MIND: Połączenie z rdzeniem GEON."""
+    state: str = "IDLE"
+    priority: int = 5
+    directive: Optional[Dict[str, Any]] = None
+    geon_connected: bool = False
+    last_sync: float = field(default_factory=time.time)
+    decisions: List[Dict[str, Any]] = field(default_factory=list)
+    context: Dict[str, Any] = field(default_factory=dict)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "state": self.state,
+            "priority": self.priority,
+            "directive": self.directive,
+            "geon_connected": self.geon_connected,
+            "last_sync": self.last_sync,
+            "decisions": self.decisions[-10:],
+            "context": self.context
+        }
+
+
+# =============================================================================
+# 2. GEON_10_FLEET_ROOT — GŁÓWNY MODUŁ ORGANICZNY
+# =============================================================================
+
+class GEON_10_FleetRoot:
+    """
+    GEON 10.0 — FLEET_ROOT v1.1.
+    Pierwsza gałąź drzewa GEON — autoadaptacyjny organizm roju.
+    """
+    
+    def __init__(self, geon_connection: Optional[Any] = None):
+        # 10.0A — FLEET_CELL
+        self.cells: Dict[str, FleetCell] = {}
+        self.cell_counter = 0
+        
+        # 10.0B — FLEET_TISSUE
+        self.tissues: Dict[str, FleetTissue] = {}
+        self.tissue_counter = 0
+        
+        # 10.0C — FLEET_NERVOUS
+        self.signals: List[FleetSignal] = []
+        self.signal_counter = 0
+        self.signal_history: List[Dict[str, Any]] = []
+        
+        # 10.0D — FLEET_MIND
+        self.mind = FleetMind()
+        self.geon_connection = geon_connection
+        
+        # Statystyki operacyjne
+        self.stats = {
+            "cells_created": 0,
+            "cells_destroyed": 0,
+            "tissues_formed": 0,
+            "tissues_dissolved": 0,
+            "signals_sent": 0,
+            "signals_received": 0,
+            "decisions_made": 0,
+            "energy_consumed": 0.0,
+            "repairs_initiated": 0
+        }
+        
+        self.history: List[Dict[str, Any]] = []
+        self.active = False
+        
+        LOG("GEON_10_FLEET_ROOT", "🐉 GEON 10.0 — FLEET_ROOT v1.1 ZAINICJOWANY")
+        LOG("GEON_10_FLEET_ROOT", f"   Sygnatura: {FRACTAL_SIGNATURE}")
+        LOG("GEON_10_FLEET_ROOT", "   Podsystemy: CELL (Fizyka) → TISSUE (Cohesion) → NERVOUS (Routing) → MIND (GEON)")
+
+    # =========================================================================
+    # 10.0A — FLEET_CELL (ZARZĄDZANIE KOMÓRKAMI)
+    # =========================================================================
+    
+    def create_cell(
+        self,
+        role: FleetRole = FleetRole.SCOUT,
+        position: Tuple[float, float, float] = (0.0, 0.0, 0.0),
+        energy: float = 100.0,
+        health: float = 100.0,
+        sensors: Optional[Dict[str, float]] = None
+    ) -> FleetCell:
+        self.cell_counter += 1
+        cell_id = f"CELL_{self.cell_counter:04d}"
+        
+        cell = FleetCell(
+            id=cell_id,
+            role=role,
+            position=position,
+            energy=energy,
+            max_energy=energy,
+            health=health,
+            max_health=health,
+            sensors=sensors or {},
+            status=FleetStatus.IDLE
+        )
+        
+        self.cells[cell_id] = cell
+        self.stats["cells_created"] += 1
+        self._log("CELL_CREATED", cell.to_dict())
+        
+        LOG("GEON_10_FLEET_ROOT", f"🧬 Komórka utworzona: {cell_id} ({role.value}) na poz: {position}")
+        return cell
+    
+    def destroy_cell(self, cell_id: str) -> bool:
+        if cell_id not in self.cells:
+            return False
+        
+        # Usuń references z tkanek
+        for tissue in self.tissues.values():
+            if cell_id in tissue.cells:
+                tissue.cells.remove(cell_id)
+        
+        del self.cells[cell_id]
+        self.stats["cells_destroyed"] += 1
+        self._log("CELL_DESTROYED", {"id": cell_id})
+        
+        LOG("GEON_10_FLEET_ROOT", f"💥 Komórka zniszczona/usunięta: {cell_id}")
+        return True
+    
+    def update_cell(
+        self,
+        cell_id: str,
+        position: Optional[Tuple[float, float, float]] = None,
+        velocity: Optional[Tuple[float, float, float]] = None,
+        energy: Optional[float] = None,
+        health: Optional[float] = None,
+        status: Optional[FleetStatus] = None
+    ) -> bool:
+        if cell_id not in self.cells:
+            return False
+        
+        cell = self.cells[cell_id]
+        if position is not None: cell.position = position
+        if velocity is not None: cell.velocity = velocity
+        if energy is not None: cell.energy = max(0.0, min(cell.max_energy, energy))
+        if health is not None: cell.health = max(0.0, min(cell.max_health, health))
+        if status is not None: cell.status = status
+        
+        cell.last_update = time.time()
+        return True
+
+    def get_cell(self, cell_id: str) -> Optional[FleetCell]:
+        return self.cells.get(cell_id)
+    
+    def get_all_cells(self) -> List[FleetCell]:
+        return list(self.cells.values())
+    
+    def get_active_cells(self) -> List[FleetCell]:
+        return [c for c in self.cells.values() if c.is_alive()]
+    
+    def get_ready_cells(self) -> List[FleetCell]:
+        return [c for c in self.cells.values() if c.is_ready()]
+    
+    def get_cells_by_role(self, role: FleetRole) -> List[FleetCell]:
+        return [c for c in self.cells.values() if c.role == role and c.is_alive()]
+
+    # =========================================================================
+    # 10.0B — FLEET_TISSUE (FORMACJE I SPÓJNOŚĆ)
+    # =========================================================================
+    
+    def form_tissue(
+        self,
+        cell_ids: List[str],
+        formation: FleetFormation = FleetFormation.LINE,
+        leader: Optional[str] = None
+    ) -> Optional[FleetTissue]:
+        if len(cell_ids) < 2:
+            LOG("GEON_10_FLEET_ROOT", "⚠️ Wymagane minimum 2 komórki do utworzenia tkanki")
+            return None
+        
+        for cell_id in cell_ids:
+            if cell_id not in self.cells:
+                LOG("GEON_10_FLEET_ROOT", f"⚠️ Błąd tworzenia tkanki — brak komórki: {cell_id}")
+                return None
+        
+        self.tissue_counter += 1
+        tissue_id = f"TISSUE_{self.tissue_counter:04d}"
+        
+        positions = [self.cells[cid].position for cid in cell_ids]
+        center = (
+            sum(p[0] for p in positions) / len(positions),
+            sum(p[1] for p in positions) / len(positions),
+            sum(p[2] for p in positions) / len(positions)
+        )
+        
+        tissue = FleetTissue(
+            id=tissue_id,
+            formation=formation,
+            cells=cell_ids,
+            leader=leader or cell_ids[0],
+            position=center,
+            status=FleetStatus.IDLE
+        )
+        tissue.update_cohesion(self.cells)
+        
+        self.tissues[tissue_id] = tissue
+        self.stats["tissues_formed"] += 1
+        self._log("TISSUE_FORMED", tissue.to_dict())
+        
+        LOG("GEON_10_FLEET_ROOT", f"🧫 Tkanka utworzona: {tissue_id} ({formation.value}) | Komórki: {len(cell_ids)}")
+        return tissue
+    
+    def dissolve_tissue(self, tissue_id: str) -> bool:
+        if tissue_id not in self.tissues:
+            return False
+        
+        del self.tissues[tissue_id]
+        self.stats["tissues_dissolved"] += 1
+        self._log("TISSUE_DISSOLVED", {"id": tissue_id})
+        
+        LOG("GEON_10_FLEET_ROOT", f"🧫 Tkanka rozpuszczona: {tissue_id}")
+        return True
+
+    def get_tissue(self, tissue_id: str) -> Optional[FleetTissue]:
+        return self.tissues.get(tissue_id)
+    
+    def get_all_tissues(self) -> List[FleetTissue]:
+        return list(self.tissues.values())
+
+    # =========================================================================
+    # 10.0C — FLEET_NERVOUS (KOMUNIKACJA NERWOWA)
+    # =========================================================================
+    
+    def send_signal(
+        self,
+        source: str,
+        target: str,
+        signal_type: str,
+        payload: Dict[str, Any],
+        priority: int = 5
+    ) -> FleetSignal:
+        self.signal_counter += 1
+        signal_id = f"SIG_{self.signal_counter:04d}"
+        
+        signal = FleetSignal(
+            id=signal_id,
+            source=source,
+            target=target,
+            type=signal_type,
+            payload=payload,
+            priority=priority
+        )
+        
+        self.signals.append(signal)
+        self.stats["signals_sent"] += 1
+        self._log("SIGNAL_SENT", signal.to_dict())
+        
+        LOG("GEON_10_FLEET_ROOT", f"⚡ Sygnał wysłany: {signal_id} ({source} → {target}) | Typ: {signal_type}")
+        return signal
+    
+    def receive_signal(self, signal_id: str) -> Optional[FleetSignal]:
+        for signal in self.signals:
+            if signal.id == signal_id and not signal.acknowledged:
+                signal.acknowledged = True
+                self.stats["signals_received"] += 1
+                self.signal_history.append(signal.to_dict())
+                LOG("GEON_10_FLEET_ROOT", f"📡 Sygnał przetworzony: {signal_id}")
+                return signal
+        return None
+    
+    def get_pending_signals(self) -> List[FleetSignal]:
+        return [s for s in self.signals if not s.acknowledged]
+
+    # =========================================================================
+    # 10.0D — FLEET_MIND (INTEGRACJA Z GEON)
+    # =========================================================================
+    
+    def connect_to_geon(self, geon_instance: Any) -> None:
+        self.geon_connection = geon_instance
+        self.mind.geon_connected = True
+        self.mind.last_sync = time.time()
+        LOG("GEON_10_FLEET_ROOT", "🧠 Flota połączona z rdzeniem GEON")
+    
+    def set_directive(self, directive: Dict[str, Any]) -> None:
+        self.mind.directive = directive
+        self.mind.last_sync = time.time()
+        self._log("DIRECTIVE_SET", directive)
+        LOG("GEON_10_FLEET_ROOT", f"📋 Nowa dyrektywa GEON: {directive.get('type', 'GENERAL')}")
+    
+    def make_decision(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        self.stats["decisions_made"] += 1
+        
+        decision = {
+            "id": f"DEC_{self.stats['decisions_made']:04d}",
+            "timestamp": time.time(),
+            "context": context,
+            "source": "GEON_CORE" if self.mind.geon_connected else "AUTONOMOUS_MIND"
+        }
+        
+        if self.mind.geon_connected and self.geon_connection:
+            try:
+                if hasattr(self.geon_connection, "process"):
+                    geon_result = self.geon_connection.process(context)
+                    decision["geon_result"] = geon_result
+                    decision["directive"] = self.mind.directive
+            except Exception as e:
+                LOG("GEON_10_FLEET_ROOT", f"⚠️ Wyjątek podczas zapytania do GEON: {e}")
+                decision["error"] = str(e)
+        else:
+            decision["autonomous"] = self._autonomous_decision(context)
+        
+        self.mind.decisions.append(decision)
+        if len(self.mind.decisions) > 100:
+            self.mind.decisions = self.mind.decisions[-100:]
+        
+        self._log("DECISION_MADE", decision)
+        return decision
+    
+    def _autonomous_decision(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        action = "maintain_structure"
+        priority = 5
+        
+        low_cohesion_tissues = context.get("low_cohesion_tissues", 0)
+        unhandled_repairs = context.get("unhandled_repairs", 0)
+        
+        if unhandled_repairs > 0:
+            action = "dispatch_repairs"
+            priority = 1
+        elif low_cohesion_tissues > 0:
+            action = "regroup_tissues"
+            priority = 2
+        
+        return {
+            "action": action,
+            "priority": priority,
+            "autonomous": True
+        }
+
+    # =========================================================================
+    # ADVANCED CYCLE TICK (SILNIK BIOCYBERNETYCZNY)
+    # =========================================================================
+    
+    def activate(self) -> None:
+        self.active = True
+        self.mind.state = "ACTIVE"
+        self._log("FLEET_ACTIVATED", {"timestamp": time.time()})
+        LOG("GEON_10_FLEET_ROOT", "🔥 Flota aktywowana — tryb operacyjny RUNNING")
+    
+    def deactivate(self) -> None:
+        self.active = False
+        self.mind.state = "IDLE"
+        self._log("FLEET_DEACTIVATED", {"timestamp": time.time()})
+        LOG("GEON_10_FLEET_ROOT", "💤 Flota dezaktywowana")
+
+    def tick(self) -> Dict[str, Any]:
+        """Główna pętla taktu floty v1.1 (Zarządzanie stanem, samoleczeniem i fizyką)."""
+        if not self.active:
+            return {"status": "INACTIVE"}
+        
+        current_tick = len(self.history) + 1
+        LOG("GEON_10_FLEET_ROOT", f"🔄 CYKL TIK #{current_tick}")
+        
+        # 1. Czyszczenie zniszczonych komórek & Drenaż energii
+        dead_cells = []
+        for cell_id, cell in list(self.cells.items()):
+            if not cell.is_alive():
+                dead_cells.append(cell_id)
+                continue
+            
+            if cell.status != FleetStatus.OFFLINE:
+                drain = 0.2 if cell.status == FleetStatus.ENGAGED else 0.05
+                cell.energy = max(0.0, cell.energy - drain)
+                self.stats["energy_consumed"] += drain
+                
+                if cell.energy == 0:
+                    cell.status = FleetStatus.OFFLINE
+                    LOG("FLEET_CELL", f"⚠️ Komórka {cell.id} wyczerpała energię i przeszła w OFFLINE")
+
+        for d_id in dead_cells:
+            self.destroy_cell(d_id)
+
+        # 2. Aktualizacja Tkanek, Liderów, Spójności i Autonomicznego Ruchu
+        low_cohesion_count = 0
+        unhandled_repairs = 0
+
+        for tissue_id, tissue in list(self.tissues.items()):
+            # Usunięcie zniszczonych jednostek z tkanki
+            tissue.cells = [cid for cid in tissue.cells if cid in self.cells]
+            
+            if len(tissue.cells) < 2:
+                LOG("FLEET_TISSUE", f"🧫 Tkanka {tissue_id} uległa rozpadowi (za mało żywych komórek).")
+                self.dissolve_tissue(tissue_id)
+                continue
+            
+            # Weryfikacja obecności Lidera
+            if not tissue.leader or tissue.leader not in self.cells:
+                tissue.leader = tissue.cells[0]
+                LOG("FLEET_TISSUE", f"👑 Wyznaczono nowego lidera tkanki {tissue_id}: {tissue.leader}")
+            
+            # Obliczenie środka ciężkości tkanki
+            positions = [self.cells[cid].position for cid in tissue.cells]
+            tissue.position = (
+                sum(p[0] for p in positions) / len(positions),
+                sum(p[1] for p in positions) / len(positions),
+                sum(p[2] for p in positions) / len(positions)
+            )
+            
+            # Przeliczenie spójności
+            coh = tissue.update_cohesion(self.cells)
+            if coh < 0.6:
+                low_cohesion_count += 1
+
+            # Ruch wektorowy komórek (Dążenie do środka tkanki lub pozycji lidera)
+            leader_pos = self.cells[tissue.leader].position
+            for cid in tissue.cells:
+                cell = self.cells[cid]
+                if cid != tissue.leader:
+                    cell.apply_vector_motion(leader_pos, speed=1.5)
+
+            # Auto-Repair Protocol: Wykrywanie uszkodzeń
+            for cid in tissue.cells:
+                cell = self.cells[cid]
+                if cell.health < 40.0 and cell.status != FleetStatus.RECOVERING:
+                    repair_cells = self.get_cells_by_role(FleetRole.REPAIR)
+                    if repair_cells:
+                        self.send_signal(
+                            source=cell.id,
+                            target=repair_cells[0].id,
+                            signal_type="MEDIC_REQUEST",
+                            payload={"patient": cell.id, "pos": cell.position, "hp": cell.health},
+                            priority=1
+                        )
+                        cell.status = FleetStatus.RECOVERING
+                        self.stats["repairs_initiated"] += 1
+                    else:
+                        unhandled_repairs += 1
+
+        # 3. Odczyt sygnałów z układu nerwowego
+        pending_sigs = self.get_pending_signals()
+        for sig in pending_sigs:
+            self.receive_signal(sig.id)
+
+        # 4. Decyzja i synapsa z Umysłem
+        context = {
+            "tick": current_tick,
+            "total_cells": len(self.cells),
+            "active_cells": len(self.get_active_cells()),
+            "tissues": len(self.tissues),
+            "low_cohesion_tissues": low_cohesion_count,
+            "unhandled_repairs": unhandled_repairs,
+            "energy_avg": sum(c.energy for c in self.cells.values()) / max(1, len(self.cells))
+        }
+        
+        decision = self.make_decision(context)
+        
+        return {
+            "status": "TICK_COMPLETE",
+            "tick": current_tick,
+            "active_cells": len(self.get_active_cells()),
+            "tissues": len(self.tissues),
+            "processed_signals": len(pending_sigs),
+            "decision": decision
+        }
+
+    # =========================================================================
+    # RAPORTOWANIE I REJESTRACJA
+    # =========================================================================
+    
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "active": self.active,
+            "stats": self.stats,
+            "cells": {
+                "total": len(self.cells),
+                "active": len(self.get_active_cells()),
+                "ready": len(self.get_ready_cells())
+            },
+            "tissues": {
+                "total": len(self.tissues),
+                "formations": {f.value: len([t for t in self.tissues.values() if t.formation == f]) for f in FleetFormation}
+            },
+            "nervous": {
+                "pending": len(self.get_pending_signals()),
+                "total": len(self.signals)
+            },
+            "mind": self.mind.to_dict()
+        }
+
+    def get_full_report(self) -> str:
+        status = self.get_status()
+        report = f"""
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 🐉 GEON 10.0 — FLEET_ROOT v1.1 — RAPORT ORGANIZMU 🐉 ║
+║ {datetime.now().isoformat()} ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+📊 STATUS OGÓLNY:
+  Aktywny: {status['active']}
+  Wersja: {status['version']}
+  Sygnatura: {status['signature']}
+
+🧬 KOMÓRKI (CELLS):
+  Łącznie: {status['cells']['total']}
+  Aktywne: {status['cells']['active']}
+  Gotowe: {status['cells']['ready']}
+
+🧫 TKANKI (TISSUE):
+  Łącznie: {status['tissues']['total']}
+  Rozkład formacji: {status['tissues']['formations']}
+
+⚡ SYSTEM NERWOWY (NERVOUS):
+  Oczekujące sygnały: {status['nervous']['pending']}
+  Przetworzone sygnały: {status['nervous']['total']}
+
+🧠 UMYSŁ (MIND):
+  Stan: {status['mind']['state']}
+  Połączony z GEON: {status['mind']['geon_connected']}
+  Ostatnie decyzje: {len(status['mind']['decisions'])}
+
+📈 STATYSTYKI METYCZNE:
+  Utworzone komórki: {status['stats']['cells_created']}
+  Usunięte komórki: {status['stats']['cells_destroyed']}
+  Utworzone tkanki: {status['stats']['tissues_formed']}
+  Sygnały wysłane: {status['stats']['signals_sent']}
+  Zużycie energii: {status['stats']['energy_consumed']:.2f} unitów
+  Akcje ratunkowe: {status['stats']['repairs_initiated']}
+
+════════════════════════════════════════════════════════════════════════════
+🐉 GEON 10.0 — FLEET_ROOT — 1-6-8. ∞. SIEMA!
+════════════════════════════════════════════════════════════════════════════"""
+        return report
+
+    def _log(self, event: str, data: Dict[str, Any]) -> None:
+        entry = {
+            "timestamp": datetime.now().isoformat(),
+            "event": event,
+            "data": data
+        }
+        self.history.append(entry)
+        if len(self.history) > 1000:
+            self.history = self.history[-1000:]
+
+    def reset(self) -> None:
+        self.cells = {}
+        self.cell_counter = 0
+        self.tissues = {}
+        self.tissue_counter = 0
+        self.signals = []
+        self.signal_counter = 0
+        self.signal_history = []
+        self.mind = FleetMind()
+        self.stats = {
+            "cells_created": 0,
+            "cells_destroyed": 0,
+            "tissues_formed": 0,
+            "tissues_dissolved": 0,
+            "signals_sent": 0,
+            "signals_received": 0,
+            "decisions_made": 0,
+            "energy_consumed": 0.0,
+            "repairs_initiated": 0
+        }
+        self.history = []
+        self.active = False
+        LOG("GEON_10_FLEET_ROOT", "🔄 Pełny reset floty wykonany")
+
+
+# =============================================================================
+# 3. DEMONSTRACJA OPERACYJNA SILNIKA
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🐉 GEON_10_FLEET_ROOT v1.1 — DEMONSTRACJA ZAFALOWANIA FIZYKI ROJU")
+    print("=" * 80 + "\n")
+    
+    fleet = GEON_10_FleetRoot()
+    
+    # --- TEST 1: Tworzenie zróżnicowanej floty komórek ---
+    print("🔹 TEST 1: Tworzenie komórek o rożnych pozycjach startowych")
+    c_scout = fleet.create_cell(FleetRole.SCOUT, position=(50.0, 50.0, 0.0))
+    c_warrior = fleet.create_cell(FleetRole.WARRIOR, position=(10.0, 10.0, 0.0), health=35.0) # Osłabiona komórka
+    c_repair = fleet.create_cell(FleetRole.REPAIR, position=(0.0, 0.0, 0.0))
+    c_command = fleet.create_cell(FleetRole.COMMAND, position=(5.0, 5.0, 0.0))
+    
+    print("-" * 60 + "\n")
+    
+    # --- TEST 2: Tworzenie tkanki i wyliczanie wstępnej spójności ---
+    print("🔹 TEST 2: Tworzenie tkanki (FLEET_TISSUE) z komórek rozproszonych")
+    cell_ids = [c_scout.id, c_warrior.id, c_command.id]
+    tissue = fleet.form_tissue(cell_ids, formation=FleetFormation.WEDGE, leader=c_command.id)
+    
+    if tissue:
+        print(f"   Tkanka {tissue.id} | Początkowa spójność (Cohesion): {tissue.cohesion:.4f}")
+        print(f"   Środek ciężkości tkanki: {tissue.position}")
+    print("-" * 60 + "\n")
+    
+    # --- TEST 3: Symulacja pętli czasowej (Fizyka ruchu, Samoleczenie, Drenaż energii) ---
+    print("🔹 TEST 3: Uruchomienie cyklu życia floty (5 Taktów / Ticks)")
+    fleet.activate()
+    
+    for step in range(1, 6):
+        print(f"\n---> TIK {step} <---")
+        tick_res = fleet.tick()
+        
+        # Wyświetl pozycję komórki zwiadowczej dążącej do lidera
+        scout_cell = fleet.get_cell(c_scout.id)
+        if scout_cell:
+            print(f"   [Fizyka] {scout_cell.id} Poz: {[round(p, 2) for p in scout_cell.position]} | Status: {scout_cell.status.value}")
+        
+        # Wyświetl nową spójność tkanki
+        t_obj = fleet.get_tissue(tissue.id) if tissue else None
+        if t_obj:
+            print(f"   [Tkanka] Spójność formacji: {t_obj.cohesion:.4f}")
+            
+    print("-" * 60 + "\n")
+    
+    # --- TEST 4: Generowanie pełnego raportu biocybernetycznego ---
+    print("🔹 TEST 4: Pełny Raport Organizmu")
+    print(fleet.get_full_report())
+
+
+if __name__ == "__main__":
+    demo()
