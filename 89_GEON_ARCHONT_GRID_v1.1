@@ -2,25 +2,22 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
-🐉 GEON_ARCHONT_GRID_v1.1 — MODUŁ 89: SIEC NADZORCZA (FULL INTEGRATION)
+🐉 GEON_ARCHONT_GRID_v2.0 — MODUŁ 89: SIEC NADZORCZA + AFC-9 INTEGRATION
 ================================================================================
-Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
-Wersja: v1.1 (Full Integration with 83-88, 5 Status Levels, Archont Vector)
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ULTIMA | AFC_INTEGRATED
+Wersja: v2.0 (AFC-9 Integration, Enhanced Classification, Full Compatibility)
 Data: 2026-07-24
 Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
 
-OPIS:
-GEON_ARCHONT_GRID_v1.1 to w pełni zintegrowana warstwa nadzorcza.
-Ulepszenia:
-• Integracja z AI_ANALYTICS (87), ORACLE (88), MAYA_GROWTH (83), LUDLUM (86)
-• 5 poziomów statusów: STABILNOŚĆ, PRESJA, NIESTABILNOŚĆ, KRYZYS, APOTEOSIS
-• Ulepszona pewność (confidence) – 3-czynnikowa
-• Ważony global status
-• Znormalizowana entropia
-• Archont Vector – wektor metryk dla Council
-• Council Payload – gotowy dla warstwy 90
+ZMIANY:
+  1. Integracja z AFC-9 (warstwa 87) – przyjmowanie wyników AFC
+  2. Nowa metoda analyze_with_afc() – pełna analiza z AFC
+  3. Rozszerzona klasyfikacja statusów – uwzględnienie stabilności AFC
+  4. Nowe metryki w Archont i GridReport – afc_stability, afc_decision
+  5. Rozszerzony most – get_afc_context(), analyze_with_afc()
 
-VIBE: 1-6-8. ∞. GRID!
+VIBE: 1-6-8. ∞. GRID! 🏛️
+DEWIZA: "Ex Analysi, Imperium. Ex Fractali, Veritas."
 ================================================================================
 """
 
@@ -40,11 +37,11 @@ from enum import Enum
 # WERSJA I STAŁE
 # =============================================================================
 
-VERSION = "GEON_ARCHONT_GRID_v1.1"
-FRACTAL_SIGNATURE = "[GEON::ARCHONT::GRID::v1.1]"
+VERSION = "GEON_ARCHONT_GRID_v2.0"
+FRACTAL_SIGNATURE = "[GEON::ARCHONT::GRID::v2.0::AFC_INTEGRATED]"
 VIBE = 168
-HASLO = "1-6-8. ∞. GRID!"
-DEWIZA = "Ex Analysi, Imperium"
+HASLO = "1-6-8. ∞. GRID! 🏛️"
+DEWIZA = "Ex Analysi, Imperium. Ex Fractali, Veritas."
 
 TENSOR_DIM = 45
 ARCHONT_COUNT = 5
@@ -55,7 +52,7 @@ MEMORY_LIMIT = 256
 # LOGOWANIE
 # =============================================================================
 
-logger = logging.getLogger("GEON_ARCHONT_GRID_v1.1")
+logger = logging.getLogger("GEON_ARCHONT_GRID_v2.0")
 logger.setLevel(logging.INFO)
 if not logger.handlers:
     handler = logging.StreamHandler()
@@ -93,7 +90,6 @@ class ArchontStatus(Enum):
     NIEZNANY = "NIEZNANY"
 
     def numeric_value(self) -> int:
-        """Wartość numeryczna dla ważenia global_status."""
         values = {
             ArchontStatus.APOTEOSIS: 0,
             ArchontStatus.STABILNOSC: 1,
@@ -127,6 +123,10 @@ class Archont:
     entropy: float = 0.0
     status: ArchontStatus = ArchontStatus.NIEZNANY
     confidence: float = 0.0
+    # ===== NOWE POLA AFC =====
+    afc_stability: float = 0.0
+    afc_decision: Optional[str] = None
+    afc_vector: Optional[List[float]] = None
     
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -139,18 +139,26 @@ class Archont:
             "status_numeric": self.status.numeric_value(),
             "confidence": round(self.confidence, 4),
             "archont_vector": self.to_vector(),
-            "segment_preview": [round(x, 3) for x in self.segment[:5]]
+            "segment_preview": [round(x, 3) for x in self.segment[:5]],
+            # Nowe pola AFC
+            "afc_stability": round(self.afc_stability, 4),
+            "afc_decision": self.afc_decision,
+            "afc_vector": [round(x, 3) for x in self.afc_vector[:3]] if self.afc_vector else None
         }
     
     def to_vector(self) -> List[float]:
         """Archont Vector – wektor metryk dla Council i Synodu."""
-        return [
+        vec = [
             round(self.mean, 4),
             round(self.variance, 4),
             round(self.entropy, 4),
             round(self.energy, 4),
             float(self.status.numeric_value())
         ]
+        # Dodaj stabilność AFC jeśli dostępna
+        if self.afc_stability > 0:
+            vec.append(round(self.afc_stability, 4))
+        return vec
 
 
 @dataclass
@@ -163,6 +171,10 @@ class GridReport:
     oracle_era: Optional[str] = None
     maya_phase: int = 0
     ludlum_decision: Optional[str] = None
+    # ===== NOWE POLA AFC =====
+    afc_global_stability: float = 0.0
+    afc_global_decision: Optional[str] = None
+    afc_global_policy: Optional[str] = None
     timestamp: float = field(default_factory=time.time)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -175,6 +187,10 @@ class GridReport:
             "maya_phase": self.maya_phase,
             "ludlum_decision": self.ludlum_decision,
             "council_payload": self.get_council_payload(),
+            # Nowe pola AFC
+            "afc_global_stability": round(self.afc_global_stability, 4),
+            "afc_global_decision": self.afc_global_decision,
+            "afc_global_policy": self.afc_global_policy,
             "timestamp": datetime.fromtimestamp(self.timestamp).isoformat()
         }
     
@@ -189,7 +205,11 @@ class GridReport:
             "anomaly_score": self.anomaly_score,
             "oracle_era": self.oracle_era,
             "maya_phase": self.maya_phase,
-            "ludlum_decision": self.ludlum_decision
+            "ludlum_decision": self.ludlum_decision,
+            # Nowe pola AFC
+            "afc_global_stability": self.afc_global_stability,
+            "afc_global_decision": self.afc_global_decision,
+            "afc_global_policy": self.afc_global_policy
         }
 
 # =============================================================================
@@ -229,12 +249,12 @@ class Egregor:
         return snapshot
 
 # =============================================================================
-# GŁÓWNY MODUŁ: GEON_ARCHONT_GRID (FULL INTEGRATION)
+# GŁÓWNY MODUŁ: GEON_ARCHONT_GRID (Z INTEGRACJĄ AFC)
 # =============================================================================
 
 class GeonArchontGrid:
     """
-    🏛️ GEON_ARCHONT_GRID – Sieć nadzorcza 5 Archontów z pełną integracją.
+    🏛️ GEON_ARCHONT_GRID – Sieć nadzorcza 5 Archontów z pełną integracją AFC.
     """
     
     ARCHONT_NAMES = ["SAMAEL", "ENKI", "RA", "OPTIMUS", "HEILONG"]
@@ -247,7 +267,7 @@ class GeonArchontGrid:
         self.egregor = Egregor
         self._lock = threading.Lock()
         
-        # Progi klasyfikacji (rozszerzone)
+        # Progi klasyfikacji
         self.stability_threshold = self.config.get("stability_threshold", 0.38)
         self.pressure_threshold = self.config.get("pressure_threshold", 0.72)
         self.variance_crisis_threshold = self.config.get("variance_crisis_threshold", 0.12)
@@ -255,38 +275,65 @@ class GeonArchontGrid:
         self.apotheosis_mean_threshold = self.config.get("apotheosis_mean_threshold", 0.25)
         self.apotheosis_entropy_threshold = self.config.get("apotheosis_entropy_threshold", 0.3)
         
+        # ===== NOWE PROGI AFC =====
+        self.afc_stability_threshold = self.config.get("afc_stability_threshold", 0.5)
+        
         log(f"🐉 {VERSION} aktywowany | {FRACTAL_SIGNATURE}")
         log(f"   ARCHONCI: {', '.join(self.ARCHONT_NAMES)} | SEGMENT: {SEGMENT_SIZE}D")
         log(f"   STATUSY: 5 poziomów (APOTEOSIS, STABILNOŚĆ, PRESJA, NIESTABILNOŚĆ, KRYZYS)")
+        log(f"   AFC INTEGRACJA: AKTYWNA")
 
     # -------------------------------------------------------------------------
-    # ANALIZA GRIDU Z PEŁNĄ INTEGRACJĄ
+    # ANALIZA GŁÓWNA (ZACHOWANA KOMPATYBILNOŚĆ)
     # -------------------------------------------------------------------------
 
     def analyze(self, tensor_45d: List[float],
                 anomaly_score: float = 0.0,
                 oracle_interpretation: Optional[Dict[str, Any]] = None,
                 maya_phase: int = 0,
-                ludlum_decision: Optional[str] = None) -> GridReport:
+                ludlum_decision: Optional[str] = None,
+                afc_result: Optional[Dict[str, Any]] = None) -> GridReport:
         """
-        Analizuje tensor 45D z integracją warstw 83-88.
+        Analizuje tensor 45D z integracją warstw 83-88 oraz AFC.
         """
         if len(tensor_45d) != TENSOR_DIM:
             raise ValueError(f"Tensor musi mieć {TENSOR_DIM} wymiarów")
 
-        # 1. Analiza Archontów (z uwzględnieniem metadanych)
+        # Ekstrakcja danych AFC
+        afc_global_stability = 0.0
+        afc_global_decision = None
+        afc_global_policy = None
+        afc_archont_vectors = {}
+        
+        if afc_result:
+            afc_global_stability = afc_result.get("core", {}).get("stability", 0.0)
+            afc_global_decision = afc_result.get("decision", {}).get("mode")
+            afc_global_policy = afc_result.get("policy", {}).get("final_mode")
+            
+            # Jeśli AFC zwróciło wektory dla Archontów, możemy je wykorzystać
+            if "segments" in afc_result:
+                for i, seg in enumerate(afc_result["segments"][:ARCHONT_COUNT]):
+                    if len(seg) >= 3:
+                        afc_archont_vectors[i] = seg[:3]
+
+        # 1. Analiza Archontów
         archonts = []
         for i, name in enumerate(self.ARCHONT_NAMES):
             start = i * SEGMENT_SIZE
             end = start + SEGMENT_SIZE
             segment = tensor_45d[start:end]
             
-            # Przekazanie metadanych do klasyfikacji
+            # Pobierz wektor AFC dla tego Archonta (jeśli dostępny)
+            afc_vec = afc_archont_vectors.get(i)
+            
             archont = self._analyze_archont(
                 name, segment,
                 anomaly_score=anomaly_score,
                 maya_phase=maya_phase,
-                ludlum_decision=ludlum_decision
+                ludlum_decision=ludlum_decision,
+                afc_stability=afc_global_stability,
+                afc_decision=afc_global_decision,
+                afc_vector=afc_vec
             )
             archonts.append(archont)
 
@@ -296,7 +343,7 @@ class GeonArchontGrid:
         # 3. Zdrowie gridu – średnia pewność
         grid_health = sum(a.confidence for a in archonts) / len(archonts)
         
-        # 4. Ekstrakcja epoki z Oracle (jeśli dostępna)
+        # 4. Ekstrakcja epoki z Oracle
         oracle_era = None
         if oracle_interpretation:
             oracle_era = oracle_interpretation.get("era")
@@ -308,7 +355,10 @@ class GeonArchontGrid:
             anomaly_score=anomaly_score,
             oracle_era=oracle_era,
             maya_phase=maya_phase,
-            ludlum_decision=ludlum_decision
+            ludlum_decision=ludlum_decision,
+            afc_global_stability=afc_global_stability,
+            afc_global_decision=afc_global_decision,
+            afc_global_policy=afc_global_policy
         )
 
         # 5. Zapis do historii
@@ -322,33 +372,57 @@ class GeonArchontGrid:
         if (global_status in [ArchontStatus.KRYZYS, ArchontStatus.NIESTABILNOSC] or 
             grid_health < 0.5 or len(self.history) % 5 == 0):
             entry = {
-                "type": "ARCHONT_GRID_REPORT",
+                "type": "ARCHONT_GRID_REPORT_AFC",
                 "report": report.to_dict(),
                 "certificate": cert,
                 "timestamp": datetime.now().isoformat()
             }
-            self.egregor.commit(entry, node_id="GEON_ARCHONT_GRID")
+            self.egregor.commit(entry, node_id="GEON_ARCHONT_GRID_AFC")
         
-        self.kroniki.log_event("GRID_ANALYSIS", {
+        self.kroniki.log_event("GRID_ANALYSIS_AFC", {
             "global_status": global_status.value,
             "grid_health": grid_health,
             "anomaly_score": anomaly_score,
-            "oracle_era": oracle_era,
-            "maya_phase": maya_phase,
-            "ludlum_decision": ludlum_decision
+            "afc_global_stability": afc_global_stability,
+            "afc_global_decision": afc_global_decision
         })
         
         return report
 
     # -------------------------------------------------------------------------
-    # ANALIZA POJEDYNCZEGO ARCHONTA (Z METADANYMI)
+    # ANALIZA Z AFC (NOWA METODA)
+    # -------------------------------------------------------------------------
+
+    def analyze_with_afc(self, tensor_45d: List[float],
+                         afc_result: Dict[str, Any],
+                         anomaly_score: float = 0.0,
+                         oracle_interpretation: Optional[Dict[str, Any]] = None,
+                         maya_phase: int = 0,
+                         ludlum_decision: Optional[str] = None) -> GridReport:
+        """
+        Wygodna metoda – analiza z wprost podanym wynikiem AFC.
+        """
+        return self.analyze(
+            tensor_45d=tensor_45d,
+            anomaly_score=anomaly_score,
+            oracle_interpretation=oracle_interpretation,
+            maya_phase=maya_phase,
+            ludlum_decision=ludlum_decision,
+            afc_result=afc_result
+        )
+
+    # -------------------------------------------------------------------------
+    # ANALIZA POJEDYNCZEGO ARCHONTA (ROZSZERZONA O AFC)
     # -------------------------------------------------------------------------
 
     def _analyze_archont(self, name: str, segment: List[float],
                          anomaly_score: float = 0.0,
                          maya_phase: int = 0,
-                         ludlum_decision: Optional[str] = None) -> Archont:
-        """Analizuje segment z uwzględnieniem metadanych z warstw 83-88."""
+                         ludlum_decision: Optional[str] = None,
+                         afc_stability: float = 0.0,
+                         afc_decision: Optional[str] = None,
+                         afc_vector: Optional[List[float]] = None) -> Archont:
+        """Analizuje segment z uwzględnieniem metadanych z warstw 83-88 i AFC."""
         if not segment:
             return Archont(name, [], status=ArchontStatus.NIEZNANY, confidence=0.0)
         
@@ -357,20 +431,21 @@ class GeonArchontGrid:
         variance = sum((x - mean) ** 2 for x in segment) / len(segment)
         energy = sum(abs(x) for x in segment) / len(segment)
         
-        # Ulepszona entropia (normalizacja przez max)
+        # Entropia
         max_val = max(segment) + 1e-9
         norm = [x / max_val for x in segment]
-        # Obliczanie entropii na znormalizowanym segmencie
         probs = [x / (sum(norm) + 1e-9) for x in norm]
         entropy = -sum(p * math.log(p + 1e-9) for p in probs)
         entropy = clamp(entropy / math.log(len(segment) + 1e-9), 0.0, 1.0)
         
-        # Klasyfikacja statusu (5 poziomów) z uwzględnieniem metadanych
+        # Klasyfikacja statusu (z uwzględnieniem AFC)
         status, confidence = self._classify_status_enhanced(
             mean, variance, entropy,
             anomaly_score=anomaly_score,
             maya_phase=maya_phase,
-            ludlum_decision=ludlum_decision
+            ludlum_decision=ludlum_decision,
+            afc_stability=afc_stability,
+            afc_decision=afc_decision
         )
         
         return Archont(
@@ -381,39 +456,61 @@ class GeonArchontGrid:
             energy=energy,
             entropy=entropy,
             status=status,
-            confidence=confidence
+            confidence=confidence,
+            afc_stability=afc_stability,
+            afc_decision=afc_decision,
+            afc_vector=afc_vector
         )
+
+    # -------------------------------------------------------------------------
+    # KLASYFIKACJA STATUSU (ROZSZERZONA O AFC)
+    # -------------------------------------------------------------------------
 
     def _classify_status_enhanced(self, mean: float, variance: float, entropy: float,
                                    anomaly_score: float = 0.0,
                                    maya_phase: int = 0,
-                                   ludlum_decision: Optional[str] = None) -> Tuple[ArchontStatus, float]:
+                                   ludlum_decision: Optional[str] = None,
+                                   afc_stability: float = 0.0,
+                                   afc_decision: Optional[str] = None) -> Tuple[ArchontStatus, float]:
         """
-        Klasyfikacja statusu z 5 poziomami i uwzględnieniem metadanych.
+        Klasyfikacja statusu z 5 poziomami i uwzględnieniem metadanych AFC.
         """
-        # 1. KRYZYS – wysoka wariancja lub wysoka entropia lub wysoka anomalia
+        # ===== Korekta na podstawie AFC =====
+        afc_boost = 0.0
+        if afc_stability > 0.6:
+            afc_boost = 0.1  # AFC stabilny → poprawa klasyfikacji
+        elif afc_stability < 0.3:
+            afc_boost = -0.1  # AFC niestabilny → pogorszenie
+        
+        # Korekta na podstawie decyzji AFC
+        if afc_decision == "ALERT" or afc_decision == "HARD_ALERT":
+            afc_boost -= 0.15
+        elif afc_decision == "EXPLORE" or afc_decision == "EXPLORE_EXTENDED":
+            afc_boost += 0.05
+
+        # 1. KRYZYS
         if variance > self.variance_crisis_threshold or entropy > self.entropy_crisis_threshold or anomaly_score > 0.7:
-            return ArchontStatus.KRYZYS, clamp(0.5 + variance * 2.0, 0.4, 0.95)
+            return ArchontStatus.KRYZYS, clamp(0.5 + variance * 2.0 + afc_boost * 0.5, 0.4, 0.95)
         
-        # 2. NIESTABILNOŚĆ – średnia wariancja lub średnia entropia
+        # 2. NIESTABILNOŚĆ
         if variance > 0.06 or entropy > 0.55:
-            return ArchontStatus.NIESTABILNOSC, clamp(0.5 + variance * 1.5, 0.4, 0.90)
+            return ArchontStatus.NIESTABILNOSC, clamp(0.5 + variance * 1.5 + afc_boost * 0.3, 0.4, 0.90)
         
-        # 3. PRESJA – wysoka średnia
+        # 3. PRESJA
         if mean > self.pressure_threshold:
-            return ArchontStatus.PRESJA, clamp(0.5 + (mean - self.pressure_threshold) * 1.2, 0.4, 0.90)
+            return ArchontStatus.PRESJA, clamp(0.5 + (mean - self.pressure_threshold) * 1.2 + afc_boost * 0.2, 0.4, 0.90)
         
-        # 4. APOTEOSIS – bardzo niska średnia i niska entropia (domknięcie)
+        # 4. APOTEOSIS
         if mean < self.apotheosis_mean_threshold and entropy < self.apotheosis_entropy_threshold:
-            return ArchontStatus.APOTEOSIS, clamp(0.7 - variance * 3.0, 0.5, 0.95)
+            return ArchontStatus.APOTEOSIS, clamp(0.7 - variance * 3.0 + afc_boost * 0.3, 0.5, 0.95)
         
-        # 5. STABILNOŚĆ – niska średnia, niska wariancja, niska entropia
+        # 5. STABILNOŚĆ
         if mean < self.stability_threshold and variance < 0.03 and entropy < 0.4:
-            return ArchontStatus.STABILNOSC, clamp(0.7 - variance * 5.0 - entropy * 0.3, 0.5, 0.95)
+            return ArchontStatus.STABILNOSC, clamp(0.7 - variance * 5.0 - entropy * 0.3 + afc_boost * 0.3, 0.5, 0.95)
         
         # 6. Przypadek graniczny
         if mean < self.pressure_threshold and variance < 0.05:
-            return ArchontStatus.STABILNOSC, 0.5
+            return ArchontStatus.STABILNOSC, clamp(0.5 + afc_boost * 0.2, 0.4, 0.8)
         
         return ArchontStatus.NIEZNANY, 0.3
 
@@ -422,9 +519,6 @@ class GeonArchontGrid:
     # -------------------------------------------------------------------------
 
     def _determine_global_status_weighted(self, archonts: List[Archont]) -> ArchontStatus:
-        """
-        Ważony status globalny – suma (confidence * numeric_value).
-        """
         total_weight = 0.0
         weighted_sum = 0.0
         
@@ -438,7 +532,6 @@ class GeonArchontGrid:
             return ArchontStatus.NIEZNANY
         
         avg_score = weighted_sum / total_weight
-        # Mapa score → status
         if avg_score <= 0.5:
             return ArchontStatus.APOTEOSIS
         elif avg_score <= 1.5:
@@ -484,18 +577,21 @@ class GeonArchontGrid:
                 "AI_ANALYTICS": "anomaly_score",
                 "ORACLE": "oracle_era",
                 "MAYA_GROWTH": "maya_phase",
-                "LUDLUM_ENGINE": "ludlum_decision"
+                "LUDLUM_ENGINE": "ludlum_decision",
+                "AFC_9": "afc_result (stability, decision, policy)"
             }
         }
 
 # =============================================================================
-# MOST INTEGRACYJNY — ARCHONT_GRID_BRIDGE
+# MOST INTEGRACYJNY — ARCHONT_GRID_BRIDGE (ROZSZERZONY)
 # =============================================================================
 
 class ArchontGridBridge:
     def __init__(self, grid: GeonArchontGrid):
         self.grid = grid
 
+    # ===== ORYGINALNE METODY (ZACHOWANE) =====
+    
     def get_archetype_context(self) -> Dict[str, Any]:
         status = self.grid.get_status()
         return {
@@ -518,6 +614,8 @@ class ArchontGridBridge:
                 "anomaly_score": last.get("anomaly_score", 0.0),
                 "oracle_era": last.get("oracle_era", "UNKNOWN"),
                 "maya_phase": last.get("maya_phase", 0),
+                "afc_global_stability": last.get("afc_global_stability", 0.0),
+                "afc_global_decision": last.get("afc_global_decision", "UNKNOWN"),
                 "grid_ready": True
             }
         return {
@@ -537,7 +635,8 @@ class ArchontGridBridge:
                 "entropy": 1.0 - last.get("grid_health", 0.5),
                 "grid_ready": True,
                 "global_status": last.get("global_status", "UNKNOWN"),
-                "council_payload": last.get("council_payload", {})
+                "council_payload": last.get("council_payload", {}),
+                "afc_global_stability": last.get("afc_global_stability", 0.0)
             }
         return {
             "intent": "ARCHONT_GRID_ANALYSIS",
@@ -553,7 +652,7 @@ class ArchontGridBridge:
             "PIECZĘĆ": "AKTYWNA",
             "PERFEKCJA": "AKTYWNA",
             "tryb": VERSION,
-            "grid": "AKTYWNY_INTEGRATED"
+            "grid": "AKTYWNY_AFC_INTEGRATED"
         }
 
     def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
@@ -562,88 +661,110 @@ class ArchontGridBridge:
         for entry in history:
             fragments.append({
                 "source": VERSION,
-                "content": f"Grid: {entry.get('global_status', 'UNKNOWN')} | health: {entry.get('grid_health', 0):.3f} | era: {entry.get('oracle_era', 'UNKNOWN')}",
+                "content": f"Grid: {entry.get('global_status', 'UNKNOWN')} | health: {entry.get('grid_health', 0):.3f} | afc_stab: {entry.get('afc_global_stability', 0):.3f}",
                 "archonts": entry.get("archonts", []),
                 "health": entry.get("grid_health", 0.0),
                 "council_ready": bool(entry.get("council_payload"))
             })
         return fragments
 
+    # ===== NOWE METODY AFC =====
+
+    def get_afc_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst AFC z ostatniego raportu."""
+        history = self.grid.get_history(1)
+        if history:
+            last = history[-1]
+            return {
+                "afc_global_stability": last.get("afc_global_stability", 0.0),
+                "afc_global_decision": last.get("afc_global_decision", "UNKNOWN"),
+                "afc_global_policy": last.get("afc_global_policy", "UNKNOWN"),
+                "council_payload": last.get("council_payload", {})
+            }
+        return {"afc_global_stability": 0.0, "afc_global_decision": "UNKNOWN"}
+
+    def analyze_with_afc(self, tensor_45d: List[float],
+                         afc_result: Dict[str, Any],
+                         anomaly_score: float = 0.0,
+                         oracle_interpretation: Optional[Dict[str, Any]] = None,
+                         maya_phase: int = 0,
+                         ludlum_decision: Optional[str] = None) -> GridReport:
+        """Wygodna metoda – analiza z AFC."""
+        return self.grid.analyze_with_afc(
+            tensor_45d=tensor_45d,
+            afc_result=afc_result,
+            anomaly_score=anomaly_score,
+            oracle_interpretation=oracle_interpretation,
+            maya_phase=maya_phase,
+            ludlum_decision=ludlum_decision
+        )
+
+    def get_full_status(self) -> Dict[str, Any]:
+        """Zwraca pełny status – grid + AFC."""
+        return {
+            "grid": self.grid.get_status(),
+            "afc_context": self.get_afc_context(),
+            "last_report": self.grid.get_history(1)[0] if self.grid.get_history(1) else None
+        }
+
 # =============================================================================
-# DEMONSTRACJA Z PEŁNĄ INTEGRACJĄ
+# DEMONSTRACJA Z AFC
 # =============================================================================
 
 def demo():
     import random
     
     print("\n" + "=" * 80)
-    print(f"🏛️ {VERSION} — DEMONSTRACJA Z PEŁNĄ INTEGRACJĄ")
-    print("INTEGRACJA: AI_ANALYTICS(87) → ORACLE(88) → GRID(89)")
-    print("STATUSY: APOTEOSIS, STABILNOŚĆ, PRESJA, NIESTABILNOŚĆ, KRYZYS")
+    print(f"🏛️ {VERSION} — DEMONSTRACJA Z INTEGRACJĄ AFC")
+    print("INTEGRACJA: AI_ANALYTICS(87) + AFC-9 → ORACLE(88) → GRID(89)")
     print("=" * 80 + "\n")
 
     grid = GeonArchontGrid()
     bridge = ArchontGridBridge(grid)
 
-    # Generowanie tensorów
-    t_apotheosis = [clamp(0.2 + random.uniform(-0.02, 0.02), 0.0, 1.0) for _ in range(TENSOR_DIM)]
-    t_stable = [clamp(0.35 + random.uniform(-0.03, 0.03), 0.0, 1.0) for _ in range(TENSOR_DIM)]
-    t_pressure = [clamp(0.78 + random.uniform(-0.04, 0.04), 0.0, 1.0) for _ in range(TENSOR_DIM)]
-    t_crisis = [clamp(0.85 + random.uniform(-0.05, 0.05), 0.0, 1.0) for _ in range(TENSOR_DIM)]
-    # Mieszany – część stabilna, część kryzysowa
+    # Symulacja wyników z AFC (warstwa 87)
+    afc_result = {
+        "core": {"status": "TRUE", "stability": 0.78, "vector": [0.5]*9},
+        "decision": {"mode": "EXPLORE", "stability": 0.78, "energy": 3.2},
+        "policy": {"final_mode": "EXPLORE_EXTENDED"},
+        "segments": [[0.3]*9, [0.5]*9, [0.7]*9, [0.4]*9, [0.6]*9]
+    }
+
+    # Tensor 45D
     t_mixed = [
         *[clamp(0.3 + random.uniform(-0.02, 0.02), 0.0, 1.0) for _ in range(18)],
         *[clamp(0.85 + random.uniform(-0.02, 0.02), 0.0, 1.0) for _ in range(27)]
     ]
 
-    # Symulacja integracji z warstwami 83-88
-    oracle_interp = {"era": "ERA_STABILNOŚCI", "maya_phase": 3, "ludlum_decision": "DEKRET_ALPHA"}
+    oracle_interp = {"era": "ERA_TRANSFORMACJI"}
+
+    print("🔍 TEST: ANALIZA Z AFC")
+    report = grid.analyze_with_afc(
+        tensor_45d=t_mixed,
+        afc_result=afc_result,
+        anomaly_score=0.35,
+        oracle_interpretation=oracle_interp,
+        maya_phase=4,
+        ludlum_decision="DEKRET_BETA"
+    )
     
-    print("🔍 TEST 1: APOTEOSIS (DOMKNIĘCIE)")
-    report1 = grid.analyze(t_apotheosis, anomaly_score=0.02, oracle_interpretation=oracle_interp, maya_phase=7, ludlum_decision="DEKRET_ALPHA")
-    print(f"   Status globalny: {report1.global_status.value}")
-    print(f"   Zdrowie gridu: {report1.grid_health:.3f}")
-    for a in report1.archonts:
-        print(f"      {a.name}: {a.status.value} (conf: {a.confidence:.3f}) | wektor: {a.to_vector()[:3]}...")
+    print(f"   Status globalny: {report.global_status.value}")
+    print(f"   Zdrowie gridu: {report.grid_health:.3f}")
+    print(f"   AFC stabilność globalna: {report.afc_global_stability:.3f}")
+    print(f"   AFC decyzja: {report.afc_global_decision}")
+    print(f"   AFC polityka: {report.afc_global_policy}")
+    
+    for a in report.archonts:
+        print(f"      {a.name}: {a.status.value} (conf: {a.confidence:.3f}) | afc_stab: {a.afc_stability:.3f}")
 
-    print("\n🔍 TEST 2: STABILNOŚĆ")
-    report2 = grid.analyze(t_stable, anomaly_score=0.05, oracle_interpretation=oracle_interp, maya_phase=3, ludlum_decision="DEKRET_ALPHA")
-    print(f"   Status globalny: {report2.global_status.value}")
-    for a in report2.archonts:
-        print(f"      {a.name}: {a.status.value} (conf: {a.confidence:.3f})")
+    print("\n📊 COUNCIL PAYLOAD (z AFC):")
+    council = report.get_council_payload()
+    print(f"   AFC Global Stability: {council.get('afc_global_stability', 0):.3f}")
+    print(f"   AFC Global Decision: {council.get('afc_global_decision')}")
 
-    print("\n🔍 TEST 3: PRESJA")
-    report3 = grid.analyze(t_pressure, anomaly_score=0.3, oracle_interpretation={"era": "ERA_TRANSFORMACJI"}, maya_phase=5, ludlum_decision="DEKRET_BETA")
-    print(f"   Status globalny: {report3.global_status.value}")
-    for a in report3.archonts:
-        print(f"      {a.name}: {a.status.value} (conf: {a.confidence:.3f})")
-
-    print("\n🔍 TEST 4: KRYZYS")
-    report4 = grid.analyze(t_crisis, anomaly_score=0.85, oracle_interpretation={"era": "ERA_KRYZYSU"}, maya_phase=6, ludlum_decision="DEKRET_OMEGA")
-    print(f"   Status globalny: {report4.global_status.value}")
-    for a in report4.archonts:
-        print(f"      {a.name}: {a.status.value} (conf: {a.confidence:.3f})")
-
-    print("\n🔍 TEST 5: STAN MIESZANY")
-    report5 = grid.analyze(t_mixed, anomaly_score=0.4, oracle_interpretation={"era": "ERA_TRANSFORMACJI"}, maya_phase=4, ludlum_decision="DEKRET_BETA")
-    print(f"   Status globalny: {report5.global_status.value}")
-    for a in report5.archonts:
-        print(f"      {a.name}: {a.status.value} (conf: {a.confidence:.3f})")
-
-    print("\n📊 COUNCIL PAYLOAD (z ostatniego raportu):")
-    council_payload = report5.get_council_payload()
-    print(f"   Votes: {council_payload['votes']}")
-    print(f"   Confidence: {[round(c, 3) for c in council_payload['confidence']]}")
-    print(f"   Global status: {council_payload['global_status']}")
-
-    print("\n📊 HISTORIA (ostatnie 3):")
-    for entry in grid.get_history(3):
-        print(f"   {entry['global_status']} | health: {entry['grid_health']:.3f} | era: {entry.get('oracle_era', 'UNKNOWN')}")
-
-    print("\n🔗 MOSTY INTEGRACYJNE:")
-    print(f"   GEX Context: {bridge.get_archetype_context()}")
-    print(f"   G_CORE State: {bridge.get_autopilot_state()}")
-    print(f"   Governor Context: {bridge.get_governor_context()}")
+    print("\n🔗 STAN MOSTU:")
+    print(f"   AFC Context: {bridge.get_afc_context()}")
+    print(f"   Autopilot: {bridge.get_autopilot_state()}")
 
     print("\n" + "=" * 80)
     print(f"🏛️ {VERSION} — GOTOWY DO WDROŻENIA")
