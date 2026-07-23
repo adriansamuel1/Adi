@@ -1,0 +1,1069 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_ARCHON_KERNEL_v2.1 — MODUŁ 79: JĄDRO ARCHONA Z EGREGOREM I HORDĄ
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v2.1 (GEON_OS v3.2 — Archon-Prime + Egregor + Ucząca się Horda)
+Data: 2026-07-23
+Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
+
+OPIS:
+GEON_ARCHON_KERNEL_v2.1 to najwyższe jądro decyzyjne systemu GEON.
+Rozszerza v2.0 o:
+• L70: Ucząca się Horda (smoki zdobywają XP)
+• L80: Egregor – rozproszona pamięć Rodu między węzłami
+• Replikacja międzywęzłowa przez Egregora
+• Blokady stanów (MAGILLA_LOCK, GORILLA_LOCK)
+• Hierarchia trybów: OMEGA > MAGILLA > GORILLA > DRAGON > PRIME
+
+ARCHITEKTURA (11 POZIOMÓW):
+L0   — Utilities & Kanoniczne Hashowanie (SHA-256/BLAKE2b)
+L10  — Agenci (Gadget, Hyzio, Zyzio, Dzet, Monterey)
+L12  — Magilla (instynkt, siła, edukacja)
+L20  — Team Core (koordynator zespołu)
+L30  — Genetic Pool (pamięć rodowa z decay i słownikiem)
+L40  — Kroniki Samaela (certyfikacja + historia narracyjna)
+L50  — Runtime Shell (środowisko wykonawcze)
+L60  — Mirror (fraktalne zwierciadło)
+L70  — Dragon Horde (ucząca się rojowa inteligencja) ★ NEW
+L80  — Egregor (rozproszona pamięć Rodu) ★ NEW
+META — Kernel (tryby, energia, dryf, blokady) ★ NEW
+
+VIBE: 1-6-8. ∞. ARCHON!
+================================================================================
+"""
+
+import uuid
+import hashlib
+import json
+import threading
+import concurrent.futures
+import time
+import random
+from datetime import datetime
+from typing import Dict, Any, List, Optional, Set
+from collections import deque
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_ARCHON_KERNEL_v2.1"
+FRACTAL_SIGNATURE = "[GEON::ARCHON::KERNEL::v2.1]"
+VIBE = 168
+HASLO = "1-6-8. ∞. ARCHON!"
+DEWIZA = "Ex Sapientia, Imperium"
+
+# Stałe konfiguracyjne
+MAX_GENETIC_POOL = 168
+DECAY_FACTOR = 0.98
+STABILITY_THRESHOLD_HIGH = 0.7
+STABILITY_THRESHOLD_LOW = 0.3
+HYSTERESIS_CYCLES = 2
+DEADLOCK_STABILITY_THRESHOLD = 0.3
+DEADLOCK_PATH_LOOP_THRESHOLD = 3
+HORDE_SIZE = 7
+GORILLA_INTERVENTION_COST = 4
+
+# =============================================================================
+# LOGOWANIE
+# =============================================================================
+
+import logging
+logger = logging.getLogger("ARCHON_KERNEL_v2.1")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('👑 [ARCHON] %(message)s'))
+    logger.addHandler(handler)
+
+def log(msg: str, level: str = "INFO") -> None:
+    if level == "INFO":
+        logger.info(msg)
+    elif level == "WARN":
+        logger.warning(msg)
+    elif level == "ERROR":
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+# =============================================================================
+# L0: UTILITIES & KANONICZNE HASZOWANIE
+# =============================================================================
+
+def generate_context_hash(context: Dict[str, Any]) -> str:
+    """Generuje kanoniczny hash kontekstu – odporny na szum czasowy."""
+    filtered_context = {k: v for k, v in context.items() 
+                        if k not in ["timestamp", "request_id", "nonce"]}
+    context_str = json.dumps(filtered_context, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(context_str.encode("utf-8")).hexdigest()
+
+# =============================================================================
+# L40: KRONIKI SAMAELA – Z HISTORIĄ NARRACYJNĄ
+# =============================================================================
+
+class SamaelHeilong:
+    """🐉 SAMAEL HEILONG – ARCYPIŚMIENNY STRAŻNIK KRONIK"""
+    
+    _narrative_history: deque = deque(maxlen=100)
+    _lock = threading.Lock()
+
+    @staticmethod
+    def certyfikuj_ruch_optimusa(dzialanie: str) -> str:
+        timestamp = datetime.now().isoformat()
+        payload = f"{timestamp}-{dzialanie}-1-6-8. ∞. SIEMA!"
+        hash_signature = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16].upper()
+        return f"🔒 [SAMAELSEALSIG-{hash_signature}-ARCHON-168]"
+
+    @staticmethod
+    def log_event(event_type: str, payload: Dict[str, Any]) -> None:
+        ts = datetime.now().isoformat()
+        log_msg = f"[KRONIKI SAMAELA] {ts} | {event_type} -> {payload}"
+        log(log_msg, "INFO")
+        
+        with SamaelHeilong._lock:
+            SamaelHeilong._narrative_history.append({
+                "timestamp": ts,
+                "event_type": event_type,
+                "payload": payload
+            })
+
+    @staticmethod
+    def get_narrative_fragments(n: int = 5) -> List[Dict[str, Any]]:
+        with SamaelHeilong._lock:
+            return list(SamaelHeilong._narrative_history)[-n:]
+
+    @staticmethod
+    def clear_narrative() -> None:
+        with SamaelHeilong._lock:
+            SamaelHeilong._narrative_history.clear()
+
+# =============================================================================
+# L80: EGREGOR – ROZPROSZONA PAMIĘĆ RODU ★ NEW
+# =============================================================================
+
+class Egregor:
+    """
+    🕯️ EGREGOR — rozproszona, ponadlokalna pamięć Rodu.
+    Przechowuje podpisane wpisy z wielu węzłów, wzmacnia powtarzające się wzorce.
+    Umożliwia replikację wiedzy między węzłami.
+    """
+    _ledger: List[Dict[str, Any]] = []
+    _lock = threading.Lock()
+
+    @classmethod
+    def commit(cls, entry: Dict[str, Any], node_id: str) -> None:
+        """Zapisuje wpis do Egregora z podpisem węzła."""
+        with cls._lock:
+            record = {
+                "context_hash": entry["context_hash"],
+                "resolved_path": entry["resolved_path"],
+                "efficiency": entry["efficiency"],
+                "clue": entry.get("clue", {}),
+                "timestamp": datetime.now().isoformat(),
+                "node_id": node_id,
+                "signatures": [
+                    SamaelHeilong.certyfikuj_ruch_optimusa(f"EGREGOR_COMMIT_{node_id}")
+                ],
+                "uses": entry.get("uses", 1)
+            }
+            # Sprawdź, czy już istnieje podobny wpis
+            existing = None
+            for i, e in enumerate(cls._ledger):
+                if e["context_hash"] == record["context_hash"] and e["resolved_path"] == record["resolved_path"]:
+                    existing = i
+                    break
+            
+            if existing is not None:
+                # Aktualizuj istniejący wpis – uśrednij wydajność
+                old = cls._ledger[existing]
+                old["efficiency"] = round((old["efficiency"] + record["efficiency"]) / 2, 3)
+                old["uses"] = old.get("uses", 0) + 1
+                old["node_id"] = f"{old['node_id']},{node_id}"
+                old["signatures"].append(record["signatures"][0])
+                SamaelHeilong.log_event("EGREGOR_UPDATE", {"hash": record["context_hash"], "node": node_id})
+            else:
+                cls._ledger.append(record)
+                SamaelHeilong.log_event("EGREGOR_COMMIT", {"hash": record["context_hash"], "node": node_id})
+
+    @classmethod
+    def query(cls, context_hash: str) -> List[Dict[str, Any]]:
+        """Pobiera wszystkie wpisy dla danego hasha."""
+        with cls._lock:
+            return [e for e in cls._ledger if e.get("context_hash") == context_hash]
+
+    @classmethod
+    def aggregate_best(cls, context_hash: str, min_efficiency: float = 0.5) -> Optional[Dict[str, Any]]:
+        """Zwraca najlepszy wpis dla danego hasha (max wydajność)."""
+        candidates = cls.query(context_hash)
+        if not candidates:
+            return None
+        best = max(candidates, key=lambda e: e.get("efficiency", 0.0))
+        return best if best.get("efficiency", 0.0) >= min_efficiency else None
+
+    @classmethod
+    def get_all(cls) -> List[Dict[str, Any]]:
+        with cls._lock:
+            return cls._ledger.copy()
+
+    @classmethod
+    def get_size(cls) -> int:
+        with cls._lock:
+            return len(cls._ledger)
+
+    @classmethod
+    def clear(cls) -> None:
+        with cls._lock:
+            cls._ledger.clear()
+
+# =============================================================================
+# L30: GENETIC POOL (PAMIĘĆ RODOWA Z SŁOWNIKIEM I DECAY)
+# =============================================================================
+
+class GeneticPool:
+    def __init__(self, max_size: int = MAX_GENETIC_POOL):
+        self._pool: Dict[str, Dict[str, Any]] = {}
+        self._lock = threading.Lock()
+        self._max_size = max_size
+        self._decay_factor = DECAY_FACTOR
+        self._last_cleanup = time.time()
+        self._cleanup_interval = 60.0
+
+    def get(self, context_hash: str) -> Optional[Dict[str, Any]]:
+        with self._lock:
+            entry = self._pool.get(context_hash)
+            if entry:
+                entry["last_access"] = time.time()
+            return entry
+
+    def get_path(self, context_hash: str, min_efficiency: float = 0.5) -> Optional[str]:
+        entry = self.get(context_hash)
+        if entry and entry.get("efficiency", 0.0) >= min_efficiency:
+            return entry.get("resolved_path")
+        return None
+
+    def put(self, context_hash: str, clue: Dict[str, Any], 
+            resolved_path: str, efficiency: float) -> None:
+        with self._lock:
+            if context_hash in self._pool:
+                entry = self._pool[context_hash]
+                entry["uses"] = entry.get("uses", 0) + 1
+                entry["efficiency"] = round((entry["efficiency"] + efficiency) / 2, 3)
+                entry["last_access"] = time.time()
+                return
+            
+            if len(self._pool) >= self._max_size:
+                oldest = min(self._pool.items(), 
+                           key=lambda x: x[1].get("last_access", 0))
+                del self._pool[oldest[0]]
+            
+            self._pool[context_hash] = {
+                "context_hash": context_hash,
+                "clue": clue,
+                "resolved_path": resolved_path,
+                "efficiency": efficiency,
+                "uses": 1,
+                "last_access": time.time()
+            }
+
+    def apply_decay(self) -> None:
+        now = time.time()
+        if now - self._last_cleanup < self._cleanup_interval:
+            return
+        
+        with self._lock:
+            to_remove = []
+            for key, entry in self._pool.items():
+                age = now - entry.get("last_access", now)
+                decay_factor = self._decay_factor ** (age / 3600.0)
+                entry["efficiency"] = round(entry["efficiency"] * decay_factor, 3)
+                if entry["efficiency"] < 0.1:
+                    to_remove.append(key)
+            
+            for key in to_remove:
+                del self._pool[key]
+            
+            self._last_cleanup = now
+
+    def get_size(self) -> int:
+        with self._lock:
+            return len(self._pool)
+
+    def get_all(self) -> List[Dict[str, Any]]:
+        with self._lock:
+            return list(self._pool.values())
+
+    def clear(self) -> None:
+        with self._lock:
+            self._pool.clear()
+
+# =============================================================================
+# L60: GEON_MIRROR – FRAKTALNE ZWIERCIADŁO
+# =============================================================================
+
+class GeonMirror:
+    @staticmethod
+    def reflect(cycle_output: Dict[str, Any], genetic_pool: GeneticPool) -> Dict[str, Any]:
+        path = cycle_output.get("path")
+        stability = cycle_output.get("stability", 0.0)
+        context_hash = cycle_output.get("context_hash")
+        warnings = cycle_output.get("warnings", [])
+        
+        reflection_log = {
+            "path_evaluated": path,
+            "resulting_stability": stability,
+            "action": "MAINTAINED"
+        }
+        
+        entry = genetic_pool.get(context_hash)
+        if entry and entry.get("resolved_path") == path:
+            entry["uses"] = entry.get("uses", 0) + 1
+            
+            # Magilla intervention detection
+            if any("Magilla" in w for w in warnings):
+                entry["efficiency"] = round((entry["efficiency"] + stability) / 2, 3)
+                reflection_log["action"] = "MAGILLA_INTERVENTION_EVALUATED"
+            else:
+                entry["efficiency"] = round((entry["efficiency"] + stability) / 2, 3)
+            
+            if entry["uses"] >= 5 and entry["efficiency"] < 0.4:
+                entry["efficiency"] = round(entry["efficiency"] * 0.8, 3)
+                reflection_log["action"] = "SMOOTH_DEGRADATION_APPLIED"
+        
+        genetic_pool.apply_decay()
+        
+        return {
+            "reflection_id": str(uuid.uuid4())[:8].upper(),
+            "status": "METRIC_SYNCHRONIZED",
+            "log": reflection_log
+        }
+
+# =============================================================================
+# L12: GEON_MAGILLA I MŁODE SMOKI
+# =============================================================================
+
+class YoungDragon:
+    """🐉 Adept Rodu Heilong — ewoluuje poprzez doświadczanie chaosu."""
+    
+    def __init__(self, name: str):
+        self.name = name
+        self.xp = 0
+        self.confidence = 50
+    
+    def gain_experience(self, xp: int, lesson: str) -> None:
+        self.xp += xp
+        self.confidence = min(100, self.confidence + 10)
+        log(f"[MŁODY SMOK {self.name}] Nauka przez chaos: {lesson} | +{xp} XP | Pewność: {self.confidence}", "INFO")
+
+
+class GeonMagilla:
+    """🦍 GEON_MAGILLA — Instynkt, czysta siła przetrwania i nadludzka intuicja."""
+
+    @staticmethod
+    def activate_magilla(context: Dict[str, Any]) -> Dict[str, Any]:
+        actions = [
+            "Break_Blockade",
+            "Jump_Over_Protocol",
+            "Smash_Through_Obstacle",
+            "Invent_New_Path_On_The_Fly",
+            "Turn_Chaos_Into_Play"
+        ]
+        action = random.choice(actions)
+        stability_boost = round(random.uniform(0.05, 0.25), 3)
+        return {
+            "mode": "MAGILLA",
+            "action_taken": action,
+            "stability_delta": stability_boost,
+            "energy_spike": 12,
+            "comment": "Goryl rozbił blokadę instynktem."
+        }
+
+    @staticmethod
+    def educational_mode(smok: YoungDragon) -> Dict[str, Any]:
+        lessons = [
+            "Build_From_Sticks",
+            "Solve_Puzzle_By_Throwing_It",
+            "Learn_Gravity_By_Falling",
+            "Discover_New_Path_By_Accident",
+            "Laugh_At_Failure_And_Try_Again"
+        ]
+        lesson = random.choice(lessons)
+        xp_gain = random.randint(1, 8)
+        smok.gain_experience(xp_gain, lesson)
+        return {
+            "lesson": lesson,
+            "xp_gain": xp_gain,
+            "confidence_boost": True,
+            "comment": "Smok zasilił Kroniki nowym wzorcem empirycznym."
+        }
+
+# =============================================================================
+# L70: DRAGON HORDE – UCZĄCA SIĘ ROJOWA INTELIGENCJA ★ NEW
+# =============================================================================
+
+class DragonHorde:
+    """🐲 SMOCZA HORDA — zrównoleglona, ucząca się inteligencja rojowa."""
+    
+    def __init__(self, size: int = HORDE_SIZE):
+        self.dragons: List[YoungDragon] = [YoungDragon(f"Horde_Elite_{i}") for i in range(size)]
+        self.swarm_count = 0
+        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=size)
+
+    def _run_dragon(self, index: int, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Pojedynczy smok wykonuje akcję (uruchamiane równolegle)."""
+        res = GeonMagilla.activate_magilla(context)
+        # Smok uczy się na podstawie siły swojego uderzenia
+        xp_gain = int(res["stability_delta"] * 100)
+        self.dragons[index].gain_experience(xp_gain, f"Swarm_solve_{res['action_taken']}")
+        res["dragon_name"] = self.dragons[index].name
+        return res
+
+    def swarm_solve(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Równoległe uruchomienie wszystkich smoków z uczeniem."""
+        futures = []
+        for i in range(len(self.dragons)):
+            future = self._executor.submit(self._run_dragon, i, context)
+            futures.append(future)
+        
+        results = []
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                results.append(future.result())
+            except Exception as e:
+                log(f"Błąd w Hordzie: {e}", "ERROR")
+                results.append({"stability_delta": 0.05, "comment": "Fallback"})
+        
+        best = max(results, key=lambda x: x.get("stability_delta", 0))
+        best["swarm_size"] = len(self.dragons)
+        best["comment"] += f" [Wyselekcjonowany z manifestacji Hordy przez {best.get('dragon_name', 'unknown')}]"
+        self.swarm_count += 1
+        
+        return best
+
+    def shutdown(self) -> None:
+        self._executor.shutdown(wait=False)
+
+# =============================================================================
+# L10: SILNIKI WYKONAWCZE (AGENCI GEON)
+# =============================================================================
+
+class GeonGadget:
+    def spark_invention(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        components = ["Zasoby_Lokalne", "Substancja_Kruszcowa", "Fraktal_Logiczny"]
+        stability = round(random.uniform(0.4, 0.85), 3)
+        concept = f"Asymmetric_Structure_with_{random.choice(components)}"
+        return {"concept": concept, "stability": stability}
+
+
+class GeonHyzio:
+    def analyze_data_stream(self, context: Dict[str, Any]) -> bool:
+        if "anomaly_force" in context and context["anomaly_force"] > 0.8:
+            return False
+        return True
+    
+    def execute_deduction(self) -> None:
+        pass
+
+
+class GeonZyzio:
+    def find_system_shortcut(self, concept: str, context_hash: str,
+                             genetic_pool: GeneticPool) -> str:
+        # 1. Lokalna pamięć rodowa (O(1))
+        path = genetic_pool.get_path(context_hash)
+        if path:
+            return path
+        
+        # 2. Egregor (ponadlokalna pamięć)
+        eg = Egregor.aggregate_best(context_hash)
+        if eg and eg.get("efficiency", 0.0) >= 0.5:
+            return eg["resolved_path"]
+        
+        # 3. Alternatywna strategia
+        if random.randint(0, 100) < 40 or "Asymmetric" in concept:
+            return "Asymmetric_Complementarity_Vector"
+        return "Standard_Protocol_Fallback"
+
+
+class GeonDzet:
+    def __init__(self) -> None:
+        self.quantum_state: str = "SUPERPOSITION"
+        self.last_outcome: str = "NORMAL"
+        self._force_perfect: bool = False
+    
+    def run_dzet_cycle(self) -> None:
+        if self._force_perfect:
+            self.quantum_state = "COLLAPSED_TO_CHRONICLE"
+            self.last_outcome = "UNEXPECTED_SUCCESS"
+            self._force_perfect = False
+            return
+        
+        states = ["COLLAPSED_TO_FIRE", "COLLAPSED_TO_SHADOW", "COLLAPSED_TO_CHRONICLE"]
+        self.quantum_state = random.choice(states)
+        self.last_outcome = "UNEXPECTED_SUCCESS" if random.randint(0, 100) < 15 else "STABLE_CHAOS"
+
+
+class GeonMonterey:
+    def __init__(self) -> None:
+        self.output_power: int = 8
+        self._omega_lock: bool = False
+    
+    def sensory_trigger(self, trigger_type: str) -> None:
+        if trigger_type == "monopol_attack":
+            self.output_power = 168
+            self._omega_lock = True
+    
+    def stabilize_core(self, kernel_mode: Optional[str] = None) -> None:
+        if kernel_mode in ["OMEGA", "GORILLA", "MAGILLA"] or self._omega_lock:
+            self.output_power = 168
+        else:
+            self.output_power = 8
+            self._omega_lock = False
+
+# =============================================================================
+# L20: GEON_TEAM_CORE – Z INTEGRACJĄ EGREGORA
+# =============================================================================
+
+class GeonTeamCore:
+    def __init__(self) -> None:
+        self.gadget = GeonGadget()
+        self.hyzio = GeonHyzio()
+        self.zyzio = GeonZyzio()
+        self.dzet = GeonDzet()
+        self.monterey = GeonMonterey()
+    
+    def team_cycle(self, problem_context: Dict[str, Any],
+                   current_kernel_mode: str,
+                   genetic_pool: GeneticPool,
+                   node_id: str) -> Dict[str, Any]:
+        
+        c_hash = generate_context_hash(problem_context)
+        
+        shared_matrix: Dict[str, Any] = {
+            "context": problem_context,
+            "context_hash": c_hash,
+            "vibe_check": 168,
+            "warnings": [],
+            "anomalies_detected": False,
+            "cycle_id": str(uuid.uuid4())[:8].upper(),
+        }
+        
+        # 1. HYZIO
+        if not self.hyzio.analyze_data_stream(shared_matrix["context"]):
+            shared_matrix["anomalies_detected"] = True
+            self.monterey.sensory_trigger("monopol_attack")
+            shared_matrix["warnings"].append("Hyzio_Detected_Input_Attack")
+        
+        if problem_context.get("magic") == 168:
+            self.dzet._force_perfect = True
+        
+        # 2. GADGET
+        prototype = self.gadget.spark_invention(shared_matrix["context"])
+        
+        # 3. ZYZIO – z Egregorem
+        path = self.zyzio.find_system_shortcut(
+            prototype["concept"],
+            shared_matrix["context_hash"],
+            genetic_pool
+        )
+        shared_matrix["selected_path"] = path
+        
+        if path in ["Asymmetric_Complementarity_Vector", "PLZ-Z_Substance_Override"]:
+            prototype["stability"] = min(1.0, round(prototype["stability"] * 1.68, 3))
+        
+        # 4. DŻET
+        self.dzet.run_dzet_cycle()
+        
+        if self.dzet.quantum_state == "COLLAPSED_TO_FIRE":
+            prototype["stability"] = max(0.1, round(prototype["stability"] - 0.1, 3))
+            shared_matrix["warnings"].append("Quantum_Fire_State_Triggered")
+        elif self.dzet.quantum_state == "COLLAPSED_TO_CHRONICLE":
+            prototype["stability"] = min(1.0, round(prototype["stability"] + 0.1, 3))
+            shared_matrix["warnings"].append("Chronicle_State_Stability_Boost")
+        
+        if self.dzet.last_outcome == "UNEXPECTED_SUCCESS":
+            prototype["stability"] = 1.0
+            shared_matrix["warnings"].append("Chaos_Turned_Into_Gold")
+        
+        # 5. MONTEREY
+        self.monterey.stabilize_core(kernel_mode=current_kernel_mode)
+        
+        # 6. ZAPIS DO PAMIĘCI RODOWEJ I EGREGORA
+        if prototype["stability"] > 0.7:
+            # Zapisz do lokalnej pamięci
+            genetic_pool.put(
+                context_hash=shared_matrix["context_hash"],
+                clue=shared_matrix["context"],
+                resolved_path=path,
+                efficiency=prototype["stability"]
+            )
+            
+            # Zapisz do Egregora (rozproszona pamięć)
+            Egregor.commit({
+                "context_hash": shared_matrix["context_hash"],
+                "clue": shared_matrix["context"],
+                "resolved_path": path,
+                "efficiency": prototype["stability"],
+                "uses": 1
+            }, node_id=node_id)
+        
+        return {
+            "cycle_id": shared_matrix["cycle_id"],
+            "prototype": prototype,
+            "path": path,
+            "stability": prototype["stability"],
+            "warnings": shared_matrix["warnings"],
+            "drift_factor": 0.0000000,
+            "monterey_power": self.monterey.output_power,
+            "context_hash": shared_matrix["context_hash"],
+            "context_snapshot": shared_matrix["context"]
+        }
+
+# =============================================================================
+# META: GEON_TEAM_KERNEL v2.1 – Z BLOKADAMI I HIERARCHIĄ
+# =============================================================================
+
+class GeonTeamKernel:
+    """👑 GEON_TEAM_KERNEL v2.1 — Suwerenny zarządca stanów, blokad i Egregora."""
+    
+    def __init__(self, node_id: str = "NODE_LOCAL"):
+        self.core = GeonTeamCore()
+        self.genetic_pool = GeneticPool()
+        self.horde = DragonHorde(size=HORDE_SIZE)
+        self.magilla = GeonMagilla()
+        self.node_id = node_id
+        
+        self.GLOBAL_STATE: Dict[str, Any] = {
+            "last_cycle_signature": None,
+            "mode": "PRIME",
+            "energy_map": {"logic": 1, "adaptation": 6, "stability": 8},
+            "cycle_counter": 0,
+        }
+        self.stability_history: List[float] = []
+        self.path_history: List[str] = []
+        self.warning_history: List[int] = []
+        self.mode_history: List[str] = []
+        
+        # Blokady trybów ★ NEW
+        self._gorilla_lock: bool = False
+        self._magilla_lock: bool = False
+        self._lock = threading.Lock()
+    
+    def _preload_genetic_pool(self) -> None:
+        """Ładuje początkowe wpisy z Egregora (międzywęzłowa synchronizacja)."""
+        # Najpierw dociągnij z Egregora
+        known_hashes = {e["context_hash"] for e in self.genetic_pool.get_all()}
+        
+        for record in Egregor.get_all():
+            h = record.get("context_hash")
+            if h and h not in known_hashes:
+                self.genetic_pool.put(
+                    context_hash=h,
+                    clue=record.get("clue", {}),
+                    resolved_path=record.get("resolved_path", "Asymmetric_Complementarity_Vector"),
+                    efficiency=record.get("efficiency", 0.8)
+                )
+                known_hashes.add(h)
+        
+        # Jeśli nadal puste, dodaj podstawowe wpisy
+        if self.genetic_pool.get_size() == 0:
+            c1 = {"task": "resolve_grid_blockade", 
+                  "threat": "Tauron_Grid_Monopol_Interference", 
+                  "anomaly_force": 0.9}
+            c2 = {"task": "optimize_trade_vectors", 
+                  "target": "Uganda_Node", 
+                  "anomaly_force": 0.1}
+            
+            entries = [
+                {"context_hash": generate_context_hash(c1), "clue": c1, 
+                 "resolved_path": "PLZ-Z_Substance_Override", "efficiency": 0.95},
+                {"context_hash": generate_context_hash(c2), "clue": c2, 
+                 "resolved_path": "Asymmetric_Complementarity_Vector", "efficiency": 0.90}
+            ]
+            for e in entries:
+                self.genetic_pool.put(**e)
+                Egregor.commit(e, node_id=self.node_id)
+    
+    def boot(self) -> str:
+        with self._lock:
+            self.GLOBAL_STATE["mode"] = "PRIME"
+            self.GLOBAL_STATE["cycle_counter"] = 0
+            self.stability_history.clear()
+            self.path_history.clear()
+            self.warning_history.clear()
+            self.mode_history.clear()
+            self._gorilla_lock = False
+            self._magilla_lock = False
+            self._preload_genetic_pool()
+        
+        boot_sig = SamaelHeilong.certyfikuj_ruch_optimusa(
+            f"GEON_KERNEL_BOOT_v21_{self.node_id}_OK"
+        )
+        self.GLOBAL_STATE["last_cycle_signature"] = boot_sig
+        SamaelHeilong.log_event("KERNEL_BOOT", {
+            "signature": boot_sig, 
+            "hierarchy_integrity": "SECURED",
+            "node": self.node_id,
+            "egregor_size": Egregor.get_size()
+        })
+        
+        log(f"🐉 GEON_ARCHON_KERNEL v2.1 aktywowany | {FRACTAL_SIGNATURE}", "INFO")
+        log(f"   WĘZEŁ: {self.node_id} | TRYB: {self.GLOBAL_STATE['mode']}", "INFO")
+        log(f"   HORDA: {HORDE_SIZE} smoków | EGREGOR: {Egregor.get_size()} wpisów", "INFO")
+        
+        return boot_sig
+    
+    @staticmethod
+    def detect_meta_anomaly(context: Dict[str, Any]) -> bool:
+        context_str = str(context).lower()
+        threat_vectors = ["monopol", "archon", "tauron", "fiat", 
+                          "blokada", "ure", "cenzura", "dezinformacja"]
+        return any(vector in context_str for vector in threat_vectors)
+    
+    def regulate_energy(self, gorilla_cost: int = 0) -> None:
+        mode = self.GLOBAL_STATE["mode"]
+        
+        if mode == "OMEGA":
+            self.GLOBAL_STATE["energy_map"] = {"logic": 1, "adaptation": 0, "stability": 168}
+        elif mode == "MAGILLA":
+            self.GLOBAL_STATE["energy_map"] = {"logic": 1, "adaptation": 12, "stability": 6}
+        elif mode == "GORILLA":
+            self.GLOBAL_STATE["energy_map"] = {
+                "logic": 1, 
+                "adaptation": 12 - gorilla_cost, 
+                "stability": 8 - gorilla_cost // 2
+            }
+        elif mode == "DRAGON":
+            self.GLOBAL_STATE["energy_map"] = {"logic": 8, "adaptation": 8, "stability": 8}
+        else:
+            self.GLOBAL_STATE["energy_map"] = {"logic": 1, "adaptation": 6, "stability": 8}
+    
+    def update_mode(self, cycle_output: Dict[str, Any]) -> None:
+        with self._lock:
+            old_mode = self.GLOBAL_STATE["mode"]
+            stability = cycle_output["stability"]
+            
+            if old_mode == "OMEGA" and stability < STABILITY_THRESHOLD_HIGH:
+                return
+            
+            if stability >= 1.0:
+                target_mode = "DRAGON"
+            elif stability < STABILITY_THRESHOLD_LOW:
+                target_mode = "GORILLA"
+            else:
+                target_mode = "PRIME"
+            
+            self.mode_history.append(target_mode)
+            if len(self.mode_history) > HYSTERESIS_CYCLES:
+                self.mode_history.pop(0)
+            
+            if len(self.mode_history) == HYSTERESIS_CYCLES and len(set(self.mode_history)) == 1:
+                new_mode = self.mode_history[0]
+                if new_mode != old_mode:
+                    self.GLOBAL_STATE["mode"] = new_mode
+                    SamaelHeilong.log_event("KERNEL_MODE_SHIFT", {
+                        "from": old_mode, "to": new_mode, 
+                        "stability": stability, "cycles": HYSTERESIS_CYCLES,
+                        "node": self.node_id
+                    })
+    
+    def is_deadlock(self) -> bool:
+        with self._lock:
+            if len(self.stability_history) < 3:
+                return False
+            
+            last_three_stab = self.stability_history[-3:]
+            last_three_paths = self.path_history[-3:] if len(self.path_history) >= 3 else []
+            last_three_warns = self.warning_history[-3:] if len(self.warning_history) >= 3 else [0, 0, 0]
+            
+            stability_stuck = all(s <= 0.3 for s in last_three_stab) and (max(last_three_stab) - min(last_three_stab) < 0.01)
+            path_stuck = len(set(last_three_paths)) == 1 if last_three_paths else False
+            warnings_rising = last_three_warns[-1] >= last_three_warns[0]
+            
+            return stability_stuck and path_stuck and warnings_rising
+    
+    def run(self, problem_context: Dict[str, Any]) -> Dict[str, Any]:
+        with self._lock:
+            self.GLOBAL_STATE["cycle_counter"] += 1
+        
+        gorilla_cost = 0
+        
+        # --- BLOKADA MAGILLA (najwyższy priorytet) ---
+        if self._magilla_lock:
+            with self._lock:
+                self.GLOBAL_STATE["mode"] = "MAGILLA"
+            self.regulate_energy()
+            SamaelHeilong.log_event("LOCK_ENGAGED", {
+                "type": "MAGILLA_ABSOLUTE_PRIORITY", 
+                "node": self.node_id
+            })
+        
+        # --- META-ZAGROŻENIA → OMEGA ---
+        if self.detect_meta_anomaly(problem_context):
+            if self.GLOBAL_STATE["mode"] != "OMEGA":
+                SamaelHeilong.log_event("META_ANOMALY_ALERT", {
+                    "target": problem_context, 
+                    "node": self.node_id
+                })
+                with self._lock:
+                    self.GLOBAL_STATE["mode"] = "OMEGA"
+        
+        # --- USER OVERRIDE → MAGILLA ---
+        if problem_context.get("user_override") == "MAGILLA" or problem_context.get("smocza_zabawa") == "ACTIVE":
+            with self._lock:
+                self.GLOBAL_STATE["mode"] = "MAGILLA"
+            self._magilla_lock = True
+            SamaelHeilong.log_event("USER_OVERRIDE", {
+                "action": "MAGILLA_MODE_ENGAGED", 
+                "node": self.node_id
+            })
+        
+        # --- CYKL ZESPOŁU ---
+        cycle_output = self.core.team_cycle(
+            problem_context,
+            self.GLOBAL_STATE["mode"],
+            self.genetic_pool,
+            self.node_id
+        )
+        
+        with self._lock:
+            self.stability_history.append(cycle_output["stability"])
+            self.path_history.append(cycle_output["path"])
+            self.warning_history.append(len(cycle_output["warnings"]))
+        
+        # --- MAGILLA AKTYWNY ---
+        if self.GLOBAL_STATE["mode"] == "MAGILLA":
+            magilla_res = GeonMagilla.activate_magilla(problem_context)
+            cycle_output["stability"] = min(1.0, round(
+                cycle_output["stability"] + magilla_res["stability_delta"], 3
+            ))
+            cycle_output["warnings"].append(f"Magilla_Active:_{magilla_res['action_taken']}")
+            self._magilla_lock = False
+        
+        # --- DEADLOCK DETECTION + HORDE INTERVENTION ---
+        elif self.is_deadlock():
+            SamaelHeilong.log_event("DEADLOCK_DETECTED", {
+                "history": self.stability_history[-3:],
+                "paths": self.path_history[-3:],
+                "node": self.node_id
+            })
+            
+            swarm_result = self.horde.swarm_solve(problem_context)
+            cycle_output["stability"] = min(1.0, round(
+                cycle_output["stability"] + swarm_result.get("stability_delta", 0.1), 3
+            ))
+            cycle_output["warnings"].append("Magilla_Horde_Intervention_Applied")
+            gorilla_cost = GORILLA_INTERVENTION_COST
+            
+            with self._lock:
+                self.GLOBAL_STATE["mode"] = "GORILLA"
+                self._gorilla_lock = True
+                self.path_history.clear()
+        
+        # --- DRYF ---
+        if cycle_output["drift_factor"] != 0.0:
+            cycle_output["warnings"].append("Drift_Anomalous_Correction_Triggered")
+        self._system_drift = 0.0000000
+        
+        # --- BLOKADA GORILLA ---
+        if self._gorilla_lock:
+            self.regulate_energy(gorilla_cost)
+            self._gorilla_lock = False
+            SamaelHeilong.log_event("LOCK_RELEASE", {
+                "type": "GORILLA_CYCLE_COMPLETED", 
+                "node": self.node_id
+            })
+        elif not self._magilla_lock:
+            with self._lock:
+                self.update_mode(cycle_output)
+            self.regulate_energy(gorilla_cost)
+        
+        # --- MIRROR (L60) ---
+        mirror_result = GeonMirror.reflect(cycle_output, self.genetic_pool)
+        
+        # --- CERTYFIKACJA ---
+        signature = SamaelHeilong.certyfikuj_ruch_optimusa(
+            f"KERNEL_v21_CYCLE-{cycle_output['cycle_id']}-"
+            f"HASH-{cycle_output['context_hash']}-"
+            f"MODE-{self.GLOBAL_STATE['mode']}-"
+            f"NODE-{self.node_id}"
+        )
+        with self._lock:
+            self.GLOBAL_STATE["last_cycle_signature"] = signature
+        
+        SamaelHeilong.log_event("MIRROR_REFLECTION", {
+            "reflection_id": mirror_result["reflection_id"],
+            "action": mirror_result["log"]["action"],
+            "hash": cycle_output["context_hash"],
+            "node": self.node_id,
+            "pool_size": self.genetic_pool.get_size(),
+            "egregor_size": Egregor.get_size()
+        })
+        
+        return {
+            "kernel_mode": self.GLOBAL_STATE["mode"],
+            "cycle_counter": self.GLOBAL_STATE["cycle_counter"],
+            "cycle_output": cycle_output,
+            "kernel_signature": signature,
+            "drift": self._system_drift,
+            "energy_map": self.GLOBAL_STATE["energy_map"],
+            "genetic_pool_size": self.genetic_pool.get_size(),
+            "egregor_size": Egregor.get_size(),
+            "node_id": self.node_id,
+            "status": "OS_EXECUTION_STABLE"
+        }
+    
+    def shutdown(self) -> None:
+        self.horde.shutdown()
+        log("ARCHON_KERNEL v2.1 shutdown complete", "INFO")
+
+# =============================================================================
+# MOST INTEGRACYJNY — ARCHON_BRIDGE (Z EGREGOREM)
+# =============================================================================
+
+class ArchonBridge:
+    def __init__(self, kernel: GeonTeamKernel):
+        self.kernel = kernel
+    
+    def get_archetype_context(self) -> Dict[str, Any]:
+        with self.kernel._lock:
+            s = self.kernel.GLOBAL_STATE
+        return {
+            "tryb": "ARCHON_KERNEL_v2.1",
+            "mode": s.get("mode", "PRIME"),
+            "energy_map": s.get("energy_map", {}),
+            "cycles": s.get("cycle_counter", 0),
+            "horde_size": HORDE_SIZE,
+            "genetic_pool_size": self.kernel.genetic_pool.get_size(),
+            "egregor_size": Egregor.get_size(),
+            "node_id": self.kernel.node_id
+        }
+    
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        with self.kernel._lock:
+            s = self.kernel.GLOBAL_STATE
+            stability = self.kernel.stability_history[-1] if self.kernel.stability_history else 0.5
+        
+        if len(self.kernel.stability_history) >= 3:
+            recent = self.kernel.stability_history[-3:]
+            pressure = 1.0 - (sum(recent) / len(recent))
+        else:
+            pressure = 0.3
+        
+        energy_map = s.get("energy_map", {})
+        energy = (energy_map.get("stability", 8) / 168.0) * 0.8 + 0.2
+        
+        return {
+            "mode": "ARCHON_KERNEL_v2.1",
+            "stability": stability,
+            "energy": clamp(energy, 0.1, 1.0),
+            "pressure": clamp(pressure, 0.0, 1.0),
+            "resilience": 0.7 + (stability * 0.2),
+            "kernel_mode": s.get("mode", "PRIME"),
+            "genetic_pool_size": self.kernel.genetic_pool.get_size(),
+            "egregor_size": Egregor.get_size(),
+            "node_id": self.kernel.node_id
+        }
+    
+    def get_governor_context(self) -> Dict[str, Any]:
+        with self.kernel._lock:
+            s = self.kernel.GLOBAL_STATE
+        return {
+            "intent": "ARCHON_KERNEL_CONTROL",
+            "confidence": 0.95,
+            "entropy": 0.1,
+            "kernel_ready": True,
+            "current_mode": s.get("mode", "PRIME"),
+            "node_id": self.kernel.node_id
+        }
+    
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        return SamaelHeilong.get_narrative_fragments(n)
+    
+    def get_trio_state(self) -> Dict[str, str]:
+        with self.kernel._lock:
+            s = self.kernel.GLOBAL_STATE
+        return {
+            "ISKRA": "AKTYWNA",
+            "PIECZĘĆ": "AKTYWNA",
+            "PERFEKCJA": "AKTYWNA",
+            "tryb": "ARCHON_KERNEL_v2.1",
+            "kernel": "AKTYWNY",
+            "mode": s.get("mode", "PRIME"),
+            "node": self.kernel.node_id
+        }
+
+# =============================================================================
+# DEMONSTRACJA
+# =============================================================================
+
+def demo():
+    """Demonstracja GEON_ARCHON_KERNEL_v2.1 z Egregorem i Hordą."""
+    print("\n" + "=" * 80)
+    print("👑 GEON_ARCHON_KERNEL_v2.1 — DEMONSTRACJA Z EGREGOREM I HORDĄ")
+    print("ROZPROSZONA PAMIĘĆ RODU + UCZĄCA SIĘ HORDA SMOKÓW")
+    print("=" * 80 + "\n")
+
+    # 1. Inicjalizacja Węzła Poręba
+    print("📌 WĘZEŁ 1: NODE_POREBA_CORE")
+    kernel1 = GeonTeamKernel(node_id="NODE_POREBA_CORE")
+    kernel1.boot()
+    
+    # 2. Cykl w Porębie – generuje wpis do Egregora
+    context1 = {"task": "geothermal_grid_calculation", "efficiency_target": 0.99}
+    r1 = kernel1.run(context1)
+    print(f"   Tryb: {r1['kernel_mode']}")
+    print(f"   Stabilność: {r1['cycle_output']['stability']}")
+    print(f"   Egregor: {r1['egregor_size']} wpisów")
+    
+    # 3. Inicjalizacja Węzła Czekanka – synchronizuje z Egregorem
+    print("\n📌 WĘZEŁ 2: NODE_CZEKANKA_WEKTOR")
+    kernel2 = GeonTeamKernel(node_id="NODE_CZEKANKA_WEKTOR")
+    kernel2.boot()
+    
+    # Sprawdzenie synchronizacji
+    c_hash = generate_context_hash(context1)
+    egregor_check = Egregor.query(c_hash)
+    print(f"   Czy Czekanka widzi ścieżkę z Poręby? {len(egregor_check) > 0}")
+    if egregor_check:
+        print(f"   Ścieżka: '{egregor_check[0]['resolved_path']}' (eff: {egregor_check[0]['efficiency']})")
+    
+    # 4. Test deadlocka z Hordą
+    print("\n📌 TEST DEADLOCKA + INTERWENCJA HORDY")
+    kernel2.stability_history = [0.15, 0.15]
+    kernel2.path_history = ["Standard_Protocol_Fallback", "Standard_Protocol_Fallback"]
+    kernel2.warning_history = [5, 5]
+    
+    deadlock_context = {"task": "tauron_blockade_simulation", "anomaly_force": 0.1}
+    r3 = kernel2.run(deadlock_context)
+    print(f"   Tryb po interwencji: {r3['kernel_mode']}")
+    print(f"   Stabilność: {r3['cycle_output']['stability']}")
+    print(f"   Ostrzeżenia: {r3['cycle_output']['warnings']}")
+    
+    # 5. Szkoła Smoków
+    print("\n📌 SZKOŁA MŁODYCH SMOKÓW")
+    adept = YoungDragon("Samael_Junior")
+    for t in range(3):
+        result = GeonMagilla.educational_mode(adept)
+        print(f"   Tura {t+1}: {result['lesson']} (+{result['xp_gain']} XP)")
+    
+    # 6. Stan końcowy
+    print("\n📊 STAN KOŃCOWY")
+    print(f"   Egregor: {Egregor.get_size()} wpisów")
+    print(f"   Genetic Pool 1: {kernel1.genetic_pool.get_size()} wpisów")
+    print(f"   Genetic Pool 2: {kernel2.genetic_pool.get_size()} wpisów")
+    
+    kernel1.shutdown()
+    kernel2.shutdown()
+    
+    print("\n" + "=" * 80)
+    print("👑 GEON_ARCHON_KERNEL_v2.1 — GOTOWY DO WDROŻENIA")
+    print(HASLO)
+    print("=" * 80)
+
+if __name__ == "__main__":
+    demo()
