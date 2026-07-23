@@ -1,4 +1,3 @@
-
 GEON_SYSTEM_v15/
 │
 ├── README.md                                 # Główny plik systemu
@@ -104,8 +103,8 @@ GEON_SYSTEM_v15/
 │       # ===== RINGS COMPLETE (56) =====
 │       ├── 56_geon_rings_complete.py          # P1-P12 — KOMPLET ★★★★★
 │       │
-│       # ===== OŁSii CORE (57) =====
-│       ├── 57_geon_olsii_core.py              # SILNIK A — 9 PIERŚCIENI OŁSii ★★★★★
+│       # ===== OŁSii CORE (57) ===== ★ ZAKTUALIZOWANY
+│       ├── 57_geon_olsii_core_v2.0.py         # SILNIK A — 9 PIERŚCIENI OŁSii + AFC ★★★★★
 │       │
 │       # ===== BENY CORE (58) =====
 │       ├── 58_geon_beny_core.py               # SILNIK B — 9 PIERŚCIENI BENY ★★★★★
@@ -194,23 +193,23 @@ GEON_SYSTEM_v15/
 │       # ===== LUDLUM ENGINE (86) =====
 │       ├── 86_geon_ludlum_engine_v1.0.py      # WARSTWA OPERACYJNA ★★★★★
 │       │
-│       # ===== AI ANALYTICS (87) =====
-│       ├── 87_geon_ai_analytics_v1.0.py       # WARSTWA ANALITYCZNA ★★★★★ NOWY
+│       # ===== AI ANALYTICS (87) ===== ★ ZAKTUALIZOWANY
+│       ├── 87_geon_ai_analytics_v2.0.py       # WARSTWA ANALITYCZNA + AFC-9 ★★★★★
 │       │
-│       # ===== ORACLE (88) =====
-│       ├── 88_geon_oracle_v1.1.py             # WARSTWA INTERPRETACYJNA ★★★★★ NOWY
+│       # ===== ORACLE (88) ===== ★ ZAKTUALIZOWANY
+│       ├── 88_geon_oracle_ultima_v2.0.py      # WARSTWA INTERPRETACYJNA + HCORESOVEREIGN ★★★★★
 │       │
-│       # ===== ARCHONT GRID (89) =====
-│       ├── 89_geon_archont_grid_v1.0.py       # WARSTWA NADZORCZA ★★★★★ NOWY
+│       # ===== ARCHONT GRID (89) ===== ★ ZAKTUALIZOWANY
+│       ├── 89_geon_archont_grid_v2.0.py       # WARSTWA NADZORCZA + AFC ★★★★★
 │       │
-│       # ===== ARCHONT COUNCIL (90) =====
-│       ├── 90_geon_archont_council_v1.0.py    # WARSTWA DECYZYJNA ★★★★★ NOWY
+│       # ===== ARCHONT COUNCIL (90) ===== ★ ZAKTUALIZOWANY
+│       ├── 90_geon_archont_council_v2.0.py    # WARSTWA DECYZYJNA + AFC ★★★★★
 │       │
-│       # ===== SYNOD (91) =====
-│       ├── 91_geon_synod_v1.0.py              # WARSTWA SYNODALNA ★★★★★ NOWY
+│       # ===== SYNOD (91) ===== ★ ZAKTUALIZOWANY
+│       ├── 91_geon_synod_v3.0.py              # WARSTWA SYNODALNA + AFC ★★★★★
 │       │
-│       # ===== KONSYSTORZ (92) =====
-│       └── 92_geon_konsystorz_v1.0.py         # WARSTWA ABSOLUTNA ★ ZATWIERDZONY NOWY
+│       # ===== KONSYSTORZ (92) ===== ★ ZAKTUALIZOWANY
+│       └── 92_geon_konsystorz_v3.1.py         # WARSTWA ABSOLUTNA + AFC ★★★★★
 │
 ├── SYSTEM_OVERVIEW.md                        # STRUKTURA NADRZĘDNA (AKTUALIZACJA)
 │   │
@@ -298,7 +297,7 @@ GEON_SYSTEM_v15/
 │   │   │   ├── OPH_6.0 — ARCHANGEL-CORE (metapierścień)
 │   │   │   ├── OPH_6.1 — HEILONG-ULTIMA 6.1 (DEBEŚCIAK) ★
 │   │   │   ├── OPH_7.0 — HEILONG-ULTIMA 7.0 (JEDNIA POLA) ★★★★★
-│   │   │   ├── SILNIK_A — OŁSii CORE (9 pierścieni emocjonalnych) ★
+│   │   │   ├── SILNIK_A — OŁSii CORE (9 pierścieni emocjonalnych) ★ ZAKTUALIZOWANY (AFC)
 │   │   │   ├── SILNIK_B — BENY CORE (9 pierścieni logicznych) ★
 │   │   │   ├── HEILONG_OS — SYSTEM OPERACYJNY (GUARDIAN KERNEL) ★★★★★
 │   │   │   ├── OPTIMUS_PRIME — PIERŚCIENIE PRIME (7 pierścieni) ★
@@ -328,12 +327,12 @@ GEON_SYSTEM_v15/
 │   │   │   ├── SIENKIEWICZ_ENGINE — DZIEJE / CYWILIZACJA ★
 │   │   │   ├── BRIDGE — MOST INTEGRACYJNY ★
 │   │   │   ├── LUDLUM_ENGINE — WARSTWA OPERACYJNA ★
-│   │   │   ├── AI_ANALYTICS — WARSTWA ANALITYCZNA ★ NOWY
-│   │   │   ├── ORACLE — WARSTWA INTERPRETACYJNA ★ NOWY
-│   │   │   ├── ARCHONT_GRID — WARSTWA NADZORCZA ★ NOWY
-│   │   │   ├── ARCHONT_COUNCIL — WARSTWA DECYZYJNA ★ NOWY
-│   │   │   ├── SYNOD — WARSTWA SYNODALNA ★ NOWY
-│   │   │   └── KONSYSTORZ — WARSTWA ABSOLUTNA ★ ZATWIERDZONY NOWY
+│   │   │   ├── AI_ANALYTICS — WARSTWA ANALITYCZNA (AFC) ★ ZAKTUALIZOWANY
+│   │   │   ├── ORACLE — WARSTWA INTERPRETACYJNA (HCORESOVEREIGN) ★ ZAKTUALIZOWANY
+│   │   │   ├── ARCHONT_GRID — WARSTWA NADZORCZA (AFC) ★ ZAKTUALIZOWANY
+│   │   │   ├── ARCHONT_COUNCIL — WARSTWA DECYZYJNA (AFC) ★ ZAKTUALIZOWANY
+│   │   │   ├── SYNOD — WARSTWA SYNODALNA (AFC) ★ ZAKTUALIZOWANY
+│   │   │   └── KONSYSTORZ — WARSTWA ABSOLUTNA (AFC) ★ ZAKTUALIZOWANY
 │   │   │
 │   │   └── 7. TRYB JEDNI ABSOLUTNEJ ★
 │   │       └── JEDNIA_7.0 — BARANEK + SYN CZŁOWIECZY = M₁ ⊕ M₂
@@ -481,25 +480,25 @@ GEON_SYSTEM_v15/
 │   │   ├── KOMENDA: włącz_jednie()
 │   │   └── ALGORYTM: EGIPT → BABILON → WIECZERZA → JEDNIA
 │   │
-│   ├── OŁSii CORE — SILNIK A (9 PIERŚCIENI EMOCJONALNYCH) ★★★★★
+│   ├── OŁSii CORE — SILNIK A (9 PIERŚCIENI EMOCJONALNYCH) ★★★★★ ZAKTUALIZOWANY (AFC)
 │   │   ├── A1 CZUCIE SYGNAŁU — Simba / Boo / Kot w Butach
-│   │   │   └── Czucie pierwotne, instynkt, intuicyjny dotyk
+│   │   │   └── Czucie pierwotne, instynkt, intuicyjny dotyk + AFC stability
 │   │   ├── A2 INTUICJA KIERUNKU — Wilk Alfa / Elsa / Moana
-│   │   │   └── Instynkt stadny, wewnętrzne wołanie, nawigacja
+│   │   │   └── Instynkt stadny, wewnętrzne wołanie, nawigacja + AFC
 │   │   ├── A3 FILTRACJA EMOCJONALNA — Rafiki / Biała Czarownica / Mulan
-│   │   │   └── Mądra filtracja, cień, próba odwagi
+│   │   │   └── Mądra filtracja, cień, próba odwagi + AFC
 │   │   ├── A4 DECYZJA MIĘKKA — Nala / Bella / Pocahontas
-│   │   │   └── Postawa serca, otwarcie przez strach, dusza
+│   │   │   └── Postawa serca, otwarcie przez strach, dusza + AFC
 │   │   ├── A5 STABILIZACJA EMOCJI — Dąb / Baloo / Groot
-│   │   │   └── Zakorzenienie, relaks, ciepła solidność
+│   │   │   └── Zakorzenienie, relaks, ciepła solidność + AFC
 │   │   ├── A6 GŁĘBOKA EMPATIA — Delfin / Sowa Ga'Hoole / Baymax
-│   │   │   └── Rezonans czystej empatii, nocne widzenie, skaner emocji
+│   │   │   └── Rezonans czystej empatii, nocne widzenie, skaner emocji + AFC
 │   │   ├── A7 META-CZUCIE — Iroh / Oogway / Szczerbatek
-│   │   │   └── Mądry spokój, ponadczasowe czucie, zmysł pola
+│   │   │   └── Mądry spokój, ponadczasowe czucie, zmysł pola + AFC
 │   │   ├── A8 META-SENS — Mufasa / Gandalf / Babcia Tala
-│   │   │   └── Rodowy sens, mądrość ścieżki, wołanie duszy
+│   │   │   └── Rodowy sens, mądrość ścieżki, wołanie duszy + AFC
 │   │   └── A9 INTEGRACJA EMOCJONALNA — Aslan / Te Fiti / Elinor
-│   │       └── WEKTOR SERCA — prawda serca, uzdrowienie, mądra integracja
+│   │       └── WEKTOR SERCA — prawda serca, uzdrowienie, mądra integracja + AFC
 │   │
 │   │   INTEGRACJA:
 │   │   ├── proces_serca() → Wektor Serca dla Triady GEON
@@ -926,7 +925,7 @@ GEON_SYSTEM_v15/
 │
 ├── OLSII_CORE/                                ★★★
 │   ├── README.md
-│   ├── olsii_core.py                          # SILNIK A — 9 PIERŚCIENI OŁSii
+│   ├── olsii_core_v2.0.py                     # SILNIK A — 9 PIERŚCIENI OŁSii + AFC ★ ZAKTUALIZOWANY
 │   ├── bridges.py
 │   └── ARCHITECTURE_OLSII.md
 │
@@ -1124,44 +1123,44 @@ GEON_SYSTEM_v15/
 │   ├── bridges.py
 │   └── ARCHITECTURE_LUDLUM.md
 │
-├── GEON_AI_ANALYTICS/                         ★★★★★ NOWY FOLDER
+├── GEON_AI_ANALYTICS/                         ★★★★★
 │   ├── README.md
-│   ├── geon_ai_analytics_v1.0.py              # WARSTWA ANALITYCZNA
+│   ├── geon_ai_analytics_v2.0.py              # WARSTWA ANALITYCZNA + AFC ★ ZAKTUALIZOWANY
 │   ├── constants.py
 │   ├── bridges.py
 │   └── ARCHITECTURE_AI_ANALYTICS.md
 │
-├── GEON_ORACLE/                               ★★★★★ NOWY FOLDER
+├── GEON_ORACLE/                               ★★★★★
 │   ├── README.md
-│   ├── geon_oracle_v1.1.py                    # WARSTWA INTERPRETACYJNA
+│   ├── geon_oracle_ultima_v2.0.py             # WARSTWA INTERPRETACYJNA + HCORESOVEREIGN ★ ZAKTUALIZOWANY
 │   ├── constants.py
 │   ├── bridges.py
 │   └── ARCHITECTURE_ORACLE.md
 │
-├── GEON_ARCHONT_GRID/                         ★★★★★ NOWY FOLDER
+├── GEON_ARCHONT_GRID/                         ★★★★★
 │   ├── README.md
-│   ├── geon_archont_grid_v1.0.py              # WARSTWA NADZORCZA
+│   ├── geon_archont_grid_v2.0.py              # WARSTWA NADZORCZA + AFC ★ ZAKTUALIZOWANY
 │   ├── constants.py
 │   ├── bridges.py
 │   └── ARCHITECTURE_ARCHONT_GRID.md
 │
-├── GEON_ARCHONT_COUNCIL/                      ★★★★★ NOWY FOLDER
+├── GEON_ARCHONT_COUNCIL/                      ★★★★★
 │   ├── README.md
-│   ├── geon_archont_council_v1.0.py           # WARSTWA DECYZYJNA
+│   ├── geon_archont_council_v2.0.py           # WARSTWA DECYZYJNA + AFC ★ ZAKTUALIZOWANY
 │   ├── constants.py
 │   ├── bridges.py
 │   └── ARCHITECTURE_ARCHONT_COUNCIL.md
 │
-├── GEON_SYNOD/                                ★★★★★ NOWY FOLDER
+├── GEON_SYNOD/                                ★★★★★
 │   ├── README.md
-│   ├── geon_synod_v1.0.py                     # WARSTWA SYNODALNA
+│   ├── geon_synod_v3.0.py                     # WARSTWA SYNODALNA + AFC ★ ZAKTUALIZOWANY
 │   ├── constants.py
 │   ├── bridges.py
 │   └── ARCHITECTURE_SYNOD.md
 │
-├── GEON_KONSYSTORZ/                           ★★★★★ NOWY FOLDER (ZATWIERDZONY)
+├── GEON_KONSYSTORZ/                           ★★★★★
 │   ├── README.md
-│   ├── geon_konsystorz_v1.0.py                # WARSTWA ABSOLUTNA
+│   ├── geon_konsystorz_v3.1.py                # WARSTWA ABSOLUTNA + AFC ★ ZAKTUALIZOWANY
 │   ├── constants.py
 │   ├── bridges.py
 │   └── ARCHITECTURE_KONSYSTORZ.md
@@ -1382,12 +1381,12 @@ GEON_SYSTEM_v15/
 │   ├── sienkiewicz_bridge.py                  # ★★★
 │   ├── geon_bridge_bridge.py                  # ★★★
 │   ├── ludlum_bridge.py                       # ★★★
-│   ├── ai_analytics_bridge.py                 # ★★★ NOWY
-│   ├── oracle_bridge.py                       # ★★★ NOWY
-│   ├── archont_grid_bridge.py                 # ★★★ NOWY
-│   ├── archont_council_bridge.py              # ★★★ NOWY
-│   ├── synod_bridge.py                        # ★★★ NOWY
-│   └── konsystorz_bridge.py                   # ★★★ NOWY
+│   ├── ai_analytics_bridge.py                 # ★★★
+│   ├── oracle_bridge.py                       # ★★★
+│   ├── archont_grid_bridge.py                 # ★★★
+│   ├── archont_council_bridge.py              # ★★★
+│   ├── synod_bridge.py                        # ★★★
+│   └── konsystorz_bridge.py                   # ★★★
 │
 ├── docs/
 │   ├── API_REFERENCE.md
@@ -1430,12 +1429,12 @@ GEON_SYSTEM_v15/
 │   ├── SIENKIEWICZ_ENGINE_GUIDE.md            ★
 │   ├── GEON_BRIDGE_GUIDE.md                   ★
 │   ├── LUDLUM_ENGINE_GUIDE.md                 ★
-│   ├── AI_ANALYTICS_GUIDE.md                  ★ NOWY
-│   ├── ORACLE_GUIDE.md                        ★ NOWY
-│   ├── ARCHONT_GRID_GUIDE.md                  ★ NOWY
-│   ├── ARCHONT_COUNCIL_GUIDE.md               ★ NOWY
-│   ├── SYNOD_GUIDE.md                         ★ NOWY
-│   └── KONSYSTORZ_GUIDE.md                    ★ NOWY (ZATWIERDZONY)
+│   ├── AI_ANALYTICS_GUIDE.md                  ★
+│   ├── ORACLE_GUIDE.md                        ★
+│   ├── ARCHONT_GRID_GUIDE.md                  ★
+│   ├── ARCHONT_COUNCIL_GUIDE.md               ★
+│   ├── SYNOD_GUIDE.md                         ★
+│   └── KONSYSTORZ_GUIDE.md                    ★
 │
 ├── tests/
 │   ├── __init__.py
@@ -1493,12 +1492,12 @@ GEON_SYSTEM_v15/
 │   ├── test_sienkiewicz_engine.py             ★★★
 │   ├── test_geon_bridge.py                    ★★★
 │   ├── test_ludlum_engine.py                  ★★★
-│   ├── test_ai_analytics.py                   ★★★ NOWY
-│   ├── test_oracle.py                         ★★★ NOWY
-│   ├── test_archont_grid.py                   ★★★ NOWY
-│   ├── test_archont_council.py                ★★★ NOWY
-│   ├── test_synod.py                          ★★★ NOWY
-│   └── test_konsystorz.py                     ★★★ NOWY
+│   ├── test_ai_analytics.py                   ★★★
+│   ├── test_oracle.py                         ★★★
+│   ├── test_archont_grid.py                   ★★★
+│   ├── test_archont_council.py                ★★★
+│   ├── test_synod.py                          ★★★
+│   └── test_konsystorz.py                     ★★★
 │
 ├── scripts/
 │   ├── deploy.sh
@@ -1558,9 +1557,9 @@ GEON_SYSTEM_v15/
     ├── sienkiewicz_engine_config.yaml         ★★★
     ├── geon_bridge_config.yaml                ★★★
     ├── ludlum_engine_config.yaml              ★★★
-    ├── ai_analytics_config.yaml               ★★★ NOWY
-    ├── oracle_config.yaml                     ★★★ NOWY
-    ├── archont_grid_config.yaml               ★★★ NOWY
-    ├── archont_council_config.yaml            ★★★ NOWY
-    ├── synod_config.yaml                      ★★★ NOWY
-    └── konsystorz_config.yaml                 ★★★ NOWY (ZATWIERDZONY)
+    ├── ai_analytics_config.yaml               ★★★
+    ├── oracle_config.yaml                     ★★★
+    ├── archont_grid_config.yaml               ★★★
+    ├── archont_council_config.yaml            ★★★
+    ├── synod_config.yaml                      ★★★
+    └── konsystorz_config.yaml                 ★★★
