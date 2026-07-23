@@ -1563,3 +1563,49 @@ GEON_SYSTEM_v15/
     ├── archont_council_config.yaml            ★★★
     ├── synod_config.yaml                      ★★★
     └── konsystorz_config.yaml                 ★★★
+
+
+
+GEON_SYSTEM_v15/
+│
+├── README.md
+├── SYSTEM_OVERVIEW.md
+│
+├── KOMBAJN_v15/
+│   └── kombajn_core/
+│       │
+│       # ===== WARSTWY 86–92 =====
+│       ├── 86_geon_ludlum_engine_v1.0.py
+│       │
+│       ├── 86_5_geon_zoo_analyzer_v1.0.py          ★ NOWA WARSTWA (Absurd & Role Filter)
+│       │
+│       ├── 87_geon_ai_analytics_v2.1.py            ★ ZAKTUALIZOWANY (dodano ZOO)
+│       │
+│       ├── 88_geon_oracle_ultima_v2.0.py
+│       ├── 89_geon_archont_grid_v2.0.py
+│       ├── 90_geon_archont_council_v2.0.py
+│       ├── 91_geon_synod_v3.0.py
+│       └── 92_geon_konsystorz_v3.1.py
+│
+├── GEON_ZOO_ANALYZER/                               ★ NOWY FOLDER
+│   ├── README.md
+│   ├── geon_zoo_analyzer_v1.0.py
+│   ├── constants.py
+│   ├── bridges.py
+│   └── ARCHITECTURE_ZOO.md
+│
+├── META/
+│   ├── ... (istniejące mosty)
+│   └── zoo_bridge.py                                ★ NOWY MOST
+│
+├── docs/
+│   ├── ... (istniejące)
+│   └── ZOO_ANALYZER_GUIDE.md                        ★ NOWA DOKUMENTACJA
+│
+├── tests/
+│   ├── ... (istniejące)
+│   └── test_zoo_analyzer.py                         ★ NOWY TEST
+│
+└── config/
+    ├── ... (istniejące)
+    └── zoo_analyzer_config.yaml                     ★ NOWA KONFIGURACJA
