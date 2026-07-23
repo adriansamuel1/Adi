@@ -1,0 +1,665 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_ARCHONT_COUNCIL_v1.2 — MODUŁ 90: RADA ARCHONTÓW (FULL INTEGRATION)
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.2 (Full Integration: Influence, Drift, Phase Alignment, Crisis Vector)
+Data: 2026-07-24
+Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
+
+NOWOŚCI v1.2:
+• Crisis Bias – KRYZYS ma większą wagę (1.25x)
+• Drift Threshold – wykrywanie ukrytych kryzysów (drift > 0.65 → OMEGA)
+• Phase Alignment – wysoki alignment (> 0.75) skłania do ALPHA
+• Influence jako główna waga z korektą drift
+• Crisis Vector – zapis pełnych wektorów kryzysowych
+• Council Drift Index – średnia dryfów Archontów
+• Integracja z Oracle (ERA jako bias)
+• Podpisy Archontów jako część certyfikacji
+
+VIBE: 1-6-8. ∞. COUNCIL!
+================================================================================
+"""
+
+import hashlib
+import json
+import logging
+import threading
+import time
+import math
+from collections import deque
+from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple
+from dataclasses import dataclass, field
+from enum import Enum
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_ARCHONT_COUNCIL_v1.2"
+FRACTAL_SIGNATURE = "[GEON::ARCHONT::COUNCIL::v1.2]"
+VIBE = 168
+HASLO = "1-6-8. ∞. COUNCIL!"
+DEWIZA = "Ex Consilio, Lex"
+
+MEMORY_LIMIT = 256
+
+# =============================================================================
+# STAŁE ULEPSZEŃ
+# =============================================================================
+
+CRISIS_BIAS = 1.25
+DRIFT_OMEGA_THRESHOLD = 0.65
+DRIFT_BETA_THRESHOLD = 0.55
+PHASE_ALIGNMENT_ALPHA_THRESHOLD = 0.75
+COUNCIL_DRIFT_OMEGA_THRESHOLD = 0.75
+COUNCIL_DRIFT_BETA_THRESHOLD = 0.55
+ORACLE_CRISIS_BIAS = 1.2
+
+# =============================================================================
+# LOGOWANIE
+# =============================================================================
+
+logger = logging.getLogger("GEON_ARCHONT_COUNCIL_v1.2")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('⚖️ [COUNCIL] %(message)s'))
+    logger.addHandler(handler)
+
+def log(msg: str, level: str = "INFO") -> None:
+    if level == "WARN":
+        logger.warning(msg)
+    elif level == "ERROR":
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+def generate_context_hash(context: Dict[str, Any]) -> str:
+    filtered_context = {k: v for k, v in context.items() 
+                        if k not in ["timestamp", "request_id", "nonce"]}
+    context_str = json.dumps(filtered_context, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(context_str.encode("utf-8")).hexdigest()
+
+# =============================================================================
+# ENUMY I STRUKTURY
+# =============================================================================
+
+class CouncilDecree(Enum):
+    ALPHA = "DEKRET_ALPHA"
+    BETA = "DEKRET_BETA"
+    OMEGA = "DEKRET_OMEGA"
+
+    def description(self) -> str:
+        desc = {
+            CouncilDecree.ALPHA: "Zatwierdzenie Ładu – kontynuacja cyklu.",
+            CouncilDecree.BETA: "Wymuszona Korekta – korekta trajektorii.",
+            CouncilDecree.OMEGA: "Globalny Reset – rekonstrukcja struktury."
+        }
+        return desc.get(self, "Nieznany dekret.")
+
+    def numeric_value(self) -> int:
+        values = {CouncilDecree.ALPHA: 0, CouncilDecree.BETA: 1, CouncilDecree.OMEGA: 2}
+        return values.get(self, 0)
+
+
+@dataclass
+class CouncilVote:
+    archont_name: str
+    status: str
+    confidence: float
+    influence: float
+    drift: float
+    phase_alignment: float
+    signature: str
+    crisis_vector: Optional[List[float]] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "archont": self.archont_name,
+            "status": self.status,
+            "confidence": round(self.confidence, 4),
+            "influence": round(self.influence, 4),
+            "drift": round(self.drift, 4),
+            "phase_alignment": round(self.phase_alignment, 4),
+            "signature": self.signature[:20] + "..." if self.signature else "BRAK",
+            "has_crisis_vector": self.crisis_vector is not None
+        }
+
+
+@dataclass
+class CouncilReport:
+    decree: CouncilDecree
+    votes: List[CouncilVote]
+    vote_summary: Dict[str, int]
+    confidence_avg: float
+    influence_avg: float
+    council_drift: float
+    crisis_vectors: List[List[float]]
+    weighted_voting: bool
+    oracle_era: Optional[str] = None
+    maya_phase: int = 0
+    anomaly_score: float = 0.0
+    certificate: str = ""
+    timestamp: float = field(default_factory=time.time)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "decree": self.decree.value,
+            "decree_description": self.decree.description(),
+            "votes": [v.to_dict() for v in self.votes],
+            "vote_summary": self.vote_summary,
+            "confidence_avg": round(self.confidence_avg, 4),
+            "influence_avg": round(self.influence_avg, 4),
+            "council_drift": round(self.council_drift, 4),
+            "crisis_vectors_count": len(self.crisis_vectors),
+            "weighted_voting": self.weighted_voting,
+            "oracle_era": self.oracle_era,
+            "maya_phase": self.maya_phase,
+            "anomaly_score": round(self.anomaly_score, 4),
+            "certificate": self.certificate,
+            "timestamp": datetime.fromtimestamp(self.timestamp).isoformat()
+        }
+
+# =============================================================================
+# KRONIKI SAMAELA I EGREGOR
+# =============================================================================
+
+class SamaelHeilong:
+    @staticmethod
+    def certyfikuj_council(action: str, signatures: List[str]) -> str:
+        timestamp = datetime.now().isoformat()
+        combined = "".join(signatures) if signatures else action
+        combined_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()[:16]
+        payload = f"{timestamp}-{action}-{combined_hash}-1-6-8. ∞. SIEMA!"
+        h = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16].upper()
+        return f"🔒 [COUNCIL-CERT-{h}-{combined_hash[:8]}]"
+
+    @staticmethod
+    def log_event(event_type: str, payload: Dict[str, Any]) -> None:
+        ts = datetime.now().isoformat()
+        log(f"[KRONIKI SAMAELA] {ts} | {event_type} -> {payload}", "INFO")
+
+class Egregor:
+    _ledger: deque = deque(maxlen=MEMORY_LIMIT)
+    _lock: threading.Lock = threading.Lock()
+    
+    @classmethod
+    def commit(cls, entry: Dict[str, Any], node_id: str) -> None:
+        entry["node_id"] = node_id
+        entry["timestamp"] = datetime.now().isoformat()
+        with cls._lock:
+            cls._ledger.append(entry)
+    
+    @classmethod
+    def query(cls, type_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+        with cls._lock:
+            snapshot = list(cls._ledger)
+        if type_filter:
+            return [e for e in snapshot if e.get("type") == type_filter]
+        return snapshot
+
+# =============================================================================
+# GŁÓWNY MODUŁ: GEON_ARCHONT_COUNCIL v1.2
+# =============================================================================
+
+class GeonArchontCouncil:
+    """
+    ⚖️ GEON_ARCHONT_COUNCIL v1.2 – Pełna Rada Archontów z integracją v1.2.
+    """
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+        self.memory_limit = self.config.get("memory_limit", MEMORY_LIMIT)
+        self.history: deque = deque(maxlen=self.memory_limit)
+        self.kroniki = SamaelHeilong
+        self.egregor = Egregor
+        self._lock = threading.Lock()
+        
+        self.weighted_voting = self.config.get("weighted_voting", True)
+        self.weight_threshold = self.config.get("weight_threshold", 0.6)
+        
+        # Progi ulepszeń
+        self.drift_omega_threshold = self.config.get("drift_omega_threshold", DRIFT_OMEGA_THRESHOLD)
+        self.drift_beta_threshold = self.config.get("drift_beta_threshold", DRIFT_BETA_THRESHOLD)
+        self.phase_alignment_alpha_threshold = self.config.get("phase_alignment_alpha_threshold", PHASE_ALIGNMENT_ALPHA_THRESHOLD)
+        self.council_drift_omega_threshold = self.config.get("council_drift_omega_threshold", COUNCIL_DRIFT_OMEGA_THRESHOLD)
+        self.council_drift_beta_threshold = self.config.get("council_drift_beta_threshold", COUNCIL_DRIFT_BETA_THRESHOLD)
+        self.crisis_bias = self.config.get("crisis_bias", CRISIS_BIAS)
+        self.oracle_crisis_bias = self.config.get("oracle_crisis_bias", ORACLE_CRISIS_BIAS)
+        
+        log(f"🐉 {VERSION} aktywowany | {FRACTAL_SIGNATURE}")
+        log(f"   GŁOSOWANIE: {'WAŻONE' if self.weighted_voting else 'TWARDE'}")
+        log(f"   CRISIS_BIAS: {self.crisis_bias} | DRIFT_OMEGA: {self.drift_omega_threshold}")
+
+    # -------------------------------------------------------------------------
+    # GŁÓWNA METODA – PRZYJMUJE PAYLOAD Z GRIDU
+    # -------------------------------------------------------------------------
+
+    def convene(self, council_payload: Dict[str, Any],
+                oracle_era: Optional[str] = None,
+                maya_phase: int = 0,
+                anomaly_score: float = 0.0) -> CouncilReport:
+        """
+        Zbiera Radę Archontów z pełnymi metrykami v1.2.
+        """
+        # 1. Ekstrakcja danych z payloadu
+        votes_raw = council_payload.get("votes", [])
+        confidence_list = council_payload.get("confidence", [])
+        influence_list = council_payload.get("influence", [])
+        drifts = council_payload.get("drifts", [])
+        phase_alignments = council_payload.get("phase_alignments", [])
+        signatures = council_payload.get("signatures", [])
+        archont_names = ["SAMAEL", "ENKI", "RA", "OPTIMUS", "HEILONG"]
+        
+        # Uzupełnienie brakujących danych
+        def pad_list(lst, default, size):
+            if len(lst) < size:
+                return lst + [default] * (size - len(lst))
+            return lst[:size]
+        
+        votes_raw = pad_list(votes_raw, "NIEZNANY", len(archont_names))
+        confidence_list = pad_list(confidence_list, 0.5, len(archont_names))
+        influence_list = pad_list(influence_list, 0.5, len(archont_names))
+        drifts = pad_list(drifts, 0.0, len(archont_names))
+        phase_alignments = pad_list(phase_alignments, 0.5, len(archont_names))
+        signatures = pad_list(signatures, "BRAK_SYGNAtURY", len(archont_names))
+
+        # Crisis Vectors z payloadu (jeśli istnieją)
+        archont_vectors = council_payload.get("archont_vectors", [])
+        crisis_vectors = []
+        for v in archont_vectors:
+            if len(v) >= 5 and v[4] >= 4:  # numeric_status >= 4 (KRYZYS)
+                # Wektor ma: [mean, variance, entropy, energy, status_numeric, influence, drift, alignment]
+                crisis_vectors.append(v[:4])  # mean, variance, entropy, energy
+
+        # 2. Tworzenie obiektów głosów z pełnymi metrykami
+        votes = []
+        for i, name in enumerate(archont_names):
+            cv = crisis_vectors[i] if i < len(crisis_vectors) else None
+            votes.append(CouncilVote(
+                archont_name=name,
+                status=votes_raw[i],
+                confidence=confidence_list[i],
+                influence=influence_list[i],
+                drift=drifts[i],
+                phase_alignment=phase_alignments[i],
+                signature=signatures[i],
+                crisis_vector=cv
+            ))
+
+        # 3. Głosowanie z ulepszeniami
+        decree = self._vote_weighted_enhanced(votes, oracle_era, anomaly_score)
+
+        # 4. Podsumowanie głosów
+        vote_summary = {}
+        for v in votes:
+            vote_summary[v.status] = vote_summary.get(v.status, 0) + 1
+
+        # 5. Średnie
+        conf_avg = sum(v.confidence for v in votes) / len(votes) if votes else 0.0
+        inf_avg = sum(v.influence for v in votes) / len(votes) if votes else 0.0
+        council_drift = sum(v.drift for v in votes) / len(votes) if votes else 0.0
+
+        # 6. Crisis Vectors w raporcie
+        crisis_vectors_report = [v.crisis_vector for v in votes if v.crisis_vector is not None]
+
+        # 7. Certyfikacja z podpisami Archontów
+        signatures_list = [v.signature for v in votes if v.signature != "BRAK_SYGNAtURY"]
+        cert = self.kroniki.certyfikuj_council(f"DECREE_{decree.value}", signatures_list)
+
+        # 8. Raport
+        report = CouncilReport(
+            decree=decree,
+            votes=votes,
+            vote_summary=vote_summary,
+            confidence_avg=conf_avg,
+            influence_avg=inf_avg,
+            council_drift=council_drift,
+            crisis_vectors=crisis_vectors_report,
+            weighted_voting=self.weighted_voting,
+            oracle_era=oracle_era,
+            maya_phase=maya_phase,
+            anomaly_score=anomaly_score,
+            certificate=cert
+        )
+
+        # 9. Zapis do historii
+        with self._lock:
+            self.history.append(report.to_dict())
+
+        # 10. Zapis do Egregora
+        if decree in [CouncilDecree.OMEGA, CouncilDecree.BETA] or len(self.history) % 5 == 0:
+            entry = {
+                "type": "COUNCIL_DECREE",
+                "report": report.to_dict(),
+                "certificate": cert,
+                "council_drift": council_drift,
+                "crisis_vectors_count": len(crisis_vectors_report),
+                "timestamp": datetime.now().isoformat()
+            }
+            self.egregor.commit(entry, node_id="GEON_ARCHONT_COUNCIL")
+
+        self.kroniki.log_event("COUNCIL_CONVENED", {
+            "decree": decree.value,
+            "summary": vote_summary,
+            "council_drift": council_drift,
+            "crisis_vectors": len(crisis_vectors_report)
+        })
+
+        return report
+
+    # -------------------------------------------------------------------------
+    # ULEPSZONE GŁOSOWANIE – v1.2
+    # -------------------------------------------------------------------------
+
+    def _vote_weighted_enhanced(self, votes: List[CouncilVote],
+                                 oracle_era: Optional[str] = None,
+                                 anomaly_score: float = 0.0) -> CouncilDecree:
+        """
+        Ważone głosowanie z ulepszeniami v1.2:
+        • Crisis Bias
+        • Drift Threshold
+        • Phase Alignment
+        • Oracle Bias
+        • Council Drift Index
+        """
+        if not self.weighted_voting:
+            return self._vote_twarde_enhanced(votes)
+
+        total_weight = 0.0
+        weighted_score = 0.0
+        drifts = []
+        crisis_count = 0
+
+        status_numeric = {
+            "APOTEOSIS": 0, "STABILNOŚĆ": 0,
+            "PRESJA": 1,
+            "NIESTABILNOŚĆ": 2,
+            "KRYZYS": 3,
+            "NIEZNANY": 1
+        }
+
+        for v in votes:
+            # 1. Waga bazowa: influence (lub confidence jako fallback)
+            weight = v.influence if v.influence > 0 else v.confidence
+            
+            # 2. Korekta dryfem: Archont z dużym dryfem ma mniejszą wagę
+            weight *= (1.0 - v.drift * 0.5)
+            
+            # 3. Crisis Bias
+            crisis_bias = 1.0
+            if v.status == "KRYZYS":
+                crisis_bias = self.crisis_bias
+                crisis_count += 1
+            
+            # 4. Numeric status
+            numeric = status_numeric.get(v.status, 1)
+            
+            # 5. Phase Alignment – jeśli wysoki, obniża score (skłania do ALPHA)
+            if v.phase_alignment > self.phase_alignment_alpha_threshold:
+                numeric = max(0, numeric - 0.5)
+            
+            weighted_score += weight * numeric * crisis_bias
+            total_weight += weight
+            drifts.append(v.drift)
+
+        if total_weight == 0:
+            return CouncilDecree.ALPHA
+
+        avg_score = weighted_score / total_weight
+        council_drift = sum(drifts) / len(drifts) if drifts else 0.0
+
+        # 6. Oracle Bias – jeśli era kryzysu, zaostrzamy
+        if oracle_era == "ERA_KRYZYSU":
+            avg_score *= self.oracle_crisis_bias
+
+        # 7. Anomaly Bias – wysoka anomalia podnosi score
+        if anomaly_score > 0.7:
+            avg_score *= (1.0 + anomaly_score * 0.3)
+
+        # 8. Council Drift Index
+        if council_drift > self.council_drift_omega_threshold:
+            return CouncilDecree.OMEGA
+        if council_drift > self.council_drift_beta_threshold:
+            return CouncilDecree.BETA
+
+        # 9. Individual Drift Threshold – jeśli któryś Archont ma bardzo wysoki dryf
+        for v in votes:
+            if v.drift > self.drift_omega_threshold:
+                return CouncilDecree.OMEGA
+            if v.drift > self.drift_beta_threshold and avg_score > 0.5:
+                return CouncilDecree.BETA
+
+        # 10. Decyzja końcowa
+        if avg_score > self.weight_threshold * 2.5:
+            return CouncilDecree.OMEGA
+        if avg_score > self.weight_threshold:
+            return CouncilDecree.BETA
+        return CouncilDecree.ALPHA
+
+    def _vote_twarde_enhanced(self, votes: List[CouncilVote]) -> CouncilDecree:
+        """
+        Twarde głosowanie z ulepszeniami v1.2.
+        """
+        statuses = [v.status for v in votes]
+        drifts = [v.drift for v in votes]
+        
+        niestab_count = statuses.count("NIESTABILNOŚĆ")
+        presja_count = statuses.count("PRESJA")
+        kryzys_count = statuses.count("KRYZYS")
+        total_niestab = niestab_count + kryzys_count
+        
+        council_drift = sum(drifts) / len(drifts) if drifts else 0.0
+        
+        # 1. Council Drift Index
+        if council_drift > self.council_drift_omega_threshold:
+            return CouncilDecree.OMEGA
+        if council_drift > self.council_drift_beta_threshold:
+            return CouncilDecree.BETA
+        
+        # 2. Individual Drift
+        for v in votes:
+            if v.drift > self.drift_omega_threshold:
+                return CouncilDecree.OMEGA
+            if v.drift > self.drift_beta_threshold:
+                return CouncilDecree.BETA
+        
+        # 3. Standardowe reguły
+        if total_niestab >= 2:
+            return CouncilDecree.OMEGA
+        if presja_count >= 3:
+            return CouncilDecree.BETA
+        return CouncilDecree.ALPHA
+
+    # -------------------------------------------------------------------------
+    # METODY POMOCNICZE
+    # -------------------------------------------------------------------------
+
+    def get_history(self, n: Optional[int] = None) -> List[Dict[str, Any]]:
+        with self._lock:
+            snapshot = list(self.history)
+        if n is not None and n > 0:
+            return snapshot[-n:]
+        return snapshot
+
+    def reset(self) -> None:
+        with self._lock:
+            self.history.clear()
+        self.kroniki.log_event("COUNCIL_RESET", {"status": "CLEARED"})
+
+    def get_status(self) -> Dict[str, Any]:
+        with self._lock:
+            hist_size = len(self.history)
+        return {
+            "system": "GEON_ARCHONT_COUNCIL",
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "vibe": VIBE,
+            "history_size": hist_size,
+            "memory_limit": self.memory_limit,
+            "weighted_voting": self.weighted_voting,
+            "weight_threshold": self.weight_threshold,
+            "features": {
+                "crisis_bias": self.crisis_bias,
+                "drift_omega_threshold": self.drift_omega_threshold,
+                "council_drift_omega": self.council_drift_omega_threshold,
+                "phase_alignment_alpha": self.phase_alignment_alpha_threshold,
+                "oracle_crisis_bias": self.oracle_crisis_bias
+            }
+        }
+
+# =============================================================================
+# MOST INTEGRACYJNY — COUNCIL_BRIDGE
+# =============================================================================
+
+class CouncilBridge:
+    def __init__(self, council: GeonArchontCouncil):
+        self.council = council
+
+    def get_archetype_context(self) -> Dict[str, Any]:
+        status = self.council.get_status()
+        return {
+            "tryb": VERSION,
+            "historia": status["history_size"],
+            "features": status["features"],
+            "weighted": status["weighted_voting"]
+        }
+
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        history = self.council.get_history(1)
+        if history:
+            last = history[-1]
+            return {
+                "mode": VERSION,
+                "decree": last.get("decree", "UNKNOWN"),
+                "council_drift": last.get("council_drift", 0.0),
+                "crisis_vectors": last.get("crisis_vectors_count", 0),
+                "council_ready": True
+            }
+        return {"mode": VERSION, "decree": "NO_DATA", "council_ready": True}
+
+    def get_governor_context(self) -> Dict[str, Any]:
+        history = self.council.get_history(1)
+        if history:
+            last = history[-1]
+            return {
+                "intent": "COUNCIL_DECISION",
+                "confidence": last.get("confidence_avg", 0.5),
+                "decree": last.get("decree", "UNKNOWN"),
+                "council_drift": last.get("council_drift", 0.0),
+                "council_ready": True
+            }
+        return {"intent": "COUNCIL_DECISION", "confidence": 0.5, "council_ready": True}
+
+    def get_trio_state(self) -> Dict[str, str]:
+        return {
+            "ISKRA": "AKTYWNA",
+            "PIECZĘĆ": "AKTYWNA",
+            "PERFEKCJA": "AKTYWNA",
+            "tryb": VERSION,
+            "council": "AKTYWNY_V1.2"
+        }
+
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        history = self.council.get_history(n)
+        fragments = []
+        for entry in history:
+            fragments.append({
+                "source": VERSION,
+                "content": f"Rada: {entry.get('decree', 'UNKNOWN')} | drift: {entry.get('council_drift', 0):.3f}",
+                "decree": entry.get("decree", "UNKNOWN"),
+                "crisis_vectors": entry.get("crisis_vectors_count", 0)
+            })
+        return fragments
+
+# =============================================================================
+# DEMONSTRACJA
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print(f"⚖️ {VERSION} — DEMONSTRACJA Z ULEPSZENIAMI")
+    print("CRISIS BIAS | DRIFT THRESHOLD | PHASE ALIGNMENT | ORACLE INTEGRATION")
+    print("=" * 80 + "\n")
+
+    council = GeonArchontCouncil(weighted_voting=True)
+    bridge = CouncilBridge(council)
+
+    # Symulacja payloadu z GRID z pełnymi metrykami v1.2
+    def create_payload(statuses, drifts=None, alignments=None):
+        if drifts is None:
+            drifts = [0.1] * 5
+        if alignments is None:
+            alignments = [0.7] * 5
+        return {
+            "votes": statuses,
+            "confidence": [0.8, 0.7, 0.9, 0.85, 0.75],
+            "influence": [0.7, 0.6, 0.8, 0.75, 0.65],
+            "drifts": drifts,
+            "phase_alignments": alignments,
+            "signatures": [f"SIG_{i}" for i in range(5)],
+            "archont_vectors": [
+                [0.5, 0.02, 0.3, 0.5, 4, 0.7, drifts[i], alignments[i]]
+                for i in range(5)
+            ]
+        }
+
+    print("🔍 TEST 1: STANDARDOWA STABILNOŚĆ → ALPHA")
+    payload1 = create_payload(["STABILNOŚĆ"] * 5)
+    report1 = council.convene(payload1, oracle_era="ERA_STABILNOŚCI", maya_phase=3)
+    print(f"   Dekret: {report1.decree.value}")
+    print(f"   Council Drift: {report1.council_drift:.3f}")
+
+    print("\n🔍 TEST 2: PRESJA → BETA")
+    payload2 = create_payload(["PRESJA", "PRESJA", "PRESJA", "STABILNOŚĆ", "STABILNOŚĆ"])
+    report2 = council.convene(payload2, oracle_era="ERA_TRANSFORMACJI", maya_phase=5)
+    print(f"   Dekret: {report2.decree.value}")
+    print(f"   Council Drift: {report2.council_drift:.3f}")
+
+    print("\n🔍 TEST 3: KRYZYS → OMEGA (z Crisis Bias)")
+    payload3 = create_payload(["NIESTABILNOŚĆ", "KRYZYS", "PRESJA", "STABILNOŚĆ", "STABILNOŚĆ"])
+    report3 = council.convene(payload3, oracle_era="ERA_KRYZYSU", maya_phase=6, anomaly_score=0.8)
+    print(f"   Dekret: {report3.decree.value}")
+    print(f"   Crisis Vectors: {len(report3.crisis_vectors)}")
+
+    print("\n🔍 TEST 4: UKRYTY KRYZYS (wysoki dryf) → OMEGA")
+    payload4 = create_payload(
+        ["STABILNOŚĆ", "STABILNOŚĆ", "STABILNOŚĆ", "STABILNOŚĆ", "STABILNOŚĆ"],
+        drifts=[0.7, 0.1, 0.1, 0.1, 0.1]
+    )
+    report4 = council.convene(payload4, oracle_era="ERA_STABILNOŚCI", maya_phase=3)
+    print(f"   Dekret (wykryty dryf): {report4.decree.value}")
+    print(f"   Council Drift: {report4.council_drift:.3f}")
+
+    print("\n🔍 TEST 5: PHASE ALIGNMENT → ALPHA (mimo presji)")
+    payload5 = create_payload(
+        ["PRESJA", "PRESJA", "STABILNOŚĆ", "STABILNOŚĆ", "STABILNOŚĆ"],
+        alignments=[0.8, 0.85, 0.9, 0.85, 0.8]
+    )
+    report5 = council.convene(payload5, oracle_era="ERA_TRANSFORMACJI", maya_phase=4)
+    print(f"   Dekret (alignment): {report5.decree.value}")
+    print(f"   Council Drift: {report5.council_drift:.3f}")
+
+    print("\n📊 HISTORIA RADY:")
+    for entry in council.get_history(3):
+        print(f"   {entry['decree']} | drift: {entry['council_drift']:.3f} | crisis: {entry['crisis_vectors_count']}")
+
+    print("\n🔗 MOSTY INTEGRACYJNE:")
+    print(f"   Autopilot: {bridge.get_autopilot_state()}")
+    print(f"   Governor: {bridge.get_governor_context()}")
+    print(f"   TRIO: {bridge.get_trio_state()}")
+
+    print("\n" + "=" * 80)
+    print(f"⚖️ {VERSION} — GOTOWY DO SYNODU (91)")
+    print(HASLO)
+    print("=" * 80)
+
+if __name__ == "__main__":
+    demo()
