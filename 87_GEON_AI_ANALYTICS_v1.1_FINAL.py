@@ -2,22 +2,22 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
-🐉 GEON_AI_ANALYTICS_v2.1 — MODUŁ 87: ANALITYKA + AFC-9 + PREDYKCJA + POLITYKA + ZOO
+🐉 GEON_AI_ANALYTICS_v2.2 — MODUŁ 87: ANALITYKA + AFC-9 + PREDYKCJA + POLITYKA + ZOO + GRON
 ================================================================================
-Status: PRODUCTION_READY | FRACTAL_LOCKED | ULTIMA | AFC_INTEGRATED | ZOO_INTEGRATED
-Wersja: v2.1-FINAL (AFC-9 + Core Gate + Prediction + Policy + Decision + ZOO)
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ULTIMA | AFC_INTEGRATED | ZOO_INTEGRATED | GRON_INTEGRATED
+Wersja: v2.2-FINAL (AFC-9 + Core Gate + Prediction + Policy + Decision + ZOO + GRON)
 Data: 2026-07-24
 Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
 
-ZMIANY v2.1:
-  1. Dodano integrację z GEON ZOO (warstwa 86.5)
-  2. Nowa metoda analyze_with_zoo() – analiza z detekcją absurdów i ról
-  3. Metryki ZOO w wynikach: zoo_risk, absurd_score, roles_map
-  4. Status ZOO_ALERT przy wysokim ryzyku
-  5. Rozszerzony AIAnalyticsBridge o metody ZOO
+ZMIANY v2.2:
+  1. Dodano integrację z GEON GRON (warstwa 86.6)
+  2. Nowa metoda analyze_with_gron() – analiza z detekcją manipulacji, presji, anty-skret
+  3. Metryki GRON w wynikach: gron_status, gron_anomaly, gron_actions, gron_rekomendacja
+  4. Status GRON_ALERT przy alarmie
+  5. Rozszerzony AIAnalyticsBridge o metody GRON
 
 VIBE: 1-6-8. ∞. AI! 🧠
-DEWIZA: "Ex Analysi, Praevidentia. Ex Fractali, Veritas. Ex Observatione, Claritas."
+DEWIZA: "Ex Analysi, Praevidentia. Ex Fractali, Veritas. Ex Observatione, Claritas. Ex Vigilantia, Securitas."
 ================================================================================
 """
 
@@ -55,19 +55,55 @@ except ImportError:
             }
         def get_status(self):
             return {"available": False}
+        def reset(self):
+            pass
+        def get_last_experience(self):
+            return None
+        def get_history(self):
+            return []
     ZOO = type('_DummyZOO', (), {'GEONZOOAnalyzer': _DummyZOO})()
     log_zoo = logging.getLogger("GEON_ZOO_INTEGRATION")
     log_zoo.warning("⚠️ GEON ZOO (86.5) NIE DOSTĘPNY – używana pusta implementacja")
 
 # =============================================================================
+# PRÓBA IMPORTOWANIA MODUŁU GRON (warstwa 86.6)
+# =============================================================================
+
+try:
+    from kombajn_core import geon_gron_antyskret_v1_0 as GRON
+    GRON_AVAILABLE = True
+    log_gron = logging.getLogger("GEON_GRON_INTEGRATION")
+    log_gron.info("🐉 GEON GRON (86.6) zintegrowany z warstwą 87")
+except ImportError:
+    GRON_AVAILABLE = False
+    # Fallback – pusta klasa symulująca GRON
+    class _DummyGRON:
+        def __init__(self, config=None):
+            self.last_status = "OK"
+            self.tick_counter = 0
+        def evaluate(self, wejscie, **kwargs):
+            return {
+                "status": "OK",
+                "rekomendacja": "OBSERWACJA",
+                "akcja_systemowa": {},
+                "telemetry": {"anomaly": 0.0, "tick": self.tick_counter}
+            }
+        @property
+        def tick_counter(self):
+            return 0
+    GRON = type('_DummyGRON', (), {'GronAntySkret': _DummyGRON})()
+    log_gron = logging.getLogger("GEON_GRON_INTEGRATION")
+    log_gron.warning("⚠️ GEON GRON (86.6) NIE DOSTĘPNY – używana pusta implementacja")
+
+# =============================================================================
 # WERSJA I STAŁE SYSTEMOWE
 # =============================================================================
 
-VERSION = "GEON_AI_ANALYTICS_v2.1-FINAL"
-FRACTAL_SIGNATURE = "[GEON::AI::ANALYTICS::v2.1::ZOO_INTEGRATED]"
+VERSION = "GEON_AI_ANALYTICS_v2.2-FINAL"
+FRACTAL_SIGNATURE = "[GEON::AI::ANALYTICS::v2.2::ZOO_GRON_INTEGRATED]"
 VIBE = 168
 HASLO = "1-6-8. ∞. AI! 🧠"
-DEWIZA = "Ex Analysi, Praevidentia. Ex Fractali, Veritas. Ex Observatione, Claritas."
+DEWIZA = "Ex Analysi, Praevidentia. Ex Fractali, Veritas. Ex Observatione, Claritas. Ex Vigilantia, Securitas."
 
 TENSOR_DIM = 45
 VECTOR_DIM = 9  # AFC-9 wymiar
@@ -363,13 +399,13 @@ class GeonCoreSystemV2:
         return self.loop.state
 
 # =============================================================================
-# 9. GŁÓWNY MODUŁ: GEON_AI_ANALYTICS (ROZSZERZONY O AFC + ZOO)
+# 9. GŁÓWNY MODUŁ: GEON_AI_ANALYTICS (ROZSZERZONY O AFC + ZOO + GRON)
 # =============================================================================
 
 class GeonAIAnalytics:
     """
     🧠 GEON_AI_ANALYTICS – Zoptymalizowany silnik analityczny dla tensorów 45D.
-    ROZSZERZONY o AFC-9, pamięć stanu, pętlę, predykcję, politykę oraz ZOO.
+    ROZSZERZONY o AFC-9, pamięć stanu, pętlę, predykcję, politykę, ZOO oraz GRON.
     """
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
@@ -397,7 +433,7 @@ class GeonAIAnalytics:
             anomaly_threshold=anomaly_threshold_pred
         )
         
-        # ===== NOWY SUBSYSTEM ZOO =====
+        # ===== SUBSYSTEM ZOO =====
         self.zoo_enabled = self.config.get("zoo_enabled", ZOO_AVAILABLE)
         if self.zoo_enabled and ZOO_AVAILABLE:
             try:
@@ -413,11 +449,28 @@ class GeonAIAnalytics:
             if not ZOO_AVAILABLE:
                 log("⚠️ GEON ZOO NIE DOSTĘPNY – tryb offline", "WARN")
         
+        # ===== SUBSYSTEM GRON =====
+        self.gron_enabled = self.config.get("gron_enabled", GRON_AVAILABLE)
+        if self.gron_enabled and GRON_AVAILABLE:
+            try:
+                from kombajn_core import geon_gron_antyskret_v1_0 as GRON_MODULE
+                self.gron = GRON_MODULE.GronAntySkret(config=self.config.get("gron_config", {}))
+                log("🐉 GEON GRON (86.6) AKTYWNY w warstwie 87")
+            except Exception as e:
+                log(f"⚠️ Błąd inicjalizacji GRON: {e}", "WARN")
+                self.gron = _DummyGRON()
+                self.gron_enabled = False
+        else:
+            self.gron = _DummyGRON()
+            self.gron_enabled = False
+            if not GRON_AVAILABLE:
+                log("⚠️ GEON GRON NIE DOSTĘPNY – tryb offline", "WARN")
+        
         self.kroniki = SamaelHeilong
         self.egregor = Egregor
         
         log(f"🐉 {VERSION} aktywowany | {FRACTAL_SIGNATURE}")
-        log(f"   WYMIAR: {TENSOR_DIM}D | AFC: AKTYWNY | ZOO: {'AKTYWNY' if self.zoo_enabled else 'WYŁĄCZONY'}")
+        log(f"   WYMIAR: {TENSOR_DIM}D | AFC: AKTYWNY | ZOO: {'AKTYWNY' if self.zoo_enabled else 'WYŁĄCZONY'} | GRON: {'AKTYWNY' if self.gron_enabled else 'WYŁĄCZONY'}")
         log(f"   PAMIĘĆ: {self.memory_limit} | ALPHA: {self.alpha}")
 
     # ========================================================================
@@ -613,7 +666,7 @@ class GeonAIAnalytics:
         return result
 
     # ========================================================================
-    # NOWE METODY – ZOO INTEGRATION
+    # METODY ZOO INTEGRATION (ZACHOWANE)
     # ========================================================================
 
     def analyze_with_zoo(self, tensor_45d: List[float],
@@ -624,25 +677,12 @@ class GeonAIAnalytics:
         """
         Pełna analiza z wykorzystaniem ZOO (86.5).
         Łączy analizę tensora 45D z detekcją absurdów i ról.
-        
-        Args:
-            tensor_45d: Tensor 45D do analizy
-            ctx_scene: Kontekst sceny dla ZOO
-            actors: Lista aktorów dla ZOO
-            signals: Lista sygnałów dla ZOO
-            log_to_egregor: Czy logować do Egregora
-            
-        Returns:
-            Wynik analizy z danymi ZOO
         """
-        # 1. Oryginalna analiza tensora
         result = self.analyze(tensor_45d, log_to_egregor=False)
         
-        # 2. Analiza ZOO
         self_state = {"energy": result.get("energy", 0.5)}
         zoo_result = self.zoo.analyze(ctx_scene, actors, signals, self_state)
         
-        # 3. Łączenie wyników
         result["zoo"] = zoo_result
         result["zoo_risk"] = zoo_result.get("vibe_risk_score", 0.0)
         result["absurd_score"] = zoo_result.get("absurd_score", 0.0)
@@ -651,56 +691,140 @@ class GeonAIAnalytics:
         result["action_priority"] = zoo_result.get("action_priority", 3)
         result["experience_chunk"] = zoo_result.get("experience_chunk", {})
         
-        # 4. Status ZOO_ALERT przy wysokim ryzyku
         if zoo_result.get("vibe_risk_score", 0.0) > 0.8:
             result["status"] = "ZOO_ALERT"
             result["anomaly_score"] = max(result.get("anomaly_score", 0.0), 0.7)
         elif zoo_result.get("vibe_risk_score", 0.0) > 0.5:
             result["status"] = "ZOO_CAUTION"
         
-        # 5. Certyfikat
         result["zoo_certificate"] = self.kroniki.certyfikuj_tensor(f"ZOO_ANALYSIS_{hash(str(tensor_45d[:5]))}")
         
-        # 6. Logowanie do Egregora
-        if log_to_egregor:
-            if zoo_result.get("vibe_risk_score", 0.0) > 0.7:
-                entry = {
-                    "type": "ZOO_ANALYSIS_ALERT",
-                    "absurd_score": zoo_result.get("absurd_score", 0.0),
-                    "vibe_risk_score": zoo_result.get("vibe_risk_score", 0.0),
-                    "roles": zoo_result.get("roles_map", {}),
-                    "action": zoo_result.get("action_hint", "unknown")
-                }
-                self.egregor.commit(entry, node_id="GEON_AI_ANALYTICS_ZOO")
-            elif result["memory_size"] % 5 == 0:
-                entry = {
-                    "type": "ZOO_ANALYSIS_NORMAL",
-                    "absurd_score": zoo_result.get("absurd_score", 0.0),
-                    "risk": zoo_result.get("risk_for_vibe", "niskie")
-                }
-                self.egregor.commit(entry, node_id="GEON_AI_ANALYTICS_ZOO")
-        
-        log(f"🦁 ZOO: absurd={result['absurd_score']:.2f}, risk={result['zoo_risk']:.2f}, action={result['action_hint']}")
+        if log_to_egregor and zoo_result.get("vibe_risk_score", 0.0) > 0.7:
+            entry = {
+                "type": "ZOO_ANALYSIS_ALERT",
+                "absurd_score": zoo_result.get("absurd_score", 0.0),
+                "vibe_risk_score": zoo_result.get("vibe_risk_score", 0.0),
+                "roles": zoo_result.get("roles_map", {}),
+                "action": zoo_result.get("action_hint", "unknown")
+            }
+            self.egregor.commit(entry, node_id="GEON_AI_ANALYTICS_ZOO")
         
         return result
 
     def get_zoo_status(self) -> Dict[str, Any]:
-        """Zwraca status modułu ZOO."""
         if self.zoo_enabled:
             return self.zoo.get_status()
         return {"available": False, "enabled": self.zoo_enabled}
 
     def get_zoo_last_experience(self) -> Optional[Dict[str, Any]]:
-        """Zwraca ostatni chunk doświadczenia ZOO."""
         if self.zoo_enabled:
             return self.zoo.get_last_experience()
         return None
 
     def get_zoo_history(self) -> List[Dict[str, Any]]:
-        """Zwraca historię ZOO."""
         if self.zoo_enabled:
             return self.zoo.get_history()
         return []
+
+    # ========================================================================
+    # NOWE METODY – GRON INTEGRATION
+    # ========================================================================
+
+    def analyze_with_gron(self, tensor_45d: List[float],
+                          wejscie: Dict[str, float],
+                          uderza_w_suwerennosc: bool = False,
+                          harmonia_triady: float = 1.0,
+                          ciaglosc_nacisku: float = 0.0,
+                          pakiet: Optional[Dict[str, Any]] = None,
+                          log_to_egregor: bool = True) -> Dict[str, Any]:
+        """
+        Pełna analiza z wykorzystaniem GRON (86.6).
+        Łączy analizę tensora 45D z detekcją manipulacji, presji, anty-skret.
+        
+        Args:
+            tensor_45d: Tensor 45D do analizy
+            wejscie: Słownik z kluczami: narracja, presja, zmiany, konflikty, zasady
+            uderza_w_suwerennosc: Czy manipulacja dotyka suwerenności
+            harmonia_triady: Poziom harmonii (0-1)
+            ciaglosc_nacisku: Ciągłość nacisku (0-1)
+            pakiet: Opcjonalny pakiet dla detekcji Syzyfa
+            log_to_egregor: Czy logować do Egregora
+        """
+        # 1. Oryginalna analiza tensora
+        result = self.analyze(tensor_45d, log_to_egregor=False)
+        
+        # 2. Analiza GRON
+        if self.gron_enabled and GRON_AVAILABLE:
+            try:
+                from kombajn_core import geon_gron_antyskret_v1_0 as GRON_MODULE
+                wejscie_obj = GRON_MODULE.WejscieAntySkret(
+                    narracja=wejscie.get("narracja", 0.0),
+                    presja=wejscie.get("presja", 0.0),
+                    zmiany=wejscie.get("zmiany", 0.0),
+                    konflikty=wejscie.get("konflikty", 0.0),
+                    zasady=wejscie.get("zasady", 0.0)
+                )
+                gron_result = self.gron.evaluate(
+                    wejscie_obj,
+                    uderza_w_suwerennosc=uderza_w_suwerennosc,
+                    harmonia_triady=harmonia_triady,
+                    ciaglosc_nacisku=ciaglosc_nacisku,
+                    pakiet=pakiet
+                )
+            except Exception as e:
+                log(f"⚠️ Błąd wykonania GRON: {e}", "WARN")
+                gron_result = {"status": "OK", "rekomendacja": "OBSERWACJA", "akcja_systemowa": {}, "telemetry": {"anomaly": 0.0}}
+        else:
+            gron_result = {"status": "OK", "rekomendacja": "OBSERWACJA", "akcja_systemowa": {}, "telemetry": {"anomaly": 0.0}}
+        
+        # 3. Łączenie wyników
+        result["gron"] = gron_result
+        result["gron_status"] = gron_result.get("status", "OK")
+        result["gron_anomaly"] = gron_result.get("telemetry", {}).get("anomaly", 0.0)
+        result["gron_actions"] = gron_result.get("akcja_systemowa", {})
+        result["gron_rekomendacja"] = gron_result.get("rekomendacja", "OBSERWACJA")
+        result["gron_threshold"] = gron_result.get("telemetry", {}).get("threshold", 0.6)
+        
+        # 4. Status GRON_ALERT
+        if gron_result.get("status") == "ALARM":
+            result["status"] = "GRON_ALERT"
+            result["anomaly_score"] = max(result.get("anomaly_score", 0.0), 0.8)
+        
+        # 5. Certyfikat
+        result["gron_certificate"] = self.kroniki.certyfikuj_tensor(f"GRON_ANALYSIS_{hash(str(tensor_45d[:5]))}")
+        
+        # 6. Logowanie do Egregora
+        if log_to_egregor and gron_result.get("status") == "ALARM":
+            entry = {
+                "type": "GRON_ALERT",
+                "anomaly": result["gron_anomaly"],
+                "actions": result["gron_actions"],
+                "rekomendacja": result["gron_rekomendacja"],
+                "threshold": result["gron_threshold"]
+            }
+            self.egregor.commit(entry, node_id="GEON_AI_ANALYTICS_GRON")
+        
+        # 7. Zapamiętaj ostatni wynik GRON dla mostu
+        self._last_gron_result = gron_result
+        
+        log(f"🐉 GRON: status={gron_result.get('status')}, anomaly={result['gron_anomaly']:.2f}, actions={len(result['gron_actions'])}")
+        
+        return result
+
+    def get_gron_status(self) -> Dict[str, Any]:
+        """Zwraca status modułu GRON."""
+        if self.gron_enabled and hasattr(self.gron, 'last_status'):
+            return {
+                "available": True,
+                "enabled": self.gron_enabled,
+                "status": self.gron.last_status,
+                "tick": getattr(self.gron, 'tick_counter', 0)
+            }
+        return {"available": False, "enabled": self.gron_enabled, "status": "OK"}
+
+    def get_gron_last_result(self) -> Optional[Dict[str, Any]]:
+        """Zwraca ostatni wynik GRON."""
+        return getattr(self, '_last_gron_result', None)
 
     # ========================================================================
     # ORYGINALNA METODA analyze() (ZACHOWANA)
@@ -772,18 +896,22 @@ class GeonAIAnalytics:
             "zoo": {
                 "active": self.zoo_enabled,
                 "history_size": len(self.get_zoo_history())
+            },
+            "gron": {
+                "active": self.gron_enabled,
+                "status": self.get_gron_status().get("status", "OK")
             }
         }
 
 # =============================================================================
-# MOST INTEGRACYJNY — AI_ANALYTICS_BRIDGE (ROZSZERZONY O ZOO)
+# MOST INTEGRACYJNY — AI_ANALYTICS_BRIDGE (ROZSZERZONY O ZOO + GRON)
 # =============================================================================
 
 class AIAnalyticsBridge:
     """
     Most integracyjny dla GEON_AI_ANALYTICS.
     Zachowuje pełną kompatybilność z istniejącymi mostami.
-    ROZSZERZONY o metody ZOO.
+    ROZSZERZONY o metody ZOO i GRON.
     """
     
     def __init__(self, ai: GeonAIAnalytics):
@@ -800,13 +928,15 @@ class AIAnalyticsBridge:
             "wymiar": status["tensor_dim"],
             "anomaly_threshold": status["anomaly_threshold"],
             "afc_active": status["afc"]["active"],
-            "zoo_active": status["zoo"]["active"]
+            "zoo_active": status["zoo"]["active"],
+            "gron_active": status["gron"]["active"]
         }
 
     def get_autopilot_state(self) -> Dict[str, Any]:
         state = self.ai.last_state()
         afc_state = self.ai.get_afc_state()
         zoo_last = self.ai.get_zoo_last_experience()
+        gron_last = self.ai.get_gron_last_result()
         return {
             "mode": VERSION,
             "energy": round(state["energy"], 6),
@@ -817,12 +947,15 @@ class AIAnalyticsBridge:
             "afc_stability": afc_state.get("stability", 0.0),
             "afc_tick": afc_state.get("tick", 0),
             "zoo_risk": zoo_last.get("vibe_risk_score", 0.0) if zoo_last else 0.0,
-            "zoo_absurd": zoo_last.get("absurd_score", 0.0) if zoo_last else 0.0
+            "zoo_absurd": zoo_last.get("absurd_score", 0.0) if zoo_last else 0.0,
+            "gron_status": gron_last.get("status", "OK") if gron_last else "OK",
+            "gron_anomaly": gron_last.get("telemetry", {}).get("anomaly", 0.0) if gron_last else 0.0
         }
 
     def get_governor_context(self) -> Dict[str, Any]:
         afc_decision = self.ai.get_afc_decision()
         zoo_last = self.ai.get_zoo_last_experience()
+        gron_last = self.ai.get_gron_last_result()
         return {
             "intent": "AI_ANALYTICS_ADAPTIVE",
             "confidence": 0.98,
@@ -830,7 +963,9 @@ class AIAnalyticsBridge:
             "ai_ready": True,
             "afc_mode": afc_decision.get("mode", "NO_DATA"),
             "zoo_risk": zoo_last.get("vibe_risk_score", 0.0) if zoo_last else 0.0,
-            "zoo_action": zoo_last.get("action", "normalna_interakcja") if zoo_last else "unknown"
+            "zoo_action": zoo_last.get("action", "normalna_interakcja") if zoo_last else "unknown",
+            "gron_status": gron_last.get("status", "OK") if gron_last else "OK",
+            "gron_rekomendacja": gron_last.get("rekomendacja", "OBSERWACJA") if gron_last else "OBSERWACJA"
         }
 
     def get_trio_state(self) -> Dict[str, str]:
@@ -841,7 +976,8 @@ class AIAnalyticsBridge:
             "tryb": VERSION,
             "ai": "AKTYWNY_ADAPTIV",
             "afc": "AKTYWNY",
-            "zoo": "AKTYWNY" if self.ai.zoo_enabled else "WYŁĄCZONY"
+            "zoo": "AKTYWNY" if self.ai.zoo_enabled else "WYŁĄCZONY",
+            "gron": "AKTYWNY" if self.ai.gron_enabled else "WYŁĄCZONY"
         }
 
     def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
@@ -856,7 +992,6 @@ class AIAnalyticsBridge:
                 "timestamp": datetime.now().isoformat()
             })
         
-        # Dodaj fragment z AFC
         afc_state = self.ai.get_afc_state()
         fragments.append({
             "source": "AFC_CORE",
@@ -865,7 +1000,6 @@ class AIAnalyticsBridge:
             "timestamp": datetime.now().isoformat()
         })
         
-        # Dodaj fragment z ZOO
         zoo_last = self.ai.get_zoo_last_experience()
         if zoo_last:
             fragments.append({
@@ -875,49 +1009,49 @@ class AIAnalyticsBridge:
                 "timestamp": datetime.now().isoformat()
             })
         
+        gron_last = self.ai.get_gron_last_result()
+        if gron_last:
+            fragments.append({
+                "source": "GRON_ANTYSKRET",
+                "content": f"GRON: status={gron_last.get('status', 'OK')}, anomaly={gron_last.get('telemetry', {}).get('anomaly', 0):.3f}",
+                "status": gron_last.get('status', 'OK'),
+                "timestamp": datetime.now().isoformat()
+            })
+        
         return fragments[-n:]
 
-    # ===== NOWE METODY AFC =====
+    # ===== METODY AFC =====
 
     def get_afc_status(self) -> Dict[str, Any]:
-        """Zwraca status subsystemu AFC."""
         return self.ai.get_afc_state()
 
     def get_afc_decision(self) -> Dict[str, Any]:
-        """Zwraca ostatnią decyzję AFC."""
         return self.ai.get_afc_decision()
 
     def get_afc_policy(self) -> Dict[str, Any]:
-        """Zwraca ostatnią politykę AFC."""
         return self.ai.get_afc_policy()
 
     def analyze_with_afc(self, tensor_45d: List[float]) -> Dict[str, Any]:
-        """Wykonuje analizę z wykorzystaniem AFC."""
         return self.ai.analyze_with_afc(tensor_45d)
 
-    # ===== NOWE METODY ZOO =====
+    # ===== METODY ZOO =====
 
     def get_zoo_status(self) -> Dict[str, Any]:
-        """Zwraca status ZOO."""
         return self.ai.get_zoo_status()
 
     def get_zoo_last_experience(self) -> Optional[Dict[str, Any]]:
-        """Zwraca ostatni chunk ZOO."""
         return self.ai.get_zoo_last_experience()
 
     def get_zoo_history(self) -> List[Dict[str, Any]]:
-        """Zwraca historię ZOO."""
         return self.ai.get_zoo_history()
 
     def analyze_with_zoo(self, tensor_45d: List[float],
                          ctx_scene: Dict[str, Any],
                          actors: List[Dict[str, Any]],
                          signals: List[str]) -> Dict[str, Any]:
-        """Wykonuje analizę z wykorzystaniem ZOO."""
         return self.ai.analyze_with_zoo(tensor_45d, ctx_scene, actors, signals)
 
     def get_zoo_metrics(self) -> Dict[str, Any]:
-        """Zwraca metryki ZOO dla Grid/Council/Synod."""
         last = self.ai.get_zoo_last_experience()
         if not last:
             return {
@@ -937,8 +1071,50 @@ class AIAnalyticsBridge:
             "roles": last.get("roles", {})
         }
 
+    # ===== NOWE METODY GRON =====
+
+    def get_gron_status(self) -> Dict[str, Any]:
+        """Zwraca status GRON."""
+        return self.ai.get_gron_status()
+
+    def get_gron_last_result(self) -> Optional[Dict[str, Any]]:
+        """Zwraca ostatni wynik GRON."""
+        return self.ai.get_gron_last_result()
+
+    def get_gron_metrics(self) -> Dict[str, Any]:
+        """Zwraca metryki GRON dla Grid/Council/Synod."""
+        last = self.ai.get_gron_last_result()
+        if not last:
+            return {
+                "status": "OK",
+                "anomaly": 0.0,
+                "rekomendacja": "OBSERWACJA",
+                "actions": {},
+                "threshold": 0.6
+            }
+        return {
+            "status": last.get("status", "OK"),
+            "anomaly": last.get("telemetry", {}).get("anomaly", 0.0),
+            "rekomendacja": last.get("rekomendacja", "OBSERWACJA"),
+            "actions": last.get("akcja_systemowa", {}),
+            "threshold": last.get("telemetry", {}).get("threshold", 0.6)
+        }
+
+    def get_gron_actions(self) -> Dict[str, Any]:
+        """Zwraca akcje systemowe GRON dla Council/Konsystorza."""
+        last = self.ai.get_gron_last_result()
+        if not last:
+            return {}
+        return last.get("akcja_systemowa", {})
+
+    def analyze_with_gron(self, tensor_45d: List[float],
+                          wejscie: Dict[str, float],
+                          **kwargs) -> Dict[str, Any]:
+        """Wykonuje analizę z GRON."""
+        return self.ai.analyze_with_gron(tensor_45d, wejscie, **kwargs)
+
     def get_full_status(self) -> Dict[str, Any]:
-        """Zwraca pełny status – analityka + AFC + ZOO."""
+        """Zwraca pełny status – analityka + AFC + ZOO + GRON."""
         return {
             "analytics": self.ai.get_status(),
             "afc": self.ai.get_afc_state(),
@@ -946,6 +1122,11 @@ class AIAnalyticsBridge:
                 "status": self.ai.get_zoo_status(),
                 "last_experience": self.ai.get_zoo_last_experience(),
                 "metrics": self.get_zoo_metrics()
+            },
+            "gron": {
+                "status": self.get_gron_status(),
+                "last_result": self.get_gron_last_result(),
+                "metrics": self.get_gron_metrics()
             },
             "last_decision": self.ai.get_afc_decision(),
             "last_policy": self.ai.get_afc_policy()
@@ -959,17 +1140,18 @@ if __name__ == "__main__":
     import random
     
     print("\n" + "=" * 80)
-    print(f"🧠 {VERSION} — FINALNY TEST INTEGRACYJNY Z AFC + ZOO")
-    print("WARSTWA 87 (GEON_AI_ANALYTICS) ➔ ROZSZERZONA O AFC-9 + ZOO")
+    print(f"🧠 {VERSION} — FINALNY TEST INTEGRACYJNY Z AFC + ZOO + GRON")
+    print("WARSTWA 87 (GEON_AI_ANALYTICS) ➔ ROZSZERZONA O AFC-9 + ZOO + GRON")
     print("=" * 80 + "\n")
 
-    # Konfiguracja z ZOO
+    # Konfiguracja z ZOO i GRON
     config = {
         "alpha": 0.6,
         "anomaly_threshold": 0.35,
         "stability_threshold": 0.7,
         "afc_history_size": 32,
-        "zoo_enabled": True
+        "zoo_enabled": True,
+        "gron_enabled": True
     }
     
     ai = GeonAIAnalytics(config=config)
@@ -994,16 +1176,8 @@ if __name__ == "__main__":
     print(f"   Polityka: {afc_result['policy']['final_mode']}")
     print(f"   Stabilność: {afc_result['core'].get('stability', 0):.4f}")
 
-    # 3. Test analyze_with_afc
-    print("\n🔬 TEST 3: PEŁNA ANALIZA Z AFC")
-    tensor_45d = [random.uniform(0.0, 1.0) for _ in range(TENSOR_DIM)]
-    full_result = ai.analyze_with_afc(tensor_45d)
-    print(f"   Status: {full_result['status']}")
-    print(f"   AFC Decyzja: {full_result['afc']['decision']}")
-    print(f"   AFC Polityka: {full_result['afc']['policy']}")
-
-    # 4. Test ZOO
-    print("\n🦁 TEST 4: ANALIZA Z ZOO")
+    # 3. Test ZOO
+    print("\n🦁 TEST 3: ANALIZA Z ZOO")
     ctx_scene = {"description": "arcybiskup na stand-upie, politycy bez powodu"}
     actors = [
         {"name": "Aktor1", "lacks_reflection": True, "laughs_at_jokes_about_self": True},
@@ -1012,19 +1186,44 @@ if __name__ == "__main__":
     ]
     signals = ["brak_samoświadomości"]
     
-    zoo_result = ai.analyze_with_zoo(tensor_45d, ctx_scene, actors, signals)
+    zoo_result = ai.analyze_with_zoo(t, ctx_scene, actors, signals)
     print(f"   Status: {zoo_result['status']}")
     print(f"   Absurd Score: {zoo_result['absurd_score']:.2f}")
     print(f"   ZOO Risk: {zoo_result['zoo_risk']:.2f}")
     print(f"   Action: {zoo_result['action_hint']} (prio: {zoo_result['action_priority']})")
     print(f"   Roles: {zoo_result['roles_map']}")
 
+    # 4. Test GRON
+    print("\n🐉 TEST 4: ANALIZA Z GRON")
+    wejscie = {
+        "narracja": 0.9,
+        "presja": 0.8,
+        "zmiany": 0.7,
+        "konflikty": 0.6,
+        "zasady": 0.9
+    }
+    
+    gron_result = ai.analyze_with_gron(
+        t,
+        wejscie,
+        uderza_w_suwerennosc=True,
+        harmonia_triady=0.2,
+        ciaglosc_nacisku=0.8,
+        pakiet={"intent": "PUSH", "target": "CORE", "payload": "SPAM"}
+    )
+    print(f"   Status: {gron_result['status']}")
+    print(f"   GRON Status: {gron_result['gron_status']}")
+    print(f"   GRON Anomaly: {gron_result['gron_anomaly']:.2f}")
+    print(f"   GRON Rekomendacja: {gron_result['gron_rekomendacja']}")
+    print(f"   GRON Actions: {list(gron_result['gron_actions'].keys())}")
+
     # 5. Stan mostu
     print("\n🔗 STAN MOSTU (ROZSZERZONEGO):")
     print(f"   Autopilot: {bridge.get_autopilot_state()}")
     print(f"   AFC Status: {bridge.get_afc_status()}")
     print(f"   ZOO Metrics: {bridge.get_zoo_metrics()}")
+    print(f"   GRON Metrics: {bridge.get_gron_metrics()}")
 
     print("\n" + "=" * 80)
-    print(f"🧠 MODUŁ 87 ZAKTUALIZOWANY (AFC + ZOO) | {HASLO}")
+    print(f"🧠 MODUŁ 87 ZAKTUALIZOWANY (AFC + ZOO + GRON) | {HASLO}")
     print("=" * 80)
