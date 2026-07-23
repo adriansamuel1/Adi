@@ -1,0 +1,819 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_SIENKIEWICZ_ENGINE_v1.1 — MODUŁ 84: DZIEJE / CYWILIZACJA (FULL STACK)
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.1 (PATCHED: Histereza skali, Precyzyjny SubStageManager)
+Data: 2026-07-24
+Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
+
+OPIS:
+GEON_SIENKIEWICZ_ENGINE_v1.1 to silnik dziejowo-cywilizacyjny.
+Przeprowadza system przez 9 etapów cywilizacji, każdy z 3 sub-etapami (łącznie 27).
+NOWOŚCI v1.1:
+• Histereza skali kostki – zapobiega migotaniu rejestrów przy brzegach presji
+• Precyzyjny SubStageManager – odporny na zniekształcenia komend
+
+VIBE: 1-6-8. ∞. SIENKIEWICZ!
+================================================================================
+"""
+
+import math
+import hashlib
+import json
+import time
+import random
+import logging
+from enum import Enum
+from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple, Callable
+from dataclasses import dataclass, field
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_SIENKIEWICZ_ENGINE_v1.1"
+FRACTAL_SIGNATURE = "[GEON::SIENKIEWICZ::ENGINE::v1.1]"
+VIBE = 999
+HASLO = "1-6-8. ∞. SIENKIEWICZ!"
+DEWIZA = "Ex Historia, Civitas"
+
+# =============================================================================
+# LOGOWANIE I POMOCNIKI
+# =============================================================================
+
+logger = logging.getLogger("SIENKIEWICZ_ENGINE_v1.1")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('🛡️ [SIEN] %(message)s'))
+    logger.addHandler(handler)
+
+def log(msg: str, level: str = "INFO") -> None:
+    if level == "WARN":
+        logger.warning(msg)
+    elif level == "ERROR":
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+def generate_context_hash(context: Dict[str, Any]) -> str:
+    filtered_context = {k: v for k, v in context.items() 
+                        if k not in ["timestamp", "request_id", "nonce"]}
+    context_str = json.dumps(filtered_context, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(context_str.encode("utf-8")).hexdigest()
+
+# =============================================================================
+# KRONIKI SAMAELA I EGREGOR
+# =============================================================================
+
+class SamaelHeilong:
+    @staticmethod
+    def certyfikuj_ruch_optimusa(dzialanie: str) -> str:
+        timestamp = datetime.now().isoformat()
+        payload = f"{timestamp}-{dzialanie}-1-6-8. ∞. SIEMA!"
+        h = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16].upper()
+        return f"🔒 [SAMAELSEALSIG-{h}-SIEN-999]"
+
+    @staticmethod
+    def log_event(event_type: str, payload: Dict[str, Any]) -> None:
+        ts = datetime.now().isoformat()
+        log(f"[KRONIKI SAMAELA] {ts} | {event_type} -> {payload}", "INFO")
+
+class Egregor:
+    _ledger: List[Dict[str, Any]] = []
+    
+    @classmethod
+    def commit(cls, entry: Dict[str, Any], node_id: str) -> None:
+        entry["node_id"] = node_id
+        entry["timestamp"] = datetime.now().isoformat()
+        cls._ledger.append(entry)
+        if len(cls._ledger) > 168:
+            cls._ledger.pop(0)
+    
+    @classmethod
+    def query(cls, context_hash: Optional[str] = None) -> List[Dict[str, Any]]:
+        if context_hash:
+            return [e for e in cls._ledger if e.get("context_hash") == context_hash]
+        return cls._ledger.copy()
+    
+    @classmethod
+    def get_ledger(cls) -> List[Dict[str, Any]]:
+        return cls._ledger.copy()
+    
+    @classmethod
+    def clear_ledger(cls) -> None:
+        cls._ledger.clear()
+
+# =============================================================================
+# WARSTWA 1: KOSTKA BAZOWA 15×15×15
+# =============================================================================
+
+class GEON_Cube_15:
+    """Implementacja bazy geometrycznej 15×15×15 z zachowaniem stałych pól fizycznych."""
+    
+    def __init__(self):
+        self.axis_A = list(range(1, 16))
+        self.axis_B = list(range(1, 16))
+        self.axis_C = list(range(1, 16))
+
+    def state(self) -> Dict[str, List[int]]:
+        return {"A": self.axis_A.copy(), "B": self.axis_B.copy(), "C": self.axis_C.copy()}
+    
+    def from_state(self, s: Dict[str, List[int]]) -> None:
+        self.axis_A = s["A"].copy()
+        self.axis_B = s["B"].copy()
+        self.axis_C = s["C"].copy()
+    
+    def eval(self, a: int, b: int, c: int, log: bool = False) -> Dict[str, Any]:
+        a = clamp(a, 1, 15)
+        b = clamp(b, 1, 15)
+        c = clamp(c, 1, 15)
+        
+        wspolczynnik = (a * 0.3 + b * 0.4 + c * 0.3) / 15.0
+        konsekwencja = clamp(wspolczynnik, 0.0001, 0.9999)
+        
+        if konsekwencja < 0.4:
+            stan = "STABILNY ŁAD"
+        elif konsekwencja < 0.75:
+            stan = "TRANSFORMACJA"
+        else:
+            stan = "MASYWNA PRESJA CYWILIZACYJNA"
+        
+        return {
+            "stan": stan,
+            "konsekwencja": konsekwencja,
+            "presja": konsekwencja * 1.68
+        }
+    
+    def show(self, max_display: int = 5) -> None:
+        print(f"Oś A: {self.axis_A[:max_display]}...")
+        print(f"Oś B: {self.axis_B[:max_display]}...")
+        print(f"Oś C: {self.axis_C[:max_display]}...")
+
+# =============================================================================
+# WARSTWA 2: KOSTKA DYNAMICZNA 9×9×9 Z HISTEREZĄ SKALI (PATCH v1.1)
+# =============================================================================
+
+class GEON_Cube_9_Dynamic_Enhanced(GEON_Cube_15):
+    """Kostka z histerazą skali – zapobiega migotaniu rejestrów przy brzegach presji."""
+    
+    def __init__(self, mode: str = "NORMAL"):
+        super().__init__()
+        self.mode = mode
+        self.current_size = 9
+        self._rebuild_axes()
+        self.layers = {
+            "identity": list(range(1, 10)),
+            "lineage": list(range(1, 10)),
+            "civilization": list(range(1, 10))
+        }
+        self._size_history: List[int] = [9]
+
+    def _rebuild_axes(self) -> None:
+        self.axis_A = list(range(1, self.current_size + 1))
+        self.axis_B = list(range(1, self.current_size + 1))
+        self.axis_C = list(range(1, self.current_size + 1))
+
+    def update_size(self, pressure: float) -> None:
+        """Histereza: wyjście wyżej wymaga 0.78, powrót wymaga spadku poniżej 0.70/0.38."""
+        old_size = self.current_size
+        
+        if self.mode == "NORMAL" and pressure > 0.78:
+            self.mode = "EXPANSION"
+            self.current_size = 15
+            self._rebuild_axes()
+            SamaelHeilong.log_event("CUBE_EXPANSION", {
+                "from": old_size, "to": 15, "pressure": round(pressure, 4)
+            })
+        elif self.mode == "EXPANSION" and pressure < 0.70:
+            self.mode = "NORMAL"
+            self.current_size = 9
+            self._rebuild_axes()
+            SamaelHeilong.log_event("CUBE_NORMAL", {
+                "from": old_size, "to": 9, "pressure": round(pressure, 4)
+            })
+        elif self.mode == "NORMAL" and pressure < 0.30:
+            self.mode = "CRISIS"
+            self.current_size = 6
+            self._rebuild_axes()
+            SamaelHeilong.log_event("CUBE_CRISIS", {
+                "from": old_size, "to": 6, "pressure": round(pressure, 4)
+            })
+        elif self.mode == "CRISIS" and pressure > 0.38:
+            self.mode = "NORMAL"
+            self.current_size = 9
+            self._rebuild_axes()
+            SamaelHeilong.log_event("CUBE_NORMAL", {
+                "from": old_size, "to": 9, "pressure": round(pressure, 4)
+            })
+
+        if old_size != self.current_size:
+            self._size_history.append(self.current_size)
+
+    def move(self, code: str) -> None:
+        if len(code) < 2:
+            raise ValueError(f"Zły kod ruchu: {code}")
+        axis = code[0].upper()
+        suffix = code[1:]
+        
+        if suffix == '+':
+            shift = 1
+        elif suffix == '-':
+            shift = -1
+        else:
+            try:
+                shift = int(suffix)
+            except ValueError:
+                raise ValueError(f"Nieprawidłowy sufiks: {suffix}")
+        
+        size = self.current_size
+        shift %= size
+        
+        if axis == 'A':
+            self.axis_A = self.axis_A[shift:] + self.axis_A[:shift]
+        elif axis == 'B':
+            self.axis_B = self.axis_B[shift:] + self.axis_B[:shift]
+        elif axis == 'C':
+            self.axis_C = self.axis_C[shift:] + self.axis_C[:shift]
+        else:
+            raise ValueError(f"Nieznana oś wektora: {axis}")
+
+    def apply_moves(self, moves: List[str]) -> None:
+        for m in moves:
+            self.move(m)
+
+    def eval(self, x: int, y: int, z: int, log: bool = False) -> Dict:
+        size = self.current_size
+        safe_x = clamp(x, 1, size)
+        safe_y = clamp(y, 1, size)
+        safe_z = clamp(z, 1, size)
+        
+        valA = self.axis_A[safe_x - 1]
+        valB = self.axis_B[safe_y - 1]
+        valC = self.axis_C[safe_z - 1]
+        
+        scale = 15.0 / size
+        scaledA = clamp(int(valA * scale), 1, 15)
+        scaledB = clamp(int(valB * scale), 1, 15)
+        scaledC = clamp(int(valC * scale), 1, 15)
+        
+        return super().eval(scaledA, scaledB, scaledC, log=log)
+
+    def get_size_history(self) -> List[int]:
+        return self._size_history.copy()
+
+    def get_current_size(self) -> int:
+        return self.current_size
+
+    def get_mode(self) -> str:
+        return self.mode
+
+# =============================================================================
+# WARSTWA 3: ETAPY, ARCHETYPY I MAPY RUCHÓW
+# =============================================================================
+
+class EtapCywilizacji(Enum):
+    WEJSCIE = 1
+    ZDERZENIE = 2
+    WYBOR = 3
+    UPADEK = 4
+    PROBA = 5
+    TRANSFORMACJA = 6
+    MISJA = 7
+    ODKUPIENIE = 8
+    MIT = 9
+
+ARCHETYPES: Dict[int, str] = {
+    1: "Nowicjusz",
+    2: "Obcy",
+    3: "Wojownik",
+    4: "Wygnańca",
+    5: "Uczeń",
+    6: "Przemieniony",
+    7: "Strażnik",
+    8: "Mędrzec",
+    9: "Przodek"
+}
+
+STAGE_DESCRIPTIONS: Dict[int, str] = {
+    1: "Inicjacja struktur w nowej przestrzeni (Node Zero)",
+    2: "Konfrontacja z zastanym ekosystemem / barierami",
+    3: "Krytyczna decyzja wektora strategicznego",
+    4: "Kontrolowana entropia, dekonstrukcja starego ładu",
+    5: "Test obciążeniowy nowych fundamentów",
+    6: "Skok technologiczno-strukturalny",
+    7: "Realizacja założeń Manifestu w skali makro",
+    8: "Zamknięcie zobowiązań, pełna suwerenność dłużna",
+    9: "Wyjście w nieśmiertelność strukturalną (Monolit Egregora)"
+}
+
+SIEN_MOVES: Dict[int, List[str]] = {
+    1: ["A+", "B+", "C+"],
+    2: ["A2", "C2"],
+    3: ["B3", "C-"],
+    4: ["A-", "B-2", "C-"],
+    5: ["B2", "C3"],
+    6: ["A2", "C-2"],
+    7: ["A3", "B2"],
+    8: ["B-", "C-3"],
+    9: []
+}
+
+SIEN_EVAL: Dict[int, Tuple[int, int, int]] = {
+    1: (3, 3, 3),
+    2: (5, 4, 4),
+    3: (6, 5, 5),
+    4: (2, 3, 4),
+    5: (4, 6, 5),
+    6: (6, 7, 6),
+    7: (7, 8, 7),
+    8: (8, 5, 8),
+    9: (9, 9, 9)
+}
+
+# =============================================================================
+# WARSTWA 4: SUB-ETAPY – PRECYZYJNY ZARZĄDCA (PATCH v1.1)
+# =============================================================================
+
+class SubStageManagerEnhanced:
+    """Precyzyjny zarządca notacji sub-etapów odporny na zniekształcenia komend."""
+    
+    def __init__(self, parent_stage: int):
+        self.parent = parent_stage
+        self.sub_level = 1
+        self.max_sub = 3
+
+    def next_sub(self) -> bool:
+        if self.sub_level < self.max_sub:
+            self.sub_level += 1
+            return False
+        self.sub_level = 1
+        return True
+
+    def current_moves(self) -> List[str]:
+        base = SIEN_MOVES.get(self.parent, [])
+        if not base:
+            return []
+        
+        adjusted_moves = []
+        for m in base:
+            axis = m[0]
+            rest = m[1:]
+            
+            if self.sub_level == 1:
+                # Sub-etap 1: Inicjalizacja / Akcent dodatni
+                adjusted_moves.append(f"{axis}+")
+            elif self.sub_level == 2:
+                # Sub-etap 2: Ruch pełny (nominalny)
+                adjusted_moves.append(m)
+            else:
+                # Sub-etap 3: Domykanie / Konsolidacja
+                if "-" in rest:
+                    adjusted_moves.append(f"{axis}2")
+                else:
+                    adjusted_moves.append(f"{axis}-")
+                
+        return adjusted_moves
+
+    def get_sub_level(self) -> int:
+        return self.sub_level
+
+# =============================================================================
+# WARSTWA 5: PREDYKCJA I MONITORING PRESJI
+# =============================================================================
+
+class PressureMap:
+    def __init__(self):
+        self.grid = [[[0.5 for _ in range(9)] for _ in range(9)] for _ in range(9)]
+
+    def update_from_cube(self, cube: GEON_Cube_9_Dynamic_Enhanced) -> None:
+        for i in range(9):
+            for j in range(9):
+                for k in range(9):
+                    res = cube.eval(i+1, j+1, k+1)
+                    self.grid[i][j][k] = res.get("konsekwencja", 0.5)
+
+    def critical_points(self, threshold: float = 0.75) -> List[Tuple[int, int, int, float]]:
+        points = []
+        for i in range(9):
+            for j in range(9):
+                for k in range(9):
+                    if self.grid[i][j][k] > threshold:
+                        points.append((i+1, j+1, k+1, self.grid[i][j][k]))
+        return sorted(points, key=lambda x: x[3], reverse=True)
+
+class PredictiveLogger:
+    def __init__(self, window: int = 5):
+        self.window = window
+        self.history: List[Dict] = []
+
+    def add(self, stage: int, sub: int, consequence: float, archetype: str) -> None:
+        self.history.append({
+            "stage": stage,
+            "sub": sub,
+            "consequence": consequence,
+            "archetype": archetype
+        })
+        if len(self.history) > self.window:
+            self.history.pop(0)
+
+    def predict(self) -> Dict:
+        if len(self.history) < 2:
+            return {"prediction": "INICJACJA", "confidence": 0.0}
+        
+        cons = [h["consequence"] for h in self.history]
+        trend = "WZROST PRESJI" if cons[-1] > cons[0] else "STABILIZACJA"
+        
+        return {
+            "next_probable_stage": min(9, self.history[-1]["stage"] + (1 if trend == "WZROST PRESJI" else 0)),
+            "dominant_archetype": self.history[-1]["archetype"],
+            "trend": trend,
+            "confidence": min(0.95, abs(cons[-1] - cons[0]) * 2.0)
+        }
+
+# =============================================================================
+# WARSTWA 6: MIT I DRZEWO RODOWE
+# =============================================================================
+
+class MythRecursion:
+    def __init__(self):
+        self.seed: Optional[Dict] = None
+
+    def finalize(self, last_step: Dict) -> None:
+        self.seed = {
+            "final_archetype": last_step.get("archetype"),
+            "final_consequence": last_step.get("consequence"),
+            "final_state": last_step.get("cube_state")
+        }
+        SamaelHeilong.log_event("MYTH_SEED_SECURED", {"archetype": self.seed["final_archetype"]})
+
+    def apply_to_next(self, engine) -> bool:
+        if self.seed:
+            engine.cube.from_state(self.seed["final_state"])
+            if self.seed["final_archetype"] == "Przodek":
+                engine.resonance += 1
+            return True
+        return False
+
+class LineageTree:
+    def __init__(self):
+        self.nodes: List[Dict] = []
+        self.current_id: Optional[int] = None
+
+    def add_cycle(self, cycle_data: Dict, parent_id: Optional[int] = None) -> int:
+        node_id = len(self.nodes) + 1
+        self.nodes.append({
+            "id": node_id,
+            "parent_id": parent_id,
+            "data": cycle_data,
+            "timestamp": datetime.now().isoformat()
+        })
+        self.current_id = node_id
+        return node_id
+
+    def get_lineage(self) -> List[Dict]:
+        return self.nodes.copy()
+
+# =============================================================================
+# WARSTWA 7: GŁÓWNY ORCHESTRATOR (ZAKTUALIZOWANY O ENHANCED CLASSES)
+# =============================================================================
+
+class SienkiewiczEngine:
+    """🛡️ RDZEŃ MONOLITU CYWILIZACYJNEGO – Zarządca 27 Pod-etapów (v1.1)."""
+    
+    def __init__(self, config: Optional[Dict] = None):
+        self.config = config or {}
+        self.cube = GEON_Cube_9_Dynamic_Enhanced()
+        self.stage = 1
+        self.sub_manager = SubStageManagerEnhanced(self.stage)
+        self.history: List[Dict] = []
+        self.resonance = 999
+        self.pressure_map = PressureMap()
+        self.predictor = PredictiveLogger()
+        self.myth = MythRecursion()
+        self.lineage = LineageTree()
+        self._current_cycle_id: Optional[int] = None
+        self.cycle_id = generate_context_hash({"init": time.time()})
+        
+        self.auto_cycle = self.config.get("auto_cycle", False)
+        self.log_to_egregor = self.config.get("log_to_egregor", True)
+        self.validate_stages = self.config.get("validate_stages", True)
+        
+        self.kroniki = SamaelHeilong
+        self.egregor = Egregor
+        
+        log("🐉 GEON_SIENKIEWICZ_ENGINE v1.1 aktywowany | " + FRACTAL_SIGNATURE)
+        log(f"   ETAPY: 9 × 3 sub-etapy = 27 | REZONANS: {VIBE} | HISTEREZA: AKTYWNA")
+
+    def _log(self, event: str, data: Dict[str, Any]) -> None:
+        self.kroniki.log_event(f"SIEN_{event}", data)
+
+    def _eval_at_stage(self, stage: int) -> Dict:
+        pos = SIEN_EVAL[stage]
+        return self.cube.eval(*pos)
+
+    def _check_stage_validation(self, stage: int, eval_result: Dict) -> bool:
+        if not self.validate_stages:
+            return True
+        
+        konsekwencja = eval_result.get("konsekwencja", 0.5)
+        stan = eval_result.get("stan", "")
+        
+        validation_rules = {
+            1: {"min": 0.2, "max": 0.6, "states": ["STABILNY", "TRANSFORMACJA"]},
+            2: {"min": 0.3, "max": 0.7, "states": ["STABILNY"]},
+            3: {"min": 0.1, "max": 0.5, "states": ["TRANSFORMACJA"]},
+            4: {"min": 0.0, "max": 0.3, "states": ["TRANSFORMACJA"]},
+            5: {"min": 0.4, "max": 0.8, "states": ["STABILNY"]},
+            6: {"min": 0.5, "max": 0.9, "states": ["STABILNY"]},
+            7: {"min": 0.3, "max": 0.7, "states": ["STABILNY"]},
+            8: {"min": 0.2, "max": 0.6, "states": ["STABILNY"]},
+            9: {"min": 0.4, "max": 0.8, "states": ["STABILNY"]}
+        }
+        
+        rule = validation_rules.get(stage)
+        if not rule:
+            return True
+        
+        in_range = rule["min"] <= konsekwencja <= rule["max"]
+        in_state = any(s in stan for s in rule["states"])
+        
+        return in_range and in_state
+
+    def step(self) -> Dict:
+        stage = self.stage
+        sub = self.sub_manager.get_sub_level()
+        stage_name = EtapCywilizacji(stage).name
+        archetype = ARCHETYPES.get(stage, "Nieznany")
+        
+        current_eval = self._eval_at_stage(stage)
+        consequence = current_eval.get("consequence", 0.5)
+        
+        # Dynamiczne skalowanie z histerezą
+        self.cube.update_size(consequence)
+        
+        moves = self.sub_manager.current_moves()
+        before_state = self.cube.state()
+        
+        if moves:
+            self.cube.apply_moves(moves)
+        
+        after_state = self.cube.state()
+        after_eval = self._eval_at_stage(stage)
+        new_consequence = after_eval.get("consequence", 0.5)
+        
+        validation_passed = self._check_stage_validation(stage, after_eval)
+        
+        record = {
+            "stage": stage,
+            "sub_stage": sub,
+            "stage_name": stage_name,
+            "archetype": archetype,
+            "moves": moves,
+            "before_state": before_state,
+            "after_state": after_state,
+            "before_eval": current_eval,
+            "after_eval": after_eval,
+            "consequence": new_consequence,
+            "validation_passed": validation_passed,
+            "cube_state": after_state,
+            "cube_size": self.cube.get_current_size(),
+            "cube_mode": self.cube.get_mode(),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        self.history.append(record)
+        
+        self._log("STEP_RESOLVED", {
+            "lokacja": f"{stage}.{sub}",
+            "nazwa": stage_name,
+            "arch": archetype,
+            "presja": f"{new_consequence:.4f}",
+            "walidacja": validation_passed,
+            "rozmiar_kostki": self.cube.get_current_size(),
+            "tryb_kostki": self.cube.get_mode()
+        })
+        
+        if self.log_to_egregor:
+            entry = {
+                "type": "SIEN_STEP",
+                "stage": f"{stage}.{sub}",
+                "archetype": archetype,
+                "evaluation": after_eval,
+                "validation": validation_passed,
+                "cube_size": self.cube.get_current_size(),
+                "cube_mode": self.cube.get_mode(),
+                "cycle_id": self.cycle_id,
+                "timestamp": record["timestamp"]
+            }
+            self.egregor.commit(entry, node_id="SIEN_ENGINE")
+        
+        self.predictor.add(stage, sub, new_consequence, archetype)
+        
+        if self.sub_manager.next_sub():
+            self.stage = 1 if stage == 9 else stage + 1
+            self.sub_manager = SubStageManagerEnhanced(self.stage)
+        
+        return record
+
+    def full_cycle(self) -> List[Dict]:
+        self.stage = 1
+        self.sub_manager = SubStageManagerEnhanced(1)
+        self.history = []
+        self.cycle_id = generate_context_hash({"start": time.time()})
+        
+        self._log("EPOCH_INITIALIZED", {"tryb": "MODEL_9_MONOLITH", "cycle_id": self.cycle_id})
+        
+        for _ in range(27):
+            self.step()
+        
+        self.pressure_map.update_from_cube(self.cube)
+        
+        if self.history:
+            cycle_summary = {
+                "final_eval": self.history[-1]["after_eval"],
+                "dominant_archetype": ARCHETYPES.get(9, "Przodek"),
+                "total_steps": len(self.history),
+                "size_history": self.cube.get_size_history()
+            }
+            self._current_cycle_id = self.lineage.add_cycle(cycle_summary, self._current_cycle_id)
+            
+            last = self.history[-1]
+            self.myth.finalize(last)
+        
+        self._log("EPOCH_COMPLETE", {
+            "steps": len(self.history),
+            "final_state": self.cube.state(),
+            "final_eval": self.history[-1]["after_eval"] if self.history else None
+        })
+        
+        return self.history
+
+    def next_cycle(self) -> List[Dict]:
+        self.myth.apply_to_next(self)
+        return self.full_cycle()
+
+    def summary(self) -> Dict[str, Any]:
+        last = self.history[-1] if self.history else None
+        return {
+            "current_stage": self.stage,
+            "total_cycles_executed": len(self.lineage.nodes),
+            "final_evaluation": last["after_eval"] if last else None,
+            "top_critical_nodes": self.pressure_map.critical_points()[:3],
+            "size_history": self.cube.get_size_history(),
+            "validation_summary": {
+                "passed": sum(1 for h in self.history if h.get("validation_passed", True)),
+                "total": len(self.history)
+            },
+            "cycle_id": self.cycle_id
+        }
+
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "system": "GEON_SIENKIEWICZ_ENGINE_v1.1",
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "vibe": VIBE,
+            "stage": self.stage,
+            "sub_stage": self.sub_manager.get_sub_level(),
+            "resonance": self.resonance,
+            "cube_size": self.cube.get_current_size(),
+            "cube_mode": self.cube.get_mode(),
+            "history_len": len(self.history),
+            "lineage_nodes": len(self.lineage.nodes),
+            "auto_cycle": self.auto_cycle,
+            "cycle_id": self.cycle_id
+        }
+
+# =============================================================================
+# MOST INTEGRACYJNY — SIENKIEWICZ_BRIDGE
+# =============================================================================
+
+class SienkiewiczBridge:
+    def __init__(self, engine: SienkiewiczEngine):
+        self.engine = engine
+
+    def get_archetype_context(self) -> Dict[str, Any]:
+        status = self.engine.get_status()
+        summary = self.engine.summary()
+        return {
+            "tryb": "SIENKIEWICZ_ENGINE_v1.1",
+            "etap": status["stage"],
+            "sub_etap": status["sub_stage"],
+            "architektura": status["cube_size"],
+            "tryb_kostki": status["cube_mode"],
+            "linia_rodowa": status["lineage_nodes"],
+            "walidacja": summary["validation_summary"]
+        }
+
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        status = self.engine.get_status()
+        summary = self.engine.summary()
+        last_eval = summary["final_evaluation"]
+        stability = 1.0 - (last_eval["konsekwencja"] / 1.0 if last_eval else 0.5)
+        return {
+            "mode": "SIENKIEWICZ_ENGINE_v1.1",
+            "stability": clamp(stability, 0.0, 1.0),
+            "energy": status["resonance"] / 999.0,
+            "pressure": last_eval["konsekwencja"] if last_eval else 0.5,
+            "resilience": summary["validation_summary"]["passed"] / max(1, summary["validation_summary"]["total"]),
+            "stage": status["stage"],
+            "cube_size": status["cube_size"],
+            "cube_mode": status["cube_mode"]
+        }
+
+    def get_governor_context(self) -> Dict[str, Any]:
+        return {
+            "intent": "CIVILIZATION_CYCLE",
+            "confidence": 0.9,
+            "entropy": 0.1,
+            "sien_ready": True,
+            "stage": self.engine.stage,
+            "lineage": len(self.engine.lineage.nodes)
+        }
+
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        fragments = []
+        for entry in self.engine.history[-n:]:
+            fragments.append({
+                "source": "SIENKIEWICZ_ENGINE_v1.1",
+                "content": f"Etap {entry['stage']}.{entry['sub_stage']}: {entry['archetype']} → {entry['after_eval']['stan']} (kostka: {entry.get('cube_size', '?')})",
+                "energy": entry["consequence"],
+                "validation": entry.get("validation_passed", True)
+            })
+        return fragments
+
+    def get_trio_state(self) -> Dict[str, str]:
+        return {
+            "ISKRA": "AKTYWNA",
+            "PIECZĘĆ": "AKTYWNA",
+            "PERFEKCJA": "AKTYWNA",
+            "tryb": "SIENKIEWICZ_ENGINE_v1.1",
+            "sien": "AKTYWNY",
+            "etap": str(self.engine.stage),
+            "cube_mode": self.engine.cube.get_mode()
+        }
+
+# =============================================================================
+# DEMONSTRACJA Z NOWYMI ULEPSZENIAMI
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🛡️ GEON_SIENKIEWICZ_ENGINE_v1.1 — DEMONSTRACJA Z HISTEREZĄ")
+    print("HISTEREZA SKALI | PRECYZYJNY SUBSTAGE MANAGER | 27 POD-ETAPÓW")
+    print("=" * 80 + "\n")
+
+    engine = SienkiewiczEngine(auto_cycle=False)
+    bridge = SienkiewiczBridge(engine)
+
+    print("📌 STAN POCZĄTKOWY KOSTKI (9×9×9):")
+    engine.cube.show()
+
+    print("\n🌀 URUCHOMIENIE PEŁNEGO CYKLU (27 POD-ETAPÓW):\n")
+    history = engine.full_cycle()
+
+    print("\n📊 PODSUMOWANIE:")
+    summary = engine.summary()
+    print(f"   • Etap końcowy: {summary['current_stage']}")
+    print(f"   • Cykle wykonane: {summary['total_cycles_executed']}")
+    print(f"   • Historia rozmiarów kostki: {summary['size_history']}")
+    print(f"   • Walidacja: {summary['validation_summary']['passed']}/{summary['validation_summary']['total']}")
+    if summary['final_evaluation']:
+        print(f"   • Stan końcowy: {summary['final_evaluation']['stan']}")
+        print(f"   • Presja: {summary['final_evaluation']['presja']:.4f}")
+
+    print("\n📜 KRONIKA ETAPÓW (pierwsze 9 z 27):")
+    for i, h in enumerate(history[:9]):
+        status = "✅" if h.get("validation_passed", True) else "❌"
+        print(f"   {status} [{i+1}/27] {h['stage']}.{h['sub_stage']} {h['archetype']:<12} | Presja: {h['consequence']:.4f} | Kostka: {h.get('cube_size', '?')} ({h.get('cube_mode', '?')})")
+
+    # Test histerezy – symulacja brzegów presji
+    print("\n🧪 TEST HISTEREZY SKALI:")
+    test_cube = GEON_Cube_9_Dynamic_Enhanced()
+    
+    test_pressures = [0.5, 0.79, 0.76, 0.68, 0.72, 0.29, 0.35, 0.40]
+    for p in test_pressures:
+        old_size = test_cube.get_current_size()
+        test_cube.update_size(p)
+        new_size = test_cube.get_current_size()
+        print(f"   Presja: {p:.2f} → Rozmiar: {old_size} → {new_size} (tryb: {test_cube.get_mode()})")
+
+    print("\n🔗 MOSTY INTEGRACYJNE:")
+    print(f"   GEX Context: {bridge.get_archetype_context()}")
+    print(f"   G_CORE State: {bridge.get_autopilot_state()}")
+
+    print("\n" + "=" * 80)
+    print("🛡️ GEON_SIENKIEWICZ_ENGINE_v1.1 — GOTOWY DO WDROŻENIA")
+    print(HASLO)
+    print("=" * 80)
+
+if __name__ == "__main__":
+    demo()
