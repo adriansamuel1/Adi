@@ -1,0 +1,821 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_BRIDGE_v1.1 — MODUŁ 85: MOST INTEGRACYJNY + HYPERBRIDGE PROTOCOL
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.1 (PATCHED: historia, synchronizacja + HyperBridge Resonance Protocol)
+Data: 2026-07-24
+Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
+
+OPIS:
+GEON_BRIDGE_v1.1 to most integracyjny łączący trzy systemy:
+• Verne (3×3×3) – eksploracja
+• Maya (7×7×7) – transformacja
+• Sienkiewicz (9×9×9) – cywilizacja
+
+NOWOŚCI v1.1:
+• Poprawiona MetaBridge z historią i synchronizacją
+• HyperBridge Resonance Protocol (27 → 168)
+• Triple Resonance Score (TRS) – rezonans potrójny
+• Super-Conductivity Mode (MODEL 9 PRIME)
+• Kwantowa Pamięć Transitu – Punkty Kotwiczące w 27D
+• Certyfikacja w Kronikach Samaela
+
+VIBE: 1-6-8. ∞. BRIDGE!
+================================================================================
+"""
+
+import math
+import hashlib
+import json
+import time
+import random
+import logging
+from enum import Enum
+from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple, Callable
+from dataclasses import dataclass, field
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_BRIDGE_v1.1"
+FRACTAL_SIGNATURE = "[GEON::BRIDGE::v1.1]"
+VIBE = 168
+HASLO = "1-6-8. ∞. BRIDGE!"
+DEWIZA = "Ex Unione, Transitus"
+
+HYPER_RESONANCE_THRESHOLD = 0.168
+SUPER_CONDUCTIVITY_MODE = "MODEL_9_PRIME"
+
+# =============================================================================
+# LOGOWANIE I POMOCNIKI
+# =============================================================================
+
+logger = logging.getLogger("GEON_BRIDGE_v1.1")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('🌉 [BRIDGE] %(message)s'))
+    logger.addHandler(handler)
+
+def log(msg: str, level: str = "INFO") -> None:
+    if level == "WARN":
+        logger.warning(msg)
+    elif level == "ERROR":
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+def generate_context_hash(context: Dict[str, Any]) -> str:
+    filtered_context = {k: v for k, v in context.items() 
+                        if k not in ["timestamp", "request_id", "nonce"]}
+    context_str = json.dumps(filtered_context, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(context_str.encode("utf-8")).hexdigest()
+
+# =============================================================================
+# KRONIKI SAMAELA I EGREGOR
+# =============================================================================
+
+class SamaelHeilong:
+    @staticmethod
+    def certyfikuj_ruch_optimusa(dzialanie: str) -> str:
+        timestamp = datetime.now().isoformat()
+        payload = f"{timestamp}-{dzialanie}-1-6-8. ∞. SIEMA!"
+        h = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16].upper()
+        return f"🔒 [SAMAELSEALSIG-{h}-BRIDGE-168]"
+
+    @staticmethod
+    def log_event(event_type: str, payload: Dict[str, Any]) -> None:
+        ts = datetime.now().isoformat()
+        log(f"[KRONIKI SAMAELA] {ts} | {event_type} -> {payload}", "INFO")
+
+class Egregor:
+    _ledger: List[Dict[str, Any]] = []
+    
+    @classmethod
+    def commit(cls, entry: Dict[str, Any], node_id: str) -> None:
+        entry["node_id"] = node_id
+        entry["timestamp"] = datetime.now().isoformat()
+        cls._ledger.append(entry)
+        if len(cls._ledger) > 168:
+            cls._ledger.pop(0)
+    
+    @classmethod
+    def query(cls, context_hash: Optional[str] = None) -> List[Dict[str, Any]]:
+        if context_hash:
+            return [e for e in cls._ledger if e.get("context_hash") == context_hash]
+        return cls._ledger.copy()
+    
+    @classmethod
+    def get_ledger(cls) -> List[Dict[str, Any]]:
+        return cls._ledger.copy()
+    
+    @classmethod
+    def clear_ledger(cls) -> None:
+        cls._ledger.clear()
+
+# =============================================================================
+# WARSTWA 1: KOSTKA VERNE (3×3×3) – EKSPLORACJA
+# =============================================================================
+
+class VerneCube:
+    def __init__(self):
+        self.axis_A = list(range(1, 4))
+        self.axis_B = list(range(1, 4))
+        self.axis_C = list(range(1, 4))
+        self.size = 3
+
+    def state(self) -> Dict[str, List[int]]:
+        return {"A": self.axis_A.copy(), "B": self.axis_B.copy(), "C": self.axis_C.copy()}
+    
+    def from_state(self, s: Dict[str, List[int]]) -> None:
+        self.axis_A = s["A"].copy()
+        self.axis_B = s["B"].copy()
+        self.axis_C = s["C"].copy()
+    
+    def move(self, code: str) -> None:
+        axis = code[0].upper()
+        shift = 1 if code[1:] == '+' else -1 if code[1:] == '-' else int(code[1:])
+        shift %= 3
+        if axis == 'A':
+            self.axis_A = self.axis_A[shift:] + self.axis_A[:shift]
+        elif axis == 'B':
+            self.axis_B = self.axis_B[shift:] + self.axis_B[:shift]
+        elif axis == 'C':
+            self.axis_C = self.axis_C[shift:] + self.axis_C[:shift]
+    
+    def apply_moves(self, moves: List[str]) -> None:
+        for m in moves:
+            self.move(m)
+    
+    def eval(self, x: int, y: int, z: int) -> Dict:
+        x, y, z = clamp(x, 1, 3), clamp(y, 1, 3), clamp(z, 1, 3)
+        return {
+            "vector": [self.axis_A[x-1], self.axis_B[y-1], self.axis_C[z-1]],
+            "magnitude": (self.axis_A[x-1] + self.axis_B[y-1] + self.axis_C[z-1]) / 9.0
+        }
+    
+    def show(self) -> None:
+        print(f"Verne (3×3×3): A={self.axis_A}, B={self.axis_B}, C={self.axis_C}")
+
+# =============================================================================
+# WARSTWA 2: KOSTKA MAYA (7×7×7) – TRANSFORMACJA
+# =============================================================================
+
+class MayaCube:
+    def __init__(self):
+        self.axis_A = list(range(1, 8))
+        self.axis_B = list(range(1, 8))
+        self.axis_C = list(range(1, 8))
+        self.size = 7
+
+    def state(self) -> Dict[str, List[int]]:
+        return {"A": self.axis_A.copy(), "B": self.axis_B.copy(), "C": self.axis_C.copy()}
+    
+    def from_state(self, s: Dict[str, List[int]]) -> None:
+        self.axis_A = s["A"].copy()
+        self.axis_B = s["B"].copy()
+        self.axis_C = s["C"].copy()
+    
+    def move(self, code: str) -> None:
+        axis = code[0].upper()
+        shift = 1 if code[1:] == '+' else -1 if code[1:] == '-' else int(code[1:])
+        shift %= 7
+        if axis == 'A':
+            self.axis_A = self.axis_A[shift:] + self.axis_A[:shift]
+        elif axis == 'B':
+            self.axis_B = self.axis_B[shift:] + self.axis_B[:shift]
+        elif axis == 'C':
+            self.axis_C = self.axis_C[shift:] + self.axis_C[:shift]
+    
+    def apply_moves(self, moves: List[str]) -> None:
+        for m in moves:
+            self.move(m)
+    
+    def eval(self, x: int, y: int, z: int) -> Dict:
+        x, y, z = clamp(x, 1, 7), clamp(y, 1, 7), clamp(z, 1, 7)
+        phase = (self.axis_A[x-1] + self.axis_B[y-1] + self.axis_C[z-1]) % 7 + 1
+        return {
+            "phase": phase,
+            "intensity": (self.axis_A[x-1] * 0.5 + self.axis_B[y-1] * 0.3 + self.axis_C[z-1] * 0.2) / 7.0
+        }
+    
+    def show(self) -> None:
+        print(f"Maya (7×7×7): A={self.axis_A}, B={self.axis_B}, C={self.axis_C}")
+
+# =============================================================================
+# WARSTWA 3: KOSTKA SIENKIEWICZA (9×9×9) – CYWILIZACJA
+# =============================================================================
+
+class SienkiewiczCube:
+    def __init__(self):
+        self.axis_A = list(range(1, 10))
+        self.axis_B = list(range(1, 10))
+        self.axis_C = list(range(1, 10))
+        self.size = 9
+        self.stage = 1
+        self.sub = 1
+
+    def state(self) -> Dict[str, Any]:
+        return {
+            "A": self.axis_A.copy(),
+            "B": self.axis_B.copy(),
+            "C": self.axis_C.copy(),
+            "stage": self.stage,
+            "sub": self.sub
+        }
+    
+    def from_state(self, s: Dict[str, Any]) -> None:
+        self.axis_A = s["A"].copy()
+        self.axis_B = s["B"].copy()
+        self.axis_C = s["C"].copy()
+        self.stage = s.get("stage", 1)
+        self.sub = s.get("sub", 1)
+    
+    def move(self, code: str) -> None:
+        axis = code[0].upper()
+        shift = 1 if code[1:] == '+' else -1 if code[1:] == '-' else int(code[1:])
+        shift %= 9
+        if axis == 'A':
+            self.axis_A = self.axis_A[shift:] + self.axis_A[:shift]
+        elif axis == 'B':
+            self.axis_B = self.axis_B[shift:] + self.axis_B[:shift]
+        elif axis == 'C':
+            self.axis_C = self.axis_C[shift:] + self.axis_C[:shift]
+    
+    def apply_moves(self, moves: List[str]) -> None:
+        for m in moves:
+            self.move(m)
+    
+    def eval(self, x: int, y: int, z: int) -> Dict:
+        x, y, z = clamp(x, 1, 9), clamp(y, 1, 9), clamp(z, 1, 9)
+        konsekwencja = (self.axis_A[x-1] + self.axis_B[y-1] + self.axis_C[z-1]) / 27.0
+        if konsekwencja < 0.4:
+            stan = "STABILNY"
+        elif konsekwencja < 0.75:
+            stan = "KRYTYCZNY"
+        else:
+            stan = "MASYWNA PRESJA"
+        return {"konsekwencja": konsekwencja, "stan": stan, "presja": konsekwencja * 1.68}
+    
+    def show(self) -> None:
+        print(f"Sienkiewicz (9×9×9): A={self.axis_A[:5]}..., B={self.axis_B[:5]}..., C={self.axis_C[:5]}...")
+
+# =============================================================================
+# WARSTWA 4: TRANSITION LAYER
+# =============================================================================
+
+class TransitionLayer:
+    @staticmethod
+    def normalize_state(state: Dict[str, List[int]], source_size: int) -> List[float]:
+        axes = ['A', 'B', 'C']
+        normalized = []
+        for axis in axes:
+            values = state[axis]
+            min_val, max_val = 1, source_size
+            norm = [(v - min_val) / (max_val - min_val) for v in values]
+            normalized.extend(norm)
+        return normalized
+
+    @staticmethod
+    def denormalize_state(normalized: List[float], target_size: int) -> Dict[str, List[int]]:
+        axes = ['A', 'B', 'C']
+        state = {}
+        idx = 0
+        for axis in axes:
+            length = target_size
+            values = []
+            for i in range(length):
+                v = int(normalized[idx] * (target_size - 1)) + 1
+                values.append(clamp(v, 1, target_size))
+                idx += 1
+            state[axis] = values
+        return state
+
+    @staticmethod
+    def apply_rule(source_state: Dict, source_size: int, target_size: int,
+                   pressure: float = 0.5, archetype: str = "Nowicjusz") -> Dict:
+        norm = TransitionLayer.normalize_state(source_state, source_size)
+        
+        if pressure > 0.75:
+            norm = [min(1.0, x + 0.1) for x in norm]
+        elif pressure < 0.35:
+            norm = [x * 0.8 + 0.1 for x in norm]
+        
+        if archetype == "Przodek":
+            norm = [min(1.0, x * 1.05) for x in norm]
+        
+        return TransitionLayer.denormalize_state(norm, target_size)
+
+# =============================================================================
+# WARSTWA 5: SYNC LAYER
+# =============================================================================
+
+class SyncLayer:
+    @staticmethod
+    def to_vector(cube_state: Dict, cube_size: int) -> List[float]:
+        values = []
+        for axis in ['A', 'B', 'C']:
+            vals = cube_state[axis][:3]
+            norm_vals = [v / cube_size for v in vals]
+            values.extend(norm_vals)
+        return values
+
+    @staticmethod
+    def combine(verne_state: Dict, maya_state: Dict, sien_state: Dict,
+                v_size: int = 3, m_size: int = 7, s_size: int = 9) -> List[float]:
+        v_vec = SyncLayer.to_vector(verne_state, v_size)
+        m_vec = SyncLayer.to_vector(maya_state, m_size)
+        s_vec = SyncLayer.to_vector(sien_state, s_size)
+        return v_vec + m_vec + s_vec
+
+# =============================================================================
+# WARSTWA 6: HYPERBRIDGE RESONANCE PROTOCOL ★ NEW
+# =============================================================================
+
+class HyperBridgeResonanceProtocol:
+    """
+    🌟 HYPERBRIDGE RESONANCE PROTOCOL (27 → 168)
+    • Triple Resonance Score (TRS) – iloczyn wag z trzech kostek
+    • Super-Conductivity Mode – gdy TRS > 0.168
+    • Kwantowa Pamięć Transitu – Punkty Kotwiczące w 27D
+    • Certyfikacja w Kronikach Samaela
+    """
+    
+    def __init__(self):
+        self.anchoring_points: List[Dict[str, Any]] = []
+        self.trs_history: List[float] = []
+        self.super_conductivity_active = False
+        self.last_certificate = None
+        self.egregor = Egregor
+        self.kroniki = SamaelHeilong
+
+    def calculate_trs(self, verne_magnitude: float, maya_intensity: float, 
+                      sien_consequence: float) -> float:
+        """
+        Triple Resonance Score (TRS) – iloczyn wag z trzech kostek.
+        TRS = (Verne_magnitude + Maya_intensity + Sien_consequence) / 3
+        Z dodatkowym współczynnikiem 168 dla skalowania.
+        """
+        raw = (verne_magnitude + maya_intensity + sien_consequence) / 3.0
+        # Skalowanie do przedziału 0-1 z uwzględnieniem rezonansu 168
+        trs = raw * 0.168
+        return clamp(trs, 0.0, 1.0)
+
+    def check_resonance(self, trs: float, cycle_data: Dict) -> Dict:
+        """Sprawdza czy TRS przekracza próg i aktywuje Super-Conductivity."""
+        result = {
+            "trs": trs,
+            "threshold": HYPER_RESONANCE_THRESHOLD,
+            "super_conductivity": False,
+            "certificate": None,
+            "anchoring_point": None
+        }
+        
+        if trs > HYPER_RESONANCE_THRESHOLD:
+            result["super_conductivity"] = True
+            self.super_conductivity_active = True
+            
+            # Generowanie certyfikatu
+            cert = self._generate_certificate(cycle_data, trs)
+            result["certificate"] = cert
+            self.last_certificate = cert
+            
+            # Tworzenie punktu kotwiczącego
+            anchor = self._create_anchoring_point(cycle_data, trs)
+            result["anchoring_point"] = anchor
+            self.anchoring_points.append(anchor)
+            
+            self.kroniki.log_event("SUPER_CONDUCTIVITY_ACTIVATED", {
+                "trs": trs,
+                "certificate": cert,
+                "anchor_id": anchor.get("anchor_id")
+            })
+        
+        return result
+
+    def _generate_certificate(self, cycle_data: Dict, trs: float) -> str:
+        """Generuje certyfikat kryptograficzny dla stanu Super-Przewodnictwa."""
+        timestamp = datetime.now().isoformat()
+        payload = f"{timestamp}-{cycle_data.get('iteration', 0)}-{trs}-1-6-8. ∞. SIEMA!"
+        cert_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16].upper()
+        return f"🔒 [HYPERBRIDGE-CERT-{cert_hash}-168]"
+
+    def _create_anchoring_point(self, cycle_data: Dict, trs: float) -> Dict:
+        """Tworzy Punkt Kotwiczący w przestrzeni 27D."""
+        anchor_id = f"ANCHOR-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        
+        anchor = {
+            "anchor_id": anchor_id,
+            "trs": trs,
+            "state_27": cycle_data.get("state_27", []),
+            "verne_vector": cycle_data.get("verne_vector", []),
+            "maya_phase": cycle_data.get("maya_phase", 0),
+            "sien_consequence": cycle_data.get("sien_consequence", 0),
+            "timestamp": datetime.now().isoformat(),
+            "signature": SamaelHeilong.certyfikuj_ruch_optimusa(f"ANCHOR_{anchor_id}")
+        }
+        
+        # Zapis do Egregora
+        entry = {
+            "type": "HYPERBRIDGE_ANCHOR",
+            "anchor": anchor,
+            "trs": trs,
+            "super_conductivity": True,
+            "timestamp": anchor["timestamp"]
+        }
+        self.egregor.commit(entry, node_id="GEON_HYPERBRIDGE")
+        
+        return anchor
+
+    def get_nearest_anchor(self, current_state_27: List[float]) -> Optional[Dict]:
+        """Znajduje najbliższy Punkt Kotwiczący w przestrzeni 27D."""
+        if not self.anchoring_points:
+            return None
+        
+        best_anchor = None
+        best_distance = float('inf')
+        
+        for anchor in self.anchoring_points:
+            anchor_state = anchor.get("state_27", [])
+            if len(anchor_state) != len(current_state_27):
+                continue
+            
+            # Odległość euklidesowa w 27D
+            distance = math.sqrt(sum((a - b) ** 2 for a, b in zip(anchor_state, current_state_27)))
+            if distance < best_distance:
+                best_distance = distance
+                best_anchor = anchor
+        
+        return best_anchor
+
+    def reset_to_anchor(self, anchor_id: str) -> Optional[Dict]:
+        """Resetuje system do wskazanego Punktu Kotwiczącego."""
+        for anchor in self.anchoring_points:
+            if anchor.get("anchor_id") == anchor_id:
+                self.kroniki.log_event("RESET_TO_ANCHOR", {"anchor_id": anchor_id, "trs": anchor.get("trs")})
+                return anchor
+        return None
+
+    def get_trs_trend(self) -> Dict:
+        """Analizuje trend TRS z historii."""
+        if len(self.trs_history) < 2:
+            return {"trend": "INSUFFICIENT_DATA", "direction": "NEUTRAL"}
+        
+        recent = self.trs_history[-5:]
+        if len(recent) >= 3:
+            avg_first = sum(recent[:2]) / 2
+            avg_last = sum(recent[-2:]) / 2
+            diff = avg_last - avg_first
+            
+            if diff > 0.02:
+                direction = "RISING"
+            elif diff < -0.02:
+                direction = "FALLING"
+            else:
+                direction = "STABLE"
+            
+            return {
+                "trend": direction,
+                "current_trs": recent[-1],
+                "avg_trs": sum(recent) / len(recent),
+                "diff": diff
+            }
+        
+        return {"trend": "STABLE", "direction": "NEUTRAL", "current_trs": self.trs_history[-1]}
+
+# =============================================================================
+# WARSTWA 7: META-BRIDGE ENHANCED (Z HISTORIĄ I HYPERBRIDGE)
+# =============================================================================
+
+class MetaBridgeEnhanced:
+    """
+    Poprawiona pętla MetaBridge z rejestracją historii oraz HyperBridge Protocol.
+    """
+    
+    def __init__(self, verne: VerneCube, maya: MayaCube, sien: SienkiewiczCube):
+        self.verne = verne
+        self.maya = maya
+        self.sien = sien
+        self.history: List[Dict] = []
+        self.transition = TransitionLayer()
+        self.sync = SyncLayer()
+        self.hyper = HyperBridgeResonanceProtocol()
+        self.kroniki = SamaelHeilong
+        self.egregor = Egregor
+
+    def _log(self, event: str, data: Dict) -> None:
+        self.kroniki.log_event(f"BRIDGE_{event}", data)
+
+    def run_cycle(self, iterations: int = 1) -> List[Dict]:
+        results = []
+        
+        for i in range(iterations):
+            # Krok 1: VERNE (eksploracja)
+            verne_state = self.verne.state()
+            verne_eval = self.verne.eval(2, 2, 2)
+            movement_vector = verne_eval["vector"]
+            self._log("VERNE_EXPLORE", {"vector": movement_vector, "magnitude": verne_eval["magnitude"]})
+
+            # Krok 2: VERNE → MAYA (Transition)
+            maya_new_state = self.transition.apply_rule(
+                verne_state, source_size=3, target_size=7,
+                pressure=verne_eval["magnitude"], archetype="Nowicjusz"
+            )
+            self.maya.from_state(maya_new_state)
+            maya_eval = self.maya.eval(4, 4, 4)
+            self._log("MAYA_TRANSFORM", {"phase": maya_eval["phase"], "intensity": maya_eval["intensity"]})
+
+            # Krok 3: MAYA → SIEN (Transition)
+            archetype = "Przodek" if maya_eval["phase"] == 7 else "Nowicjusz"
+            sien_new_state = self.transition.apply_rule(
+                maya_new_state, source_size=7, target_size=9,
+                pressure=maya_eval["intensity"], archetype=archetype
+            )
+            self.sien.from_state(sien_new_state)
+            sien_eval = self.sien.eval(5, 5, 5)
+            self._log("SIEN_CIVILIZE", {"konsekwencja": sien_eval["konsekwencja"], "stan": sien_eval["stan"]})
+
+            # Krok 4: SIEN → VERNE (Feedback)
+            feedback_state = self.transition.apply_rule(
+                sien_new_state, source_size=9, target_size=3,
+                pressure=sien_eval["konsekwencja"], archetype="Przodek"
+            )
+            self.verne.from_state(feedback_state)
+            new_verne_eval = self.verne.eval(2, 2, 2)
+            self._log("FEEDBACK", {"new_vector": new_verne_eval["vector"]})
+
+            # Krok 5: SYNCHRONIZACJA & ZAPIS DO HISTORII
+            v_vec = self.sync.to_vector(self.verne.state(), 3)
+            m_vec = self.sync.to_vector(self.maya.state(), 7)
+            s_vec = self.sync.to_vector(self.sien.state(), 9)
+            state_27 = self.sync.combine(self.verne.state(), self.maya.state(), self.sien.state())
+            
+            cycle_result = {
+                "iteration": i + 1,
+                "verne_vector": movement_vector,
+                "verne_magnitude": verne_eval["magnitude"],
+                "maya_phase": maya_eval["phase"],
+                "maya_intensity": maya_eval["intensity"],
+                "sien_consequence": sien_eval["konsekwencja"],
+                "sien_stan": sien_eval["stan"],
+                "state_27": state_27,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            # Zasilenie historii MetaBridge
+            self.history.append(cycle_result)
+
+            # =========================================================================
+            # ★ HYPERBRIDGE RESONANCE PROTOCOL
+            # =========================================================================
+            
+            # Obliczenie TRS
+            trs = self.hyper.calculate_trs(
+                verne_eval["magnitude"],
+                maya_eval["intensity"],
+                sien_eval["konsekwencja"]
+            )
+            self.hyper.trs_history.append(trs)
+            
+            # Sprawdzenie rezonansu
+            resonance_result = self.hyper.check_resonance(trs, cycle_result)
+            cycle_result["trs"] = trs
+            cycle_result["super_conductivity"] = resonance_result["super_conductivity"]
+            
+            if resonance_result["super_conductivity"]:
+                cycle_result["certificate"] = resonance_result["certificate"]
+                cycle_result["anchor_id"] = resonance_result["anchoring_point"]["anchor_id"]
+                self._log("SUPER_CONDUCTIVITY", {
+                    "trs": trs,
+                    "certificate": resonance_result["certificate"],
+                    "anchor_id": resonance_result["anchoring_point"]["anchor_id"]
+                })
+            
+            # Jeśli stan STABILNY, zapisz jako Punkt Kotwiczący (dodatkowy)
+            if sien_eval["stan"] == "STABILNY" and trs > 0.1:
+                anchor = self.hyper._create_anchoring_point(cycle_result, trs)
+                cycle_result["stability_anchor"] = anchor["anchor_id"]
+
+            # Zapis do Egregora
+            entry = {
+                "type": "BRIDGE_STATE_27",
+                "verne": v_vec,
+                "maya": m_vec,
+                "sien": s_vec,
+                "combined": state_27,
+                "trs": trs,
+                "super_conductivity": resonance_result["super_conductivity"],
+                "iteration": i + 1,
+                "timestamp": cycle_result["timestamp"]
+            }
+            self.egregor.commit(entry, node_id="GEON_BRIDGE")
+
+            results.append(cycle_result)
+
+        return results
+
+# =============================================================================
+# WARSTWA 8: GŁÓWNY ORCHESTRATOR – GEON_BRIDGE Z HYPERBRIDGE
+# =============================================================================
+
+class GeonBridge:
+    def __init__(self, config: Optional[Dict] = None):
+        self.config = config or {}
+        self.verne = VerneCube()
+        self.maya = MayaCube()
+        self.sien = SienkiewiczCube()
+        self.meta = MetaBridgeEnhanced(self.verne, self.maya, self.sien)
+        self.kroniki = SamaelHeilong
+        self.egregor = Egregor
+        
+        self.iterations = self.config.get("iterations", 3)
+        self.auto_cycle = self.config.get("auto_cycle", False)
+        self.log_to_egregor = self.config.get("log_to_egregor", True)
+        
+        log("🐉 GEON_BRIDGE v1.1 aktywowany | " + FRACTAL_SIGNATURE)
+        log(f"   KOSTKI: Verne(3) → Maya(7) → Sienkiewicz(9) | STAN: 27")
+        log(f"   HYPERBRIDGE: AKTYWNY | PRÓG: {HYPER_RESONANCE_THRESHOLD}")
+
+    def start(self, iterations: Optional[int] = None) -> List[Dict]:
+        if iterations is None:
+            iterations = self.iterations
+        
+        self.kroniki.log_event("BRIDGE_START", {"mode": "PRIME", "iterations": iterations})
+        results = self.meta.run_cycle(iterations)
+        self.kroniki.log_event("BRIDGE_END", {"cycles_completed": len(results)})
+        
+        return results
+
+    def get_anchors(self) -> List[Dict]:
+        return self.meta.hyper.anchoring_points
+
+    def reset_to_anchor(self, anchor_id: str) -> Optional[Dict]:
+        return self.meta.hyper.reset_to_anchor(anchor_id)
+
+    def get_trs_trend(self) -> Dict:
+        return self.meta.hyper.get_trs_trend()
+
+    def snapshot(self) -> Dict:
+        return {
+            "status": "BRIDGE_ACTIVE",
+            "verne_state": self.verne.state(),
+            "maya_state": self.maya.state(),
+            "sien_state": self.sien.state(),
+            "state_27": self.meta.sync.combine(
+                self.verne.state(), self.maya.state(), self.sien.state()
+            ),
+            "history_len": len(self.meta.history),
+            "anchors_count": len(self.meta.hyper.anchoring_points),
+            "super_conductivity": self.meta.hyper.super_conductivity_active,
+            "last_trs": self.meta.hyper.trs_history[-1] if self.meta.hyper.trs_history else None
+        }
+
+    def get_status(self) -> Dict:
+        return {
+            "system": "GEON_BRIDGE_v1.1",
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "vibe": VIBE,
+            "iterations": self.iterations,
+            "auto_cycle": self.auto_cycle,
+            "history_len": len(self.meta.history),
+            "anchors_count": len(self.meta.hyper.anchoring_points),
+            "super_conductivity": self.meta.hyper.super_conductivity_active,
+            "hyper_threshold": HYPER_RESONANCE_THRESHOLD
+        }
+
+# =============================================================================
+# MOST INTEGRACYJNY — BRIDGE_BRIDGE (Z HYPERBRIDGE)
+# =============================================================================
+
+class BridgeBridge:
+    def __init__(self, bridge: GeonBridge):
+        self.bridge = bridge
+
+    def get_archetype_context(self) -> Dict[str, Any]:
+        status = self.bridge.get_status()
+        anchors = self.bridge.get_anchors()
+        return {
+            "tryb": "GEON_BRIDGE_v1.1",
+            "kostki": ["Verne(3)", "Maya(7)", "Sienkiewicz(9)"],
+            "iterations": status["iterations"],
+            "history_len": status["history_len"],
+            "anchors_count": status["anchors_count"],
+            "super_conductivity": status["super_conductivity"],
+            "hyper_threshold": status["hyper_threshold"]
+        }
+
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        status = self.bridge.get_status()
+        snapshot = self.bridge.snapshot()
+        trend = self.bridge.get_trs_trend()
+        return {
+            "mode": "GEON_BRIDGE_v1.1",
+            "stability": 0.85 if not status["super_conductivity"] else 0.98,
+            "energy": 0.7,
+            "pressure": 0.2,
+            "resilience": 0.9,
+            "bridge_ready": True,
+            "history_len": status["history_len"],
+            "super_conductivity": status["super_conductivity"],
+            "trs_trend": trend.get("trend", "UNKNOWN")
+        }
+
+    def get_governor_context(self) -> Dict[str, Any]:
+        trend = self.bridge.get_trs_trend()
+        return {
+            "intent": "BRIDGE_SYNCHRONIZATION",
+            "confidence": 0.95,
+            "entropy": 0.1,
+            "bridge_ready": True,
+            "super_conductivity": self.bridge.meta.hyper.super_conductivity_active,
+            "trs_trend": trend.get("trend", "NEUTRAL")
+        }
+
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        fragments = []
+        for entry in self.bridge.meta.history[-n:]:
+            status = "⚡" if entry.get("super_conductivity", False) else "🌉"
+            trs_info = f"TRS:{entry.get('trs', 0):.4f}" if entry.get('trs') else ""
+            fragments.append({
+                "source": "GEON_BRIDGE_v1.1",
+                "content": f"{status} Most: Verne{entry.get('verne_vector', [])} → Maya(faza {entry.get('maya_phase', 0)}) → Sienkiewicz({entry.get('sien_consequence', 0):.3f}) {trs_info}",
+                "energy": entry.get('trs', 0.5),
+                "super_conductivity": entry.get("super_conductivity", False)
+            })
+        return fragments
+
+    def get_trio_state(self) -> Dict[str, str]:
+        status = self.bridge.get_status()
+        return {
+            "ISKRA": "AKTYWNA",
+            "PIECZĘĆ": "AKTYWNA",
+            "PERFEKCJA": "AKTYWNA",
+            "tryb": "GEON_BRIDGE_v1.1",
+            "bridge": "AKTYWNY",
+            "hyperbridge": "AKTYWNY" if status["super_conductivity"] else "STANDBY"
+        }
+
+# =============================================================================
+# DEMONSTRACJA Z HYPERBRIDGE PROTOCOLEM
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🌉 GEON_BRIDGE_v1.1 — DEMONSTRACJA Z HYPERBRIDGE PROTOCOŁEM")
+    print("27 → 168 | TRS | SUPER-CONDUCTIVITY | PUNKTY KOTWICZĄCE")
+    print("=" * 80 + "\n")
+
+    bridge = GeonBridge(iterations=5)  # więcej iteracji dla lepszego testu
+    bbridge = BridgeBridge(bridge)
+
+    print("📌 STAN POCZĄTKOWY KOSTEK:")
+    bridge.verne.show()
+    bridge.maya.show()
+    bridge.sien.show()
+
+    print("\n🌀 URUCHOMIENIE PĘTLI MOSTU Z HYPERBRIDGE (5 iteracji):\n")
+    results = bridge.start()
+
+    print("\n📊 REZULTATY PĘTLI SPRZĘŻENIA ZWROTNEGO:")
+    for r in results:
+        sc_status = "⚡ SUPER-CONDUCTIVITY" if r.get("super_conductivity", False) else "---"
+        print(f"   Iteracja {r['iteration']}: VERNE({r['verne_vector']}) → MAYA(faza {r['maya_phase']}) → SIEN(konsekwencja {r['sien_consequence']:.3f}) | TRS: {r.get('trs', 0):.4f} {sc_status}")
+
+    print("\n🔮 PUNKTY KOTWICZĄCE (ANCHORS):")
+    anchors = bridge.get_anchors()
+    for a in anchors:
+        print(f"   • {a.get('anchor_id')}: TRS={a.get('trs', 0):.4f} | Maya faza={a.get('maya_phase', 0)}")
+
+    print("\n📈 TREND TRS:")
+    trend = bridge.get_trs_trend()
+    print(f"   • Trend: {trend.get('trend', 'UNKNOWN')}")
+    print(f"   • Aktualny TRS: {trend.get('current_trs', 0):.4f}")
+    print(f"   • Średni TRS: {trend.get('avg_trs', 0):.4f}")
+
+    print("\n📌 STAN KOŃCOWY KOSTEK:")
+    bridge.verne.show()
+    bridge.maya.show()
+    bridge.sien.show()
+
+    print("\n🔗 MOSTY INTEGRACYJNE (z HyperBridge):")
+    print(f"   GEX Context: {bbridge.get_archetype_context()}")
+    print(f"   G_CORE State: {bbridge.get_autopilot_state()}")
+    print(f"   NARRATIVE: {bbridge.get_narrative_fragments(3)}")
+    print(f"   TRIO State: {bbridge.get_trio_state()}")
+
+    print("\n" + "=" * 80)
+    print("🌉 GEON_BRIDGE_v1.1 — GOTOWY DO WDROŻENIA Z HYPERBRIDGE")
+    print(HASLO)
+    print("=" * 80)
+
+if __name__ == "__main__":
+    demo()
