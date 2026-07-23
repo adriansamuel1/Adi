@@ -1,0 +1,1192 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_STALLONE_AGENT_v1.1 — MODUŁ 78: AGENT BOJOWY (FULL STACK + KERNEL)
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.1 (GEON_STALLONE_MODULE v3.1 — Pełna integracja z OS, TEAM, MEM_Ω)
+Data: 2026-07-23
+Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
+
+OPIS:
+GEON_STALLONE_AGENT_v1.1 to zaawansowany agent decyzyjno-operacyjny z pełną
+integracją z GEON_OS_KERNEL (71), TEAM_CORE (77) i GEON_MEM_Ω (45).
+Zawiera hooki systemowe, przerwania, priorytetyzację, komunikację międzyagentową
+oraz kwintesencję pamięci z rezonansem.
+
+ARCHITEKTURA (8 POZIOMÓW):
+I.   STRUKTURY DANYCH — StalloneProfile, EnvironmentContext, ChallengeVector
+II.  RDZENIE — RockyCore (wytrzymałość), RamboCore (taktyka)
+III. INTEGRATOR — przełącznik stanów (ROCKY, RAMBO, BALANCE, SHADOW, PRIME, HYBRID_DRAGON, GLADIATOR, PHOENIX_RECOVERY, ULTRA_PRIME_FLOW, MENTOR_OVERRIDE, OPERATOR_OVERRIDE)
+IV.  FRAKTAL ENGINE — 15 rekurencyjnych sub-modułów (A–O)
+V.   PAMIĘĆ I INSTYNKT — LongTermMemory, InstinctPredictor
+VI.  KERNEL INTEGRATION — KernelHookManager, SystemInterruptHandler, PriorityScheduler
+VII. TEAM INTEGRATION — TeamCoreCommunicator (wymiana stanów, koordynacja)
+VIII.MEM_Ω INTEGRATION — MemOmegaIntegrator (kwintesencja, rezonans)
+
+VIBE: 1-6-8. ∞. STALLONE!
+================================================================================
+"""
+
+import time
+import math
+import random
+from typing import Dict, Any, List, Tuple, Optional
+from dataclasses import dataclass, field
+import logging
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_STALLONE_AGENT_v1.1"
+FRACTAL_SIGNATURE = "[GEON::STALLONE::AGENT::v1.1]"
+VIBE = 168
+HASLO = "1-6-8. ∞. STALLONE!"
+DEWIZA = "Ex Fortitudine, Victoria"
+AGENT_PRIORITY = 5  # Priorytet w schedulerze OS (1-10, gdzie 10 najwyższy)
+
+# =============================================================================
+# LOGOWANIE
+# =============================================================================
+
+logger = logging.getLogger("STALLONE_AGENT_v1.1")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('🥊 [STALLONE] %(message)s'))
+    logger.addHandler(handler)
+
+def log(msg: str, level: str = "INFO") -> None:
+    if level == "INFO":
+        logger.info(msg)
+    elif level == "WARN":
+        logger.warning(msg)
+    elif level == "ERROR":
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+# =============================================================================
+# 1. STRUKTURY DANYCH (bez zmian)
+# =============================================================================
+
+@dataclass
+class StalloneProfile:
+    heart: float = 0.65
+    shadow: float = 0.35
+    momentum: float = 50.0
+    sri: float = 0.0
+    instinct_confidence: float = 0.0
+    terrain_profile: str = "urban"
+    legacy_config: Dict[str, Any] = field(default_factory=dict)
+    adaptive_bias: Dict[str, float] = field(default_factory=lambda: {"rocky": 0.0, "rambo": 0.0})
+
+
+@dataclass
+class EnvironmentContext:
+    threat_level: float = 0.0
+    chaos_level: float = 0.0
+    emotional_pressure: float = 0.0
+    entropy: float = 5.0
+    terrain: str = "urban"
+    social_pressure: float = 0.0
+    resource_availability: float = 100.0
+    time_active: float = 0.0
+
+
+@dataclass
+class ChallengeVector:
+    impact: float = 10.0
+    difficulty: float = 5.0
+    long_term: bool = False
+    emotional_weight: float = 0.5
+
+# =============================================================================
+# 2. PAMIĘĆ DŁUGOTERMINOWA (bez zmian)
+# =============================================================================
+
+class LongTermMemory:
+    def __init__(self, max_patterns: int = 50):
+        self.history: List[Dict[str, Any]] = []
+        self.patterns: List[Dict[str, Any]] = []
+        self.bias: Dict[str, float] = {"rocky": 0.0, "rambo": 0.0}
+        self.max_patterns = max_patterns
+        self.last_trend = 0.0
+
+    def update(self, cycle_data: Dict[str, Any]) -> None:
+        self.history.append(cycle_data)
+        if len(self.history) > self.max_patterns:
+            self.history.pop(0)
+        self._extract_patterns()
+        self._update_bias()
+
+    def _extract_patterns(self) -> None:
+        if len(self.history) < 5:
+            return
+        recent = self.history[-10:]
+        states = [h.get("state", "") for h in recent]
+        rocky_count = sum(1 for s in states if "ROCKY" in s)
+        rambo_count = sum(1 for s in states if "RAMBO" in s)
+        if rocky_count > rambo_count + 2:
+            self.patterns.append({"trend": "rocky_dominant", "strength": rocky_count / len(states)})
+        elif rambo_count > rocky_count + 2:
+            self.patterns.append({"trend": "rambo_dominant", "strength": rambo_count / len(states)})
+        if len(self.patterns) > 10:
+            self.patterns.pop(0)
+
+    def _update_bias(self) -> None:
+        rocky_patterns = [p for p in self.patterns if p.get("trend") == "rocky_dominant"]
+        rambo_patterns = [p for p in self.patterns if p.get("trend") == "rambo_dominant"]
+        if rocky_patterns:
+            avg = sum(p["strength"] for p in rocky_patterns) / len(rocky_patterns)
+            self.bias["rocky"] = min(0.3, avg * 0.15)
+        if rambo_patterns:
+            avg = sum(p["strength"] for p in rambo_patterns) / len(rambo_patterns)
+            self.bias["rambo"] = min(0.3, avg * 0.15)
+        if len(self.history) >= 3:
+            scores = [h.get("score", 50) for h in self.history[-3:]]
+            self.last_trend = scores[-1] - scores[0]
+
+    def get_adaptive_weight(self, base_weight: float) -> float:
+        correction = self.bias["rocky"] - self.bias["rambo"]
+        return max(0.0, min(1.0, base_weight + correction))
+
+# =============================================================================
+# 3. ROCKY_CORE (bez zmian)
+# =============================================================================
+
+class RockyCore:
+    def __init__(self, rebound_factor: float = 1.25):
+        self.rebound_factor = rebound_factor
+        self.internal_resilience = 0.0
+        self.heart_drive_bonus = 0.0
+
+    def execute(self, challenge: Dict[str, Any], micro_tactics: Dict[str, Any] = None) -> Dict[str, Any]:
+        impact = challenge.get("impact", 10.0)
+        difficulty = challenge.get("difficulty", 5.0)
+        emotional_weight = challenge.get("emotional_weight", 0.5)
+        absorbed_energy = (impact * self.rebound_factor + difficulty * 0.5) * (1 + self.heart_drive_bonus * 0.1)
+        self.internal_resilience += absorbed_energy * 0.1
+        return {
+            "core": "ROCKY",
+            "action": "Absorb & Endure",
+            "resilience": f"Absorbed impact {impact:.1f}, difficulty {difficulty:.1f}. Fortitude built.",
+            "heart_drive": f"Heart Engine active (bonus {self.heart_drive_bonus:.2f}). Long-term focus locked.",
+            "absorbed_energy": round(absorbed_energy, 2),
+            "internal_resilience": round(self.internal_resilience, 2),
+            "micro_tactics": micro_tactics or {},
+            "emotional_influence": round(emotional_weight, 2)
+        }
+
+    def stabilize(self) -> Dict[str, Any]:
+        self.internal_resilience = max(0.0, self.internal_resilience - 5.0)
+        return {
+            "core": "ROCKY",
+            "action": "Stabilize",
+            "status": "Emotional core anchored. Zero-point noise cancellation active.",
+            "resilience_after_stabilization": round(self.internal_resilience, 2)
+        }
+
+    def growth(self, challenge: Dict[str, Any]) -> Dict[str, Any]:
+        difficulty = challenge.get("difficulty", 5.0)
+        growth_delta = difficulty * 1.5 * (1 + self.heart_drive_bonus * 0.05)
+        self.internal_resilience += growth_delta * 0.2
+        return {
+            "core": "ROCKY",
+            "action": "Growth Loop",
+            "growth_delta": round(growth_delta, 2),
+            "status": "Structural capabilities expanded under pressure.",
+            "resilience_after_growth": round(self.internal_resilience, 2)
+        }
+
+    def mentor_override(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "core": "ROCKY",
+            "action": "MENTOR_OVERRIDE",
+            "status": "Stable environment detected. Providing long-term guidance.",
+            "guidance": "Focus on gradual improvement and structural integrity.",
+            "resilience": round(self.internal_resilience, 2)
+        }
+
+# =============================================================================
+# 4. RAMBO_CORE (bez zmian)
+# =============================================================================
+
+class RamboCore:
+    def __init__(self, precision_factor: float = 0.9):
+        self.precision_factor = precision_factor
+        self.stealth_charge = 0.0
+        self.precision_boost = 0.0
+
+    def execute(self, context: Dict[str, Any], micro_stamina: Dict[str, Any] = None) -> Dict[str, Any]:
+        threat = context.get("threat_level", 0.0)
+        chaos = context.get("chaos_level", 0.0)
+        resource = context.get("resource_availability", 100.0)
+        leverage = (threat * self.precision_factor + (100 - chaos) * 0.1) * (1 + self.precision_boost * 0.1)
+        return {
+            "core": "RAMBO",
+            "action": "Precision Strike",
+            "leverage_point": f"Bottleneck at threat {threat:.1f}, chaos {chaos:.1f}",
+            "tactical_result": f"Precision execution with leverage {leverage:.1f} (boost {self.precision_boost:.2f}).",
+            "resource_used": min(20.0, resource * 0.1),
+            "micro_stamina": micro_stamina or {}
+        }
+
+    def shadow_ops(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        self.stealth_charge += 10.0
+        return {
+            "core": "RAMBO",
+            "action": "Shadow Ops",
+            "stealth_level": "MAXIMUM",
+            "status": "Bypassed active monitoring. Silent processing engaged.",
+            "stealth_charge": round(self.stealth_charge, 2)
+        }
+
+    def analysis(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "core": "RAMBO",
+            "action": "Situational Analysis",
+            "threat_assessment": context.get("threat_level", 0.0),
+            "chaos_assessment": context.get("chaos_level", 0.0),
+            "terrain_assessment": context.get("terrain", "unknown"),
+            "recommendation": "Strike at highest threat node."
+        }
+
+    def operator_override(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "core": "RAMBO",
+            "action": "OPERATOR_OVERRIDE",
+            "status": "High threat environment. Taking tactical command.",
+            "directive": "Eliminate immediate threats with maximum efficiency.",
+            "stealth_charge": round(self.stealth_charge, 2)
+        }
+
+# =============================================================================
+# 5. FRAKTAL ENGINE (bez zmian)
+# =============================================================================
+
+class FractalEngine:
+    @staticmethod
+    def run(core_obj: Any, mode: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        if mode == "A_Micro_Tactics" and hasattr(core_obj, 'analysis'):
+            return core_obj.analysis(data)
+        elif mode == "B_Micro_Stamina" and hasattr(core_obj, 'stabilize'):
+            return core_obj.stabilize()
+        elif mode == "C_Regeneration":
+            return {"fractal": "C", "status": "Regeneration cycle initiated", "recovery": 15.0}
+        elif mode == "D_LongTerm_Analysis":
+            return {"fractal": "D", "status": "Long-term pattern detected", "trend": "upward"}
+        elif mode == "E_Decision_Minimalism":
+            return {"fractal": "E", "status": "Minimalist decision pruning", "complexity_reduced": 30}
+        elif mode == "F_High_Precision":
+            return {"fractal": "F", "status": "High precision mode", "accuracy_boost": 25}
+        elif mode == "G_Meditation":
+            return {"fractal": "G", "status": "Internal noise cleared", "clarity": 95}
+        elif mode == "H_Nomad":
+            return {"fractal": "H", "status": "Low-energy nomad mode", "energy_save": 40}
+        elif mode == "I_Omega":
+            return {"fractal": "I", "status": "Omega cycle – phase closed", "reset": True}
+        elif mode == "J_Guardian":
+            return {"fractal": "J", "status": "Guardian shield active", "protection": 70}
+        elif mode == "K_Phoenix_Feather":
+            return {"fractal": "K", "status": "Phoenix feather – minor restore", "restore": 10}
+        elif mode == "L_Shadow_Weave":
+            return {"fractal": "L", "status": "Shadow weave – enhanced stealth", "stealth": 90}
+        elif mode == "M_Core_Reconstruction":
+            return {"fractal": "M", "status": "Core structural reconstruction", "integrity": 85}
+        elif mode == "N_Synaptic_Plasticity":
+            return {"fractal": "N", "status": "Synaptic plasticity – learning rate +20%", "learning": 20}
+        elif mode == "O_Resonance_Frequency":
+            return {"fractal": "O", "status": "Resonance frequency matched", "harmony": 98}
+        else:
+            return {"fractal": "IDLE", "status": "No fractal operation"}
+
+# =============================================================================
+# 6. INTEGRATOR STALLONE (bez zmian)
+# =============================================================================
+
+class IntegratorStallone:
+    def __init__(self):
+        self.terrain_mods = {
+            "urban": {"threat_offset": 0, "chaos_offset": 0, "weight_rambo": 0.1},
+            "wilderness": {"threat_offset": -10, "chaos_offset": -10, "weight_rambo": -0.1},
+            "cyber": {"threat_offset": 10, "chaos_offset": 5, "weight_rambo": 0.15},
+            "social": {"threat_offset": -5, "chaos_offset": 15, "weight_rambo": -0.05}
+        }
+
+    def select_state(self, context: Dict[str, Any], challenge: Dict[str, Any],
+                     profile: StalloneProfile, memory: LongTermMemory,
+                     energy: float, fatigue: float) -> str:
+        if energy < 10.0 and fatigue > 90.0 and context.get("threat_level", 0) > 90.0:
+            return "GLADIATOR"
+        if energy < 15.0 or fatigue > 85.0:
+            return "PHOENIX_RECOVERY"
+        if energy > 90.0 and fatigue < 20.0 and context.get("chaos_level", 50) < 40.0:
+            return "ULTRA_PRIME_FLOW"
+
+        threat = context.get("threat_level", 0.0)
+        chaos = context.get("chaos_level", 0.0)
+        emotional = context.get("emotional_pressure", 0.0)
+        long_term = challenge.get("long_term", False)
+
+        if chaos < 30 and threat < 20 and long_term:
+            return "MENTOR_OVERRIDE"
+        if chaos > 70 and threat > 60 and emotional > 50:
+            return "OPERATOR_OVERRIDE"
+
+        terrain = context.get("terrain", "urban")
+        mods = self.terrain_mods.get(terrain, self.terrain_mods["urban"])
+        threat_threshold = 70 + mods["threat_offset"]
+        chaos_threshold = 50 + mods["chaos_offset"]
+
+        base_weight_rambo = 0.5
+        adapted_weight = memory.get_adaptive_weight(base_weight_rambo)
+        bias_adjust = (adapted_weight - 0.5) * 20
+        threat_threshold += bias_adjust
+
+        if threat > threat_threshold:
+            return "RAMBO_MODE"
+        if long_term and chaos < 60.0:
+            return "ROCKY_MODE"
+        if chaos > chaos_threshold:
+            return "BALANCE_MODE"
+        if emotional > 60.0:
+            return "SHADOW_MODE"
+        if threat < 40 and chaos < 30 and energy > 70 and fatigue < 40:
+            return "HYBRID_DRAGON_MODE"
+        return "PRIME_MODE"
+
+    def merge(self, rocky_res: Dict, rambo_res: Dict, weight_rambo: float) -> Dict:
+        w_rocky = 1.0 - weight_rambo
+        return {
+            "merged_mode": "BALANCE",
+            "weights": {"rocky": round(w_rocky, 2), "rambo": round(weight_rambo, 2)},
+            "rocky_component": rocky_res,
+            "rambo_component": rambo_res
+        }
+
+    def merge_shadow(self, rambo_res: Dict, rocky_res: Dict, fatigue: float) -> Dict:
+        w_rambo = max(0.3, min(0.7, 0.7 - fatigue * 0.004))
+        w_rocky = 1.0 - w_rambo
+        return {
+            "merged_mode": "SHADOW",
+            "weights": {"rocky": round(w_rocky, 2), "rambo": round(w_rambo, 2)},
+            "fatigue_mitigation": f"Fatigue {fatigue:.1f} suppressed.",
+            "primary_shadow": rambo_res,
+            "secondary_anchor": rocky_res
+        }
+
+    def merge_prime(self, rocky_res: Dict, rambo_res: Dict, energy: float) -> Dict:
+        w_rocky = max(0.4, min(0.8, 0.6 + (100 - energy) * 0.002))
+        w_rambo = 1.0 - w_rocky
+        return {
+            "merged_mode": "PRIME",
+            "weights": {"rocky": round(w_rocky, 2), "rambo": round(w_rambo, 2)},
+            "system_efficiency": f"Prime capacity at energy {energy:.1f}.",
+            "growth_expansion": rocky_res,
+            "tactical_overview": rambo_res
+        }
+
+    def merge_dragon(self, rocky_res: Dict, rambo_res: Dict, heilong_suggestion: Dict) -> Dict:
+        return {
+            "merged_mode": "HYBRID_DRAGON",
+            "status": "Stallone + HEILONG synergy active.",
+            "stability_score": 95,
+            "precision_score": 97,
+            "energy_cost": "minimal",
+            "rocky_foundation": rocky_res,
+            "rambo_tactics": rambo_res,
+            "heilong_strategy": heilong_suggestion
+        }
+
+# =============================================================================
+# 7. INSTINCT (bez zmian)
+# =============================================================================
+
+class InstinctPredictor:
+    def __init__(self):
+        self.confidence_threshold = 0.8
+        self.last_prediction = None
+
+    def predict(self, history: List[Dict], context: Dict) -> Tuple[Optional[str], float]:
+        if len(history) < 3:
+            return None, 0.0
+        recent_scores = [h.get("score", 50) for h in history[-5:]]
+        if len(recent_scores) >= 3:
+            trend = recent_scores[-1] - recent_scores[-3]
+            last_state = history[-1].get("state", "")
+            if trend > 10 and last_state in ["PRIME_MODE", "ULTRA_PRIME_FLOW"]:
+                confidence = min(0.9, 0.6 + trend / 100)
+                return last_state, confidence
+            if trend < -10:
+                return "SHADOW_MODE", 0.75
+        terrain = context.get("terrain", "urban")
+        if terrain == "cyber" and context.get("threat_level", 0) > 60:
+            return "RAMBO_MODE", 0.85
+        if terrain == "wilderness" and context.get("chaos_level", 0) < 30:
+            return "ROCKY_MODE", 0.82
+        return None, 0.0
+
+# =============================================================================
+# 8. KERNEL INTEGRATION – NOWOŚĆ v1.1
+# =============================================================================
+
+class KernelHookManager:
+    """
+    Zarządza hookami do GEON_OS_KERNEL (71).
+    Hooki przed- i po-cyklu, przerwania systemowe.
+    """
+    def __init__(self, agent_id: str = "STALLONE_AGENT"):
+        self.agent_id = agent_id
+        self.pre_hooks: List[Callable] = []
+        self.post_hooks: List[Callable] = []
+        self.interrupt_handlers: Dict[str, Callable] = {}
+        self.priority = AGENT_PRIORITY
+
+    def register_pre_hook(self, hook: Callable) -> None:
+        self.pre_hooks.append(hook)
+
+    def register_post_hook(self, hook: Callable) -> None:
+        self.post_hooks.append(hook)
+
+    def register_interrupt_handler(self, interrupt_type: str, handler: Callable) -> None:
+        self.interrupt_handlers[interrupt_type] = handler
+
+    def trigger_pre_hooks(self, context: Dict) -> Dict:
+        for hook in self.pre_hooks:
+            try:
+                context = hook(context)
+            except Exception as e:
+                log(f"Pre-hook error: {e}", "WARN")
+        return context
+
+    def trigger_post_hooks(self, result: Dict) -> Dict:
+        for hook in self.post_hooks:
+            try:
+                result = hook(result)
+            except Exception as e:
+                log(f"Post-hook error: {e}", "WARN")
+        return result
+
+    def handle_interrupt(self, interrupt_type: str, data: Dict) -> Dict:
+        if interrupt_type in self.interrupt_handlers:
+            return self.interrupt_handlers[interrupt_type](data)
+        return {"status": "ignored", "reason": f"No handler for {interrupt_type}"}
+
+    def get_priority(self) -> int:
+        return self.priority
+
+
+class SystemInterruptHandler:
+    """
+    Obsługa przerwań systemowych – np. emergency stop, rekonfiguracja.
+    """
+    @staticmethod
+    def emergency_stop(data: Dict) -> Dict:
+        log("🔥 EMERGENCY STOP – natychmiastowe wstrzymanie działania!", "CRITICAL")
+        return {"action": "EMERGENCY_STOP", "status": "HALTED"}
+
+    @staticmethod
+    def reconfigure(data: Dict) -> Dict:
+        log(f"🔄 REKONFIGURACJA – nowe parametry: {data}", "INFO")
+        return {"action": "RECONFIGURE", "status": "PENDING", "params": data}
+
+    @staticmethod
+    def soft_reset(data: Dict) -> Dict:
+        log(f"🔁 SOFT RESET – przywrócenie domyślnych ustawień", "INFO")
+        return {"action": "SOFT_RESET", "status": "COMPLETE"}
+
+
+class PriorityScheduler:
+    """
+    Integracja z schedulerem priorytetów GEON_OS_KERNEL.
+    Umożliwia ustalanie priorytetu i żądanie czasu procesora.
+    """
+    def __init__(self, agent_id: str = "STALLONE_AGENT"):
+        self.agent_id = agent_id
+        self.base_priority = AGENT_PRIORITY
+        self.current_priority = self.base_priority
+        self.quantum_used = 0
+        self.quantum_limit = 10  # liczba cykli przed zezwoleniem na przejęcie
+
+    def request_processing_time(self, urgency: float) -> bool:
+        """
+        Prosi o czas procesora. Zwraca True, jeśli agent może kontynuować.
+        """
+        # Jeśli priorytet został podniesiony, zawsze kontynuuj
+        if self.current_priority > self.base_priority:
+            return True
+
+        # Jeśli zużyto kwantum, oddaj kontrolę
+        if self.quantum_used >= self.quantum_limit:
+            self.quantum_used = 0
+            return False
+
+        self.quantum_used += 1
+        return True
+
+    def raise_priority(self, urgency: float) -> None:
+        """
+        Podnosi priorytet w sytuacjach krytycznych.
+        """
+        if urgency > 0.8:
+            self.current_priority = min(10, self.base_priority + 3)
+        elif urgency > 0.5:
+            self.current_priority = min(10, self.base_priority + 1)
+        else:
+            self.current_priority = self.base_priority
+
+    def lower_priority(self) -> None:
+        self.current_priority = self.base_priority
+        self.quantum_used = 0
+
+    def get_current_priority(self) -> int:
+        return self.current_priority
+
+# =============================================================================
+# 9. TEAM INTEGRATION – NOWOŚĆ v1.1
+# =============================================================================
+
+class TeamCoreCommunicator:
+    """
+    Komunikacja z TEAM_CORE (77). Wymiana stanów, koordynacja, zadania.
+    """
+    def __init__(self, agent_id: str = "STALLONE_AGENT"):
+        self.agent_id = agent_id
+        self.team_state: Dict[str, Any] = {}
+        self.assigned_task: Optional[Dict] = None
+        self.shared_intent: Dict[str, float] = {}
+        self.communication_log: List[Dict] = []
+
+    def sync_state(self, state: Dict[str, Any]) -> None:
+        """Wysyła stan agenta do TEAM_CORE."""
+        self.team_state.update(state)
+        log(f"[TEAM] Stan zsynchronizowany: {state.get('state', 'IDLE')}", "INFO")
+        self.communication_log.append({"type": "sync", "state": state, "time": time.time()})
+
+    def receive_task(self, task: Dict[str, Any]) -> None:
+        """Odbiera zadanie od TEAM_CORE."""
+        self.assigned_task = task
+        log(f"[TEAM] Otrzymano zadanie: {task.get('name', 'UNKNOWN')}", "INFO")
+        self.communication_log.append({"type": "task", "task": task, "time": time.time()})
+
+    def report_completion(self, result: Dict[str, Any]) -> None:
+        """Raportuje ukończenie zadania do TEAM_CORE."""
+        log(f"[TEAM] Zadanie ukończone: {result.get('status', 'DONE')}", "INFO")
+        self.communication_log.append({"type": "completion", "result": result, "time": time.time()})
+        self.assigned_task = None
+
+    def get_team_intent(self) -> Dict[str, float]:
+        """Pobiera intencję zespołu (np. współczynniki koordynacji)."""
+        return self.shared_intent
+
+    def update_intent(self, intent: Dict[str, float]) -> None:
+        """Aktualizuje intencję agenta dla zespołu."""
+        self.shared_intent.update(intent)
+
+    def has_task(self) -> bool:
+        return self.assigned_task is not None
+
+    def get_current_task(self) -> Optional[Dict]:
+        return self.assigned_task
+
+# =============================================================================
+# 10. MEM_Ω INTEGRATION – NOWOŚĆ v1.1
+# =============================================================================
+
+class MemOmegaIntegrator:
+    """
+    Pełna integracja z GEON_MEM_Ω (45). Kwintesencja pamięci, rezonans.
+    """
+    def __init__(self, agent_id: str = "STALLONE_AGENT"):
+        self.agent_id = agent_id
+        self.quintessence: Dict[str, Any] = {}  # kwintesencja – wzorce kluczowe
+        self.memory_resonance: float = 0.0
+        self.last_recall: Optional[Dict] = None
+
+    def store_pattern(self, pattern_id: str, data: Dict[str, Any]) -> None:
+        """
+        Zapisuje wzorzec w pamięci kwintesencji.
+        """
+        self.quintessence[pattern_id] = {
+            "data": data,
+            "timestamp": time.time(),
+            "agent": self.agent_id
+        }
+        log(f"[MEM_Ω] Zapisano wzorzec: {pattern_id}", "INFO")
+
+    def recall_pattern(self, pattern_id: str) -> Optional[Dict]:
+        """
+        Odczytuje wzorzec z pamięci kwintesencji.
+        """
+        if pattern_id in self.quintessence:
+            self.last_recall = self.quintessence[pattern_id]
+            self._update_resonance(self.quintessence[pattern_id])
+            return self.quintessence[pattern_id]["data"]
+        return None
+
+    def find_similar_pattern(self, context: Dict[str, Any]) -> Optional[Tuple[str, float]]:
+        """
+        Szuka podobnego wzorca w pamięci kwintesencji (rezonans).
+        Zwraca (pattern_id, similarity_score).
+        """
+        best_match = None
+        best_score = 0.0
+
+        for pid, entry in self.quintessence.items():
+            data = entry["data"]
+            # Prosta heurystyka podobieństwa – można rozbudować
+            score = self._calculate_similarity(context, data)
+            if score > best_score:
+                best_score = score
+                best_match = pid
+
+        if best_match and best_score > 0.3:
+            self.memory_resonance = best_score
+            return best_match, best_score
+        return None
+
+    def _calculate_similarity(self, context: Dict, stored: Dict) -> float:
+        """
+        Oblicza podobieństwo między kontekstem a przechowywanym wzorcem.
+        """
+        # Podstawowa heurystyka – porównanie typów i wag
+        score = 0.0
+        for key in ["threat_level", "chaos_level", "terrain"]:
+            if key in context and key in stored:
+                if context[key] == stored[key]:
+                    score += 0.5
+                else:
+                    # Im mniejsza różnica, tym wyższy wynik
+                    try:
+                        diff = abs(context[key] - stored[key])
+                        score += max(0, 1.0 - diff / 100.0) * 0.5
+                    except TypeError:
+                        pass
+        return min(1.0, score)
+
+    def _update_resonance(self, entry: Dict) -> None:
+        """
+        Aktualizuje rezonans pamięci na podstawie odczytanego wzorca.
+        """
+        # Rezonans rośnie z czasem od ostatniego odczytu
+        elapsed = time.time() - entry.get("timestamp", time.time())
+        decay = math.exp(-elapsed / 3600.0)  # 1 godzina półtrwania
+        self.memory_resonance = max(0.0, min(1.0, 0.5 + 0.5 * decay))
+
+    def get_quintessence(self) -> Dict[str, Any]:
+        return self.quintessence
+
+    def get_resonance(self) -> float:
+        return self.memory_resonance
+
+    def clear(self) -> None:
+        self.quintessence.clear()
+        self.memory_resonance = 0.0
+
+# =============================================================================
+# 11. GŁÓWNY MODUŁ GEON_STALLONE v3.1 – z integracjami
+# =============================================================================
+
+class GEONStalloneModule:
+    """
+    Główny moduł operacyjny z pełną integracją v3.1.
+    Rozszerzony o KERNEL, TEAM i MEM_Ω.
+    """
+    def __init__(self, legacy_config: Dict[str, Any] = None, agent_id: str = "STALLONE_AGENT"):
+        # Rdzenie (bez zmian)
+        self.rocky = RockyCore(rebound_factor=1.25)
+        self.rambo = RamboCore(precision_factor=0.9)
+        self.integrator = IntegratorStallone()
+        self.fractal = FractalEngine()
+        self.memory = LongTermMemory()
+        self.instinct = InstinctPredictor()
+
+        self.profile = StalloneProfile()
+        if legacy_config:
+            self.profile.legacy_config = legacy_config
+            if "heilong" in legacy_config:
+                self.profile.adaptive_bias["rambo"] += 0.1
+            if "osmiornica" in legacy_config:
+                self.profile.adaptive_bias["rocky"] += 0.05
+            if "rings" in legacy_config:
+                self.profile.adaptive_bias["rocky"] += 0.02
+            if "olsii" in legacy_config:
+                self.rocky.heart_drive_bonus = 0.2
+            if "beny" in legacy_config:
+                self.rambo.precision_boost = 0.15
+
+        self.energy = 100.0
+        self.fatigue = 0.0
+        self.current_state = "IDLE"
+        self.cycle_count = 0
+        self.history: List[Dict[str, Any]] = []
+        self.heilong_suggestion = {"strategy": "balanced_offensive", "priority": "medium"}
+
+        # --- NOWE INTEGRACJE v1.1 ---
+        self.agent_id = agent_id
+        # Kernel
+        self.kernel_hook = KernelHookManager(agent_id)
+        self.interrupt_handler = SystemInterruptHandler()
+        self.scheduler = PriorityScheduler(agent_id)
+        # Rejestracja domyślnych przerwań
+        self.kernel_hook.register_interrupt_handler("EMERGENCY_STOP", self.interrupt_handler.emergency_stop)
+        self.kernel_hook.register_interrupt_handler("RECONFIGURE", self.interrupt_handler.reconfigure)
+        self.kernel_hook.register_interrupt_handler("SOFT_RESET", self.interrupt_handler.soft_reset)
+        # Team
+        self.team = TeamCoreCommunicator(agent_id)
+        # MemΩ
+        self.mem_omega = MemOmegaIntegrator(agent_id)
+
+        log(f"🐉 GEON_STALLONE_AGENT_v1.1 załadowany – ID: {agent_id}", "INFO")
+
+    def calc_momentum(self) -> float:
+        if len(self.history) < 2:
+            return 50.0
+        scores = [h.get("score", 50) for h in self.history[-3:]]
+        avg_score = sum(scores) / len(scores)
+        trend = scores[-1] - scores[0] if len(scores) > 1 else 0
+        momentum = (avg_score * 0.6) + (trend * 0.4) + (self.energy * 0.1) - (self.fatigue * 0.2)
+        return max(0.0, min(100.0, momentum))
+
+    def calc_sri(self) -> float:
+        heart = self.profile.heart
+        shadow = self.profile.shadow
+        resilience = self.rocky.internal_resilience / 100.0
+        awareness = self.rambo.stealth_charge / 100.0
+        fatigue_penalty = self.fatigue * 0.3 / 100.0
+        sri = (heart * resilience + shadow * awareness) - fatigue_penalty
+        if "heilong" in self.profile.legacy_config:
+            sri += 0.1
+        if self.profile.momentum > 70:
+            sri *= 1.2
+        return max(0.0, min(100.0, sri * 100))
+
+    def update_fatigue(self, entropy: float) -> float:
+        increment = (entropy * 0.1) + (2.0 if self.energy < 30.0 else 0.5)
+        increment = math.log(1 + increment) * 1.5
+        self.fatigue = min(100.0, self.fatigue + increment)
+        return self.fatigue
+
+    def adjust_energy(self, delta: float) -> None:
+        terrain = self.profile.terrain_profile
+        cost_mod = 1.0
+        if terrain == "wilderness":
+            cost_mod = 0.8
+        elif terrain == "cyber":
+            cost_mod = 1.2
+        regen_factor = 0.5 + self.profile.heart * 0.3
+        if delta < 0:
+            self.energy = max(0.0, self.energy + delta * cost_mod)
+        else:
+            self.energy = min(100.0, self.energy + delta * regen_factor)
+
+    def dispatch(self, state: str, context: Dict, challenge: Dict) -> Dict:
+        output = {"state": state, "cycle": self.cycle_count}
+
+        # Przerwania systemowe – sprawdzenie przed wykonaniem
+        if self.kernel_hook.handle_interrupt("EMERGENCY_STOP", {}).get("status") == "HALTED":
+            return {"state": "HALTED", "result": {"status": "EMERGENCY_STOP"}}
+
+        # Wybór stanu
+        if state == "ROCKY_MODE":
+            micro = self.fractal.run(self.rambo, "A_Micro_Tactics", context)
+            result = self.rocky.execute(challenge, micro)
+            self.adjust_energy(result.get("absorbed_energy", 0) * 0.2)
+            output["result"] = result
+
+        elif state == "RAMBO_MODE":
+            micro = self.fractal.run(self.rocky, "B_Micro_Stamina", context)
+            result = self.rambo.execute(context, micro)
+            self.adjust_energy(-8.0)
+            output["result"] = result
+
+        elif state == "BALANCE_MODE":
+            rocky_out = self.rocky.execute(challenge)
+            rambo_out = self.rambo.execute(context)
+            chaos = context.get("chaos_level", 50)
+            base_weight = 0.5 + 0.004 * (chaos - 50)
+            adapted_weight = self.memory.get_adaptive_weight(base_weight)
+            merged = self.integrator.merge(rocky_out, rambo_out, adapted_weight)
+            self.adjust_energy(-3.0)
+            output["result"] = merged
+
+        elif state == "SHADOW_MODE":
+            rambo_silent = self.rambo.shadow_ops(context)
+            rocky_stab = self.rocky.stabilize()
+            merged = self.integrator.merge_shadow(rambo_silent, rocky_stab, self.fatigue)
+            self.fatigue = max(0.0, self.fatigue - 15.0)
+            output["result"] = merged
+
+        elif state == "PRIME_MODE":
+            rocky_grow = self.rocky.growth(challenge)
+            rambo_anal = self.rambo.analysis(context)
+            merged = self.integrator.merge_prime(rocky_grow, rambo_anal, self.energy)
+            self.adjust_energy(-5.0)
+            output["result"] = merged
+
+        elif state == "ULTRA_PRIME_FLOW":
+            rocky_out = self.rocky.execute(challenge)
+            rambo_out = self.rambo.execute(context)
+            merged = self.integrator.merge(rocky_out, rambo_out, 0.4)
+            self.adjust_energy(-2.0)
+            output["result"] = merged
+            output["ultra_bonus"] = {"speed": "+30%", "cost": "-20%", "score": "+15%"}
+
+        elif state == "HYBRID_DRAGON_MODE":
+            rocky_out = self.rocky.stabilize()
+            rambo_out = self.rambo.analysis(context)
+            merged = self.integrator.merge_dragon(rocky_out, rambo_out, self.heilong_suggestion)
+            self.adjust_energy(-1.0)
+            output["result"] = merged
+
+        elif state == "MENTOR_OVERRIDE":
+            result = self.rocky.mentor_override(context)
+            self.adjust_energy(-2.0)
+            output["result"] = result
+
+        elif state == "OPERATOR_OVERRIDE":
+            result = self.rambo.operator_override(context)
+            self.adjust_energy(-10.0)
+            output["result"] = result
+
+        elif state == "PHOENIX_RECOVERY":
+            phase1 = {"phase": "1/3", "action": "Emotional stabilization"}
+            phase2 = {"phase": "2/3", "action": "Micro-noise clearing"}
+            phase3 = {"phase": "3/3", "action": "Priority reconstruction"}
+            self.energy = 80.0
+            self.fatigue = 0.0
+            self.rocky.internal_resilience = max(10.0, self.rocky.internal_resilience * 0.5)
+            output["result"] = {
+                "action": "PHOENIX_RECOVERY_2.0",
+                "phases": [phase1, phase2, phase3],
+                "status": "Energy restored to 80%, fatigue cleared, core stabilized."
+            }
+
+        elif state == "GLADIATOR":
+            rocky_raw = self.rocky.execute(challenge)
+            rambo_raw = self.rambo.execute(context)
+            output["result"] = {
+                "action": "GLADIATOR",
+                "rocky_raw": rocky_raw,
+                "rambo_raw": rambo_raw,
+                "status": "Total force deployed. No filters. Reboot required."
+            }
+            self.energy = 5.0
+            self.fatigue = 99.0
+
+        else:
+            output["result"] = {"status": "IDLE", "message": "No valid state executed"}
+
+        # Post-hook – zapisz w pamięci kwintesencji
+        self.mem_omega.store_pattern(f"cycle_{self.cycle_count}", {
+            "state": state,
+            "energy": self.energy,
+            "fatigue": self.fatigue,
+            "score": output.get("result", {}).get("score", 0)
+        })
+
+        return output
+
+    def process_cycle(self, context: Dict[str, Any], challenge: Dict[str, Any]) -> Dict[str, Any]:
+        self.cycle_count += 1
+        entropy = context.get("entropy", 5.0)
+
+        # --- HOOK PRE-CYCLE ---
+        context = self.kernel_hook.trigger_pre_hooks(context)
+
+        # --- SCHEDULER – sprawdzenie, czy agent może kontynuować ---
+        urgency = max(context.get("threat_level", 0.0) / 100.0,
+                      context.get("chaos_level", 0.0) / 100.0)
+        self.scheduler.raise_priority(urgency)
+        if not self.scheduler.request_processing_time(urgency):
+            log("Agent oddaje kontrolę – kwantum wyczerpane", "INFO")
+            return {"state": "PAUSED", "metrics": self.get_metrics()}
+
+        # --- AKTUALIZACJA ---
+        self.update_fatigue(entropy)
+        self.profile.terrain_profile = context.get("terrain", "urban")
+
+        # --- INSTINCT ---
+        inst_state, inst_conf = self.instinct.predict(self.history, context)
+        self.profile.instinct_confidence = inst_conf
+
+        if inst_state and inst_conf > 0.8:
+            state = inst_state
+        else:
+            state = self.integrator.select_state(
+                context, challenge, self.profile, self.memory, self.energy, self.fatigue
+            )
+
+        # --- WYKONANIE ---
+        self.profile.momentum = self.calc_momentum()
+        self.profile.sri = self.calc_sri()
+
+        output = self.dispatch(state, context, challenge)
+        self.current_state = state
+
+        # --- OCENA SKUTECZNOŚCI ---
+        base_score = 100.0 - (self.fatigue * 0.4) + (self.energy * 0.3)
+        sri_bonus = self.profile.sri * 0.2
+        momentum_bonus = self.profile.momentum * 0.1
+        score = min(100.0, max(0.0, base_score + sri_bonus + momentum_bonus))
+
+        cycle_data = {
+            "cycle": self.cycle_count,
+            "state": state,
+            "energy": round(self.energy, 2),
+            "fatigue": round(self.fatigue, 2),
+            "score": round(score, 2),
+            "sri": round(self.profile.sri, 2),
+            "momentum": round(self.profile.momentum, 2)
+        }
+        self.history.append(cycle_data)
+        if len(self.history) > 20:
+            self.history.pop(0)
+        self.memory.update(cycle_data)
+
+        # --- TEAM CORE – synchronizacja stanu ---
+        self.team.sync_state(cycle_data)
+
+        # --- MEM_Ω – rezonans i zapis ---
+        # Szukamy podobnego wzorca
+        similar = self.mem_omega.find_similar_pattern(context)
+        if similar:
+            pattern_id, score = similar
+            log(f"[MEM_Ω] Znaleziono rezonans: {pattern_id} (score: {score:.2f})", "INFO")
+            # Zastosuj rezonans – modyfikacja decyzji
+            if score > 0.7:
+                output["resonance_boost"] = True
+
+        # --- METRYKI ---
+        output["metrics"] = self.get_metrics()
+
+        # --- HOOK POST-CYCLE ---
+        output = self.kernel_hook.trigger_post_hooks(output)
+
+        # Obniżenie priorytetu po cyklu
+        self.scheduler.lower_priority()
+
+        return output
+
+    def get_metrics(self) -> Dict[str, float]:
+        return {
+            "energy": round(self.energy, 2),
+            "fatigue": round(self.fatigue, 2),
+            "score": round(self.history[-1]["score"], 2) if self.history else 50.0,
+            "sri": round(self.profile.sri, 2),
+            "momentum": round(self.profile.momentum, 2),
+            "instinct_confidence": round(self.profile.instinct_confidence, 2),
+            "memory_resonance": round(self.mem_omega.get_resonance(), 2)
+        }
+
+    def handle_system_interrupt(self, interrupt_type: str, data: Dict) -> Dict:
+        return self.kernel_hook.handle_interrupt(interrupt_type, data)
+
+    def get_team_state(self) -> Dict:
+        return self.team.team_state
+
+    def get_quintessence(self) -> Dict:
+        return self.mem_omega.get_quintessence()
+
+# =============================================================================
+# 12. MOSTEK INTEGRACYJNY (zaktualizowany)
+# =============================================================================
+
+class GEONStalloneBridge:
+    def __init__(self, trunk, heilong, osmiornica, team_core=None, os_kernel=None):
+        self.trunk = trunk
+        self.heilong = heilong
+        self.osmiornica = osmiornica
+        self.team_core = team_core
+        self.os_kernel = os_kernel
+
+        self.stallone = GEONStalloneModule(
+            legacy_config={
+                "heilong": True,
+                "osmiornica": True,
+                "olsii": True,
+                "beny": True,
+                "rings": True
+            },
+            agent_id="STALLONE_BRIDGE"
+        )
+        self.energy = 100.0
+        self.fatigue = 0.0
+        self.last_state = "IDLE"
+
+        # Rejestracja hooków w OS Kernel
+        if self.os_kernel:
+            self._register_kernel_hooks()
+
+    def _register_kernel_hooks(self):
+        if hasattr(self.os_kernel, 'register_agent'):
+            self.os_kernel.register_agent("STALLONE_AGENT", self.stallone.scheduler.get_current_priority())
+
+    def map_environment(self, env: Dict[str, Any]) -> Dict[str, Any]:
+        ctx = EnvironmentContext(
+            threat_level=env.get("threat", 0.0),
+            chaos_level=env.get("chaos", 0.0),
+            emotional_pressure=env.get("emotional", 0.0),
+            entropy=env.get("entropy", 5.0),
+            terrain=env.get("terrain", "urban"),
+            social_pressure=env.get("social", 0.0),
+            resource_availability=env.get("resources", 100.0),
+            time_active=env.get("time_active", 0.0),
+        )
+        return ctx.__dict__
+
+    def map_challenge(self, ch: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "impact": ch.get("impact", 10.0),
+            "difficulty": ch.get("difficulty", 5.0),
+            "long_term": ch.get("long_term", False),
+            "emotional_weight": ch.get("emotional_weight", 0.5),
+        }
+
+    def process(self, env: Dict[str, Any], ch: Dict[str, Any]) -> Dict[str, Any]:
+        context = self.map_environment(env)
+        challenge = self.map_challenge(ch)
+
+        # Jeśli mamy zadanie od TEAM_CORE, dodaj je do kontekstu
+        if self.team_core and self.stallone.team.has_task():
+            task = self.stallone.team.get_current_task()
+            context["team_task"] = task
+
+        stallone_out = self.stallone.process_cycle(context, challenge)
+
+        self.energy = stallone_out["metrics"]["energy"]
+        self.fatigue = stallone_out["metrics"]["fatigue"]
+        self.last_state = stallone_out["state"]
+
+        self.heilong.receive_shadow_vector({
+            "stealth": self.stallone.rambo.stealth_charge,
+            "fatigue": self.fatigue,
+            "state": self.last_state
+        })
+
+        self.osmiornica.route({
+            "rocky_resilience": self.stallone.rocky.internal_resilience,
+            "rambo_precision": self.stallone.rambo.precision_factor,
+            "fractal": stallone_out.get("fractal_pulse", {})
+        })
+
+        self.trunk.update_meta_state({
+            "stallone_state": self.last_state,
+            "sri": stallone_out["metrics"]["sri"],
+            "momentum": stallone_out["metrics"]["momentum"],
+            "energy": self.energy,
+            "fatigue": self.fatigue
+        })
+
+        # Raport do TEAM_CORE
+        if self.team_core:
+            self.stallone.team.report_completion({
+                "status": stallone_out["state"],
+                "score": stallone_out["metrics"]["score"]
+            })
+
+        return {
+            "stallone_state": self.last_state,
+            "stallone_output": stallone_out,
+            "energy": self.energy,
+            "fatigue": self.fatigue,
+            "memory_resonance": stallone_out["metrics"]["memory_resonance"]
+        }
+
+# =============================================================================
+# 13. DEMONSTRACJA
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🥊 GEON_STALLONE_AGENT_v1.1 — DEMONSTRACJA Z INTEGRACJAMI")
+    print("KERNEL (71) + TEAM (77) + MEM_Ω (45)")
+    print("=" * 80 + "\n")
+
+    # Mocki komponentów systemowych
+    class DummyTrunk:
+        def update_meta_state(self, data):
+            print(f"[DRAGON_TRUNK] {data}")
+
+    class DummyHeilong:
+        def receive_shadow_vector(self, data):
+            print(f"[HEILONG] {data}")
+
+    class DummyOsmiornica:
+        def route(self, data):
+            print(f"[OŚMIORNICA] {data}")
+
+    class DummyTeamCore:
+        def __init__(self):
+            self.agents = {}
+
+        def register_agent(self, agent_id, priority):
+            self.agents[agent_id] = priority
+            print(f"[TEAM_CORE] Agent {agent_id} zarejestrowany (priorytet: {priority})")
+
+        def assign_task(self, agent_id, task):
+            print(f"[TEAM_CORE] Zadanie dla {agent_id}: {task}")
+
+    class DummyOSKernel:
+        def __init__(self):
+            self.agents = {}
+            self.interrupts = []
+
+        def register_agent(self, agent_id, priority):
+            self.agents[agent_id] = priority
+            print(f"[OS_KERNEL] Agent {agent_id} zarejestrowany (priorytet: {priority})")
+
+        def send_interrupt(self, agent_id, interrupt_type, data):
+            print(f"[OS_KERNEL] Przerwanie {interrupt_type} dla {agent_id} z danymi: {data}")
+            self.interrupts.append((agent_id, interrupt_type, data))
+
+    trunk = DummyTrunk()
+    heilong = DummyHeilong()
+    osmiornica = DummyOsmiornica()
+    team = DummyTeamCore()
+    os_kernel = DummyOSKernel()
+
+    bridge = GEONStalloneBridge(trunk, heilong, osmiornica, team_core=team, os_kernel=os_kernel)
+
+    # Symulacja zadania od TEAM_CORE
+    bridge.stallone.team.receive_task({"name": "scout_urban_area", "priority": "high"})
+
+    env = {
+        "threat": 72.0,
+        "chaos": 35.0,
+        "emotional": 40.0,
+        "entropy": 4.0,
+        "terrain": "urban",
+        "social": 20.0,
+        "resources": 80.0,
+        "time_active": 12.0,
+    }
+    ch = {
+        "impact": 18.0,
+        "difficulty": 7.0,
+        "long_term": True,
+        "emotional_weight": 0.6
+    }
+
+    print("\n🔮 PRZETWARZANIE CYKLU:\n")
+    out = bridge.process(env, ch)
+
+    print("\n[WYNIK MOSTKA]")
+    print(f"Stan Stallone: {out['stallone_state']}")
+    print(f"Energia: {out['energy']:.1f}, Zmęczenie: {out['fatigue']:.1f}")
+    print(f"Rezonans pamięci: {out['memory_resonance']:.2f}")
+
+    print("\n" + "=" * 80)
+    print("🥊 GEON_STALLONE_AGENT_v1.1 — GOTOWY DO WDROŻENIA")
+    print(HASLO)
+    print("=" * 80)
+
+
+if __name__ == "__main__":
+    demo()
