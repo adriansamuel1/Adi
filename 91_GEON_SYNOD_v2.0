@@ -1,0 +1,759 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_SYNOD_v2.0 — MODUŁ 91: WIELOSYSTEMOWA RADA EPOK (FULL OPTIMIZED)
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v2.0 (Synod Class – Full Integration, SPI, Drift Map, Era Vector)
+Data: 2026-07-24
+Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
+
+NOWOŚCI v2.0:
+• Walidacja raportów (Sanity Check)
+• Synod Pressure Index (SPI)
+• Waga epoki Oracle (ERA_WEIGHTS)
+• Certyfikacja z kontekstem
+• Fraktalny konsensus (lokalny/regionalny/globalny)
+• Synod Drift Map (min, max, median, std)
+• Era Vector (stabilność, transformacja, kryzys)
+• Indeksowany Egregor (szybkie zapytania)
+• Tryb dry-run
+• Thread-safe convene()
+
+VIBE: 1-6-8. ∞. SYNOD!
+================================================================================
+"""
+
+import hashlib
+import json
+import logging
+import threading
+import time
+import math
+import statistics
+from collections import deque
+from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple
+from dataclasses import dataclass, field
+from enum import Enum
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_SYNOD_v2.0"
+FRACTAL_SIGNATURE = "[GEON::SYNOD::v2.0]"
+VIBE = 168
+HASLO = "1-6-8. ∞. SYNOD!"
+DEWIZA = "Ex Unione, Consilium"
+
+MEMORY_LIMIT = 512
+
+# =============================================================================
+# STAŁE
+# =============================================================================
+
+META_OMEGA_REQUIRED = 1
+META_BETA_THRESHOLD = 0.5
+DRIFT_OMEGA_THRESHOLD = 0.65
+HEALTH_CRISIS_THRESHOLD = 0.4
+
+SPI_OMEGA_THRESHOLD = 1.2
+SPI_BETA_THRESHOLD = 0.7
+
+ERA_WEIGHTS = {
+    "ERA_KRYZYSU": 0.25,
+    "ERA_TRANSFORMACJI": 0.15,
+    "ERA_STABILNOŚCI": -0.10,
+    "ERA_NIEOKRESLONA": 0.0
+}
+
+ERA_VECTOR = {
+    "ERA_STABILNOŚCI": (1, 0, 0),
+    "ERA_TRANSFORMACJI": (0, 1, 0),
+    "ERA_KRYZYSU": (0, 0, 1),
+    "ERA_NIEOKRESLONA": (0.33, 0.33, 0.33)
+}
+
+# =============================================================================
+# LOGOWANIE
+# =============================================================================
+
+logger = logging.getLogger("GEON_SYNOD_v2.0")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('🜀 [SYNOD] %(message)s'))
+    logger.addHandler(handler)
+
+def log(msg: str, level: str = "INFO") -> None:
+    if level == "WARN":
+        logger.warning(msg)
+    elif level == "ERROR":
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+def generate_context_hash(context: Dict[str, Any]) -> str:
+    filtered_context = {k: v for k, v in context.items() 
+                        if k not in ["timestamp", "request_id", "nonce"]}
+    context_str = json.dumps(filtered_context, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(context_str.encode("utf-8")).hexdigest()
+
+# =============================================================================
+# ENUMY I STRUKTURY
+# =============================================================================
+
+class MetaDecree(Enum):
+    ALPHA = "META_ALPHA"
+    BETA = "META_BETA"
+    OMEGA = "META_OMEGA"
+
+    def description(self) -> str:
+        desc = {
+            MetaDecree.ALPHA: "Autoryzacja kontynuacji globalnego cyklu rozwojowego sieci.",
+            MetaDecree.BETA: "Synchroniczna korekta trajektorii powiązanych Dominionów.",
+            MetaDecree.OMEGA: "Globalna rekonstrukcja epoki – izolacja i restart sieci."
+        }
+        return desc.get(self, "Nieznany Meta‑Dekret.")
+
+    def numeric_value(self) -> int:
+        values = {MetaDecree.ALPHA: 0, MetaDecree.BETA: 1, MetaDecree.OMEGA: 2}
+        return values.get(self, 0)
+
+
+@dataclass
+class SystemReport:
+    system_id: str
+    council_decree: str
+    council_confidence: float
+    council_drift: float
+    grid_health: float
+    anomaly_score: float
+    oracle_era: str
+    maya_phase: int
+    dominion_substance_index: float
+    dominion_status: str
+    crisis_vectors_count: int
+    signatures: List[str]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "system_id": self.system_id,
+            "council_decree": self.council_decree,
+            "council_confidence": round(self.council_confidence, 4),
+            "council_drift": round(self.council_drift, 4),
+            "grid_health": round(self.grid_health, 4),
+            "anomaly_score": round(self.anomaly_score, 4),
+            "oracle_era": self.oracle_era,
+            "maya_phase": self.maya_phase,
+            "dominion_substance_index": round(self.dominion_substance_index, 4),
+            "dominion_status": self.dominion_status,
+            "crisis_vectors_count": self.crisis_vectors_count,
+            "signatures": self.signatures
+        }
+
+
+@dataclass
+class SynodReport:
+    meta_decree: MetaDecree
+    system_reports: List[SystemReport]
+    vote_summary: Dict[str, int]
+    average_confidence: float
+    average_drift: float
+    average_health: float
+    omega_count: int
+    beta_count: int
+    alpha_count: int
+    spi: float
+    drift_map: Dict[str, float]
+    era_vector: Tuple[float, float, float]
+    fractal_consensus: Dict[str, Any]
+    timestamp: float = field(default_factory=time.time)
+    certificate: str = ""
+    oracle_era_aggregated: Optional[str] = None
+    pressure_index: float = 0.0
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "meta_decree": self.meta_decree.value,
+            "meta_description": self.meta_decree.description(),
+            "systems_count": len(self.system_reports),
+            "system_reports": [s.to_dict() for s in self.system_reports],
+            "vote_summary": self.vote_summary,
+            "average_confidence": round(self.average_confidence, 4),
+            "average_drift": round(self.average_drift, 4),
+            "average_health": round(self.average_health, 4),
+            "omega_count": self.omega_count,
+            "beta_count": self.beta_count,
+            "alpha_count": self.alpha_count,
+            "spi": round(self.spi, 4),
+            "drift_map": self.drift_map,
+            "era_vector": [round(x, 4) for x in self.era_vector],
+            "fractal_consensus": self.fractal_consensus,
+            "pressure_index": round(self.pressure_index, 4),
+            "oracle_era_aggregated": self.oracle_era_aggregated,
+            "certificate": self.certificate,
+            "timestamp": datetime.fromtimestamp(self.timestamp).isoformat()
+        }
+
+# =============================================================================
+# EGREGOR Z INDEKSAMI
+# =============================================================================
+
+class Egregor:
+    _ledger: deque = deque(maxlen=MEMORY_LIMIT)
+    _index_by_type: Dict[str, List[int]] = {}
+    _lock: threading.Lock = threading.Lock()
+    
+    @classmethod
+    def commit(cls, entry: Dict[str, Any], node_id: str) -> None:
+        entry["node_id"] = node_id
+        entry["timestamp"] = datetime.now().isoformat()
+        with cls._lock:
+            idx = len(cls._ledger)
+            cls._ledger.append(entry)
+            entry_type = entry.get("type", "UNKNOWN")
+            cls._index_by_type.setdefault(entry_type, []).append(idx)
+    
+    @classmethod
+    def query(cls, type_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+        with cls._lock:
+            if type_filter:
+                indices = cls._index_by_type.get(type_filter, [])
+                return [cls._ledger[i] for i in indices if i < len(cls._ledger)]
+            return list(cls._ledger)
+    
+    @classmethod
+    def query_fast(cls, type_filter: str, limit: int = 10) -> List[Dict[str, Any]]:
+        with cls._lock:
+            indices = cls._index_by_type.get(type_filter, [])[-limit:]
+            return [cls._ledger[i] for i in indices if i < len(cls._ledger)]
+
+# =============================================================================
+# KRONIKI SAMAELA
+# =============================================================================
+
+class SamaelHeilong:
+    @staticmethod
+    def certyfikuj_synod(action: str, signatures: List[str], context_hash: str) -> str:
+        timestamp = datetime.now().isoformat()
+        combined = "".join(signatures) if signatures else action
+        combined_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()[:16]
+        payload = f"{timestamp}-{action}-{combined_hash}-{context_hash[:12]}-1-6-8. ∞. SIEMA!"
+        h = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16].upper()
+        return f"🔒 [SYNOD-CERT-{h}-{combined_hash[:8]}]"
+
+    @staticmethod
+    def log_event(event_type: str, payload: Dict[str, Any]) -> None:
+        ts = datetime.now().isoformat()
+        log(f"[KRONIKI SAMAELA] {ts} | {event_type} -> {payload}", "INFO")
+
+# =============================================================================
+# GŁÓWNY MODUŁ: GEON_SYNOD v2.0
+# =============================================================================
+
+class GeonSynod:
+    """
+    🜀 GEON_SYNOD v2.0 – Wielosystemowa Rada Epok z pełnymi metrykami.
+    """
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+        self.memory_limit = self.config.get("memory_limit", MEMORY_LIMIT)
+        self.history: deque = deque(maxlen=self.memory_limit)
+        self.kroniki = SamaelHeilong
+        self.egregor = Egregor
+        self._lock = threading.Lock()
+        
+        self.meta_omega_required = self.config.get("meta_omega_required", META_OMEGA_REQUIRED)
+        self.meta_beta_threshold = self.config.get("meta_beta_threshold", META_BETA_THRESHOLD)
+        self.drift_omega_threshold = self.config.get("drift_omega_threshold", DRIFT_OMEGA_THRESHOLD)
+        self.health_crisis_threshold = self.config.get("health_crisis_threshold", HEALTH_CRISIS_THRESHOLD)
+        self.spi_omega_threshold = self.config.get("spi_omega_threshold", SPI_OMEGA_THRESHOLD)
+        self.spi_beta_threshold = self.config.get("spi_beta_threshold", SPI_BETA_THRESHOLD)
+        
+        log(f"🐉 {VERSION} aktywowany | {FRACTAL_SIGNATURE}")
+        log(f"   META_OMEGA: ≥{self.meta_omega_required} OMEGA | SPI_OMEGA: {self.spi_omega_threshold}")
+
+    # -------------------------------------------------------------------------
+    # WALIDACJA RAPORTÓW
+    # -------------------------------------------------------------------------
+
+    def _validate_report(self, rep: Dict[str, Any]) -> None:
+        required = ["system_id", "council_decree", "grid_health", "oracle_era"]
+        for r in required:
+            if r not in rep:
+                raise ValueError(f"Brak wymaganego pola: {r}")
+        
+        if not 0 <= rep.get("grid_health", 0.5) <= 1:
+            raise ValueError(f"grid_health poza zakresem 0–1: {rep.get('grid_health')}")
+        
+        if not 0 <= rep.get("council_confidence", 0.5) <= 1:
+            raise ValueError(f"council_confidence poza zakresem 0–1: {rep.get('council_confidence')}")
+        
+        valid_eras = ["ERA_STABILNOŚCI", "ERA_TRANSFORMACJI", "ERA_KRYZYSU", "ERA_NIEOKRESLONA"]
+        if rep.get("oracle_era") not in valid_eras:
+            raise ValueError(f"Nieznana epoka Oracle: {rep.get('oracle_era')}")
+
+    # -------------------------------------------------------------------------
+    # GŁÓWNA METODA – ZWOŁANIE SYNODU (THREAD-SAFE)
+    # -------------------------------------------------------------------------
+
+    def convene(self, system_reports: List[Dict[str, Any]], dry_run: bool = False) -> SynodReport:
+        with self._lock:
+            return self._convene_internal(system_reports, dry_run)
+
+    def _convene_internal(self, system_reports: List[Dict[str, Any]], dry_run: bool = False) -> SynodReport:
+        if not system_reports:
+            raise ValueError("Synod wymaga co najmniej jednego raportu systemowego.")
+        
+        # 1. Walidacja raportów
+        for rep in system_reports:
+            self._validate_report(rep)
+        
+        # 2. Parsowanie
+        parsed_reports = []
+        signatures_all = []
+        decrees = []
+        drifts = []
+        healths = []
+        confidences = []
+        eras = []
+        crisis_counts = []
+
+        for rep in system_reports:
+            system_id = rep.get("system_id", "UNKNOWN")
+            council_decree = rep.get("council_decree", "DEKRET_ALPHA")
+            council_confidence = rep.get("council_confidence", 0.5)
+            council_drift = rep.get("council_drift", 0.0)
+            grid_health = rep.get("grid_health", 0.5)
+            anomaly_score = rep.get("anomaly_score", 0.0)
+            oracle_era = rep.get("oracle_era", "ERA_NIEOKRESLONA")
+            maya_phase = rep.get("maya_phase", 0)
+            dominion_substance = rep.get("dominion_substance_index", 0.5)
+            dominion_status = rep.get("dominion_status", "KONSOLIDACJA_NOMINALNA")
+            crisis_vectors_count = rep.get("crisis_vectors_count", 0)
+            signatures = rep.get("signatures", [f"SIG_{system_id}"])
+
+            system_report = SystemReport(
+                system_id=system_id,
+                council_decree=council_decree,
+                council_confidence=council_confidence,
+                council_drift=council_drift,
+                grid_health=grid_health,
+                anomaly_score=anomaly_score,
+                oracle_era=oracle_era,
+                maya_phase=maya_phase,
+                dominion_substance_index=dominion_substance,
+                dominion_status=dominion_status,
+                crisis_vectors_count=crisis_vectors_count,
+                signatures=signatures
+            )
+            parsed_reports.append(system_report)
+            signatures_all.extend(signatures)
+            decrees.append(council_decree)
+            drifts.append(council_drift)
+            healths.append(grid_health)
+            confidences.append(council_confidence)
+            eras.append(oracle_era)
+            crisis_counts.append(crisis_vectors_count)
+
+        # 3. Statystyki podstawowe
+        avg_drift = sum(drifts) / len(drifts) if drifts else 0.0
+        avg_health = sum(healths) / len(healths) if healths else 0.0
+        avg_confidence = sum(confidences) / len(confidences) if confidences else 0.0
+        
+        # 4. Drift Map
+        drift_map = {
+            "min": min(drifts) if drifts else 0.0,
+            "max": max(drifts) if drifts else 0.0,
+            "median": statistics.median(drifts) if drifts else 0.0,
+            "std": statistics.stdev(drifts) if len(drifts) > 1 else 0.0
+        }
+        
+        # 5. Podsumowanie głosów
+        vote_summary = {}
+        for d in decrees:
+            vote_summary[d] = vote_summary.get(d, 0) + 1
+        omega_count = vote_summary.get("DEKRET_OMEGA", 0)
+        beta_count = vote_summary.get("DEKRET_BETA", 0)
+        alpha_count = vote_summary.get("DEKRET_ALPHA", 0)
+        
+        # 6. Agregacja epok
+        era_counts = {}
+        for e in eras:
+            era_counts[e] = era_counts.get(e, 0) + 1
+        aggregated_era = max(era_counts.items(), key=lambda x: x[1])[0] if era_counts else "ERA_NIEOKRESLONA"
+        
+        # 7. Era Pressure
+        era_pressure = sum(ERA_WEIGHTS.get(e, 0) for e in eras) / len(eras) if eras else 0.0
+        
+        # 8. Era Vector
+        vec_sum = [0.0, 0.0, 0.0]
+        for e in eras:
+            vec = ERA_VECTOR.get(e, (0.33, 0.33, 0.33))
+            vec_sum[0] += vec[0]
+            vec_sum[1] += vec[1]
+            vec_sum[2] += vec[2]
+        era_vector = tuple(v / len(eras) for v in vec_sum) if eras else (0.33, 0.33, 0.33)
+        
+        # 9. SPI (Synod Pressure Index)
+        crisis_pressure = sum(crisis_counts) * 0.05
+        spi = avg_drift + (1 - avg_health) + era_pressure + crisis_pressure
+        spi = clamp(spi, 0.0, 2.0)
+        
+        # 10. Pressure Index
+        pressure_index = (avg_drift * 0.3) + ((1 - avg_health) * 0.3) + (era_pressure * 0.2) + (crisis_pressure * 0.2)
+        pressure_index = clamp(pressure_index, 0.0, 1.0)
+        
+        # 11. Meta‑Dekret (z SPI)
+        meta_decree = self._vote_meta_with_spi(decrees, drifts, healths, eras, spi)
+        
+        # 12. Fraktalny konsensus
+        fractal_consensus = self._compute_fractal_consensus(decrees, drifts, healths)
+        
+        # 13. Certyfikacja z kontekstem
+        context_hash = generate_context_hash({
+            "decrees": decrees,
+            "avg_drift": avg_drift,
+            "avg_health": avg_health,
+            "era": aggregated_era,
+            "spi": spi
+        })
+        cert = self.kroniki.certyfikuj_synod(f"META_{meta_decree.value}", signatures_all, context_hash)
+        
+        # 14. Raport
+        report = SynodReport(
+            meta_decree=meta_decree,
+            system_reports=parsed_reports,
+            vote_summary=vote_summary,
+            average_confidence=avg_confidence,
+            average_drift=avg_drift,
+            average_health=avg_health,
+            omega_count=omega_count,
+            beta_count=beta_count,
+            alpha_count=alpha_count,
+            spi=spi,
+            drift_map=drift_map,
+            era_vector=era_vector,
+            fractal_consensus=fractal_consensus,
+            pressure_index=pressure_index,
+            oracle_era_aggregated=aggregated_era,
+            certificate=cert
+        )
+
+        # 15. Zapis (chyba że dry-run)
+        if not dry_run:
+            with self._lock:
+                self.history.append(report.to_dict())
+            
+            if meta_decree in [MetaDecree.OMEGA, MetaDecree.BETA] or len(self.history) % 5 == 0:
+                entry = {
+                    "type": "SYNOD_DECREE",
+                    "report": report.to_dict(),
+                    "certificate": cert,
+                    "spi": spi,
+                    "systems_count": len(system_reports),
+                    "timestamp": datetime.now().isoformat()
+                }
+                self.egregor.commit(entry, node_id="GEON_SYNOD")
+
+        self.kroniki.log_event("SYNOD_CONVENED", {
+            "meta_decree": meta_decree.value,
+            "spi": round(spi, 4),
+            "systems": len(system_reports),
+            "omega": omega_count,
+            "beta": beta_count,
+            "alpha": alpha_count
+        })
+
+        return report
+
+    # -------------------------------------------------------------------------
+    # META‑GŁOSOWANIE Z SPI
+    # -------------------------------------------------------------------------
+
+    def _vote_meta_with_spi(self, decrees: List[str], drifts: List[float],
+                           healths: List[float], eras: List[str], spi: float) -> MetaDecree:
+        omega_count = decrees.count("DEKRET_OMEGA")
+        beta_count = decrees.count("DEKRET_BETA")
+        alpha_count = decrees.count("DEKRET_ALPHA")
+        total = len(decrees)
+
+        avg_drift = sum(drifts) / len(drifts) if drifts else 0.0
+        avg_health = sum(healths) / len(healths) if healths else 0.0
+
+        # 1. SPI – OMEGA
+        if spi > self.spi_omega_threshold:
+            return MetaDecree.OMEGA
+        
+        # 2. SPI – BETA
+        if spi > self.spi_beta_threshold:
+            return MetaDecree.BETA
+
+        # 3. OMEGA z Rad
+        if omega_count >= self.meta_omega_required:
+            return MetaDecree.OMEGA
+        
+        # 4. Ekstremalny dryf lub niskie zdrowie
+        if avg_drift > self.drift_omega_threshold:
+            return MetaDecree.OMEGA
+        if avg_health < self.health_crisis_threshold:
+            return MetaDecree.OMEGA
+
+        # 5. BETA z głosowania
+        if beta_count > 0:
+            beta_ratio = beta_count / total
+            if beta_ratio >= self.meta_beta_threshold:
+                return MetaDecree.BETA
+            if (beta_count + omega_count) > alpha_count:
+                return MetaDecree.BETA
+
+        # 6. BETA z dryfu
+        if avg_drift > 0.45:
+            return MetaDecree.BETA
+
+        # 7. ALPHA
+        return MetaDecree.ALPHA
+
+    # -------------------------------------------------------------------------
+    # FRAKTALNY KONSENSUS
+    # -------------------------------------------------------------------------
+
+    def _compute_fractal_consensus(self, decrees: List[str], drifts: List[float],
+                                   healths: List[float]) -> Dict[str, Any]:
+        total = len(decrees)
+        omega = decrees.count("DEKRET_OMEGA")
+        beta = decrees.count("DEKRET_BETA")
+        alpha = decrees.count("DEKRET_ALPHA")
+        avg_drift = sum(drifts) / len(drifts) if drifts else 0.0
+        avg_health = sum(healths) / len(healths) if healths else 0.0
+
+        return {
+            "local": {
+                "dominant_decree": max(set(decrees), key=decrees.count) if decrees else "DEKRET_ALPHA",
+                "avg_drift": round(avg_drift, 4),
+                "avg_health": round(avg_health, 4)
+            },
+            "regional": {
+                "omega_ratio": round(omega / total, 4) if total > 0 else 0.0,
+                "beta_ratio": round(beta / total, 4) if total > 0 else 0.0,
+                "alpha_ratio": round(alpha / total, 4) if total > 0 else 0.0
+            },
+            "global": {
+                "consensus_strength": round((1 - avg_drift) * avg_health, 4),
+                "decisive_factor": "OMEGA" if omega >= 1 else "BETA" if beta > alpha else "ALPHA"
+            }
+        }
+
+    # -------------------------------------------------------------------------
+    # SYMULACJA DRY-RUN
+    # -------------------------------------------------------------------------
+
+    def _simulate(self, system_reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+        report = self._convene_internal(system_reports, dry_run=True)
+        return {
+            "status": "SIMULATION",
+            "meta_decree": report.meta_decree.value,
+            "spi": report.spi,
+            "would_be_saved": False,
+            "timestamp": datetime.now().isoformat()
+        }
+
+    # -------------------------------------------------------------------------
+    # METODY POMOCNICZE
+    # -------------------------------------------------------------------------
+
+    def get_history(self, n: Optional[int] = None) -> List[Dict[str, Any]]:
+        with self._lock:
+            snapshot = list(self.history)
+        if n is not None and n > 0:
+            return snapshot[-n:]
+        return snapshot
+
+    def reset(self) -> None:
+        with self._lock:
+            self.history.clear()
+        self.kroniki.log_event("SYNOD_RESET", {"status": "CLEARED"})
+
+    def get_status(self) -> Dict[str, Any]:
+        with self._lock:
+            hist_size = len(self.history)
+        return {
+            "system": "GEON_SYNOD",
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "vibe": VIBE,
+            "history_size": hist_size,
+            "memory_limit": self.memory_limit,
+            "thresholds": {
+                "meta_omega_required": self.meta_omega_required,
+                "meta_beta_threshold": self.meta_beta_threshold,
+                "drift_omega_threshold": self.drift_omega_threshold,
+                "health_crisis_threshold": self.health_crisis_threshold,
+                "spi_omega_threshold": self.spi_omega_threshold,
+                "spi_beta_threshold": self.spi_beta_threshold
+            }
+        }
+
+# =============================================================================
+# MOST INTEGRACYJNY
+# =============================================================================
+
+class SynodBridge:
+    def __init__(self, synod: GeonSynod):
+        self.synod = synod
+
+    def get_archetype_context(self) -> Dict[str, Any]:
+        status = self.synod.get_status()
+        return {
+            "tryb": VERSION,
+            "historia": status["history_size"],
+            "thresholds": status["thresholds"]
+        }
+
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        history = self.synod.get_history(1)
+        if history:
+            last = history[-1]
+            return {
+                "mode": VERSION,
+                "meta_decree": last.get("meta_decree", "UNKNOWN"),
+                "systems": last.get("systems_count", 0),
+                "spi": last.get("spi", 0.0),
+                "pressure_index": last.get("pressure_index", 0.0),
+                "synod_ready": True
+            }
+        return {"mode": VERSION, "meta_decree": "NO_DATA", "synod_ready": True}
+
+    def get_governor_context(self) -> Dict[str, Any]:
+        history = self.synod.get_history(1)
+        if history:
+            last = history[-1]
+            return {
+                "intent": "SYNOD_DECISION",
+                "confidence": last.get("average_confidence", 0.5),
+                "meta_decree": last.get("meta_decree", "UNKNOWN"),
+                "spi": last.get("spi", 0.0),
+                "pressure_index": last.get("pressure_index", 0.0),
+                "synod_ready": True
+            }
+        return {"intent": "SYNOD_DECISION", "confidence": 0.5, "synod_ready": True}
+
+    def get_trio_state(self) -> Dict[str, str]:
+        return {
+            "ISKRA": "AKTYWNA",
+            "PIECZĘĆ": "AKTYWNA",
+            "PERFEKCJA": "AKTYWNA",
+            "tryb": VERSION,
+            "synod": "AKTYWNY_V2.0"
+        }
+
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        history = self.synod.get_history(n)
+        fragments = []
+        for entry in history:
+            fragments.append({
+                "source": VERSION,
+                "content": f"Synod: {entry.get('meta_decree', 'UNKNOWN')} | SPI: {entry.get('spi', 0):.3f} | systems: {entry.get('systems_count', 0)}",
+                "meta_decree": entry.get("meta_decree", "UNKNOWN"),
+                "spi": entry.get("spi", 0.0),
+                "pressure": entry.get("pressure_index", 0.0)
+            })
+        return fragments
+
+# =============================================================================
+# DEMONSTRACJA
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print(f"🜀 {VERSION} — DEMONSTRACJA Z ULEPSZENIAMI")
+    print("SPI | DRIFT MAP | ERA VECTOR | FRAKTALNY KONSENSUS")
+    print("=" * 80 + "\n")
+
+    synod = GeonSynod()
+    bridge = SynodBridge(synod)
+
+    # Symulacja raportów z 3 systemów
+    system_1 = {
+        "system_id": "DOMINION_PLZ_CORE",
+        "council_decree": "DEKRET_ALPHA",
+        "council_confidence": 0.85,
+        "council_drift": 0.12,
+        "grid_health": 0.92,
+        "anomaly_score": 0.05,
+        "oracle_era": "ERA_STABILNOŚCI",
+        "maya_phase": 3,
+        "dominion_substance_index": 0.72,
+        "dominion_status": "KONSOLIDACJA_NOMINALNA",
+        "crisis_vectors_count": 0,
+        "signatures": ["SIG_PLZ_01"]
+    }
+
+    system_2 = {
+        "system_id": "DOMINION_UGANDA_ZERO",
+        "council_decree": "DEKRET_BETA",
+        "council_confidence": 0.70,
+        "council_drift": 0.38,
+        "grid_health": 0.65,
+        "anomaly_score": 0.35,
+        "oracle_era": "ERA_TRANSFORMACJI",
+        "maya_phase": 5,
+        "dominion_substance_index": 0.45,
+        "dominion_status": "DEFICYT_SUBSTANCJI",
+        "crisis_vectors_count": 1,
+        "signatures": ["SIG_UGA_01"]
+    }
+
+    system_3 = {
+        "system_id": "DOMINION_CRISTAL_GLOBAL",
+        "council_decree": "DEKRET_OMEGA",
+        "council_confidence": 0.60,
+        "council_drift": 0.55,
+        "grid_health": 0.40,
+        "anomaly_score": 0.78,
+        "oracle_era": "ERA_KRYZYSU",
+        "maya_phase": 6,
+        "dominion_substance_index": 0.28,
+        "dominion_status": "KRYZYS_ZASOBOWY",
+        "crisis_vectors_count": 3,
+        "signatures": ["SIG_CRI_01", "SIG_CRI_02"]
+    }
+
+    print("🔍 SYMULACJA 3 SYSTEMÓW:")
+    print("   System 1 (PLZ): ALPHA – stabilny")
+    print("   System 2 (Uganda): BETA – transformacja")
+    print("   System 3 (Cristal): OMEGA – kryzys\n")
+
+    report = synod.convene([system_1, system_2, system_3])
+
+    print(f"📊 META‑DEKRET: {report.meta_decree.value}")
+    print(f"   SPI: {report.spi:.3f}")
+    print(f"   Pressure Index: {report.pressure_index:.3f}")
+    print(f"   Drift Map: min={report.drift_map['min']:.3f}, max={report.drift_map['max']:.3f}, median={report.drift_map['median']:.3f}")
+    print(f"   Era Vector: ({report.era_vector[0]:.3f}, {report.era_vector[1]:.3f}, {report.era_vector[2]:.3f})")
+    print(f"   Fraktalny konsensus: {report.fractal_consensus['global']['decisive_factor']}")
+    print(f"   Certyfikat: {report.certificate[:50]}...")
+
+    print("\n🔍 TEST DRY-RUN:")
+    dry = synod._simulate([system_1, system_2, system_3])
+    print(f"   Status: {dry['status']}")
+    print(f"   Predykcja: {dry['meta_decree']} | SPI: {dry['spi']:.3f}")
+
+    print("\n🔗 MOSTY INTEGRACYJNE:")
+    print(f"   Autopilot: {bridge.get_autopilot_state()}")
+    print(f"   Governor: {bridge.get_governor_context()}")
+
+    print("\n" + "=" * 80)
+    print(f"🜀 {VERSION} — GOTOWY DO KONSYSTORZA (92)")
+    print(HASLO)
+    print("=" * 80)
+
+if __name__ == "__main__":
+    demo()
