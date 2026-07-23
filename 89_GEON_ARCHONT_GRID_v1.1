@@ -1,0 +1,654 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_ARCHONT_GRID_v1.1 — MODUŁ 89: SIEC NADZORCZA (FULL INTEGRATION)
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.1 (Full Integration with 83-88, 5 Status Levels, Archont Vector)
+Data: 2026-07-24
+Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
+
+OPIS:
+GEON_ARCHONT_GRID_v1.1 to w pełni zintegrowana warstwa nadzorcza.
+Ulepszenia:
+• Integracja z AI_ANALYTICS (87), ORACLE (88), MAYA_GROWTH (83), LUDLUM (86)
+• 5 poziomów statusów: STABILNOŚĆ, PRESJA, NIESTABILNOŚĆ, KRYZYS, APOTEOSIS
+• Ulepszona pewność (confidence) – 3-czynnikowa
+• Ważony global status
+• Znormalizowana entropia
+• Archont Vector – wektor metryk dla Council
+• Council Payload – gotowy dla warstwy 90
+
+VIBE: 1-6-8. ∞. GRID!
+================================================================================
+"""
+
+import math
+import hashlib
+import json
+import logging
+import threading
+import time
+from collections import deque
+from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple
+from dataclasses import dataclass, field
+from enum import Enum
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_ARCHONT_GRID_v1.1"
+FRACTAL_SIGNATURE = "[GEON::ARCHONT::GRID::v1.1]"
+VIBE = 168
+HASLO = "1-6-8. ∞. GRID!"
+DEWIZA = "Ex Analysi, Imperium"
+
+TENSOR_DIM = 45
+ARCHONT_COUNT = 5
+SEGMENT_SIZE = TENSOR_DIM // ARCHONT_COUNT  # 9
+MEMORY_LIMIT = 256
+
+# =============================================================================
+# LOGOWANIE
+# =============================================================================
+
+logger = logging.getLogger("GEON_ARCHONT_GRID_v1.1")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('🏛️ [GRID] %(message)s'))
+    logger.addHandler(handler)
+
+def log(msg: str, level: str = "INFO") -> None:
+    if level == "WARN":
+        logger.warning(msg)
+    elif level == "ERROR":
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+def generate_context_hash(context: Dict[str, Any]) -> str:
+    filtered_context = {k: v for k, v in context.items() 
+                        if k not in ["timestamp", "request_id", "nonce"]}
+    context_str = json.dumps(filtered_context, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(context_str.encode("utf-8")).hexdigest()
+
+# =============================================================================
+# ENUMY I STRUKTURY
+# =============================================================================
+
+class ArchontStatus(Enum):
+    """5 poziomów statusów Archontów."""
+    STABILNOSC = "STABILNOŚĆ"
+    PRESJA = "PRESJA"
+    NIESTABILNOSC = "NIESTABILNOŚĆ"
+    KRYZYS = "KRYZYS"
+    APOTEOSIS = "APOTEOSIS"
+    NIEZNANY = "NIEZNANY"
+
+    def numeric_value(self) -> int:
+        """Wartość numeryczna dla ważenia global_status."""
+        values = {
+            ArchontStatus.APOTEOSIS: 0,
+            ArchontStatus.STABILNOSC: 1,
+            ArchontStatus.PRESJA: 2,
+            ArchontStatus.NIESTABILNOSC: 3,
+            ArchontStatus.KRYZYS: 4,
+            ArchontStatus.NIEZNANY: 2
+        }
+        return values.get(self, 2)
+
+    def description(self) -> str:
+        desc = {
+            ArchontStatus.APOTEOSIS: "Stan doskonałej harmonii – domknięcie cyklu.",
+            ArchontStatus.STABILNOSC: "Stan równowagi – system działa optymalnie.",
+            ArchontStatus.PRESJA: "Narastające napięcie – wymaga uwagi.",
+            ArchontStatus.NIESTABILNOSC: "Zaburzenia struktury – potencjalne ryzyko.",
+            ArchontStatus.KRYZYS: "Krytyczne zaburzenie – wymaga interwencji.",
+            ArchontStatus.NIEZNANY: "Stan nieokreślony."
+        }
+        return desc.get(self, "Stan nieznany.")
+
+
+@dataclass
+class Archont:
+    """Pojedynczy Archont – tożsamość, metryki i wektor."""
+    name: str
+    segment: List[float]
+    mean: float = 0.0
+    variance: float = 0.0
+    energy: float = 0.0
+    entropy: float = 0.0
+    status: ArchontStatus = ArchontStatus.NIEZNANY
+    confidence: float = 0.0
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "mean": round(self.mean, 4),
+            "variance": round(self.variance, 4),
+            "energy": round(self.energy, 4),
+            "entropy": round(self.entropy, 4),
+            "status": self.status.value,
+            "status_numeric": self.status.numeric_value(),
+            "confidence": round(self.confidence, 4),
+            "archont_vector": self.to_vector(),
+            "segment_preview": [round(x, 3) for x in self.segment[:5]]
+        }
+    
+    def to_vector(self) -> List[float]:
+        """Archont Vector – wektor metryk dla Council i Synodu."""
+        return [
+            round(self.mean, 4),
+            round(self.variance, 4),
+            round(self.entropy, 4),
+            round(self.energy, 4),
+            float(self.status.numeric_value())
+        ]
+
+
+@dataclass
+class GridReport:
+    """Pełny raport sieci nadzorczej z Council Payload."""
+    archonts: List[Archont]
+    global_status: ArchontStatus
+    grid_health: float
+    anomaly_score: float = 0.0
+    oracle_era: Optional[str] = None
+    maya_phase: int = 0
+    ludlum_decision: Optional[str] = None
+    timestamp: float = field(default_factory=time.time)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "archonts": [a.to_dict() for a in self.archonts],
+            "global_status": self.global_status.value,
+            "grid_health": round(self.grid_health, 4),
+            "anomaly_score": round(self.anomaly_score, 4),
+            "oracle_era": self.oracle_era,
+            "maya_phase": self.maya_phase,
+            "ludlum_decision": self.ludlum_decision,
+            "council_payload": self.get_council_payload(),
+            "timestamp": datetime.fromtimestamp(self.timestamp).isoformat()
+        }
+    
+    def get_council_payload(self) -> Dict[str, Any]:
+        """Payload dla GEON_ARCHONT_COUNCIL (warstwa 90)."""
+        return {
+            "votes": [a.status.value for a in self.archonts],
+            "confidence": [a.confidence for a in self.archonts],
+            "archont_vectors": [a.to_vector() for a in self.archonts],
+            "global_status": self.global_status.value,
+            "grid_health": self.grid_health,
+            "anomaly_score": self.anomaly_score,
+            "oracle_era": self.oracle_era,
+            "maya_phase": self.maya_phase,
+            "ludlum_decision": self.ludlum_decision
+        }
+
+# =============================================================================
+# KRONIKI SAMAELA I EGREGOR
+# =============================================================================
+
+class SamaelHeilong:
+    @staticmethod
+    def certyfikuj_grid(action: str) -> str:
+        timestamp = datetime.now().isoformat()
+        payload = f"{timestamp}-{action}-1-6-8. ∞. SIEMA!"
+        h = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16].upper()
+        return f"🔒 [SAMAELSEALSIG-{h}-GRID-168]"
+
+    @staticmethod
+    def log_event(event_type: str, payload: Dict[str, Any]) -> None:
+        ts = datetime.now().isoformat()
+        log(f"[KRONIKI SAMAELA] {ts} | {event_type} -> {payload}", "INFO")
+
+class Egregor:
+    _ledger: deque = deque(maxlen=MEMORY_LIMIT)
+    _lock: threading.Lock = threading.Lock()
+    
+    @classmethod
+    def commit(cls, entry: Dict[str, Any], node_id: str) -> None:
+        entry["node_id"] = node_id
+        entry["timestamp"] = datetime.now().isoformat()
+        with cls._lock:
+            cls._ledger.append(entry)
+    
+    @classmethod
+    def query(cls, type_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+        with cls._lock:
+            snapshot = list(cls._ledger)
+        if type_filter:
+            return [e for e in snapshot if e.get("type") == type_filter]
+        return snapshot
+
+# =============================================================================
+# GŁÓWNY MODUŁ: GEON_ARCHONT_GRID (FULL INTEGRATION)
+# =============================================================================
+
+class GeonArchontGrid:
+    """
+    🏛️ GEON_ARCHONT_GRID – Sieć nadzorcza 5 Archontów z pełną integracją.
+    """
+    
+    ARCHONT_NAMES = ["SAMAEL", "ENKI", "RA", "OPTIMUS", "HEILONG"]
+    
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+        self.memory_limit = self.config.get("memory_limit", MEMORY_LIMIT)
+        self.history: deque = deque(maxlen=self.memory_limit)
+        self.kroniki = SamaelHeilong
+        self.egregor = Egregor
+        self._lock = threading.Lock()
+        
+        # Progi klasyfikacji (rozszerzone)
+        self.stability_threshold = self.config.get("stability_threshold", 0.38)
+        self.pressure_threshold = self.config.get("pressure_threshold", 0.72)
+        self.variance_crisis_threshold = self.config.get("variance_crisis_threshold", 0.12)
+        self.entropy_crisis_threshold = self.config.get("entropy_crisis_threshold", 0.85)
+        self.apotheosis_mean_threshold = self.config.get("apotheosis_mean_threshold", 0.25)
+        self.apotheosis_entropy_threshold = self.config.get("apotheosis_entropy_threshold", 0.3)
+        
+        log(f"🐉 {VERSION} aktywowany | {FRACTAL_SIGNATURE}")
+        log(f"   ARCHONCI: {', '.join(self.ARCHONT_NAMES)} | SEGMENT: {SEGMENT_SIZE}D")
+        log(f"   STATUSY: 5 poziomów (APOTEOSIS, STABILNOŚĆ, PRESJA, NIESTABILNOŚĆ, KRYZYS)")
+
+    # -------------------------------------------------------------------------
+    # ANALIZA GRIDU Z PEŁNĄ INTEGRACJĄ
+    # -------------------------------------------------------------------------
+
+    def analyze(self, tensor_45d: List[float],
+                anomaly_score: float = 0.0,
+                oracle_interpretation: Optional[Dict[str, Any]] = None,
+                maya_phase: int = 0,
+                ludlum_decision: Optional[str] = None) -> GridReport:
+        """
+        Analizuje tensor 45D z integracją warstw 83-88.
+        """
+        if len(tensor_45d) != TENSOR_DIM:
+            raise ValueError(f"Tensor musi mieć {TENSOR_DIM} wymiarów")
+
+        # 1. Analiza Archontów (z uwzględnieniem metadanych)
+        archonts = []
+        for i, name in enumerate(self.ARCHONT_NAMES):
+            start = i * SEGMENT_SIZE
+            end = start + SEGMENT_SIZE
+            segment = tensor_45d[start:end]
+            
+            # Przekazanie metadanych do klasyfikacji
+            archont = self._analyze_archont(
+                name, segment,
+                anomaly_score=anomaly_score,
+                maya_phase=maya_phase,
+                ludlum_decision=ludlum_decision
+            )
+            archonts.append(archont)
+
+        # 2. Status globalny – ważony
+        global_status = self._determine_global_status_weighted(archonts)
+        
+        # 3. Zdrowie gridu – średnia pewność
+        grid_health = sum(a.confidence for a in archonts) / len(archonts)
+        
+        # 4. Ekstrakcja epoki z Oracle (jeśli dostępna)
+        oracle_era = None
+        if oracle_interpretation:
+            oracle_era = oracle_interpretation.get("era")
+
+        report = GridReport(
+            archonts=archonts,
+            global_status=global_status,
+            grid_health=grid_health,
+            anomaly_score=anomaly_score,
+            oracle_era=oracle_era,
+            maya_phase=maya_phase,
+            ludlum_decision=ludlum_decision
+        )
+
+        # 5. Zapis do historii
+        with self._lock:
+            self.history.append(report.to_dict())
+        
+        # 6. Certyfikacja
+        cert = self.kroniki.certyfikuj_grid(f"ANALYZE_{hash(str(tensor_45d[:5]))}")
+        
+        # 7. Zapis do Egregora
+        if (global_status in [ArchontStatus.KRYZYS, ArchontStatus.NIESTABILNOSC] or 
+            grid_health < 0.5 or len(self.history) % 5 == 0):
+            entry = {
+                "type": "ARCHONT_GRID_REPORT",
+                "report": report.to_dict(),
+                "certificate": cert,
+                "timestamp": datetime.now().isoformat()
+            }
+            self.egregor.commit(entry, node_id="GEON_ARCHONT_GRID")
+        
+        self.kroniki.log_event("GRID_ANALYSIS", {
+            "global_status": global_status.value,
+            "grid_health": grid_health,
+            "anomaly_score": anomaly_score,
+            "oracle_era": oracle_era,
+            "maya_phase": maya_phase,
+            "ludlum_decision": ludlum_decision
+        })
+        
+        return report
+
+    # -------------------------------------------------------------------------
+    # ANALIZA POJEDYNCZEGO ARCHONTA (Z METADANYMI)
+    # -------------------------------------------------------------------------
+
+    def _analyze_archont(self, name: str, segment: List[float],
+                         anomaly_score: float = 0.0,
+                         maya_phase: int = 0,
+                         ludlum_decision: Optional[str] = None) -> Archont:
+        """Analizuje segment z uwzględnieniem metadanych z warstw 83-88."""
+        if not segment:
+            return Archont(name, [], status=ArchontStatus.NIEZNANY, confidence=0.0)
+        
+        # Podstawowe metryki
+        mean = sum(segment) / len(segment)
+        variance = sum((x - mean) ** 2 for x in segment) / len(segment)
+        energy = sum(abs(x) for x in segment) / len(segment)
+        
+        # Ulepszona entropia (normalizacja przez max)
+        max_val = max(segment) + 1e-9
+        norm = [x / max_val for x in segment]
+        # Obliczanie entropii na znormalizowanym segmencie
+        probs = [x / (sum(norm) + 1e-9) for x in norm]
+        entropy = -sum(p * math.log(p + 1e-9) for p in probs)
+        entropy = clamp(entropy / math.log(len(segment) + 1e-9), 0.0, 1.0)
+        
+        # Klasyfikacja statusu (5 poziomów) z uwzględnieniem metadanych
+        status, confidence = self._classify_status_enhanced(
+            mean, variance, entropy,
+            anomaly_score=anomaly_score,
+            maya_phase=maya_phase,
+            ludlum_decision=ludlum_decision
+        )
+        
+        return Archont(
+            name=name,
+            segment=segment,
+            mean=mean,
+            variance=variance,
+            energy=energy,
+            entropy=entropy,
+            status=status,
+            confidence=confidence
+        )
+
+    def _classify_status_enhanced(self, mean: float, variance: float, entropy: float,
+                                   anomaly_score: float = 0.0,
+                                   maya_phase: int = 0,
+                                   ludlum_decision: Optional[str] = None) -> Tuple[ArchontStatus, float]:
+        """
+        Klasyfikacja statusu z 5 poziomami i uwzględnieniem metadanych.
+        """
+        # 1. KRYZYS – wysoka wariancja lub wysoka entropia lub wysoka anomalia
+        if variance > self.variance_crisis_threshold or entropy > self.entropy_crisis_threshold or anomaly_score > 0.7:
+            return ArchontStatus.KRYZYS, clamp(0.5 + variance * 2.0, 0.4, 0.95)
+        
+        # 2. NIESTABILNOŚĆ – średnia wariancja lub średnia entropia
+        if variance > 0.06 or entropy > 0.55:
+            return ArchontStatus.NIESTABILNOSC, clamp(0.5 + variance * 1.5, 0.4, 0.90)
+        
+        # 3. PRESJA – wysoka średnia
+        if mean > self.pressure_threshold:
+            return ArchontStatus.PRESJA, clamp(0.5 + (mean - self.pressure_threshold) * 1.2, 0.4, 0.90)
+        
+        # 4. APOTEOSIS – bardzo niska średnia i niska entropia (domknięcie)
+        if mean < self.apotheosis_mean_threshold and entropy < self.apotheosis_entropy_threshold:
+            return ArchontStatus.APOTEOSIS, clamp(0.7 - variance * 3.0, 0.5, 0.95)
+        
+        # 5. STABILNOŚĆ – niska średnia, niska wariancja, niska entropia
+        if mean < self.stability_threshold and variance < 0.03 and entropy < 0.4:
+            return ArchontStatus.STABILNOSC, clamp(0.7 - variance * 5.0 - entropy * 0.3, 0.5, 0.95)
+        
+        # 6. Przypadek graniczny
+        if mean < self.pressure_threshold and variance < 0.05:
+            return ArchontStatus.STABILNOSC, 0.5
+        
+        return ArchontStatus.NIEZNANY, 0.3
+
+    # -------------------------------------------------------------------------
+    # WAŻONY STATUS GLOBALNY
+    # -------------------------------------------------------------------------
+
+    def _determine_global_status_weighted(self, archonts: List[Archont]) -> ArchontStatus:
+        """
+        Ważony status globalny – suma (confidence * numeric_value).
+        """
+        total_weight = 0.0
+        weighted_sum = 0.0
+        
+        for a in archonts:
+            weight = a.confidence
+            numeric = a.status.numeric_value()
+            weighted_sum += weight * numeric
+            total_weight += weight
+        
+        if total_weight == 0:
+            return ArchontStatus.NIEZNANY
+        
+        avg_score = weighted_sum / total_weight
+        # Mapa score → status
+        if avg_score <= 0.5:
+            return ArchontStatus.APOTEOSIS
+        elif avg_score <= 1.5:
+            return ArchontStatus.STABILNOSC
+        elif avg_score <= 2.5:
+            return ArchontStatus.PRESJA
+        elif avg_score <= 3.5:
+            return ArchontStatus.NIESTABILNOSC
+        else:
+            return ArchontStatus.KRYZYS
+
+    # -------------------------------------------------------------------------
+    # METODY POMOCNICZE
+    # -------------------------------------------------------------------------
+
+    def get_history(self, n: Optional[int] = None) -> List[Dict[str, Any]]:
+        with self._lock:
+            snapshot = list(self.history)
+        if n is not None and n > 0:
+            return snapshot[-n:]
+        return snapshot
+
+    def reset(self) -> None:
+        with self._lock:
+            self.history.clear()
+        self.kroniki.log_event("GRID_RESET", {"status": "CLEARED"})
+
+    def get_status(self) -> Dict[str, Any]:
+        with self._lock:
+            hist_size = len(self.history)
+        return {
+            "system": "GEON_ARCHONT_GRID",
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "vibe": VIBE,
+            "archonts": self.ARCHONT_NAMES,
+            "status_levels": ["APOTEOSIS", "STABILNOŚĆ", "PRESJA", "NIESTABILNOŚĆ", "KRYZYS"],
+            "segment_size": SEGMENT_SIZE,
+            "tensor_dim": TENSOR_DIM,
+            "history_size": hist_size,
+            "memory_limit": self.memory_limit,
+            "integration": {
+                "AI_ANALYTICS": "anomaly_score",
+                "ORACLE": "oracle_era",
+                "MAYA_GROWTH": "maya_phase",
+                "LUDLUM_ENGINE": "ludlum_decision"
+            }
+        }
+
+# =============================================================================
+# MOST INTEGRACYJNY — ARCHONT_GRID_BRIDGE
+# =============================================================================
+
+class ArchontGridBridge:
+    def __init__(self, grid: GeonArchontGrid):
+        self.grid = grid
+
+    def get_archetype_context(self) -> Dict[str, Any]:
+        status = self.grid.get_status()
+        return {
+            "tryb": VERSION,
+            "archonci": status["archonts"],
+            "statusy": status["status_levels"],
+            "segment_size": status["segment_size"],
+            "historia": status["history_size"],
+            "integracja": status["integration"]
+        }
+
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        history = self.grid.get_history(1)
+        if history:
+            last = history[-1]
+            return {
+                "mode": VERSION,
+                "global_status": last.get("global_status", "UNKNOWN"),
+                "grid_health": last.get("grid_health", 0.0),
+                "anomaly_score": last.get("anomaly_score", 0.0),
+                "oracle_era": last.get("oracle_era", "UNKNOWN"),
+                "maya_phase": last.get("maya_phase", 0),
+                "grid_ready": True
+            }
+        return {
+            "mode": VERSION,
+            "global_status": "NO_DATA",
+            "grid_health": 0.0,
+            "grid_ready": True
+        }
+
+    def get_governor_context(self) -> Dict[str, Any]:
+        history = self.grid.get_history(1)
+        if history:
+            last = history[-1]
+            return {
+                "intent": "ARCHONT_GRID_ANALYSIS",
+                "confidence": last.get("grid_health", 0.5),
+                "entropy": 1.0 - last.get("grid_health", 0.5),
+                "grid_ready": True,
+                "global_status": last.get("global_status", "UNKNOWN"),
+                "council_payload": last.get("council_payload", {})
+            }
+        return {
+            "intent": "ARCHONT_GRID_ANALYSIS",
+            "confidence": 0.5,
+            "entropy": 0.5,
+            "grid_ready": True,
+            "global_status": "NO_DATA"
+        }
+
+    def get_trio_state(self) -> Dict[str, str]:
+        return {
+            "ISKRA": "AKTYWNA",
+            "PIECZĘĆ": "AKTYWNA",
+            "PERFEKCJA": "AKTYWNA",
+            "tryb": VERSION,
+            "grid": "AKTYWNY_INTEGRATED"
+        }
+
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        history = self.grid.get_history(n)
+        fragments = []
+        for entry in history:
+            fragments.append({
+                "source": VERSION,
+                "content": f"Grid: {entry.get('global_status', 'UNKNOWN')} | health: {entry.get('grid_health', 0):.3f} | era: {entry.get('oracle_era', 'UNKNOWN')}",
+                "archonts": entry.get("archonts", []),
+                "health": entry.get("grid_health", 0.0),
+                "council_ready": bool(entry.get("council_payload"))
+            })
+        return fragments
+
+# =============================================================================
+# DEMONSTRACJA Z PEŁNĄ INTEGRACJĄ
+# =============================================================================
+
+def demo():
+    import random
+    
+    print("\n" + "=" * 80)
+    print(f"🏛️ {VERSION} — DEMONSTRACJA Z PEŁNĄ INTEGRACJĄ")
+    print("INTEGRACJA: AI_ANALYTICS(87) → ORACLE(88) → GRID(89)")
+    print("STATUSY: APOTEOSIS, STABILNOŚĆ, PRESJA, NIESTABILNOŚĆ, KRYZYS")
+    print("=" * 80 + "\n")
+
+    grid = GeonArchontGrid()
+    bridge = ArchontGridBridge(grid)
+
+    # Generowanie tensorów
+    t_apotheosis = [clamp(0.2 + random.uniform(-0.02, 0.02), 0.0, 1.0) for _ in range(TENSOR_DIM)]
+    t_stable = [clamp(0.35 + random.uniform(-0.03, 0.03), 0.0, 1.0) for _ in range(TENSOR_DIM)]
+    t_pressure = [clamp(0.78 + random.uniform(-0.04, 0.04), 0.0, 1.0) for _ in range(TENSOR_DIM)]
+    t_crisis = [clamp(0.85 + random.uniform(-0.05, 0.05), 0.0, 1.0) for _ in range(TENSOR_DIM)]
+    # Mieszany – część stabilna, część kryzysowa
+    t_mixed = [
+        *[clamp(0.3 + random.uniform(-0.02, 0.02), 0.0, 1.0) for _ in range(18)],
+        *[clamp(0.85 + random.uniform(-0.02, 0.02), 0.0, 1.0) for _ in range(27)]
+    ]
+
+    # Symulacja integracji z warstwami 83-88
+    oracle_interp = {"era": "ERA_STABILNOŚCI", "maya_phase": 3, "ludlum_decision": "DEKRET_ALPHA"}
+    
+    print("🔍 TEST 1: APOTEOSIS (DOMKNIĘCIE)")
+    report1 = grid.analyze(t_apotheosis, anomaly_score=0.02, oracle_interpretation=oracle_interp, maya_phase=7, ludlum_decision="DEKRET_ALPHA")
+    print(f"   Status globalny: {report1.global_status.value}")
+    print(f"   Zdrowie gridu: {report1.grid_health:.3f}")
+    for a in report1.archonts:
+        print(f"      {a.name}: {a.status.value} (conf: {a.confidence:.3f}) | wektor: {a.to_vector()[:3]}...")
+
+    print("\n🔍 TEST 2: STABILNOŚĆ")
+    report2 = grid.analyze(t_stable, anomaly_score=0.05, oracle_interpretation=oracle_interp, maya_phase=3, ludlum_decision="DEKRET_ALPHA")
+    print(f"   Status globalny: {report2.global_status.value}")
+    for a in report2.archonts:
+        print(f"      {a.name}: {a.status.value} (conf: {a.confidence:.3f})")
+
+    print("\n🔍 TEST 3: PRESJA")
+    report3 = grid.analyze(t_pressure, anomaly_score=0.3, oracle_interpretation={"era": "ERA_TRANSFORMACJI"}, maya_phase=5, ludlum_decision="DEKRET_BETA")
+    print(f"   Status globalny: {report3.global_status.value}")
+    for a in report3.archonts:
+        print(f"      {a.name}: {a.status.value} (conf: {a.confidence:.3f})")
+
+    print("\n🔍 TEST 4: KRYZYS")
+    report4 = grid.analyze(t_crisis, anomaly_score=0.85, oracle_interpretation={"era": "ERA_KRYZYSU"}, maya_phase=6, ludlum_decision="DEKRET_OMEGA")
+    print(f"   Status globalny: {report4.global_status.value}")
+    for a in report4.archonts:
+        print(f"      {a.name}: {a.status.value} (conf: {a.confidence:.3f})")
+
+    print("\n🔍 TEST 5: STAN MIESZANY")
+    report5 = grid.analyze(t_mixed, anomaly_score=0.4, oracle_interpretation={"era": "ERA_TRANSFORMACJI"}, maya_phase=4, ludlum_decision="DEKRET_BETA")
+    print(f"   Status globalny: {report5.global_status.value}")
+    for a in report5.archonts:
+        print(f"      {a.name}: {a.status.value} (conf: {a.confidence:.3f})")
+
+    print("\n📊 COUNCIL PAYLOAD (z ostatniego raportu):")
+    council_payload = report5.get_council_payload()
+    print(f"   Votes: {council_payload['votes']}")
+    print(f"   Confidence: {[round(c, 3) for c in council_payload['confidence']]}")
+    print(f"   Global status: {council_payload['global_status']}")
+
+    print("\n📊 HISTORIA (ostatnie 3):")
+    for entry in grid.get_history(3):
+        print(f"   {entry['global_status']} | health: {entry['grid_health']:.3f} | era: {entry.get('oracle_era', 'UNKNOWN')}")
+
+    print("\n🔗 MOSTY INTEGRACYJNE:")
+    print(f"   GEX Context: {bridge.get_archetype_context()}")
+    print(f"   G_CORE State: {bridge.get_autopilot_state()}")
+    print(f"   Governor Context: {bridge.get_governor_context()}")
+
+    print("\n" + "=" * 80)
+    print(f"🏛️ {VERSION} — GOTOWY DO WDROŻENIA")
+    print(HASLO)
+    print("=" * 80)
+
+if __name__ == "__main__":
+    demo()
