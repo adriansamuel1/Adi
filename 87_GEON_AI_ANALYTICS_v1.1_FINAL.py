@@ -2,24 +2,22 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
-🐉 GEON_AI_ANALYTICS_v2.0 — MODUŁ 87: ANALITYKA + AFC-9 + PREDYKCJA + POLITYKA
+🐉 GEON_AI_ANALYTICS_v2.1 — MODUŁ 87: ANALITYKA + AFC-9 + PREDYKCJA + POLITYKA + ZOO
 ================================================================================
-Status: PRODUCTION_READY | FRACTAL_LOCKED | ULTIMA | AFC_INTEGRATED
-Wersja: v2.0-FINAL (AFC-9 + Core Gate + Prediction + Policy + Decision)
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ULTIMA | AFC_INTEGRATED | ZOO_INTEGRATED
+Wersja: v2.1-FINAL (AFC-9 + Core Gate + Prediction + Policy + Decision + ZOO)
 Data: 2026-07-24
 Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
 
-ZMIANY:
-  1. Dodano AFC-9 – filtr prawdy (afc9, CORE_ACCESS_GATE)
-  2. Dodano GeonCoreState – pamięć stanu (historia + stabilność)
-  3. Dodano GeonCoreLoop – pętla w czasie rzeczywistym
-  4. Dodano GeonCoreDecisionLayer – decyzje (STABILIZE, EXPLORE, ALERT)
-  5. Dodano GeonCorePredictor – predykcja i anomalie
-  6. Dodano GeonCorePolicyLayer – polityka systemowa
-  7. Dodano GeonCoreSystemV2 – integracja AFC + analityka
+ZMIANY v2.1:
+  1. Dodano integrację z GEON ZOO (warstwa 86.5)
+  2. Nowa metoda analyze_with_zoo() – analiza z detekcją absurdów i ról
+  3. Metryki ZOO w wynikach: zoo_risk, absurd_score, roles_map
+  4. Status ZOO_ALERT przy wysokim ryzyku
+  5. Rozszerzony AIAnalyticsBridge o metody ZOO
 
 VIBE: 1-6-8. ∞. AI! 🧠
-DEWIZA: "Ex Analysi, Praevidentia. Ex Fractali, Veritas."
+DEWIZA: "Ex Analysi, Praevidentia. Ex Fractali, Veritas. Ex Observatione, Claritas."
 ================================================================================
 """
 
@@ -33,14 +31,43 @@ from datetime import datetime
 from typing import Dict, Any, List, Optional, Deque, Tuple
 
 # =============================================================================
+# PRÓBA IMPORTOWANIA MODUŁU ZOO (warstwa 86.5)
+# =============================================================================
+
+try:
+    from kombajn_core import geon_zoo_analyzer_v1_0 as ZOO
+    ZOO_AVAILABLE = True
+    log_zoo = logging.getLogger("GEON_ZOO_INTEGRATION")
+    log_zoo.info("🐉 GEON ZOO (86.5) zintegrowany z warstwą 87")
+except ImportError:
+    ZOO_AVAILABLE = False
+    # Fallback – pusta klasa symulująca ZOO
+    class _DummyZOO:
+        def analyze(self, ctx_scene, actors, signals, self_state):
+            return {
+                "roles_map": {},
+                "absurd_score": 0.0,
+                "risk_for_vibe": "niskie",
+                "vibe_risk_score": 0.0,
+                "action_hint": "normalna_interakcja",
+                "action_priority": 3,
+                "experience_chunk": {"lesson": "Brak modułu ZOO"}
+            }
+        def get_status(self):
+            return {"available": False}
+    ZOO = type('_DummyZOO', (), {'GEONZOOAnalyzer': _DummyZOO})()
+    log_zoo = logging.getLogger("GEON_ZOO_INTEGRATION")
+    log_zoo.warning("⚠️ GEON ZOO (86.5) NIE DOSTĘPNY – używana pusta implementacja")
+
+# =============================================================================
 # WERSJA I STAŁE SYSTEMOWE
 # =============================================================================
 
-VERSION = "GEON_AI_ANALYTICS_v2.0-FINAL"
-FRACTAL_SIGNATURE = "[GEON::AI::ANALYTICS::v2.0::AFC_INTEGRATED]"
+VERSION = "GEON_AI_ANALYTICS_v2.1-FINAL"
+FRACTAL_SIGNATURE = "[GEON::AI::ANALYTICS::v2.1::ZOO_INTEGRATED]"
 VIBE = 168
 HASLO = "1-6-8. ∞. AI! 🧠"
-DEWIZA = "Ex Analysi, Praevidentia. Ex Fractali, Veritas."
+DEWIZA = "Ex Analysi, Praevidentia. Ex Fractali, Veritas. Ex Observatione, Claritas."
 
 TENSOR_DIM = 45
 VECTOR_DIM = 9  # AFC-9 wymiar
@@ -336,13 +363,13 @@ class GeonCoreSystemV2:
         return self.loop.state
 
 # =============================================================================
-# 9. GŁÓWNY MODUŁ: GEON_AI_ANALYTICS (ROZSZERZONY O AFC)
+# 9. GŁÓWNY MODUŁ: GEON_AI_ANALYTICS (ROZSZERZONY O AFC + ZOO)
 # =============================================================================
 
 class GeonAIAnalytics:
     """
     🧠 GEON_AI_ANALYTICS – Zoptymalizowany silnik analityczny dla tensorów 45D.
-    ROZSZERZONY o AFC-9, pamięć stanu, pętlę, predykcję, politykę.
+    ROZSZERZONY o AFC-9, pamięć stanu, pętlę, predykcję, politykę oraz ZOO.
     """
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
@@ -370,11 +397,28 @@ class GeonAIAnalytics:
             anomaly_threshold=anomaly_threshold_pred
         )
         
+        # ===== NOWY SUBSYSTEM ZOO =====
+        self.zoo_enabled = self.config.get("zoo_enabled", ZOO_AVAILABLE)
+        if self.zoo_enabled and ZOO_AVAILABLE:
+            try:
+                self.zoo = ZOO.GEONZOOAnalyzer(config=self.config.get("zoo_config", {}))
+                log("🦁 GEON ZOO (86.5) AKTYWNY w warstwie 87")
+            except Exception as e:
+                log(f"⚠️ Błąd inicjalizacji ZOO: {e}", "WARN")
+                self.zoo = _DummyZOO()
+                self.zoo_enabled = False
+        else:
+            self.zoo = _DummyZOO()
+            self.zoo_enabled = False
+            if not ZOO_AVAILABLE:
+                log("⚠️ GEON ZOO NIE DOSTĘPNY – tryb offline", "WARN")
+        
         self.kroniki = SamaelHeilong
         self.egregor = Egregor
         
         log(f"🐉 {VERSION} aktywowany | {FRACTAL_SIGNATURE}")
-        log(f"   WYMIAR: {TENSOR_DIM}D | AFC: AKTYWNY | PAMIĘĆ: {self.memory_limit} | ALPHA: {self.alpha}")
+        log(f"   WYMIAR: {TENSOR_DIM}D | AFC: AKTYWNY | ZOO: {'AKTYWNY' if self.zoo_enabled else 'WYŁĄCZONY'}")
+        log(f"   PAMIĘĆ: {self.memory_limit} | ALPHA: {self.alpha}")
 
     # ========================================================================
     # ORYGINALNE METODY (ZACHOWANE BEZ ZMIAN)
@@ -398,6 +442,8 @@ class GeonAIAnalytics:
         with self._lock:
             self._memory.clear()
             self._anomaly_history.clear()
+        if self.zoo_enabled:
+            self.zoo.reset()
         self.kroniki.log_event("MEMORY_RESET", {"status": "CLEARED"})
 
     def memory_size(self) -> int:
@@ -479,7 +525,7 @@ class GeonAIAnalytics:
         return total_anomaly
 
     # ========================================================================
-    # NOWE METODY – AFC INTEGRATION
+    # METODY AFC INTEGRATION (ZACHOWANE)
     # ========================================================================
 
     def afc_transform(self, D1: List[float], D2: List[float], D3: List[float], D4: List[float]) -> List[float]:
@@ -567,6 +613,96 @@ class GeonAIAnalytics:
         return result
 
     # ========================================================================
+    # NOWE METODY – ZOO INTEGRATION
+    # ========================================================================
+
+    def analyze_with_zoo(self, tensor_45d: List[float],
+                         ctx_scene: Dict[str, Any],
+                         actors: List[Dict[str, Any]],
+                         signals: List[str],
+                         log_to_egregor: bool = True) -> Dict[str, Any]:
+        """
+        Pełna analiza z wykorzystaniem ZOO (86.5).
+        Łączy analizę tensora 45D z detekcją absurdów i ról.
+        
+        Args:
+            tensor_45d: Tensor 45D do analizy
+            ctx_scene: Kontekst sceny dla ZOO
+            actors: Lista aktorów dla ZOO
+            signals: Lista sygnałów dla ZOO
+            log_to_egregor: Czy logować do Egregora
+            
+        Returns:
+            Wynik analizy z danymi ZOO
+        """
+        # 1. Oryginalna analiza tensora
+        result = self.analyze(tensor_45d, log_to_egregor=False)
+        
+        # 2. Analiza ZOO
+        self_state = {"energy": result.get("energy", 0.5)}
+        zoo_result = self.zoo.analyze(ctx_scene, actors, signals, self_state)
+        
+        # 3. Łączenie wyników
+        result["zoo"] = zoo_result
+        result["zoo_risk"] = zoo_result.get("vibe_risk_score", 0.0)
+        result["absurd_score"] = zoo_result.get("absurd_score", 0.0)
+        result["roles_map"] = zoo_result.get("roles_map", {})
+        result["action_hint"] = zoo_result.get("action_hint", "normalna_interakcja")
+        result["action_priority"] = zoo_result.get("action_priority", 3)
+        result["experience_chunk"] = zoo_result.get("experience_chunk", {})
+        
+        # 4. Status ZOO_ALERT przy wysokim ryzyku
+        if zoo_result.get("vibe_risk_score", 0.0) > 0.8:
+            result["status"] = "ZOO_ALERT"
+            result["anomaly_score"] = max(result.get("anomaly_score", 0.0), 0.7)
+        elif zoo_result.get("vibe_risk_score", 0.0) > 0.5:
+            result["status"] = "ZOO_CAUTION"
+        
+        # 5. Certyfikat
+        result["zoo_certificate"] = self.kroniki.certyfikuj_tensor(f"ZOO_ANALYSIS_{hash(str(tensor_45d[:5]))}")
+        
+        # 6. Logowanie do Egregora
+        if log_to_egregor:
+            if zoo_result.get("vibe_risk_score", 0.0) > 0.7:
+                entry = {
+                    "type": "ZOO_ANALYSIS_ALERT",
+                    "absurd_score": zoo_result.get("absurd_score", 0.0),
+                    "vibe_risk_score": zoo_result.get("vibe_risk_score", 0.0),
+                    "roles": zoo_result.get("roles_map", {}),
+                    "action": zoo_result.get("action_hint", "unknown")
+                }
+                self.egregor.commit(entry, node_id="GEON_AI_ANALYTICS_ZOO")
+            elif result["memory_size"] % 5 == 0:
+                entry = {
+                    "type": "ZOO_ANALYSIS_NORMAL",
+                    "absurd_score": zoo_result.get("absurd_score", 0.0),
+                    "risk": zoo_result.get("risk_for_vibe", "niskie")
+                }
+                self.egregor.commit(entry, node_id="GEON_AI_ANALYTICS_ZOO")
+        
+        log(f"🦁 ZOO: absurd={result['absurd_score']:.2f}, risk={result['zoo_risk']:.2f}, action={result['action_hint']}")
+        
+        return result
+
+    def get_zoo_status(self) -> Dict[str, Any]:
+        """Zwraca status modułu ZOO."""
+        if self.zoo_enabled:
+            return self.zoo.get_status()
+        return {"available": False, "enabled": self.zoo_enabled}
+
+    def get_zoo_last_experience(self) -> Optional[Dict[str, Any]]:
+        """Zwraca ostatni chunk doświadczenia ZOO."""
+        if self.zoo_enabled:
+            return self.zoo.get_last_experience()
+        return None
+
+    def get_zoo_history(self) -> List[Dict[str, Any]]:
+        """Zwraca historię ZOO."""
+        if self.zoo_enabled:
+            return self.zoo.get_history()
+        return []
+
+    # ========================================================================
     # ORYGINALNA METODA analyze() (ZACHOWANA)
     # ========================================================================
 
@@ -632,17 +768,22 @@ class GeonAIAnalytics:
                 "active": True,
                 "history_size": len(self.afc_system.get_state().history),
                 "stability": self.afc_system.get_state().stability_score()
+            },
+            "zoo": {
+                "active": self.zoo_enabled,
+                "history_size": len(self.get_zoo_history())
             }
         }
 
 # =============================================================================
-# MOST INTEGRACYJNY — AI_ANALYTICS_BRIDGE (ROZSZERZONY)
+# MOST INTEGRACYJNY — AI_ANALYTICS_BRIDGE (ROZSZERZONY O ZOO)
 # =============================================================================
 
 class AIAnalyticsBridge:
     """
     Most integracyjny dla GEON_AI_ANALYTICS.
     Zachowuje pełną kompatybilność z istniejącymi mostami.
+    ROZSZERZONY o metody ZOO.
     """
     
     def __init__(self, ai: GeonAIAnalytics):
@@ -658,12 +799,14 @@ class AIAnalyticsBridge:
             "limit": status["memory_limit"],
             "wymiar": status["tensor_dim"],
             "anomaly_threshold": status["anomaly_threshold"],
-            "afc_active": status["afc"]["active"]
+            "afc_active": status["afc"]["active"],
+            "zoo_active": status["zoo"]["active"]
         }
 
     def get_autopilot_state(self) -> Dict[str, Any]:
         state = self.ai.last_state()
         afc_state = self.ai.get_afc_state()
+        zoo_last = self.ai.get_zoo_last_experience()
         return {
             "mode": VERSION,
             "energy": round(state["energy"], 6),
@@ -672,17 +815,22 @@ class AIAnalyticsBridge:
             "ai_ready": True,
             "memory_usage": f"{self.ai.memory_size()}/{self.ai.memory_limit}",
             "afc_stability": afc_state.get("stability", 0.0),
-            "afc_tick": afc_state.get("tick", 0)
+            "afc_tick": afc_state.get("tick", 0),
+            "zoo_risk": zoo_last.get("vibe_risk_score", 0.0) if zoo_last else 0.0,
+            "zoo_absurd": zoo_last.get("absurd_score", 0.0) if zoo_last else 0.0
         }
 
     def get_governor_context(self) -> Dict[str, Any]:
         afc_decision = self.ai.get_afc_decision()
+        zoo_last = self.ai.get_zoo_last_experience()
         return {
             "intent": "AI_ANALYTICS_ADAPTIVE",
             "confidence": 0.98,
             "entropy": 0.02,
             "ai_ready": True,
-            "afc_mode": afc_decision.get("mode", "NO_DATA")
+            "afc_mode": afc_decision.get("mode", "NO_DATA"),
+            "zoo_risk": zoo_last.get("vibe_risk_score", 0.0) if zoo_last else 0.0,
+            "zoo_action": zoo_last.get("action", "normalna_interakcja") if zoo_last else "unknown"
         }
 
     def get_trio_state(self) -> Dict[str, str]:
@@ -692,7 +840,8 @@ class AIAnalyticsBridge:
             "PERFEKCJA": "AKTYWNA",
             "tryb": VERSION,
             "ai": "AKTYWNY_ADAPTIV",
-            "afc": "AKTYWNY"
+            "afc": "AKTYWNY",
+            "zoo": "AKTYWNY" if self.ai.zoo_enabled else "WYŁĄCZONY"
         }
 
     def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
@@ -716,6 +865,16 @@ class AIAnalyticsBridge:
             "timestamp": datetime.now().isoformat()
         })
         
+        # Dodaj fragment z ZOO
+        zoo_last = self.ai.get_zoo_last_experience()
+        if zoo_last:
+            fragments.append({
+                "source": "ZOO_ANALYZER",
+                "content": f"ZOO: absurd={zoo_last.get('absurd_score', 0):.3f}, risk={zoo_last.get('vibe_risk_score', 0):.3f}",
+                "absurd": zoo_last.get('absurd_score', 0.0),
+                "timestamp": datetime.now().isoformat()
+            })
+        
         return fragments[-n:]
 
     # ===== NOWE METODY AFC =====
@@ -736,11 +895,58 @@ class AIAnalyticsBridge:
         """Wykonuje analizę z wykorzystaniem AFC."""
         return self.ai.analyze_with_afc(tensor_45d)
 
+    # ===== NOWE METODY ZOO =====
+
+    def get_zoo_status(self) -> Dict[str, Any]:
+        """Zwraca status ZOO."""
+        return self.ai.get_zoo_status()
+
+    def get_zoo_last_experience(self) -> Optional[Dict[str, Any]]:
+        """Zwraca ostatni chunk ZOO."""
+        return self.ai.get_zoo_last_experience()
+
+    def get_zoo_history(self) -> List[Dict[str, Any]]:
+        """Zwraca historię ZOO."""
+        return self.ai.get_zoo_history()
+
+    def analyze_with_zoo(self, tensor_45d: List[float],
+                         ctx_scene: Dict[str, Any],
+                         actors: List[Dict[str, Any]],
+                         signals: List[str]) -> Dict[str, Any]:
+        """Wykonuje analizę z wykorzystaniem ZOO."""
+        return self.ai.analyze_with_zoo(tensor_45d, ctx_scene, actors, signals)
+
+    def get_zoo_metrics(self) -> Dict[str, Any]:
+        """Zwraca metryki ZOO dla Grid/Council/Synod."""
+        last = self.ai.get_zoo_last_experience()
+        if not last:
+            return {
+                "absurd_score": 0.0,
+                "vibe_risk_score": 0.0,
+                "risk_for_vibe": "niskie",
+                "action_hint": "normalna_interakcja",
+                "action_priority": 3,
+                "roles": {}
+            }
+        return {
+            "absurd_score": last.get("absurd_score", 0.0),
+            "vibe_risk_score": last.get("vibe_risk_score", 0.0),
+            "risk_for_vibe": last.get("risk", "niskie"),
+            "action_hint": last.get("action", "normalna_interakcja"),
+            "action_priority": last.get("action_priority", 3),
+            "roles": last.get("roles", {})
+        }
+
     def get_full_status(self) -> Dict[str, Any]:
-        """Zwraca pełny status – zarówno analityka, jak i AFC."""
+        """Zwraca pełny status – analityka + AFC + ZOO."""
         return {
             "analytics": self.ai.get_status(),
             "afc": self.ai.get_afc_state(),
+            "zoo": {
+                "status": self.ai.get_zoo_status(),
+                "last_experience": self.ai.get_zoo_last_experience(),
+                "metrics": self.get_zoo_metrics()
+            },
             "last_decision": self.ai.get_afc_decision(),
             "last_policy": self.ai.get_afc_policy()
         }
@@ -753,16 +959,20 @@ if __name__ == "__main__":
     import random
     
     print("\n" + "=" * 80)
-    print(f"🧠 {VERSION} — FINALNY TEST INTEGRACYJNY Z AFC")
-    print("WARSTWA 87 (GEON_AI_ANALYTICS) ➔ ROZSZERZONA O AFC-9")
+    print(f"🧠 {VERSION} — FINALNY TEST INTEGRACYJNY Z AFC + ZOO")
+    print("WARSTWA 87 (GEON_AI_ANALYTICS) ➔ ROZSZERZONA O AFC-9 + ZOO")
     print("=" * 80 + "\n")
 
-    ai = GeonAIAnalytics(config={
+    # Konfiguracja z ZOO
+    config = {
         "alpha": 0.6,
         "anomaly_threshold": 0.35,
         "stability_threshold": 0.7,
-        "afc_history_size": 32
-    })
+        "afc_history_size": 32,
+        "zoo_enabled": True
+    }
+    
+    ai = GeonAIAnalytics(config=config)
     bridge = AIAnalyticsBridge(ai)
 
     # 1. Test oryginalnej analizy
@@ -773,7 +983,6 @@ if __name__ == "__main__":
 
     # 2. Test AFC
     print("\n🔬 TEST 2: ANALIZA Z AFC")
-    # Przygotowanie 4 wektorów 9D (symulacja)
     D1 = [0.5 + random.uniform(-0.1, 0.1) for _ in range(VECTOR_DIM)]
     D2 = [0.5 + random.uniform(-0.1, 0.1) for _ in range(VECTOR_DIM)]
     D3 = [0.5 + random.uniform(-0.1, 0.1) for _ in range(VECTOR_DIM)]
@@ -793,11 +1002,29 @@ if __name__ == "__main__":
     print(f"   AFC Decyzja: {full_result['afc']['decision']}")
     print(f"   AFC Polityka: {full_result['afc']['policy']}")
 
-    # 4. Stan mostu
+    # 4. Test ZOO
+    print("\n🦁 TEST 4: ANALIZA Z ZOO")
+    ctx_scene = {"description": "arcybiskup na stand-upie, politycy bez powodu"}
+    actors = [
+        {"name": "Aktor1", "lacks_reflection": True, "laughs_at_jokes_about_self": True},
+        {"name": "Aktor2", "volume_db": 95, "logic_percent": 5},
+        {"name": "Aktor3", "is_snobbish": True, "overestimates_status": True},
+    ]
+    signals = ["brak_samoświadomości"]
+    
+    zoo_result = ai.analyze_with_zoo(tensor_45d, ctx_scene, actors, signals)
+    print(f"   Status: {zoo_result['status']}")
+    print(f"   Absurd Score: {zoo_result['absurd_score']:.2f}")
+    print(f"   ZOO Risk: {zoo_result['zoo_risk']:.2f}")
+    print(f"   Action: {zoo_result['action_hint']} (prio: {zoo_result['action_priority']})")
+    print(f"   Roles: {zoo_result['roles_map']}")
+
+    # 5. Stan mostu
     print("\n🔗 STAN MOSTU (ROZSZERZONEGO):")
     print(f"   Autopilot: {bridge.get_autopilot_state()}")
     print(f"   AFC Status: {bridge.get_afc_status()}")
+    print(f"   ZOO Metrics: {bridge.get_zoo_metrics()}")
 
     print("\n" + "=" * 80)
-    print(f"🧠 MODUŁ 87 ZAKTUALIZOWANY | {HASLO}")
+    print(f"🧠 MODUŁ 87 ZAKTUALIZOWANY (AFC + ZOO) | {HASLO}")
     print("=" * 80)
