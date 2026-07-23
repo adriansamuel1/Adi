@@ -2,24 +2,22 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
-🐉 GEON_ARCHONT_COUNCIL_v1.2 — MODUŁ 90: RADA ARCHONTÓW (FULL INTEGRATION)
+🐉 GEON_ARCHONT_COUNCIL_v2.0 — MODUŁ 90: RADA ARCHONTÓW + AFC INTEGRATION
 ================================================================================
-Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
-Wersja: v1.2 (Full Integration: Influence, Drift, Phase Alignment, Crisis Vector)
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ULTIMA | AFC_INTEGRATED
+Wersja: v2.0 (Full AFC Integration: Stability, Decision, Policy)
 Data: 2026-07-24
 Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
 
-NOWOŚCI v1.2:
-• Crisis Bias – KRYZYS ma większą wagę (1.25x)
-• Drift Threshold – wykrywanie ukrytych kryzysów (drift > 0.65 → OMEGA)
-• Phase Alignment – wysoki alignment (> 0.75) skłania do ALPHA
-• Influence jako główna waga z korektą drift
-• Crisis Vector – zapis pełnych wektorów kryzysowych
-• Council Drift Index – średnia dryfów Archontów
-• Integracja z Oracle (ERA jako bias)
-• Podpisy Archontów jako część certyfikacji
+ZMIANY:
+  1. Integracja z AFC – przyjmowanie afc_global_stability, afc_decision, afc_policy
+  2. Nowe pola w CouncilVote – afc_stability, afc_decision, afc_policy
+  3. Nowe pola w CouncilReport – afc_global_stability, afc_global_decision, afc_global_policy
+  4. Uwzględnienie AFC w głosowaniu – niska stabilność lub ALERT zwiększają score
+  5. Rozszerzony CouncilBridge – get_afc_context(), get_full_status()
 
-VIBE: 1-6-8. ∞. COUNCIL!
+VIBE: 1-6-8. ∞. COUNCIL! ⚖️
+DEWIZA: "Ex Consilio, Lex. Ex Fractali, Vigor."
 ================================================================================
 """
 
@@ -39,11 +37,11 @@ from enum import Enum
 # WERSJA I STAŁE
 # =============================================================================
 
-VERSION = "GEON_ARCHONT_COUNCIL_v1.2"
-FRACTAL_SIGNATURE = "[GEON::ARCHONT::COUNCIL::v1.2]"
+VERSION = "GEON_ARCHONT_COUNCIL_v2.0"
+FRACTAL_SIGNATURE = "[GEON::ARCHONT::COUNCIL::v2.0::AFC_INTEGRATED]"
 VIBE = 168
-HASLO = "1-6-8. ∞. COUNCIL!"
-DEWIZA = "Ex Consilio, Lex"
+HASLO = "1-6-8. ∞. COUNCIL! ⚖️"
+DEWIZA = "Ex Consilio, Lex. Ex Fractali, Vigor."
 
 MEMORY_LIMIT = 256
 
@@ -59,11 +57,15 @@ COUNCIL_DRIFT_OMEGA_THRESHOLD = 0.75
 COUNCIL_DRIFT_BETA_THRESHOLD = 0.55
 ORACLE_CRISIS_BIAS = 1.2
 
+# ===== NOWE STAŁE AFC =====
+AFC_CRISIS_STABILITY_THRESHOLD = 0.35
+AFC_ALERT_SCORE_BOOST = 0.3
+
 # =============================================================================
 # LOGOWANIE
 # =============================================================================
 
-logger = logging.getLogger("GEON_ARCHONT_COUNCIL_v1.2")
+logger = logging.getLogger("GEON_ARCHONT_COUNCIL_v2.0")
 logger.setLevel(logging.INFO)
 if not logger.handlers:
     handler = logging.StreamHandler()
@@ -119,6 +121,10 @@ class CouncilVote:
     phase_alignment: float
     signature: str
     crisis_vector: Optional[List[float]] = None
+    # ===== NOWE POLA AFC =====
+    afc_stability: float = 0.0
+    afc_decision: Optional[str] = None
+    afc_policy: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -129,7 +135,11 @@ class CouncilVote:
             "drift": round(self.drift, 4),
             "phase_alignment": round(self.phase_alignment, 4),
             "signature": self.signature[:20] + "..." if self.signature else "BRAK",
-            "has_crisis_vector": self.crisis_vector is not None
+            "has_crisis_vector": self.crisis_vector is not None,
+            # Nowe pola AFC
+            "afc_stability": round(self.afc_stability, 4),
+            "afc_decision": self.afc_decision,
+            "afc_policy": self.afc_policy
         }
 
 
@@ -147,6 +157,10 @@ class CouncilReport:
     maya_phase: int = 0
     anomaly_score: float = 0.0
     certificate: str = ""
+    # ===== NOWE POLA AFC =====
+    afc_global_stability: float = 0.0
+    afc_global_decision: Optional[str] = None
+    afc_global_policy: Optional[str] = None
     timestamp: float = field(default_factory=time.time)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -164,6 +178,10 @@ class CouncilReport:
             "maya_phase": self.maya_phase,
             "anomaly_score": round(self.anomaly_score, 4),
             "certificate": self.certificate,
+            # Nowe pola AFC
+            "afc_global_stability": round(self.afc_global_stability, 4),
+            "afc_global_decision": self.afc_global_decision,
+            "afc_global_policy": self.afc_global_policy,
             "timestamp": datetime.fromtimestamp(self.timestamp).isoformat()
         }
 
@@ -206,12 +224,12 @@ class Egregor:
         return snapshot
 
 # =============================================================================
-# GŁÓWNY MODUŁ: GEON_ARCHONT_COUNCIL v1.2
+# GŁÓWNY MODUŁ: GEON_ARCHONT_COUNCIL v2.0
 # =============================================================================
 
 class GeonArchontCouncil:
     """
-    ⚖️ GEON_ARCHONT_COUNCIL v1.2 – Pełna Rada Archontów z integracją v1.2.
+    ⚖️ GEON_ARCHONT_COUNCIL v2.0 – Pełna Rada Archontów z integracją AFC.
     """
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
@@ -234,20 +252,29 @@ class GeonArchontCouncil:
         self.crisis_bias = self.config.get("crisis_bias", CRISIS_BIAS)
         self.oracle_crisis_bias = self.config.get("oracle_crisis_bias", ORACLE_CRISIS_BIAS)
         
+        # ===== NOWE PROGI AFC =====
+        self.afc_crisis_stability_threshold = self.config.get("afc_crisis_stability_threshold", AFC_CRISIS_STABILITY_THRESHOLD)
+        self.afc_alert_score_boost = self.config.get("afc_alert_score_boost", AFC_ALERT_SCORE_BOOST)
+        
         log(f"🐉 {VERSION} aktywowany | {FRACTAL_SIGNATURE}")
         log(f"   GŁOSOWANIE: {'WAŻONE' if self.weighted_voting else 'TWARDE'}")
         log(f"   CRISIS_BIAS: {self.crisis_bias} | DRIFT_OMEGA: {self.drift_omega_threshold}")
+        log(f"   AFC INTEGRACJA: AKTYWNA")
 
     # -------------------------------------------------------------------------
-    # GŁÓWNA METODA – PRZYJMUJE PAYLOAD Z GRIDU
+    # GŁÓWNA METODA – PRZYJMUJE PAYLOAD Z GRIDU (ROZSZERZONA O AFC)
     # -------------------------------------------------------------------------
 
     def convene(self, council_payload: Dict[str, Any],
                 oracle_era: Optional[str] = None,
                 maya_phase: int = 0,
-                anomaly_score: float = 0.0) -> CouncilReport:
+                anomaly_score: float = 0.0,
+                # ===== NOWE PARAMETRY AFC (opcjonalne) =====
+                afc_global_stability: Optional[float] = None,
+                afc_global_decision: Optional[str] = None,
+                afc_global_policy: Optional[str] = None) -> CouncilReport:
         """
-        Zbiera Radę Archontów z pełnymi metrykami v1.2.
+        Zbiera Radę Archontów z pełnymi metrykami v2.0 + AFC.
         """
         # 1. Ekstrakcja danych z payloadu
         votes_raw = council_payload.get("votes", [])
@@ -257,6 +284,14 @@ class GeonArchontCouncil:
         phase_alignments = council_payload.get("phase_alignments", [])
         signatures = council_payload.get("signatures", [])
         archont_names = ["SAMAEL", "ENKI", "RA", "OPTIMUS", "HEILONG"]
+        
+        # Pobierz AFC z payloadu (jeśli nie podano wprost)
+        if afc_global_stability is None:
+            afc_global_stability = council_payload.get("afc_global_stability", 0.0)
+        if afc_global_decision is None:
+            afc_global_decision = council_payload.get("afc_global_decision")
+        if afc_global_policy is None:
+            afc_global_policy = council_payload.get("afc_global_policy")
         
         # Uzupełnienie brakujących danych
         def pad_list(lst, default, size):
@@ -271,15 +306,14 @@ class GeonArchontCouncil:
         phase_alignments = pad_list(phase_alignments, 0.5, len(archont_names))
         signatures = pad_list(signatures, "BRAK_SYGNAtURY", len(archont_names))
 
-        # Crisis Vectors z payloadu (jeśli istnieją)
+        # Crisis Vectors z payloadu
         archont_vectors = council_payload.get("archont_vectors", [])
         crisis_vectors = []
         for v in archont_vectors:
-            if len(v) >= 5 and v[4] >= 4:  # numeric_status >= 4 (KRYZYS)
-                # Wektor ma: [mean, variance, entropy, energy, status_numeric, influence, drift, alignment]
-                crisis_vectors.append(v[:4])  # mean, variance, entropy, energy
+            if len(v) >= 5 and v[4] >= 4:
+                crisis_vectors.append(v[:4])
 
-        # 2. Tworzenie obiektów głosów z pełnymi metrykami
+        # 2. Tworzenie obiektów głosów z pełnymi metrykami + AFC
         votes = []
         for i, name in enumerate(archont_names):
             cv = crisis_vectors[i] if i < len(crisis_vectors) else None
@@ -291,11 +325,15 @@ class GeonArchontCouncil:
                 drift=drifts[i],
                 phase_alignment=phase_alignments[i],
                 signature=signatures[i],
-                crisis_vector=cv
+                crisis_vector=cv,
+                # ===== NOWE POLA AFC =====
+                afc_stability=afc_global_stability,
+                afc_decision=afc_global_decision,
+                afc_policy=afc_global_policy
             ))
 
-        # 3. Głosowanie z ulepszeniami
-        decree = self._vote_weighted_enhanced(votes, oracle_era, anomaly_score)
+        # 3. Głosowanie z ulepszeniami + AFC
+        decree = self._vote_weighted_enhanced(votes, oracle_era, anomaly_score, afc_global_stability, afc_global_decision)
 
         # 4. Podsumowanie głosów
         vote_summary = {}
@@ -314,7 +352,7 @@ class GeonArchontCouncil:
         signatures_list = [v.signature for v in votes if v.signature != "BRAK_SYGNAtURY"]
         cert = self.kroniki.certyfikuj_council(f"DECREE_{decree.value}", signatures_list)
 
-        # 8. Raport
+        # 8. Raport z AFC
         report = CouncilReport(
             decree=decree,
             votes=votes,
@@ -327,7 +365,11 @@ class GeonArchontCouncil:
             oracle_era=oracle_era,
             maya_phase=maya_phase,
             anomaly_score=anomaly_score,
-            certificate=cert
+            certificate=cert,
+            # ===== NOWE POLA AFC =====
+            afc_global_stability=afc_global_stability,
+            afc_global_decision=afc_global_decision,
+            afc_global_policy=afc_global_policy
         )
 
         # 9. Zapis do historii
@@ -337,41 +379,42 @@ class GeonArchontCouncil:
         # 10. Zapis do Egregora
         if decree in [CouncilDecree.OMEGA, CouncilDecree.BETA] or len(self.history) % 5 == 0:
             entry = {
-                "type": "COUNCIL_DECREE",
+                "type": "COUNCIL_DECREE_AFC",
                 "report": report.to_dict(),
                 "certificate": cert,
                 "council_drift": council_drift,
                 "crisis_vectors_count": len(crisis_vectors_report),
+                "afc_stability": afc_global_stability,
+                "afc_decision": afc_global_decision,
                 "timestamp": datetime.now().isoformat()
             }
-            self.egregor.commit(entry, node_id="GEON_ARCHONT_COUNCIL")
+            self.egregor.commit(entry, node_id="GEON_ARCHONT_COUNCIL_AFC")
 
-        self.kroniki.log_event("COUNCIL_CONVENED", {
+        self.kroniki.log_event("COUNCIL_CONVENED_AFC", {
             "decree": decree.value,
             "summary": vote_summary,
             "council_drift": council_drift,
-            "crisis_vectors": len(crisis_vectors_report)
+            "crisis_vectors": len(crisis_vectors_report),
+            "afc_stability": afc_global_stability,
+            "afc_decision": afc_global_decision
         })
 
         return report
 
     # -------------------------------------------------------------------------
-    # ULEPSZONE GŁOSOWANIE – v1.2
+    # ULEPSZONE GŁOSOWANIE – v2.0 (z AFC)
     # -------------------------------------------------------------------------
 
     def _vote_weighted_enhanced(self, votes: List[CouncilVote],
                                  oracle_era: Optional[str] = None,
-                                 anomaly_score: float = 0.0) -> CouncilDecree:
+                                 anomaly_score: float = 0.0,
+                                 afc_global_stability: float = 0.0,
+                                 afc_global_decision: Optional[str] = None) -> CouncilDecree:
         """
-        Ważone głosowanie z ulepszeniami v1.2:
-        • Crisis Bias
-        • Drift Threshold
-        • Phase Alignment
-        • Oracle Bias
-        • Council Drift Index
+        Ważone głosowanie z ulepszeniami v2.0 + AFC.
         """
         if not self.weighted_voting:
-            return self._vote_twarde_enhanced(votes)
+            return self._vote_twarde_enhanced(votes, afc_global_stability, afc_global_decision)
 
         total_weight = 0.0
         weighted_score = 0.0
@@ -387,10 +430,10 @@ class GeonArchontCouncil:
         }
 
         for v in votes:
-            # 1. Waga bazowa: influence (lub confidence jako fallback)
+            # 1. Waga bazowa
             weight = v.influence if v.influence > 0 else v.confidence
             
-            # 2. Korekta dryfem: Archont z dużym dryfem ma mniejszą wagę
+            # 2. Korekta dryfem
             weight *= (1.0 - v.drift * 0.5)
             
             # 3. Crisis Bias
@@ -399,14 +442,22 @@ class GeonArchontCouncil:
                 crisis_bias = self.crisis_bias
                 crisis_count += 1
             
-            # 4. Numeric status
+            # ===== 4. NOWA KOREKTA AFC =====
+            afc_bias = 1.0
+            if afc_global_stability < self.afc_crisis_stability_threshold:
+                # Niska stabilność AFC – zwiększamy wagę kryzysu
+                afc_bias *= 1.3
+            if afc_global_decision in ["ALERT", "HARD_ALERT"]:
+                afc_bias *= (1.0 + self.afc_alert_score_boost)
+            
+            # 5. Numeric status
             numeric = status_numeric.get(v.status, 1)
             
-            # 5. Phase Alignment – jeśli wysoki, obniża score (skłania do ALPHA)
+            # 6. Phase Alignment
             if v.phase_alignment > self.phase_alignment_alpha_threshold:
                 numeric = max(0, numeric - 0.5)
             
-            weighted_score += weight * numeric * crisis_bias
+            weighted_score += weight * numeric * crisis_bias * afc_bias
             total_weight += weight
             drifts.append(v.drift)
 
@@ -416,37 +467,39 @@ class GeonArchontCouncil:
         avg_score = weighted_score / total_weight
         council_drift = sum(drifts) / len(drifts) if drifts else 0.0
 
-        # 6. Oracle Bias – jeśli era kryzysu, zaostrzamy
+        # 7. Oracle Bias
         if oracle_era == "ERA_KRYZYSU":
             avg_score *= self.oracle_crisis_bias
 
-        # 7. Anomaly Bias – wysoka anomalia podnosi score
+        # 8. Anomaly Bias
         if anomaly_score > 0.7:
             avg_score *= (1.0 + anomaly_score * 0.3)
 
-        # 8. Council Drift Index
+        # 9. Council Drift Index
         if council_drift > self.council_drift_omega_threshold:
             return CouncilDecree.OMEGA
         if council_drift > self.council_drift_beta_threshold:
             return CouncilDecree.BETA
 
-        # 9. Individual Drift Threshold – jeśli któryś Archont ma bardzo wysoki dryf
+        # 10. Individual Drift Threshold
         for v in votes:
             if v.drift > self.drift_omega_threshold:
                 return CouncilDecree.OMEGA
             if v.drift > self.drift_beta_threshold and avg_score > 0.5:
                 return CouncilDecree.BETA
 
-        # 10. Decyzja końcowa
+        # 11. Decyzja końcowa
         if avg_score > self.weight_threshold * 2.5:
             return CouncilDecree.OMEGA
         if avg_score > self.weight_threshold:
             return CouncilDecree.BETA
         return CouncilDecree.ALPHA
 
-    def _vote_twarde_enhanced(self, votes: List[CouncilVote]) -> CouncilDecree:
+    def _vote_twarde_enhanced(self, votes: List[CouncilVote],
+                               afc_global_stability: float = 0.0,
+                               afc_global_decision: Optional[str] = None) -> CouncilDecree:
         """
-        Twarde głosowanie z ulepszeniami v1.2.
+        Twarde głosowanie z ulepszeniami v2.0 + AFC.
         """
         statuses = [v.status for v in votes]
         drifts = [v.drift for v in votes]
@@ -457,6 +510,13 @@ class GeonArchontCouncil:
         total_niestab = niestab_count + kryzys_count
         
         council_drift = sum(drifts) / len(drifts) if drifts else 0.0
+        
+        # ===== AFC Boost =====
+        afc_boost = 0
+        if afc_global_stability < self.afc_crisis_stability_threshold:
+            afc_boost += 1
+        if afc_global_decision in ["ALERT", "HARD_ALERT"]:
+            afc_boost += 1
         
         # 1. Council Drift Index
         if council_drift > self.council_drift_omega_threshold:
@@ -471,10 +531,10 @@ class GeonArchontCouncil:
             if v.drift > self.drift_beta_threshold:
                 return CouncilDecree.BETA
         
-        # 3. Standardowe reguły
-        if total_niestab >= 2:
+        # 3. Standardowe reguły + AFC
+        if total_niestab >= 2 or afc_boost >= 2:
             return CouncilDecree.OMEGA
-        if presja_count >= 3:
+        if presja_count >= 3 or afc_boost >= 1:
             return CouncilDecree.BETA
         return CouncilDecree.ALPHA
 
@@ -511,25 +571,35 @@ class GeonArchontCouncil:
                 "drift_omega_threshold": self.drift_omega_threshold,
                 "council_drift_omega": self.council_drift_omega_threshold,
                 "phase_alignment_alpha": self.phase_alignment_alpha_threshold,
-                "oracle_crisis_bias": self.oracle_crisis_bias
+                "oracle_crisis_bias": self.oracle_crisis_bias,
+                "afc_crisis_stability_threshold": self.afc_crisis_stability_threshold,
+                "afc_alert_score_boost": self.afc_alert_score_boost
+            },
+            "integration": {
+                "AFC": True,
+                "ORACLE": True,
+                "GRID": True
             }
         }
 
 # =============================================================================
-# MOST INTEGRACYJNY — COUNCIL_BRIDGE
+# MOST INTEGRACYJNY — COUNCIL_BRIDGE (ROZSZERZONY)
 # =============================================================================
 
 class CouncilBridge:
     def __init__(self, council: GeonArchontCouncil):
         self.council = council
 
+    # ===== ORYGINALNE METODY (ZACHOWANE) =====
+    
     def get_archetype_context(self) -> Dict[str, Any]:
         status = self.council.get_status()
         return {
             "tryb": VERSION,
             "historia": status["history_size"],
             "features": status["features"],
-            "weighted": status["weighted_voting"]
+            "weighted": status["weighted_voting"],
+            "integration": status["integration"]
         }
 
     def get_autopilot_state(self) -> Dict[str, Any]:
@@ -541,6 +611,8 @@ class CouncilBridge:
                 "decree": last.get("decree", "UNKNOWN"),
                 "council_drift": last.get("council_drift", 0.0),
                 "crisis_vectors": last.get("crisis_vectors_count", 0),
+                "afc_stability": last.get("afc_global_stability", 0.0),
+                "afc_decision": last.get("afc_global_decision", "UNKNOWN"),
                 "council_ready": True
             }
         return {"mode": VERSION, "decree": "NO_DATA", "council_ready": True}
@@ -554,6 +626,7 @@ class CouncilBridge:
                 "confidence": last.get("confidence_avg", 0.5),
                 "decree": last.get("decree", "UNKNOWN"),
                 "council_drift": last.get("council_drift", 0.0),
+                "afc_stability": last.get("afc_global_stability", 0.0),
                 "council_ready": True
             }
         return {"intent": "COUNCIL_DECISION", "confidence": 0.5, "council_ready": True}
@@ -564,7 +637,7 @@ class CouncilBridge:
             "PIECZĘĆ": "AKTYWNA",
             "PERFEKCJA": "AKTYWNA",
             "tryb": VERSION,
-            "council": "AKTYWNY_V1.2"
+            "council": "AKTYWNY_V2.0_AFC"
         }
 
     def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
@@ -573,11 +646,35 @@ class CouncilBridge:
         for entry in history:
             fragments.append({
                 "source": VERSION,
-                "content": f"Rada: {entry.get('decree', 'UNKNOWN')} | drift: {entry.get('council_drift', 0):.3f}",
+                "content": f"Rada: {entry.get('decree', 'UNKNOWN')} | drift: {entry.get('council_drift', 0):.3f} | afc_stab: {entry.get('afc_global_stability', 0):.3f}",
                 "decree": entry.get("decree", "UNKNOWN"),
-                "crisis_vectors": entry.get("crisis_vectors_count", 0)
+                "crisis_vectors": entry.get("crisis_vectors_count", 0),
+                "afc_stability": entry.get("afc_global_stability", 0.0)
             })
         return fragments
+
+    # ===== NOWE METODY AFC =====
+
+    def get_afc_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst AFC z ostatniej decyzji Rady."""
+        history = self.council.get_history(1)
+        if history:
+            last = history[-1]
+            return {
+                "afc_global_stability": last.get("afc_global_stability", 0.0),
+                "afc_global_decision": last.get("afc_global_decision", "UNKNOWN"),
+                "afc_global_policy": last.get("afc_global_policy", "UNKNOWN"),
+                "decree": last.get("decree", "UNKNOWN")
+            }
+        return {"afc_global_stability": 0.0, "afc_global_decision": "UNKNOWN"}
+
+    def get_full_status(self) -> Dict[str, Any]:
+        """Zwraca pełny status – Rada + AFC."""
+        return {
+            "council": self.council.get_status(),
+            "afc_context": self.get_afc_context(),
+            "last_report": self.council.get_history(1)[0] if self.council.get_history(1) else None
+        }
 
 # =============================================================================
 # DEMONSTRACJA
@@ -585,15 +682,15 @@ class CouncilBridge:
 
 def demo():
     print("\n" + "=" * 80)
-    print(f"⚖️ {VERSION} — DEMONSTRACJA Z ULEPSZENIAMI")
-    print("CRISIS BIAS | DRIFT THRESHOLD | PHASE ALIGNMENT | ORACLE INTEGRATION")
+    print(f"⚖️ {VERSION} — DEMONSTRACJA Z INTEGRACJĄ AFC")
+    print("CRISIS BIAS | DRIFT THRESHOLD | PHASE ALIGNMENT | AFC INTEGRATION")
     print("=" * 80 + "\n")
 
     council = GeonArchontCouncil(weighted_voting=True)
     bridge = CouncilBridge(council)
 
-    # Symulacja payloadu z GRID z pełnymi metrykami v1.2
-    def create_payload(statuses, drifts=None, alignments=None):
+    # Symulacja payloadu z GRID z AFC
+    def create_payload(statuses, drifts=None, alignments=None, afc_stability=0.7, afc_decision="NORMAL"):
         if drifts is None:
             drifts = [0.1] * 5
         if alignments is None:
@@ -608,50 +705,44 @@ def demo():
             "archont_vectors": [
                 [0.5, 0.02, 0.3, 0.5, 4, 0.7, drifts[i], alignments[i]]
                 for i in range(5)
-            ]
+            ],
+            # ===== AFC DATA =====
+            "afc_global_stability": afc_stability,
+            "afc_global_decision": afc_decision,
+            "afc_global_policy": "MAINTAIN"
         }
 
-    print("🔍 TEST 1: STANDARDOWA STABILNOŚĆ → ALPHA")
-    payload1 = create_payload(["STABILNOŚĆ"] * 5)
+    print("🔍 TEST 1: STABILNOŚĆ + AFC STABILNY → ALPHA")
+    payload1 = create_payload(["STABILNOŚĆ"] * 5, afc_stability=0.8, afc_decision="NORMAL")
     report1 = council.convene(payload1, oracle_era="ERA_STABILNOŚCI", maya_phase=3)
     print(f"   Dekret: {report1.decree.value}")
+    print(f"   AFC Stability: {report1.afc_global_stability:.3f}")
     print(f"   Council Drift: {report1.council_drift:.3f}")
 
-    print("\n🔍 TEST 2: PRESJA → BETA")
-    payload2 = create_payload(["PRESJA", "PRESJA", "PRESJA", "STABILNOŚĆ", "STABILNOŚĆ"])
-    report2 = council.convene(payload2, oracle_era="ERA_TRANSFORMACJI", maya_phase=5)
-    print(f"   Dekret: {report2.decree.value}")
-    print(f"   Council Drift: {report2.council_drift:.3f}")
+    print("\n🔍 TEST 2: STABILNOŚĆ + AFC NIESTABILNY (ALERT) → BETA/OMEGA")
+    payload2 = create_payload(["STABILNOŚĆ"] * 5, afc_stability=0.2, afc_decision="ALERT")
+    report2 = council.convene(payload2, oracle_era="ERA_STABILNOŚCI", maya_phase=3)
+    print(f"   Dekret (AFC ALERT): {report2.decree.value}")
+    print(f"   AFC Stability: {report2.afc_global_stability:.3f}")
 
-    print("\n🔍 TEST 3: KRYZYS → OMEGA (z Crisis Bias)")
-    payload3 = create_payload(["NIESTABILNOŚĆ", "KRYZYS", "PRESJA", "STABILNOŚĆ", "STABILNOŚĆ"])
-    report3 = council.convene(payload3, oracle_era="ERA_KRYZYSU", maya_phase=6, anomaly_score=0.8)
+    print("\n🔍 TEST 3: PRESJA + AFC STABILNY → BETA")
+    payload3 = create_payload(["PRESJA", "PRESJA", "PRESJA", "STABILNOŚĆ", "STABILNOŚĆ"], afc_stability=0.8, afc_decision="NORMAL")
+    report3 = council.convene(payload3, oracle_era="ERA_TRANSFORMACJI", maya_phase=5)
     print(f"   Dekret: {report3.decree.value}")
-    print(f"   Crisis Vectors: {len(report3.crisis_vectors)}")
+    print(f"   AFC Stability: {report3.afc_global_stability:.3f}")
 
-    print("\n🔍 TEST 4: UKRYTY KRYZYS (wysoki dryf) → OMEGA")
-    payload4 = create_payload(
-        ["STABILNOŚĆ", "STABILNOŚĆ", "STABILNOŚĆ", "STABILNOŚĆ", "STABILNOŚĆ"],
-        drifts=[0.7, 0.1, 0.1, 0.1, 0.1]
-    )
-    report4 = council.convene(payload4, oracle_era="ERA_STABILNOŚCI", maya_phase=3)
-    print(f"   Dekret (wykryty dryf): {report4.decree.value}")
-    print(f"   Council Drift: {report4.council_drift:.3f}")
+    print("\n🔍 TEST 4: PRESJA + AFC NIESTABILNY (HARD_ALERT) → OMEGA")
+    payload4 = create_payload(["PRESJA", "PRESJA", "STABILNOŚĆ", "STABILNOŚĆ", "STABILNOŚĆ"], afc_stability=0.15, afc_decision="HARD_ALERT")
+    report4 = council.convene(payload4, oracle_era="ERA_TRANSFORMACJI", maya_phase=5)
+    print(f"   Dekret (AFC HARD_ALERT): {report4.decree.value}")
+    print(f"   AFC Stability: {report4.afc_global_stability:.3f}")
 
-    print("\n🔍 TEST 5: PHASE ALIGNMENT → ALPHA (mimo presji)")
-    payload5 = create_payload(
-        ["PRESJA", "PRESJA", "STABILNOŚĆ", "STABILNOŚĆ", "STABILNOŚĆ"],
-        alignments=[0.8, 0.85, 0.9, 0.85, 0.8]
-    )
-    report5 = council.convene(payload5, oracle_era="ERA_TRANSFORMACJI", maya_phase=4)
-    print(f"   Dekret (alignment): {report5.decree.value}")
-    print(f"   Council Drift: {report5.council_drift:.3f}")
-
-    print("\n📊 HISTORIA RADY:")
+    print("\n📊 HISTORIA RADY (z AFC):")
     for entry in council.get_history(3):
-        print(f"   {entry['decree']} | drift: {entry['council_drift']:.3f} | crisis: {entry['crisis_vectors_count']}")
+        print(f"   {entry['decree']} | drift: {entry['council_drift']:.3f} | afc_stab: {entry.get('afc_global_stability', 0):.3f}")
 
-    print("\n🔗 MOSTY INTEGRACYJNE:")
+    print("\n🔗 MOSTY INTEGRACYJNE (AFC):")
+    print(f"   AFC Context: {bridge.get_afc_context()}")
     print(f"   Autopilot: {bridge.get_autopilot_state()}")
     print(f"   Governor: {bridge.get_governor_context()}")
     print(f"   TRIO: {bridge.get_trio_state()}")
