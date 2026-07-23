@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 ZOO_BRIDGE — MOST INTEGRACYJNY DLA WARSTWY 86.5 (GEON ZOO)
+================================================================================
+Status: PRODUCTION_READY | ULTIMA
+Wersja: v1.0 (Full Integration Bridge)
+Data: 2026-07-24
+
+OPIS:
+    Most wystawia metryki GEONZOOAnalyzer do warstw:
+    - 89 (ARCHONT_GRID) – risk_metrics
+    - 90 (ARCHONT_COUNCIL) – action_hint
+    - 91 (GEON_SYNOD) – roles_map
+    - System/Narrative – lesson
+================================================================================
+"""
+
+from typing import Dict, Any, List, Optional
+from kombajn_core import geon_zoo_analyzer_v1_0 as ZOO
+
+
+class ZOOBridge:
+    """
+    🦁 Most integracyjny dla GEONZOOAnalyzer.
+    Wystawia metryki ZOO do warstw 89-92.
+    """
+
+    def __init__(self, zoo: Optional[ZOO.GEONZOOAnalyzer] = None):
+        self.zoo = zoo or ZOO.GEONZOOAnalyzer()
+        self._last_result = {}
+
+    # ========================================================================
+    # MOST DO ARCHONT_GRID (89)
+    # ========================================================================
+
+    def get_risk_metrics(self) -> Dict[str, Any]:
+        """Zwraca metryki ryzyka dla Grid (89)."""
+        if not self.zoo.last_experiences:
+            return {
+                "risk_for_vibe": "niskie",
+                "vibe_risk_score": 0.0,
+                "absurd_score": 0.0,
+                "action": "obserwuj"
+            }
+        last = self.zoo.last_experiences[-1]
+        return {
+            "risk_for_vibe": last.get("risk", "niskie"),
+            "vibe_risk_score": last.get("vibe_risk_score", 0.0),
+            "absurd_score": last.get("absurd_score", 0.0),
+            "action": last.get("action", "obserwuj")
+        }
+
+    # ========================================================================
+    # MOST DO ARCHONT_COUNCIL (90)
+    # ========================================================================
+
+    def get_action_hint(self) -> Dict[str, Any]:
+        """Zwraca hint akcji dla Council (90)."""
+        if not self.zoo.last_experiences:
+            return {"hint": "normalna_interakcja", "priority": 3, "source": "ZOO"}
+        last = self.zoo.last_experiences[-1]
+        return {
+            "hint": last.get("action", "obserwuj_z_dystansu"),
+            "priority": last.get("action_priority", 5),
+            "source": "ZOO_ANALYZER",
+            "absurd_score": last.get("absurd_score", 0.0)
+        }
+
+    # ========================================================================
+    # MOST DO GEON_SYNOD (91)
+    # ========================================================================
+
+    def get_roles_map(self) -> Dict[str, str]:
+        """Zwraca mapę ról dla Synodu (91)."""
+        if not self.zoo.last_experiences:
+            return {}
+        return self.zoo.last_experiences[-1].get("roles", {})
+
+    def get_role_summary(self) -> Dict[str, int]:
+        """Zwraca podsumowanie ról (liczby)."""
+        roles = self.get_roles_map()
+        summary = {}
+        for role in roles.values():
+            summary[role] = summary.get(role, 0) + 1
+        return summary
+
+    # ========================================================================
+    # MOST DO SYSTEMU / NARRATIVE
+    # ========================================================================
+
+    def get_lesson(self) -> str:
+        """Zwraca lekcję dla Narrative."""
+        if not self.zoo.last_experiences:
+            return "Obserwuj, nie angażuj się w tryb aktora."
+        return self.zoo.last_experiences[-1].get("lesson", "")
+
+    def get_experience_chunk(self) -> Optional[Dict[str, Any]]:
+        """Zwraca ostatni chunk doświadczenia."""
+        return self.zoo.get_last_experience()
+
+    # ========================================================================
+    # MOST DO KONSYSTORZ (92) – opcjonalnie
+    # ========================================================================
+
+    def get_zoo_verdict(self) -> Dict[str, Any]:
+        """Zwraca werdykt ZOO dla Konsystorza (92)."""
+        if not self.zoo.last_experiences:
+            return {"status": "OK", "reason": "Brak danych ZOO"}
+        last = self.zoo.last_experiences[-1]
+        absurd = last.get("absurd_score", 0.0)
+        risk = last.get("vibe_risk_score", 0.0)
+        
+        if absurd > 0.7 or risk > 0.8:
+            return {
+                "status": "ZOO_ALERT",
+                "reason": f"Wysoki absurd ({absurd:.2f}) lub ryzyko ({risk:.2f})",
+                "action": last.get("action", "wyjdź_z_pola_rażenia")
+            }
+        if absurd > 0.4 or risk > 0.5:
+            return {
+                "status": "ZOO_CAUTION",
+                "reason": f"Umiarkowany absurd ({absurd:.2f})",
+                "action": last.get("action", "obserwuj_z_dystansu")
+            }
+        return {"status": "ZOO_OK", "reason": "Poziom absurdu akceptowalny"}
+
+    # ========================================================================
+    # METODY POMOCNICZE
+    # ========================================================================
+
+    def get_full_status(self) -> Dict[str, Any]:
+        """Zwraca pełny status mostu ZOO."""
+        return {
+            "zoo_status": self.zoo.get_status(),
+            "risk_metrics": self.get_risk_metrics(),
+            "action_hint": self.get_action_hint(),
+            "roles_summary": self.get_role_summary(),
+            "lesson": self.get_lesson(),
+            "verdict": self.get_zoo_verdict()
+        }
+
+    def analyze(self, ctx_scene: Dict[str, Any],
+                actors: List[Dict[str, Any]],
+                signals: List[str],
+                self_state: Dict[str, Any]) -> Dict[str, Any]:
+        """Wykonuje analizę ZOO i zapisuje wynik."""
+        result = self.zoo.analyze(ctx_scene, actors, signals, self_state)
+        self._last_result = result
+        return result
+
+    def get_last_result(self) -> Dict[str, Any]:
+        """Zwraca ostatni wynik analizy."""
+        return self._last_result
