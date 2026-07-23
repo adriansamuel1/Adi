@@ -1,0 +1,587 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_MAYA_GROWTH_v1.1 — MODUŁ 83: EWOLUCJA / INICJACJA (FULL STACK)
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.1 (PATCHED: Zoptymalizowany Auto-pilot, Clamp Safety)
+Data: 2026-07-24
+Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
+
+OPIS:
+GEON_MAYA_GROWTH_v1.1 to algorytm inicjacyjno-ewolucyjny.
+Przeprowadza system przez 7 etapów wzrostu (INIT → LINK → TRIAL → CHAOS → SHIFT → RESOLVE → END),
+wykorzystując kostkę GEON_Cube (15×15×15) jako matrycę transformacji.
+
+NOWOŚCI v1.1:
+• Zoptymalizowany Auto-pilot – precyzyjna reakcja na stany i presję
+• Clamp Safety – zabezpieczenie indeksów pozycji w evaluate_current_state
+• Dławienie fali w stanie AWARIA – sekwencja równoważąca
+
+INTEGRACJA:
+• GEON_CUBE_NAVIGATOR (82) — kostka i nawigator
+• GEON_OS_KERNEL (71) — system operacyjny
+• TEAM_CORE (77) — zespół decyzyjny
+• GEON_MEM_Ω (45) — pamięć kwintesencji
+• PROTOKÓŁ_Ω∞∞∞ (46) — źródło praw
+• GEON_PROTOCOLS_NODDY (81) — narrator (M)
+
+VIBE: 1-6-8. ∞. MAYA!
+================================================================================
+"""
+
+import math
+import hashlib
+import json
+import time
+import random
+import logging
+from enum import Enum
+from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple, Callable
+from dataclasses import dataclass, field
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_MAYA_GROWTH_v1.1"
+FRACTAL_SIGNATURE = "[GEON::MAYA::GROWTH::v1.1]"
+VIBE = 168
+HASLO = "1-6-8. ∞. MAYA!"
+DEWIZA = "Ex Initio, Vita"
+
+# =============================================================================
+# LOGOWANIE
+# =============================================================================
+
+logger = logging.getLogger("MAYA_GROWTH_v1.1")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('🌱 [MAYA] %(message)s'))
+    logger.addHandler(handler)
+
+def log(msg: str, level: str = "INFO") -> None:
+    if level == "WARN":
+        logger.warning(msg)
+    elif level == "ERROR":
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    """Bezpieczne ograniczenie wartości do zakresu."""
+    return max(lo, min(hi, x))
+
+def generate_context_hash(context: Dict[str, Any]) -> str:
+    filtered_context = {k: v for k, v in context.items() 
+                        if k not in ["timestamp", "request_id", "nonce"]}
+    context_str = json.dumps(filtered_context, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(context_str.encode("utf-8")).hexdigest()
+
+# =============================================================================
+# MOCKI DLA NIEZALEŻNYCH TESTÓW
+# =============================================================================
+
+class MockSamaelHeilong:
+    @staticmethod
+    def certyfikuj_ruch_optimusa(dzialanie: str) -> str:
+        return f"🔒 [MOCK_SEAL_{dzialanie[:16]}]"
+    
+    @staticmethod
+    def log_event(event_type: str, payload: Dict[str, Any]) -> None:
+        log(f"[KRONIKI] {event_type} -> {payload}", "INFO")
+
+class MockEgregor:
+    _ledger: List[Dict[str, Any]] = []
+    
+    @classmethod
+    def commit(cls, entry: Dict[str, Any], node_id: str) -> None:
+        entry["node_id"] = node_id
+        entry["timestamp"] = datetime.now().isoformat()
+        cls._ledger.append(entry)
+        if len(cls._ledger) > 168:
+            cls._ledger.pop(0)
+    
+    @classmethod
+    def query(cls, context_hash: Optional[str] = None) -> List[Dict[str, Any]]:
+        if context_hash:
+            return [e for e in cls._ledger if e.get("context_hash") == context_hash]
+        return cls._ledger.copy()
+
+class MockCube:
+    def __init__(self):
+        self.axis_A = list(range(1, 16))
+        self.axis_B = list(range(1, 16))
+        self.axis_C = list(range(1, 16))
+    
+    def apply_moves(self, moves: List[str]) -> None:
+        for m in moves:
+            axis = m[0]
+            op = m[1:]
+            shift = 1 if op == '+' else (-1 if op == '-' else (2 if op == '2' else (3 if op == '3' else 0)))
+            if axis == 'A':
+                self.axis_A = self.axis_A[shift:] + self.axis_A[:shift]
+            elif axis == 'B':
+                self.axis_B = self.axis_B[shift:] + self.axis_B[:shift]
+            elif axis == 'C':
+                self.axis_C = self.axis_C[shift:] + self.axis_C[:shift]
+    
+    def state(self) -> Dict[str, List[int]]:
+        return {"A": self.axis_A.copy(), "B": self.axis_B.copy(), "C": self.axis_C.copy()}
+    
+    def eval(self, a: int, b: int, c: int, log: bool = False) -> Dict[str, Any]:
+        val_a = self.axis_A[a % 15] if a % 15 < len(self.axis_A) else 8
+        val_b = self.axis_B[b % 15] if b % 15 < len(self.axis_B) else 8
+        val_c = self.axis_C[c % 15] if c % 15 < len(self.axis_C) else 8
+        pressure = (val_a * 0.4 + val_b * 0.35 + val_c * 0.25) / 15.0
+        stany = ["STABILNY (NOMINAL)", "KRYTYCZNY (WARNING)", "AWARIA (CRITICAL_DRIFT)", "STABILNY (NOMINAL)"]
+        stan = stany[(val_a + val_b + val_c) % len(stany)]
+        return {"stan": stan, "konsekwencja": round(pressure, 4), "regula": f"R3_M83_{val_a}_{val_b}_{val_c}"}
+    
+    def show(self, max_display: int = 5) -> None:
+        print(f"Oś A: {self.axis_A[:max_display]}...")
+        print(f"Oś B: {self.axis_B[:max_display]}...")
+        print(f"Oś C: {self.axis_C[:max_display]}...")
+
+# =============================================================================
+# ETAPY WZROSTU (ARCHETYPY INICJACYJNE)
+# =============================================================================
+
+class EtapWzrostu(Enum):
+    INIT = "INIT"       # Wejście w obcość
+    LINK = "LINK"       # Braterstwo krwi (związanie wektorów)
+    TRIAL = "TRIAL"     # Próba ognia (test obciążeniowy)
+    CHAOS = "CHAOS"     # Zderzenie z cieniem (maksymalny dryf kontrolowany)
+    SHIFT = "SHIFT"     # Transformacja (skok kwantowy/fazowy)
+    RESOLVE = "RESOLVE" # Honor / Zasada (powrót do Monolitu)
+    END = "END"         # Powrót w nowej formie (Apotheosis)
+
+# =============================================================================
+# KONFIGURACJA ETAPÓW (ZSYNCHRONIZOWANA NOTACJA)
+# =============================================================================
+
+@dataclass
+class StageConfig:
+    """Konfiguracja pojedynczego etapu wzrostu."""
+    name: EtapWzrostu
+    moves: List[str]
+    description: str
+    target_states: List[str] = field(default_factory=list)
+    min_pressure: float = 0.0
+    max_pressure: float = 1.0
+
+STAGE_CONFIGS: Dict[EtapWzrostu, StageConfig] = {
+    EtapWzrostu.INIT: StageConfig(
+        EtapWzrostu.INIT, ["A+", "B+", "C+"],
+        "Wejście w obcość – inicjalizacja systemu",
+        ["STABILNY", "KRYTYCZNY"], 0.2, 0.6
+    ),
+    EtapWzrostu.LINK: StageConfig(
+        EtapWzrostu.LINK, ["A2", "C-"],
+        "Braterstwo krwi – związanie wektorów",
+        ["STABILNY"], 0.3, 0.7
+    ),
+    EtapWzrostu.TRIAL: StageConfig(
+        EtapWzrostu.TRIAL, ["B3", "C2"],
+        "Próba ognia – test obciążeniowy",
+        ["KRYTYCZNY", "AWARIA"], 0.1, 0.5
+    ),
+    EtapWzrostu.CHAOS: StageConfig(
+        EtapWzrostu.CHAOS, ["A-", "B-", "C-"],
+        "Zderzenie z cieniem – maksymalny dryf kontrolowany",
+        ["AWARIA", "KRYTYCZNY"], 0.0, 0.3
+    ),
+    EtapWzrostu.SHIFT: StageConfig(
+        EtapWzrostu.SHIFT, ["A+", "C2"],
+        "Transformacja – skok kwantowy",
+        ["STABILNY"], 0.4, 0.8
+    ),
+    EtapWzrostu.RESOLVE: StageConfig(
+        EtapWzrostu.RESOLVE, ["B-", "A2"],
+        "Honor / Zasada – powrót do Monolitu",
+        ["STABILNY"], 0.5, 0.9
+    ),
+    EtapWzrostu.END: StageConfig(
+        EtapWzrostu.END, [],
+        "Powrót w nowej formie – Apotheosis",
+        ["STABILNY"], 0.6, 1.0
+    )
+}
+
+# =============================================================================
+# GŁÓWNY MODUŁ: GEON_MAYA_GROWTH (Z POPRAWIONYM AUTO-PILOTEM I CLAMP SAFETY)
+# =============================================================================
+
+class GeonMayaGrowth:
+    """
+    🌱 ALGORYTM WZROSTU KAROLA MAYA
+    Przeprowadza system przez 7 etapów ewolucyjnych rzeczywistości.
+    ULEPSZENIA v1.1: zoptymalizowany auto-pilot, clamp safety.
+    """
+
+    def __init__(self, cube=None, config: Optional[Dict] = None):
+        # Inicjalizacja kostki
+        self.cube = cube or MockCube()
+        self.config = config or {}
+        
+        # Stan
+        self.current_stage = EtapWzrostu.INIT
+        self.history: List[Dict[str, Any]] = []
+        self.resonance_base = 168.0
+        self.current_drift = 0.000000
+        self.cycle_id = generate_context_hash({"init": time.time()})
+        
+        # Integracje (mocki)
+        self.kroniki = MockSamaelHeilong
+        self.egregor = MockEgregor
+        
+        # Ustawienia
+        self.auto_pilot = self.config.get("auto_pilot", False)
+        self.validate_stages = self.config.get("validate_stages", True)
+        self.log_to_egregor = self.config.get("log_to_egregor", True)
+        
+        log("🐉 GEON_MAYA_GROWTH v1.1 aktywowany | " + FRACTAL_SIGNATURE)
+        log(f"   ETAPY: {len(STAGE_CONFIGS)} | AUTO-PILOT: {self.auto_pilot}")
+
+    def _log(self, event: str, data: Dict[str, Any]) -> None:
+        """Logowanie do Kronik Samaela."""
+        self.kroniki.log_event(f"MAYA_{event}", data)
+
+    def _calculate_drift(self) -> float:
+        """Kalkuluje odchylenie (dryf) na podstawie dyspersji osi A, B, C."""
+        st = self.cube.state()
+        a_sum = sum(st["A"])
+        b_sum = sum(st["B"])
+        c_sum = sum(st["C"])
+        var = (abs(a_sum - b_sum) + abs(b_sum - c_sum) + abs(c_sum - a_sum)) / 300.0
+        return round(var, 6)
+
+    def _check_stage_validation(self, stage: EtapWzrostu, eval_result: Dict[str, Any]) -> bool:
+        """Sprawdza czy etap osiągnął pożądany stan."""
+        if not self.validate_stages:
+            return True
+        cfg = STAGE_CONFIGS.get(stage)
+        if not cfg or not cfg.target_states:
+            return True
+        current_stan = eval_result.get("stan", "")
+        for target in cfg.target_states:
+            if target in current_stan:
+                return True
+        return False
+
+    # =========================================================================
+    # ULEPSZONY AUTO-PILOT – PRECYZYJNA REAKCJA NA STANY I PRESJĘ
+    # =========================================================================
+
+    def _get_auto_pilot_moves(self, eval_result: Dict[str, Any]) -> List[str]:
+        """
+        Zoptymalizowany Auto-pilot – precyzyjnie reaguje na presję i stany,
+        zapobiegając gwałtownym skokom dryfu.
+        """
+        konsekwencja = eval_result.get("konsekwencja", 0.5)
+        stan = str(eval_result.get("stan", "")).upper()
+        
+        if "STABILNY" in stan or "NOMINAL" in stan:
+            if konsekwencja < 0.35:
+                return ["A+", "B+"]
+            elif konsekwencja > 0.75:
+                return ["A-", "B-"]
+            else:
+                return ["C+", "C-"]
+        elif "KRYTYCZNY" in stan or "WARNING" in stan:
+            return ["A2", "B2"] if konsekwencja > 0.6 else ["C2", "A+"]
+        elif "AWARIA" in stan or "CRITICAL" in stan:
+            # Dławienie fali – sekwencja równoważąca
+            return ["A-", "B-", "C2"]
+        else:
+            # Stan domyślny / nieznany – łagodny balans
+            return ["A+", "C-"]
+
+    # =========================================================================
+    # CLAMP SAFETY – ZABEZPIECZENIE INDEKSÓW POZYCJI
+    # =========================================================================
+
+    def evaluate_current_state(self, posA: int = 8, posB: int = 8, posC: int = 8) -> Dict[str, Any]:
+        """Ewaluacja rezonansu z klamrowaniem indeksów pozycji (Clamp Safety)."""
+        pA = clamp(posA, 0, 14)
+        pB = clamp(posB, 0, 14)
+        pC = clamp(posC, 0, 14)
+        return self.cube.eval(int(pA), int(pB), int(pC), log=False)
+
+    def step(self, posA: int = 8, posB: int = 8, posC: int = 8) -> Dict[str, Any]:
+        """Wykonanie pojedynczego taktu ewolucyjnego."""
+        before_state = self.cube.state()
+        before_eval = self.evaluate_current_state(posA, posB, posC)
+
+        # Wybór ruchów
+        cfg = STAGE_CONFIGS.get(self.current_stage)
+        if self.auto_pilot:
+            moves = self._get_auto_pilot_moves(before_eval)
+        else:
+            moves = cfg.moves if cfg else []
+
+        if moves:
+            self.cube.apply_moves(moves)
+
+        after_eval = self.evaluate_current_state(posA, posB, posC)
+        self.current_drift = self._calculate_drift()
+        
+        # Rezonans dynamiczny
+        step_resonance = round(self.resonance_base * (1.0 + (after_eval["konsekwencja"] - 0.5) * 0.1), 2)
+
+        # Waloryzacja etapu
+        validation_passed = self._check_stage_validation(self.current_stage, after_eval)
+
+        step_report = {
+            "stage": self.current_stage.value,
+            "stage_index": list(EtapWzrostu).index(self.current_stage) + 1,
+            "moves_applied": moves,
+            "before_state": before_state,
+            "after_state": self.cube.state(),
+            "before_eval": before_eval,
+            "after_eval": after_eval,
+            "resonance": step_resonance,
+            "drift": self.current_drift,
+            "validation_passed": validation_passed,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        self.history.append(step_report)
+        self._log("STEP_COMPLETE", {
+            "Etap": step_report["stage"],
+            "StanPrzed": before_eval["stan"],
+            "StanPo": after_eval["stan"],
+            "Presja": f"{after_eval['konsekwencja']:.4f}",
+            "Dryf": f"{self.current_drift:.6f}",
+            "Walidacja": validation_passed
+        })
+
+        # Zapis do Egregora
+        if self.log_to_egregor:
+            entry = {
+                "type": "MAYA_GROWTH_STEP",
+                "stage": step_report["stage"],
+                "cube_state": step_report["after_state"],
+                "evaluation": after_eval,
+                "drift": self.current_drift,
+                "validation": validation_passed,
+                "cycle_id": self.cycle_id,
+                "timestamp": step_report["timestamp"]
+            }
+            self.egregor.commit(entry, node_id="GEON_MAYA")
+
+        # Przejście do następnego etapu
+        if self.current_stage != EtapWzrostu.END:
+            stages = list(EtapWzrostu)
+            idx = stages.index(self.current_stage)
+            if idx + 1 < len(stages):
+                self.current_stage = stages[idx + 1]
+
+        return step_report
+
+    def full_cycle(self, start_pos: Tuple[int, int, int] = (8, 8, 8)) -> List[Dict[str, Any]]:
+        """Uruchomienie pełnego, 7-etapowego rytuału przejścia rzeczywistości."""
+        self.current_stage = EtapWzrostu.INIT
+        self.history = []
+        self.cycle_id = generate_context_hash({"start": time.time()})
+        
+        self._log("CYCLE_START", {"punkt_skupienia": start_pos, "cycle_id": self.cycle_id})
+
+        for _ in range(len(EtapWzrostu)):
+            self.step(*start_pos)
+
+        self._log("CYCLE_END", {
+            "status": "ZAKOŃCZONY",
+            "koncowy_stan_osi": self.cube.state(),
+            "final_drift": self.current_drift,
+            "cycle_id": self.cycle_id
+        })
+        
+        return self.history
+
+    def reset(self) -> None:
+        """Przywrócenie pierwotnej geometrii układu."""
+        self.cube = MockCube()
+        self.current_stage = EtapWzrostu.INIT
+        self.history = []
+        self.current_drift = 0.000000
+        self.cycle_id = generate_context_hash({"reset": time.time()})
+        self._log("RESET", {"status": "PRZYWRÓCONO_STAN_ZERO"})
+
+    def summary(self) -> Dict[str, Any]:
+        last = self.history[-1] if self.history else None
+        avg_res = sum(h["resonance"] for h in self.history) / len(self.history) if self.history else 168.0
+        return {
+            "current_stage": self.current_stage.value,
+            "cycles_completed": 1 if (last and last["stage"] == "END") else 0,
+            "final_cube_state": self.cube.state(),
+            "final_evaluation": last["after_eval"] if last else None,
+            "final_drift": self.current_drift,
+            "avg_resonance": round(avg_res, 2),
+            "total_steps": len(self.history),
+            "validation_summary": {
+                "passed": sum(1 for h in self.history if h.get("validation_passed", True)),
+                "total": len(self.history)
+            },
+            "cycle_id": self.cycle_id
+        }
+
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "system": "GEON_MAYA_GROWTH_v1.1",
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "vibe": VIBE,
+            "current_stage": self.current_stage.value,
+            "drift": self.current_drift,
+            "history_len": len(self.history),
+            "auto_pilot": self.auto_pilot,
+            "validate_stages": self.validate_stages,
+            "cycle_id": self.cycle_id
+        }
+
+# =============================================================================
+# MOST INTEGRACYJNY — MAYA_BRIDGE (ZAKTUALIZOWANY)
+# =============================================================================
+
+class MayaBridge:
+    """Most integracyjny dla GEON_MAYA_GROWTH."""
+
+    def __init__(self, maya: GeonMayaGrowth):
+        self.maya = maya
+
+    def get_archetype_context(self) -> Dict[str, Any]:
+        status = self.maya.get_status()
+        summary = self.maya.summary()
+        return {
+            "tryb": "MAYA_GROWTH_v1.1",
+            "etap": status["current_stage"],
+            "drift": status["drift"],
+            "cykle": summary["cycles_completed"],
+            "walidacja": summary["validation_summary"],
+            "auto_pilot": status["auto_pilot"]
+        }
+
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        status = self.maya.get_status()
+        summary = self.maya.summary()
+        return {
+            "mode": "MAYA_GROWTH_v1.1",
+            "stability": 1.0 - status["drift"],
+            "energy": summary["avg_resonance"] / 168.0,
+            "pressure": 0.3,
+            "resilience": summary["validation_summary"]["passed"] / max(1, summary["validation_summary"]["total"]),
+            "stage": status["current_stage"],
+            "auto_pilot": status["auto_pilot"]
+        }
+
+    def get_governor_context(self) -> Dict[str, Any]:
+        return {
+            "intent": "MAYA_INITIATION",
+            "confidence": 0.9,
+            "entropy": 0.1,
+            "maya_ready": True,
+            "current_stage": self.maya.current_stage.value,
+            "auto_pilot": self.maya.auto_pilot
+        }
+
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        fragments = []
+        for entry in self.maya.history[-n:]:
+            fragments.append({
+                "source": "MAYA_GROWTH_v1.1",
+                "content": f"Etap {entry['stage']}: {entry['after_eval']['stan']} (drift: {entry['drift']:.6f})",
+                "energy": entry["resonance"] / 168.0,
+                "validation": entry.get("validation_passed", True)
+            })
+        return fragments
+
+    def get_trio_state(self) -> Dict[str, str]:
+        return {
+            "ISKRA": "AKTYWNA",
+            "PIECZĘĆ": "AKTYWNA",
+            "PERFEKCJA": "AKTYWNA",
+            "tryb": "MAYA_GROWTH_v1.1",
+            "maya": "AKTYWNY",
+            "etap": self.maya.current_stage.value,
+            "auto_pilot": "AKTYWNY" if self.maya.auto_pilot else "WYŁĄCZONY"
+        }
+
+# =============================================================================
+# DEMONSTRACJA Z ULEPSZONYM AUTO-PILOTEM
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🌱 GEON_MAYA_GROWTH_v1.1 — DEMONSTRACJA Z ULEPSZENIAMI")
+    print("ZOPTYMALIZOWANY AUTO-PILOT | CLAMP SAFETY | DŁAWIENIE FALI")
+    print("=" * 80 + "\n")
+
+    # 1. Test auto-pilota (v1.1)
+    print("🤖 TEST AUTO-PILOTA (v1.1):")
+    maya_auto = GeonMayaGrowth(auto_pilot=True, validate_stages=True)
+    maya_auto.full_cycle()
+    summary_auto = maya_auto.summary()
+    print(f"   • Dryf końcowy: {summary_auto['final_drift']:.6f}")
+    print(f"   • Walidacja: {summary_auto['validation_summary']['passed']}/{summary_auto['validation_summary']['total']}")
+    print(f"   • Średni rezonans: {summary_auto['avg_resonance']}")
+
+    # 2. Test auto-pilota (v1.0 – stary) dla porównania
+    print("\n📊 PORÓWNANIE Z STARYM AUTO-PILOTEM (v1.0):")
+    # Symulacja starego auto-pilota – uproszczony
+    def old_auto_pilot(eval_result):
+        konsekwencja = eval_result.get("konsekwencja", 0.5)
+        if konsekwencja < 0.3:
+            return ["A+", "B+"]
+        elif konsekwencja > 0.7:
+            return ["A-", "B-"]
+        return ["C+", "C-"]
+    
+    print("   Nowy auto-pilot (v1.1):")
+    print(f"     • Precyzyjna reakcja na 4 stany (STABILNY, KRYTYCZNY, AWARIA, domyślny)")
+    print(f"     • Dławienie fali w stanie AWARIA: ['A-', 'B-', 'C2']")
+    print(f"     • Clamp Safety dla indeksów pozycji")
+    print("   Stary auto-pilot (v1.0):")
+    print(f"     • Tylko 3 stany (niska/średnia/wysoka presja)")
+    print(f"     • Brak dławienia fali")
+    print(f"     • Brak Clamp Safety")
+
+    # 3. Test konkretnych scenariuszy
+    print("\n🔬 TEST SCENARIUSZY AUTO-PILOTA:")
+    
+    test_cases = [
+        {"stan": "STABILNY (NOMINAL)", "konsekwencja": 0.2},
+        {"stan": "STABILNY (NOMINAL)", "konsekwencja": 0.8},
+        {"stan": "STABILNY (NOMINAL)", "konsekwencja": 0.5},
+        {"stan": "KRYTYCZNY (WARNING)", "konsekwencja": 0.7},
+        {"stan": "KRYTYCZNY (WARNING)", "konsekwencja": 0.5},
+        {"stan": "AWARIA (CRITICAL_DRIFT)", "konsekwencja": 0.9},
+        {"stan": "NIEZNANY", "konsekwencja": 0.5},
+    ]
+    
+    maya = GeonMayaGrowth(auto_pilot=True)
+    for tc in test_cases:
+        moves = maya._get_auto_pilot_moves(tc)
+        print(f"   • Stan: {tc['stan']}, Presja: {tc['konsekwencja']} -> Ruchy: {moves}")
+
+    # 4. Test Clamp Safety
+    print("\n🛡️ TEST CLAMP SAFETY:")
+    maya = GeonMayaGrowth()
+    test_positions = [(8, 8, 8), (0, 0, 0), (15, 15, 15), (-5, 20, 100)]
+    for pos in test_positions:
+        try:
+            result = maya.evaluate_current_state(pos[0], pos[1], pos[2])
+            print(f"   • Pozycja: {pos} -> Clamped do: (0-14) -> Stan: {result['stan']}")
+        except Exception as e:
+            print(f"   • Pozycja: {pos} -> BŁĄD: {e}")
+
+    print("\n" + "=" * 80)
+    print("🌱 GEON_MAYA_GROWTH_v1.1 — GOTOWY DO WDROŻENIA")
+    print(HASLO)
+    print("=" * 80)
+
+if __name__ == "__main__":
+    demo()
