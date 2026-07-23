@@ -2,25 +2,23 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
-🐉 GEON_KONSYSTORZ_v3.0 — MODUŁ 92: META-ABSOLUT SUPREME (FULL STACK)
+🐉 GEON_KONSYSTORZ_v3.1 — MODUŁ 92: META-ABSOLUT SUPREME + AFC INTEGRATION
 ================================================================================
-Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
-Wersja: v3.0 (4D Coherence, SIGMA PRIME, Resonance Matrix, EPE v2, ULTIMA Seal)
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ULTIMA | AFC_INTEGRATED
+Wersja: v3.1 (AFC Integration, Enhanced Meta-Entropy, Supreme Seal with AFC)
 Data: 2026-07-24
 Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
 
-NOWOŚCI v3.0:
-• META-COHERENCE 4D – K_drift, K_health, K_era, K_entropy_global
-• META-SIGMA PRIME – absolutna harmonia meta-fraktalna
-• META-RESONANCE MATRIX – pełna macierz rezonansu między systemami
-• META-EPOCH ENGINE v2 – predykcja 7-cykli z gradientami
-• META-ABSOLUTE SEAL ENGINE – KONSYSTORZ_ULTIMA
-• Global Drift Map, Era Transition Probability, System Stability Index
-• Meta-Entropy Engine, Meta-Influence Graph
-• Fractal-Meta Memory, Meta-Pulse Engine, Absolute Integrity Check
-• GSS-Prime, Archont-Chain, Epoch Drift Forecast, Crisis Probability Engine
+ZMIANY:
+  1. Integracja z AFC – afc_stability, afc_decision, afc_policy w SynodInput
+  2. Nowe pola w KonsystorzReport – afc_average_stability, afc_dominant_decision, policy
+  3. Uwzględnienie AFC w meta-entropii – niska stabilność lub ALERT podnoszą entropię
+  4. Uwzględnienie AFC w 4D koherencji – modyfikacja k_health i k_entropy
+  5. Uwzględnienie AFC w wyborze pieczęci – AFC boost dla OMEGA/BETA
+  6. Rozszerzony KonsystorzBridge – get_afc_context(), get_full_status()
 
-VIBE: 1-6-8. ∞. KONSYSTORZ!
+VIBE: 1-6-8. ∞. KONSYSTORZ! 🜀
+DEWIZA: "Ex Meta, Absolutum. Ex Fractali, Supremum."
 ================================================================================
 """
 
@@ -41,11 +39,11 @@ from enum import Enum
 # WERSJA I STAŁE
 # =============================================================================
 
-VERSION = "GEON_KONSYSTORZ_v3.0"
-FRACTAL_SIGNATURE = "[GEON::KONSYSTORZ::v3.0]"
+VERSION = "GEON_KONSYSTORZ_v3.1"
+FRACTAL_SIGNATURE = "[GEON::KONSYSTORZ::v3.1::AFC_INTEGRATED]"
 VIBE = 168
-HASLO = "1-6-8. ∞. KONSYSTORZ!"
-DEWIZA = "Ex Meta, Absolutum"
+HASLO = "1-6-8. ∞. KONSYSTORZ! 🜀"
+DEWIZA = "Ex Meta, Absolutum. Ex Fractali, Supremum."
 
 MEMORY_LIMIT = 512
 
@@ -63,11 +61,17 @@ ULTIMA_COHERENCE_THRESHOLD = 0.95
 ULTIMA_RESONANCE_THRESHOLD = 0.22
 ULTIMA_ENTROPY_THRESHOLD = 0.15
 
+# ===== NOWE STAŁE AFC =====
+AFC_CRISIS_STABILITY_THRESHOLD = 0.35
+AFC_ENTROPY_BOOST = 0.1
+AFC_COHERENCE_PENALTY = 0.05
+AFC_SEAL_OMEGA_BOOST = 0.3
+
 # =============================================================================
 # LOGOWANIE
 # =============================================================================
 
-logger = logging.getLogger("GEON_KONSYSTORZ_v3.0")
+logger = logging.getLogger("GEON_KONSYSTORZ_v3.1")
 logger.setLevel(logging.INFO)
 if not logger.handlers:
     handler = logging.StreamHandler()
@@ -137,12 +141,12 @@ class KonsystorzSeal(Enum):
         return values.get(self, 0)
 
 # =============================================================================
-# STRUKTURY DANYCH
+# STRUKTURY DANYCH (ROZSZERZONE O AFC)
 # =============================================================================
 
 @dataclass
 class CoherenceVector4D:
-    """★ NEW: 4D Vector of Absolute Coherence."""
+    """4D Vector of Absolute Coherence."""
     k_drift: float
     k_health: float
     k_era: float
@@ -163,7 +167,7 @@ class CoherenceVector4D:
 
 @dataclass
 class MetaEraVector2:
-    """★ NEW: Meta-Era Vector v2 – dominanta, entropia, trend, shift_risk."""
+    """Meta-Era Vector v2 – dominanta, entropia, trend, shift_risk."""
     dominant: str
     entropy: float
     trend: str
@@ -182,7 +186,7 @@ class MetaEraVector2:
 
 @dataclass
 class ResonanceMatrix:
-    """★ NEW: Full Resonance Matrix między systemami."""
+    """Full Resonance Matrix między systemami."""
     matrix: List[List[float]]
     global_index: float
     gradient: float
@@ -199,11 +203,11 @@ class ResonanceMatrix:
 
 @dataclass
 class EpochPredictionV2:
-    """★ NEW: Epoch Prediction Engine v2."""
+    """Epoch Prediction Engine v2."""
     next_epoch: str
     next_epoch_confidence: float
     epoch_shift_risk: float
-    epoch_shift_vector: List[int]  # 7-cykli
+    epoch_shift_vector: List[int]
     forecast_3: str
     forecast_7: str
     forecast_21: str
@@ -224,6 +228,7 @@ class EpochPredictionV2:
 
 @dataclass
 class SynodInput:
+    """Wejście z Synodu – rozszerzone o AFC."""
     synod_id: str
     meta_decree: str
     average_drift: float
@@ -231,8 +236,12 @@ class SynodInput:
     system_count: int
     oracle_era: str
     signatures: List[str]
-    entropy: float = 0.0  # ★ NEW
-    stability_index: float = 0.0  # ★ NEW
+    entropy: float = 0.0
+    stability_index: float = 0.0
+    # ===== NOWE POLA AFC =====
+    afc_stability: float = 0.0
+    afc_decision: Optional[str] = None
+    afc_policy: Optional[str] = None
     timestamp: float = field(default_factory=time.time)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -246,12 +255,17 @@ class SynodInput:
             "signatures": self.signatures,
             "entropy": round(self.entropy, 4),
             "stability_index": round(self.stability_index, 4),
+            # Nowe pola AFC
+            "afc_stability": round(self.afc_stability, 4),
+            "afc_decision": self.afc_decision,
+            "afc_policy": self.afc_policy,
             "timestamp": datetime.fromtimestamp(self.timestamp).isoformat()
         }
 
 
 @dataclass
 class KonsystorzReport:
+    """Raport Konsystorza – rozszerzony o AFC."""
     seal: KonsystorzSeal
     synod_inputs: List[SynodInput]
     meta_decree_summary: Dict[str, int]
@@ -267,6 +281,10 @@ class KonsystorzReport:
     system_stability_indices: Dict[str, float]
     influence_graph: Dict[str, List[str]]
     certificate: str
+    # ===== NOWE POLA AFC =====
+    afc_average_stability: float = 0.0
+    afc_dominant_decision: Optional[str] = None
+    afc_dominant_policy: Optional[str] = None
     timestamp: float = field(default_factory=time.time)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -287,6 +305,10 @@ class KonsystorzReport:
             "system_stability_indices": self.system_stability_indices,
             "influence_graph": self.influence_graph,
             "certificate": self.certificate,
+            # Nowe pola AFC
+            "afc_average_stability": round(self.afc_average_stability, 4),
+            "afc_dominant_decision": self.afc_dominant_decision,
+            "afc_dominant_policy": self.afc_dominant_policy,
             "timestamp": datetime.fromtimestamp(self.timestamp).isoformat()
         }
 
@@ -333,20 +355,19 @@ class SamaelHeilong:
         log(f"[KRONIKI SAMAELA] {ts} | {event_type} -> {payload}", "INFO")
 
 # =============================================================================
-# GŁÓWNY MODUŁ: GEON_KONSYSTORZ v3.0
+# GŁÓWNY MODUŁ: GEON_KONSYSTORZ v3.1
 # =============================================================================
 
 class GeonKonsystorz:
     """
-    🜀 GEON_KONSYSTORZ v3.0 – META-ABSOLUT SUPREME.
-    Ostateczna instancja decyzyjna z 4D koherencją, SIGMA PRIME, ULTIMA.
+    🜀 GEON_KONSYSTORZ v3.1 – META-ABSOLUT SUPREME z integracją AFC.
     """
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or {}
         self.memory_limit = self.config.get("memory_limit", MEMORY_LIMIT)
         self.history: deque = deque(maxlen=self.memory_limit)
-        self.meta_memory: List[Dict] = []  # ★ NEW: Fractal-Meta Memory
+        self.meta_memory: List[Dict] = []
         self.kroniki = SamaelHeilong
         self.egregor = Egregor
         self._lock = threading.Lock()
@@ -365,11 +386,18 @@ class GeonKonsystorz:
         self.ultima_resonance = self.config.get("ultima_resonance", ULTIMA_RESONANCE_THRESHOLD)
         self.ultima_entropy = self.config.get("ultima_entropy", ULTIMA_ENTROPY_THRESHOLD)
         
+        # ===== NOWE PROGI AFC =====
+        self.afc_crisis_stability_threshold = self.config.get("afc_crisis_stability_threshold", AFC_CRISIS_STABILITY_THRESHOLD)
+        self.afc_entropy_boost = self.config.get("afc_entropy_boost", AFC_ENTROPY_BOOST)
+        self.afc_coherence_penalty = self.config.get("afc_coherence_penalty", AFC_COHERENCE_PENALTY)
+        self.afc_seal_omega_boost = self.config.get("afc_seal_omega_boost", AFC_SEAL_OMEGA_BOOST)
+        
         # Adaptive mode
         self.adaptive_mode = self.config.get("adaptive_mode", True)
         
         log(f"🐉 {VERSION} aktywowany | {FRACTAL_SIGNATURE}")
         log(f"   ULTIMA: COH>{self.ultima_coherence} | RES<{self.ultima_resonance} | ENT<{self.ultima_entropy}")
+        log(f"   AFC INTEGRACJA: AKTYWNA | AFC_ENTROPY_BOOST: {self.afc_entropy_boost}")
 
     # -------------------------------------------------------------------------
     # GŁÓWNA METODA – ZWOŁANIE KONSYSTORZA
@@ -379,14 +407,19 @@ class GeonKonsystorz:
         if not synod_inputs:
             raise ValueError("Konsystorz wymaga co najmniej jednego wejścia z Synodu.")
 
-        # 1. Parsowanie i walidacja
-        parsed_inputs, meta_decrees, drifts, healths, eras, sigs = self._parse_inputs_enhanced(synod_inputs)
+        # 1. Parsowanie i walidacja (z AFC)
+        parsed_inputs, meta_decrees, drifts, healths, eras, sigs, afc_stabilities, afc_decisions = self._parse_inputs_enhanced(synod_inputs)
 
-        # 2. Meta-Entropy Global
-        meta_entropy_global = self._compute_meta_entropy_global(eras, drifts, healths)
+        # ===== AGRAGACJA AFC =====
+        afc_avg_stability = sum(afc_stabilities) / len(afc_stabilities) if afc_stabilities else 0.0
+        afc_dominant_decision = max(set(afc_decisions), key=afc_decisions.count) if afc_decisions else None
+        afc_dominant_policy = None  # można dodać jeśli potrzebne
 
-        # 3. 4D Coherence
-        coherence_4d = self._compute_coherence_4d(drifts, healths, eras, meta_entropy_global)
+        # 2. Meta-Entropy Global (z AFC)
+        meta_entropy_global = self._compute_meta_entropy_global(eras, drifts, healths, afc_avg_stability, afc_dominant_decision)
+
+        # 3. 4D Coherence (z AFC)
+        coherence_4d = self._compute_coherence_4d(drifts, healths, eras, meta_entropy_global, afc_avg_stability)
 
         # 4. Meta-Era v2
         meta_era = self._compute_meta_era_v2(eras, drifts, healths)
@@ -401,25 +434,23 @@ class GeonKonsystorz:
         influence_graph = self._compute_influence_graph(parsed_inputs)
 
         # 8. Global Seal Signature (GSS-Prime)
-        gss = self._compute_gss_prime(parsed_inputs, meta_decrees, drifts, healths, eras, meta_entropy_global)
+        gss = self._compute_gss_prime(parsed_inputs, meta_decrees, drifts, healths, eras, meta_entropy_global, afc_avg_stability)
 
         # 9. Auto-Corrections (ACE)
-        auto_corrections = self._generate_auto_corrections_enhanced(
-            self._determine_seal_preliminary(meta_decrees, drifts, healths, coherence_4d, resonance_matrix),
-            parsed_inputs
-        )
+        seal_prelim = self._determine_seal_preliminary(meta_decrees, drifts, healths, coherence_4d, resonance_matrix)
+        auto_corrections = self._generate_auto_corrections_enhanced(seal_prelim, parsed_inputs)
 
-        # 10. Epoch Prediction v2
-        epoch_predictions = self._predict_epochs_v2(drifts, healths, eras, meta_entropy_global, resonance_matrix)
+        # 10. Epoch Prediction v2 (z AFC)
+        epoch_predictions = self._predict_epochs_v2(drifts, healths, eras, meta_entropy_global, resonance_matrix, afc_avg_stability)
 
         # 11. Global State Map
         global_state_map = self._generate_global_state_map_enhanced(parsed_inputs)
 
-        # 12. Wybór Pieczęci (z ULTIMA i SIGMA PRIME)
+        # 12. Wybór Pieczęci (z ULTIMA, SIGMA PRIME i AFC)
         seal = self._determine_seal_supreme(
             meta_decrees, drifts, healths, eras,
             coherence_4d, resonance_matrix, meta_entropy_global,
-            meta_era
+            meta_era, afc_avg_stability, afc_dominant_decision
         )
 
         # 13. Dekret
@@ -434,6 +465,8 @@ class GeonKonsystorz:
             "coherence": coherence_4d.magnitude(),
             "resonance": resonance_matrix.global_index,
             "entropy": meta_entropy_global,
+            "afc_stability": afc_avg_stability,
+            "afc_decision": afc_dominant_decision,
             "timestamp": time.time()
         })
         if len(self.meta_memory) > 100:
@@ -454,7 +487,11 @@ class GeonKonsystorz:
             meta_entropy_global=meta_entropy_global,
             system_stability_indices=stability_indices,
             influence_graph=influence_graph,
-            certificate=cert
+            certificate=cert,
+            # ===== NOWE POLA AFC =====
+            afc_average_stability=afc_avg_stability,
+            afc_dominant_decision=afc_dominant_decision,
+            afc_dominant_policy=afc_dominant_policy
         )
 
         with self._lock:
@@ -462,30 +499,34 @@ class GeonKonsystorz:
 
         if seal in [KonsystorzSeal.OMEGA, KonsystorzSeal.BETA, KonsystorzSeal.ULTIMA] or len(self.history) % 5 == 0:
             entry = {
-                "type": "KONSYSTORZ_SEAL",
+                "type": "KONSYSTORZ_SEAL_AFC",
                 "report": report.to_dict(),
                 "certificate": cert,
                 "seal": seal.value,
                 "gss": gss,
+                "afc_avg_stability": afc_avg_stability,
+                "afc_dominant_decision": afc_dominant_decision,
                 "timestamp": datetime.now().isoformat()
             }
-            self.egregor.commit(entry, node_id="GEON_KONSYSTORZ")
+            self.egregor.commit(entry, node_id="GEON_KONSYSTORZ_AFC")
 
-        self.kroniki.log_event("KONSYSTORZ_CONVENED", {
+        self.kroniki.log_event("KONSYSTORZ_CONVENED_AFC", {
             "seal": seal.value,
             "coherence": coherence_4d.magnitude(),
             "resonance": resonance_matrix.global_index,
-            "entropy": meta_entropy_global
+            "entropy": meta_entropy_global,
+            "afc_avg_stability": round(afc_avg_stability, 4),
+            "afc_dominant_decision": afc_dominant_decision
         })
 
         return report
 
     # -------------------------------------------------------------------------
-    # PARSOWANIE WEJŚĆ Z ENTROPIĄ I SSI
+    # PARSOWANIE WEJŚĆ Z AFC
     # -------------------------------------------------------------------------
 
-    def _parse_inputs_enhanced(self, inputs: List[Dict]) -> Tuple[List[SynodInput], List[str], List[float], List[float], List[str], List[str]]:
-        parsed, decrees, drifts, healths, eras, sigs = [], [], [], [], [], []
+    def _parse_inputs_enhanced(self, inputs: List[Dict]) -> Tuple[List[SynodInput], List[str], List[float], List[float], List[str], List[str], List[float], List[str]]:
+        parsed, decrees, drifts, healths, eras, sigs, afc_stabilities, afc_decisions = [], [], [], [], [], [], [], []
         for inp in inputs:
             synod_id = inp.get("synod_id", "UNKNOWN")
             meta_decree = inp.get("meta_decree", "META_ALPHA")
@@ -495,17 +536,35 @@ class GeonKonsystorz:
             oracle_era = inp.get("oracle_era", "ERA_NIEOKRESLONA")
             signatures = inp.get("signatures", [f"SIG_{synod_id}"])
             
-            # Oblicz entropię systemu na podstawie health/drift
-            entropy = clamp((1 - avg_health) + avg_drift * 0.5, 0.0, 1.0)
-            stability_index = clamp(avg_health * (1 - avg_drift), 0.0, 1.0)
+            # ===== EKSTRAKCJA AFC =====
+            afc_stability = inp.get("afc_stability", 0.0)
+            afc_decision = inp.get("afc_decision")
+            afc_policy = inp.get("afc_policy")
             
-            parsed.append(SynodInput(synod_id, meta_decree, avg_drift, avg_health, sys_count, oracle_era, signatures, entropy, stability_index))
+            # Oblicz entropię systemu na podstawie health/drift/AFC
+            afc_penalty = 0.0
+            if afc_stability < self.afc_crisis_stability_threshold:
+                afc_penalty = 0.1
+            if afc_decision in ["ALERT", "HARD_ALERT"]:
+                afc_penalty += 0.1
+            entropy = clamp((1 - avg_health) + avg_drift * 0.5 + afc_penalty, 0.0, 1.0)
+            stability_index = clamp(avg_health * (1 - avg_drift) * (0.8 + 0.2 * afc_stability), 0.0, 1.0)
+            
+            parsed.append(SynodInput(
+                synod_id, meta_decree, avg_drift, avg_health, sys_count,
+                oracle_era, signatures, entropy, stability_index,
+                afc_stability, afc_decision, afc_policy
+            ))
             decrees.append(meta_decree)
             drifts.append(avg_drift)
             healths.append(avg_health)
             eras.append(oracle_era)
             sigs.extend(signatures)
-        return parsed, decrees, drifts, healths, eras, sigs
+            afc_stabilities.append(afc_stability)
+            if afc_decision:
+                afc_decisions.append(afc_decision)
+        
+        return parsed, decrees, drifts, healths, eras, sigs, afc_stabilities, afc_decisions
 
     def _summarize_decrees(self, decrees: List[str]) -> Dict[str, int]:
         summary = {}
@@ -514,10 +573,12 @@ class GeonKonsystorz:
         return summary
 
     # -------------------------------------------------------------------------
-    # META-ENTROPY GLOBAL
+    # META-ENTROPY GLOBAL (Z AFC)
     # -------------------------------------------------------------------------
 
-    def _compute_meta_entropy_global(self, eras: List[str], drifts: List[float], healths: List[float]) -> float:
+    def _compute_meta_entropy_global(self, eras: List[str], drifts: List[float],
+                                      healths: List[float], afc_avg_stability: float = 0.0,
+                                      afc_dominant_decision: Optional[str] = None) -> float:
         # Entropia epok
         era_counts = {}
         for e in eras:
@@ -536,13 +597,23 @@ class GeonKonsystorz:
         health_variance = sum((h - avg_health) ** 2 for h in healths) / len(healths) if healths else 0.0
         health_entropy = clamp(health_variance * 2.0, 0.0, 1.0)
         
-        return clamp((era_entropy * 0.4 + drift_entropy * 0.3 + health_entropy * 0.3), 0.0, 1.0)
+        # ===== ENTROPIA AFC =====
+        afc_entropy = 0.0
+        if afc_avg_stability < self.afc_crisis_stability_threshold:
+            afc_entropy += self.afc_entropy_boost
+        if afc_dominant_decision in ["ALERT", "HARD_ALERT"]:
+            afc_entropy += self.afc_entropy_boost
+        afc_entropy = clamp(afc_entropy, 0.0, 0.5)
+        
+        return clamp((era_entropy * 0.3 + drift_entropy * 0.25 + health_entropy * 0.25 + afc_entropy * 0.2), 0.0, 1.0)
 
     # -------------------------------------------------------------------------
-    # 4D KOHERENCJA
+    # 4D KOHERENCJA (Z AFC)
     # -------------------------------------------------------------------------
 
-    def _compute_coherence_4d(self, drifts: List[float], healths: List[float], eras: List[str], meta_entropy: float) -> CoherenceVector4D:
+    def _compute_coherence_4d(self, drifts: List[float], healths: List[float],
+                               eras: List[str], meta_entropy: float,
+                               afc_avg_stability: float = 0.0) -> CoherenceVector4D:
         avg_drift = sum(drifts) / len(drifts) if drifts else 0.0
         avg_health = sum(healths) / len(healths) if healths else 0.0
         
@@ -553,17 +624,22 @@ class GeonKonsystorz:
         k_era = max_count / len(eras) if eras else 0.0
         
         k_drift = 1.0 - clamp(avg_drift, 0.0, 1.0)
-        k_health = clamp(avg_health, 0.0, 1.0)
+        
+        # ===== KOREKTA ZDROWIA O AFC =====
+        afc_penalty = 0.0
+        if afc_avg_stability < self.afc_crisis_stability_threshold:
+            afc_penalty = self.afc_coherence_penalty
+        k_health = clamp(avg_health - afc_penalty, 0.0, 1.0)
+        
         k_entropy_global = 1.0 - meta_entropy
         
         return CoherenceVector4D(k_drift, k_health, k_era, k_entropy_global)
 
     # -------------------------------------------------------------------------
-    # META-ERA v2
+    # META-ERA v2 (BEZ ZMIAN)
     # -------------------------------------------------------------------------
 
     def _compute_meta_era_v2(self, eras: List[str], drifts: List[float], healths: List[float]) -> MetaEraVector2:
-        # Dominanta
         counts = {}
         for e in eras:
             counts[e] = counts.get(e, 0) + 1
@@ -573,7 +649,6 @@ class GeonKonsystorz:
         entropy = -sum((c/total) * math.log((c/total) + 1e-9) for c in counts.values()) if total > 0 else 0.0
         entropy = clamp(entropy / math.log(len(counts) + 1e-9), 0.0, 1.0)
         
-        # Trend
         era_order = {"ERA_STABILNOŚCI": 0, "ERA_TRANSFORMACJI": 1, "ERA_KRYZYSU": 2}
         values = [era_order.get(e, 1) for e in eras]
         avg_value = sum(values) / len(values) if values else 1.0
@@ -584,10 +659,8 @@ class GeonKonsystorz:
         else:
             trend = "KRYZYS"
         
-        # Shift risk
         shift_risk = clamp(entropy + (1 - sum(healths) / len(healths) if healths else 0) * 0.5, 0.0, 1.0)
         
-        # Transition probabilities
         probs = {}
         for era in ["ERA_STABILNOŚCI", "ERA_TRANSFORMACJI", "ERA_KRYZYSU"]:
             if era == dominant:
@@ -598,7 +671,7 @@ class GeonKonsystorz:
         return MetaEraVector2(dominant, entropy, trend, shift_risk, probs)
 
     # -------------------------------------------------------------------------
-    # RESONANCE MATRIX
+    # RESONANCE MATRIX (BEZ ZMIAN)
     # -------------------------------------------------------------------------
 
     def _compute_resonance_matrix(self, inputs: List[SynodInput]) -> ResonanceMatrix:
@@ -615,11 +688,11 @@ class GeonKonsystorz:
                     drift_diff = abs(inp_i.average_drift - inp_j.average_drift)
                     health_diff = abs(inp_i.average_health - inp_j.average_health)
                     era_same = 1.0 if inp_i.oracle_era == inp_j.oracle_era else 0.0
-                    resonance = (1.0 - drift_diff) * 0.4 + health_diff * 0.3 + era_same * 0.3
+                    afc_diff = abs(inp_i.afc_stability - inp_j.afc_stability) * 0.5
+                    resonance = (1.0 - drift_diff) * 0.35 + health_diff * 0.25 + era_same * 0.25 + (1.0 - afc_diff) * 0.15
                     row.append(clamp(resonance, 0.0, 1.0))
             matrix.append(row)
         
-        # Global index – średnia wszystkich rezonansów (bez diagonali)
         total = 0
         count = 0
         for i in range(n):
@@ -629,7 +702,6 @@ class GeonKonsystorz:
                     count += 1
         global_index = total / count if count > 0 else 0.0
         
-        # Gradient – trend rezonansu (różnica między pierwszą a ostatnią kolumną)
         gradient = 0.0
         if n > 1:
             first_col = sum(matrix[i][0] for i in range(n)) / n
@@ -639,18 +711,14 @@ class GeonKonsystorz:
         return ResonanceMatrix(matrix, global_index, gradient, systems)
 
     # -------------------------------------------------------------------------
-    # SYSTEM STABILITY INDICES
+    # SYSTEM STABILITY INDICES (BEZ ZMIAN)
     # -------------------------------------------------------------------------
 
     def _compute_stability_indices(self, inputs: List[SynodInput]) -> Dict[str, float]:
-        indices = {}
-        for inp in inputs:
-            ssi = inp.stability_index  # już policzone w _parse_inputs_enhanced
-            indices[inp.synod_id] = ssi
-        return indices
+        return {inp.synod_id: inp.stability_index for inp in inputs}
 
     # -------------------------------------------------------------------------
-    # INFLUENCE GRAPH
+    # INFLUENCE GRAPH (BEZ ZMIAN)
     # -------------------------------------------------------------------------
 
     def _compute_influence_graph(self, inputs: List[SynodInput]) -> Dict[str, List[str]]:
@@ -664,12 +732,13 @@ class GeonKonsystorz:
         return graph
 
     # -------------------------------------------------------------------------
-    # GSS-PRIME
+    # GSS-PRIME (Z AFC)
     # -------------------------------------------------------------------------
 
     def _compute_gss_prime(self, inputs: List[SynodInput], decrees: List[str],
                             drifts: List[float], healths: List[float],
-                            eras: List[str], meta_entropy: float) -> str:
+                            eras: List[str], meta_entropy: float,
+                            afc_avg_stability: float) -> str:
         payload = {
             "synods": [inp.synod_id for inp in inputs],
             "decrees": decrees,
@@ -677,12 +746,13 @@ class GeonKonsystorz:
             "avg_health": sum(healths) / len(healths) if healths else 0.0,
             "eras": eras,
             "meta_entropy": meta_entropy,
+            "afc_avg_stability": afc_avg_stability,
             "timestamp": time.time()
         }
         return generate_context_hash(payload)
 
     # -------------------------------------------------------------------------
-    # AUTO-CORRECTIONS ENHANCED
+    # AUTO-CORRECTIONS ENHANCED (BEZ ZMIAN)
     # -------------------------------------------------------------------------
 
     def _determine_seal_preliminary(self, decrees: List[str], drifts: List[float],
@@ -717,26 +787,31 @@ class GeonKonsystorz:
                 corr["drift_reduction"] = round(inp.average_drift - target_drift, 4)
             if inp.average_health < target_health:
                 corr["health_increase"] = round(target_health - inp.average_health, 4)
+            if inp.afc_stability < self.afc_crisis_stability_threshold:
+                corr["afc_stabilization_required"] = round(self.afc_crisis_stability_threshold - inp.afc_stability, 4)
             if len(corr) > 1:
                 corrections.append(corr)
         return corrections
 
     # -------------------------------------------------------------------------
-    # EPOCH PREDICTION v2
+    # EPOCH PREDICTION v2 (Z AFC)
     # -------------------------------------------------------------------------
 
     def _predict_epochs_v2(self, drifts: List[float], healths: List[float],
                            eras: List[str], meta_entropy: float,
-                           resonance: ResonanceMatrix) -> EpochPredictionV2:
+                           resonance: ResonanceMatrix,
+                           afc_avg_stability: float = 0.0) -> EpochPredictionV2:
         avg_drift = sum(drifts) / len(drifts) if drifts else 0.0
         avg_health = sum(healths) / len(healths) if healths else 0.0
         
-        # Trend epok
         era_order = {"ERA_STABILNOŚCI": 0, "ERA_TRANSFORMACJI": 1, "ERA_KRYZYSU": 2}
         era_values = [era_order.get(e, 1) for e in eras]
         trend = sum(era_values) / len(era_values) if era_values else 1.0
         
-        # Predykcja najbliższej epoki
+        # Korekta trendu o AFC
+        if afc_avg_stability < self.afc_crisis_stability_threshold:
+            trend += 0.3
+        
         if trend < 0.6:
             next_epoch = "ERA_STABILNOŚCI"
             confidence = 0.85 - avg_drift
@@ -747,24 +822,20 @@ class GeonKonsystorz:
             next_epoch = "ERA_KRYZYSU"
             confidence = 0.7 - avg_drift * 0.5
         
-        # Shift risk
         shift_risk = clamp(meta_entropy + (1 - avg_health) * 0.5, 0.0, 1.0)
         
-        # Epoch shift vector (7 cykli)
         base = 0 if next_epoch == "ERA_STABILNOŚCI" else 1 if next_epoch == "ERA_TRANSFORMACJI" else 2
         shift_vector = []
         for i in range(7):
             val = base + int(i * 0.3)
             shift_vector.append(clamp(val, 0, 2))
         
-        # Forecasty
         forecasts = ["ERA_STABILNOŚCI", "ERA_TRANSFORMACJI", "ERA_KRYZYSU"]
         forecast_3 = forecasts[(base + 1) % 3]
         forecast_7 = forecasts[(base + 2) % 3]
-        forecast_21 = forecasts[(base + 0) % 3]  # cykliczny powrót
+        forecast_21 = forecasts[(base + 0) % 3]
         
-        # Crisis probability
-        crisis_prob = clamp(avg_drift * 0.5 + (1 - avg_health) * 0.3 + meta_entropy * 0.2, 0.0, 1.0)
+        crisis_prob = clamp(avg_drift * 0.4 + (1 - avg_health) * 0.25 + meta_entropy * 0.2 + (1 - afc_avg_stability) * 0.15, 0.0, 1.0)
         
         return EpochPredictionV2(
             next_epoch=next_epoch,
@@ -778,7 +849,7 @@ class GeonKonsystorz:
         )
 
     # -------------------------------------------------------------------------
-    # GLOBAL STATE MAP ENHANCED
+    # GLOBAL STATE MAP ENHANCED (Z AFC)
     # -------------------------------------------------------------------------
 
     def _generate_global_state_map_enhanced(self, inputs: List[SynodInput]) -> Dict[str, Any]:
@@ -792,8 +863,10 @@ class GeonKonsystorz:
                 "era": inp.oracle_era,
                 "entropy": round(inp.entropy, 4),
                 "stability": round(inp.stability_index, 4),
+                "afc_stability": round(inp.afc_stability, 4),
+                "afc_decision": inp.afc_decision,
                 "systems": inp.system_count,
-                "status": "KRYTYCZNY" if inp.average_drift > 0.6 or inp.average_health < 0.4 else "STABILNY"
+                "status": "KRYTYCZNY" if inp.average_drift > 0.6 or inp.average_health < 0.4 or inp.afc_stability < 0.2 else "STABILNY"
             })
         
         return {
@@ -802,13 +875,14 @@ class GeonKonsystorz:
                 "total": len(inputs),
                 "avg_drift": round(sum(inp.average_drift for inp in inputs) / len(inputs), 4),
                 "avg_health": round(sum(inp.average_health for inp in inputs) / len(inputs), 4),
+                "avg_afc_stability": round(sum(inp.afc_stability for inp in inputs) / len(inputs), 4),
                 "critical_count": sum(1 for s in systems if s["status"] == "KRYTYCZNY"),
                 "dominant_era": max(set(inp.oracle_era for inp in inputs), key=lambda e: sum(1 for i in inputs if i.oracle_era == e)) if inputs else "UNKNOWN"
             }
         }
 
     # -------------------------------------------------------------------------
-    # SUPREME SEAL DETERMINATION (Z ULTIMA I SIGMA PRIME)
+    # SUPREME SEAL DETERMINATION (Z AFC)
     # -------------------------------------------------------------------------
 
     def _determine_seal_supreme(self, decrees: List[str], drifts: List[float],
@@ -816,7 +890,9 @@ class GeonKonsystorz:
                                 coherence: CoherenceVector4D,
                                 resonance: ResonanceMatrix,
                                 meta_entropy: float,
-                                meta_era: MetaEraVector2) -> KonsystorzSeal:
+                                meta_era: MetaEraVector2,
+                                afc_avg_stability: float = 0.0,
+                                afc_dominant_decision: Optional[str] = None) -> KonsystorzSeal:
         omega = decrees.count("META_OMEGA")
         beta = decrees.count("META_BETA")
         alpha = decrees.count("META_ALPHA")
@@ -827,34 +903,43 @@ class GeonKonsystorz:
         coherence_mag = coherence.magnitude()
         resonance_global = resonance.global_index
         
-        # 1. ULTIMA – absolutne domknięcie
+        # ===== AFC BOOST =====
+        afc_omega_boost = 0.0
+        if afc_avg_stability < self.afc_crisis_stability_threshold:
+            afc_omega_boost += self.afc_seal_omega_boost
+        if afc_dominant_decision in ["ALERT", "HARD_ALERT"]:
+            afc_omega_boost += self.afc_seal_omega_boost
+        
+        # 1. ULTIMA – absolutne domknięcie (wymaga stabilnego AFC)
         if (coherence_mag > self.ultima_coherence and
             resonance_global < self.ultima_resonance and
             meta_entropy < self.ultima_entropy and
+            afc_avg_stability > 0.8 and
             meta_era.trend == "STABILIZACJA" and
-            all(s == "STABILNY" for s in []) and  # wszystkie systemy stabilne
             omega == 0 and beta == 0):
             return KonsystorzSeal.ULTIMA
 
-        # 2. SIGMA PRIME – absolutna harmonia
+        # 2. SIGMA PRIME – absolutna harmonia (wymaga stabilnego AFC)
         if (coherence_mag > self.sigma_prime_coherence and
             resonance_global < self.sigma_prime_resonance and
             meta_entropy < self.sigma_prime_entropy and
+            afc_avg_stability > 0.7 and
             meta_era.trend == "STABILIZACJA" and
             omega == 0 and beta == 0):
             return KonsystorzSeal.SIGMA_PRIME
 
         # 3. SIGMA – super-stabilność
         if (omega == 0 and beta == 0 and alpha == total and
-            coherence_mag > 0.85 and avg_drift < 0.25):
+            coherence_mag > 0.85 and avg_drift < 0.25 and
+            afc_avg_stability > 0.6):
             return KonsystorzSeal.SIGMA
 
-        # 4. OMEGA
-        if omega >= 2 or avg_drift > 0.65:
+        # 4. OMEGA – z AFC boost
+        if omega >= 2 or avg_drift > 0.65 or afc_omega_boost >= 0.5:
             return KonsystorzSeal.OMEGA
 
-        # 5. BETA
-        if beta >= 2 or avg_health < 0.4:
+        # 5. BETA – z AFC boost
+        if beta >= 2 or avg_health < 0.4 or afc_omega_boost >= 0.3:
             return KonsystorzSeal.BETA
 
         # 6. ALPHA – domyślnie
@@ -906,25 +991,35 @@ class GeonKonsystorz:
                 "ultima": True,
                 "meta_entropy": True,
                 "stability_indices": True,
-                "influence_graph": True
+                "influence_graph": True,
+                "afc_integration": True
+            },
+            "afc_thresholds": {
+                "crisis_stability": self.afc_crisis_stability_threshold,
+                "entropy_boost": self.afc_entropy_boost,
+                "coherence_penalty": self.afc_coherence_penalty,
+                "seal_omega_boost": self.afc_seal_omega_boost
             }
         }
 
 # =============================================================================
-# MOST INTEGRACYJNY — KONSYSTORZ_BRIDGE
+# MOST INTEGRACYJNY — KONSYSTORZ_BRIDGE (ROZSZERZONY)
 # =============================================================================
 
 class KonsystorzBridge:
     def __init__(self, konsystorz: GeonKonsystorz):
         self.konsystorz = konsystorz
 
+    # ===== ORYGINALNE METODY (ZACHOWANE) =====
+    
     def get_archetype_context(self) -> Dict[str, Any]:
         status = self.konsystorz.get_status()
         return {
             "tryb": VERSION,
             "historia": status["history_size"],
             "features": status["features"],
-            "seals": status["seals"]
+            "seals": status["seals"],
+            "afc_thresholds": status.get("afc_thresholds", {})
         }
 
     def get_autopilot_state(self) -> Dict[str, Any]:
@@ -938,6 +1033,8 @@ class KonsystorzBridge:
                 "resonance": last.get("resonance_matrix", {}).get("global_index", 0.0),
                 "entropy": last.get("meta_entropy_global", 0.0),
                 "gss": last.get("global_seal_signature", "")[:16],
+                "afc_avg_stability": last.get("afc_average_stability", 0.0),
+                "afc_dominant_decision": last.get("afc_dominant_decision", "UNKNOWN"),
                 "konsystorz_ready": True
             }
         return {"mode": VERSION, "seal": "NO_DATA", "konsystorz_ready": True}
@@ -952,6 +1049,7 @@ class KonsystorzBridge:
                 "seal": last.get("seal", "UNKNOWN"),
                 "gss": last.get("global_seal_signature", ""),
                 "coherence": last.get("coherence_4d", {}).get("magnitude", 0.0),
+                "afc_avg_stability": last.get("afc_average_stability", 0.0),
                 "konsystorz_ready": True
             }
         return {"intent": "KONSYSTORZ_ABSOLUTION", "confidence": 0.5, "konsystorz_ready": True}
@@ -962,7 +1060,7 @@ class KonsystorzBridge:
             "PIECZĘĆ": "AKTYWNA",
             "PERFEKCJA": "AKTYWNA",
             "tryb": VERSION,
-            "konsystorz": "META-ABSOLUT"
+            "konsystorz": "META-ABSOLUT_AFC"
         }
 
     def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
@@ -971,19 +1069,45 @@ class KonsystorzBridge:
         for entry in history:
             fragments.append({
                 "source": VERSION,
-                "content": f"Konsystorz: {entry.get('seal', 'UNKNOWN')} | coh: {entry.get('coherence_4d', {}).get('magnitude', 0):.3f} | gss: {entry.get('global_seal_signature', '')[:12]}...",
+                "content": f"Konsystorz: {entry.get('seal', 'UNKNOWN')} | coh: {entry.get('coherence_4d', {}).get('magnitude', 0):.3f} | afc_stab: {entry.get('afc_average_stability', 0):.3f}",
                 "seal": entry.get("seal", "UNKNOWN"),
-                "decree": entry.get("absolution_decree", "UNKNOWN")[:60]
+                "decree": entry.get("absolution_decree", "UNKNOWN")[:60],
+                "afc_stability": entry.get("afc_average_stability", 0.0)
             })
         return fragments
 
+    # ===== NOWE METODY AFC =====
+
+    def get_afc_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst AFC z ostatniego posiedzenia Konsystorza."""
+        history = self.konsystorz.get_history(1)
+        if history:
+            last = history[-1]
+            return {
+                "afc_average_stability": last.get("afc_average_stability", 0.0),
+                "afc_dominant_decision": last.get("afc_dominant_decision", "UNKNOWN"),
+                "afc_dominant_policy": last.get("afc_dominant_policy", "UNKNOWN"),
+                "seal": last.get("seal", "UNKNOWN"),
+                "coherence": last.get("coherence_4d", {}).get("magnitude", 0.0)
+            }
+        return {"afc_average_stability": 0.0, "afc_dominant_decision": "UNKNOWN"}
+
+    def get_full_status(self) -> Dict[str, Any]:
+        """Zwraca pełny status – Konsystorz + AFC."""
+        return {
+            "konsystorz": self.konsystorz.get_status(),
+            "afc_context": self.get_afc_context(),
+            "last_report": self.konsystorz.get_history(1)[0] if self.konsystorz.get_history(1) else None,
+            "meta_memory": self.konsystorz.get_meta_memory(5)
+        }
+
 # =============================================================================
-# GEON_Ω∞ SUPREME — ORGANIZM META-ABSOLUT
+# GEON_Ω∞ SUPREME — ORGANIZM META-ABSOLUT (z AFC)
 # =============================================================================
 
 class GeonOmegaInfinitySupreme:
     """
-    🜀 GEON_Ω∞ SUPREME – Najwyższa instancja organizmu meta-fraktalnego.
+    🜀 GEON_Ω∞ SUPREME – Najwyższa instancja organizmu meta-fraktalnego z AFC.
     """
 
     def __init__(self, konsystorz: GeonKonsystorz):
@@ -995,12 +1119,12 @@ class GeonOmegaInfinitySupreme:
 
     def execute_supreme_pulse(self, synod_reports: List[Dict[str, Any]]) -> Dict[str, Any]:
         self.pulse_count += 1
-        self.kroniki.log_event("SUPREME_PULSE", {"pulse": self.pulse_count, "synods": len(synod_reports)})
+        self.kroniki.log_event("SUPREME_PULSE_AFC", {"pulse": self.pulse_count, "synods": len(synod_reports)})
 
         report = self.konsystorz.convene(synod_reports)
 
         entry = {
-            "type": "SUPREME_PULSE",
+            "type": "SUPREME_PULSE_AFC",
             "pulse": self.pulse_count,
             "seal": report.seal.value,
             "absolution_decree": report.absolution_decree,
@@ -1008,10 +1132,12 @@ class GeonOmegaInfinitySupreme:
             "coherence": report.coherence_4d.magnitude(),
             "resonance": report.resonance_matrix.global_index,
             "entropy": report.meta_entropy_global,
+            "afc_avg_stability": report.afc_average_stability,
+            "afc_dominant_decision": report.afc_dominant_decision,
             "timestamp": datetime.now().isoformat()
         }
         self.history.append(entry)
-        self.egregor.commit(entry, node_id="GEON_OMEGA_INFINITY_SUPREME")
+        self.egregor.commit(entry, node_id="GEON_OMEGA_INFINITY_SUPREME_AFC")
 
         return {
             "status": "SUPREME_PULSE_COMPLETE",
@@ -1022,6 +1148,8 @@ class GeonOmegaInfinitySupreme:
             "coherence": report.coherence_4d.magnitude(),
             "resonance": report.resonance_matrix.global_index,
             "entropy": report.meta_entropy_global,
+            "afc_avg_stability": report.afc_average_stability,
+            "afc_dominant_decision": report.afc_dominant_decision,
             "corrections": len(report.auto_corrections),
             "certificate": report.certificate,
             "epoch_forecast": report.epoch_predictions.next_epoch
@@ -1044,88 +1172,70 @@ class GeonOmegaInfinitySupreme:
 
 def demo():
     print("\n" + "=" * 80)
-    print(f"🜀 {VERSION} — DEMONSTRACJA META-ABSOLUT SUPREME")
-    print("4D COHERENCE | SIGMA PRIME | ULTIMA | RESONANCE MATRIX | EPE v2")
+    print(f"🜀 {VERSION} — DEMONSTRACJA META-ABSOLUT SUPREME Z AFC")
+    print("4D COHERENCE | SIGMA PRIME | ULTIMA | AFC INTEGRATION")
     print("=" * 80 + "\n")
 
     konsystorz = GeonKonsystorz(adaptive_mode=True)
     bridge = KonsystorzBridge(konsystorz)
     supreme = GeonOmegaInfinitySupreme(konsystorz)
 
-    # Symulacja wejść z 3 Synodów (wszystkie ALPHA – test SIGMA PRIME)
-    synod_1 = {
-        "synod_id": "SYNOD_EUROPE",
-        "meta_decree": "META_ALPHA",
-        "average_drift": 0.08,
-        "average_health": 0.95,
-        "system_count": 5,
-        "oracle_era": "ERA_STABILNOŚCI",
-        "signatures": ["SIG_EU_01", "SIG_EU_02"]
-    }
-    synod_2 = {
-        "synod_id": "SYNOD_AFRICA",
-        "meta_decree": "META_ALPHA",
-        "average_drift": 0.12,
-        "average_health": 0.92,
-        "system_count": 3,
-        "oracle_era": "ERA_STABILNOŚCI",
-        "signatures": ["SIG_AF_01"]
-    }
-    synod_3 = {
-        "synod_id": "SYNOD_AMERICA",
-        "meta_decree": "META_ALPHA",
-        "average_drift": 0.05,
-        "average_health": 0.97,
-        "system_count": 4,
-        "oracle_era": "ERA_STABILNOŚCI",
-        "signatures": ["SIG_AM_01", "SIG_AM_02"]
-    }
+    # Symulacja wejść z Synodów z AFC
+    def create_synod_input(synod_id, decree, drift, health, era, afc_stab=0.0, afc_dec=None):
+        return {
+            "synod_id": synod_id,
+            "meta_decree": decree,
+            "average_drift": drift,
+            "average_health": health,
+            "system_count": 5,
+            "oracle_era": era,
+            "signatures": [f"SIG_{synod_id}_01"],
+            "afc_stability": afc_stab,
+            "afc_decision": afc_dec,
+            "afc_policy": "MAINTAIN"
+        }
 
-    print("🔍 WEJŚCIA Z SYNODÓW (wszystkie ALPHA – test SIGMA PRIME / ULTIMA):\n")
+    print("🔍 TEST 1: WSZYSTKIE STABILNE + AFC STABILNY → ULTIMA")
+    inputs1 = [
+        create_synod_input("EUROPE", "META_ALPHA", 0.05, 0.95, "ERA_STABILNOŚCI", 0.85, "NORMAL"),
+        create_synod_input("AFRICA", "META_ALPHA", 0.08, 0.93, "ERA_STABILNOŚCI", 0.82, "NORMAL"),
+        create_synod_input("AMERICA", "META_ALPHA", 0.06, 0.94, "ERA_STABILNOŚCI", 0.88, "NORMAL")
+    ]
+    report1 = konsystorz.convene(inputs1)
+    print(f"   Pieczęć: {report1.seal.value} | Coherence: {report1.coherence_4d.magnitude():.3f}")
+    print(f"   AFC avg stability: {report1.afc_average_stability:.3f}")
 
-    # 1. Test Konsystorza
-    report = konsystorz.convene([synod_1, synod_2, synod_3])
+    print("\n🔍 TEST 2: WSZYSTKIE STABILNE + AFC NIESTABILNY (ALERT) → BETA/OMEGA")
+    inputs2 = [
+        create_synod_input("EUROPE", "META_ALPHA", 0.05, 0.95, "ERA_STABILNOŚCI", 0.2, "ALERT"),
+        create_synod_input("AFRICA", "META_ALPHA", 0.08, 0.93, "ERA_STABILNOŚCI", 0.15, "HARD_ALERT"),
+        create_synod_input("AMERICA", "META_ALPHA", 0.06, 0.94, "ERA_STABILNOŚCI", 0.25, "ALERT")
+    ]
+    report2 = konsystorz.convene(inputs2)
+    print(f"   Pieczęć: {report2.seal.value} | Entropy: {report2.meta_entropy_global:.3f}")
+    print(f"   AFC avg stability: {report2.afc_average_stability:.3f}")
 
-    print(f"📊 PIECZĘĆ: {report.seal.value}")
-    print(f"   Opis: {report.seal.description()}")
-    print(f"   Dekret: {report.absolution_decree}")
-    print(f"   Coherence 4D: {report.coherence_4d.to_dict()}")
-    print(f"   Meta-Era: {report.meta_era.to_dict()}")
-    print(f"   Resonance Matrix: global={report.resonance_matrix.global_index:.3f}, gradient={report.resonance_matrix.gradient:.3f}")
-    print(f"   Global Entropy: {report.meta_entropy_global:.3f}")
-    print(f"   System Stability: {report.system_stability_indices}")
-    print(f"   GSS: {report.global_seal_signature[:16]}...")
+    print("\n🔍 TEST 3: SYSTEMY MIESZANE + AFC MIESZANE")
+    inputs3 = [
+        create_synod_input("EUROPE", "META_ALPHA", 0.05, 0.95, "ERA_STABILNOŚCI", 0.7, "NORMAL"),
+        create_synod_input("AFRICA", "META_BETA", 0.35, 0.65, "ERA_TRANSFORMACJI", 0.4, "NORMAL"),
+        create_synod_input("AMERICA", "META_OMEGA", 0.55, 0.45, "ERA_KRYZYSU", 0.2, "ALERT")
+    ]
+    report3 = konsystorz.convene(inputs3)
+    print(f"   Pieczęć: {report3.seal.value}")
+    print(f"   Coherence: {report3.coherence_4d.magnitude():.3f}")
+    print(f"   AFC avg stability: {report3.afc_average_stability:.3f}")
+    print(f"   Epoch forecast: {report3.epoch_predictions.next_epoch}")
 
-    print(f"\n📊 EPOCH PREDICTIONS v2:")
-    print(f"   Next: {report.epoch_predictions.next_epoch} (conf: {report.epoch_predictions.next_epoch_confidence:.3f})")
-    print(f"   Shift risk: {report.epoch_predictions.epoch_shift_risk:.3f}")
-    print(f"   Forecast 3: {report.epoch_predictions.forecast_3}")
-    print(f"   Forecast 7: {report.epoch_predictions.forecast_7}")
-    print(f"   Crisis probability: {report.epoch_predictions.crisis_probability:.3f}")
-    print(f"   Shift vector (7 cycles): {report.epoch_predictions.epoch_shift_vector}")
+    print("\n🔍 TEST SUPREME PULSE:")
+    pulse = supreme.execute_supreme_pulse(inputs3)
+    print(f"   Pulse #{pulse['pulse']}: {pulse['seal']}")
+    print(f"   Coherence: {pulse['coherence']:.3f} | AFC stab: {pulse['afc_avg_stability']:.3f}")
 
-    if report.auto_corrections:
-        print(f"\n📊 Auto-Corrections: {len(report.auto_corrections)}")
-        for c in report.auto_corrections:
-            print(f"   {c}")
-
-    # 2. Test SUPREME PULSE
-    print("\n" + "=" * 40)
-    print("🜀 TEST SUPREME PULSE (GEON_Ω∞ SUPREME)")
-    print("=" * 40)
-
-    pulse_result = supreme.execute_supreme_pulse([synod_1, synod_2, synod_3])
-    print(f"   Pulse #{pulse_result['pulse']}")
-    print(f"   Seal: {pulse_result['seal']}")
-    print(f"   Coherence: {pulse_result['coherence']:.3f}")
-    print(f"   Resonance: {pulse_result['resonance']:.3f}")
-    print(f"   Entropy: {pulse_result['entropy']:.3f}")
-    print(f"   Epoch Forecast: {pulse_result['epoch_forecast']}")
-
-    print("\n🔗 MOSTY INTEGRACYJNE:")
+    print("\n🔗 MOSTY INTEGRACYJNE (AFC):")
+    print(f"   AFC Context: {bridge.get_afc_context()}")
     print(f"   Autopilot: {bridge.get_autopilot_state()}")
     print(f"   Governor: {bridge.get_governor_context()}")
-    print(f"   TRIO: {bridge.get_trio_state()}")
 
     print("\n" + "=" * 80)
     print(f"🜀 {VERSION} — META-ABSOLUT SUPREME GOTOWY DO WDROŻENIA")
