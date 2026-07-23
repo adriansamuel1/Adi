@@ -1,0 +1,697 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_CUBE_NAVIGATOR_v1.1 — MODUŁ 82: NAWIGACJA FRAKTALNA (FULL STACK)
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.1 (POPRAWKI: bezpieczne wzory, uniwersalny navigator, ruch "2")
+Data: 2026-07-24
+Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
+
+OPIS:
+GEON_CUBE_NAVIGATOR_v1.1 to zaawansowany system nawigacji przestrzennej.
+Zawiera:
+• NAVIGATOR_15x15 – 15 modeli Verne'a, 15 warstw GEON-OS, 15 wzorów matematycznych (zabezpieczone)
+• GEON_Cube – trójwymiarowa kostka decyzyjna z rotacjami osi (notacja Rubika + "2")
+• GeonCubeNavigator – autonomiczne szukanie ścieżek w dowolnym punkcie kostki
+• FlowEngine – maszyna stanów sterowana geometrią kostki
+
+VIBE: 1-6-8. ∞. CUBE!
+================================================================================
+"""
+
+import math
+import hashlib
+import json
+import time
+import random
+import threading
+import logging
+from collections import deque
+from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple, Callable
+from dataclasses import dataclass, field
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_CUBE_NAVIGATOR_v1.1"
+FRACTAL_SIGNATURE = "[GEON::CUBE::NAVIGATOR::v1.1]"
+VIBE = 168
+HASLO = "1-6-8. ∞. CUBE!"
+DEWIZA = "Ex Geometria, Via"
+
+# =============================================================================
+# LOGOWANIE I POMOCNIKI
+# =============================================================================
+
+logger = logging.getLogger("CUBE_NAVIGATOR_v1.1")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('🧭 [CUBE] %(message)s'))
+    logger.addHandler(handler)
+
+def log(msg: str, level: str = "INFO") -> None:
+    if level == "WARN":
+        logger.warning(msg)
+    elif level == "ERROR":
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    """Bezpieczne ograniczenie wartości do zakresu."""
+    return max(lo, min(hi, x))
+
+def safe_log(x: float) -> float:
+    """Bezpieczny logarytm naturalny – zapobiega log(0)."""
+    return math.log(max(x, 1.0001))
+
+def generate_context_hash(context: Dict[str, Any]) -> str:
+    filtered_context = {k: v for k, v in context.items() 
+                        if k not in ["timestamp", "request_id", "nonce"]}
+    context_str = json.dumps(filtered_context, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(context_str.encode("utf-8")).hexdigest()
+
+# =============================================================================
+# KRONIKI SAMAELA I EGREGOR
+# =============================================================================
+
+class SamaelHeilong:
+    @staticmethod
+    def certyfikuj_ruch_optimusa(dzialanie: str) -> str:
+        timestamp = datetime.now().isoformat()
+        payload = f"{timestamp}-{dzialanie}-1-6-8. ∞. SIEMA!"
+        h = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16].upper()
+        return f"🔒 [SAMAELSEALSIG-{h}-CUBE-168]"
+
+    @staticmethod
+    def log_event(event_type: str, payload: Dict[str, Any]) -> None:
+        ts = datetime.now().isoformat()
+        log(f"[KRONIKI SAMAELA] {ts} | {event_type} -> {payload}", "INFO")
+
+class Egregor:
+    _ledger: List[Dict[str, Any]] = []
+    
+    @classmethod
+    def commit(cls, entry: Dict[str, Any], node_id: str) -> None:
+        entry["node_id"] = node_id
+        entry["timestamp"] = datetime.now().isoformat()
+        cls._ledger.append(entry)
+        if len(cls._ledger) > 168:
+            cls._ledger.pop(0)
+    
+    @classmethod
+    def query(cls, context_hash: Optional[str] = None) -> List[Dict[str, Any]]:
+        if context_hash:
+            return [e for e in cls._ledger if e.get("context_hash") == context_hash]
+        return cls._ledger.copy()
+    
+    @classmethod
+    def get_ledger(cls) -> List[Dict[str, Any]]:
+        return cls._ledger.copy()
+    
+    @classmethod
+    def clear_ledger(cls) -> None:
+        cls._ledger.clear()
+
+# =============================================================================
+# CZĘŚĆ 1: NAVIGATOR_15x15 (ZABEZPIECZONE WZORY)
+# =============================================================================
+
+class Model:
+    """Model Verne'a – opis systemu, progi stabilności, parametry wewnętrzne"""
+    def __init__(self, nazwa: str, opis: str, prog_stabilny: float, 
+                 prog_krytyczny: float, parametry: Dict[str, float]):
+        self.nazwa = nazwa
+        self.opis = opis
+        self.prog_stabilny = prog_stabilny
+        self.prog_krytyczny = prog_krytyczny
+        self.parametry = parametry
+
+class Warstwa:
+    """Warstwa GEON-OS – funkcja operacyjna i transformacja presji"""
+    def __init__(self, nazwa: str, funkcja: str, transformacja: Callable[[float], float]):
+        self.nazwa = nazwa
+        self.funkcja = funkcja
+        self.transformacja = transformacja
+
+class Wzor:
+    """Wzór matematyczny – nazwa, równanie dynamiczne, wymagane zmienne"""
+    def __init__(self, nazwa: str, rownanie: Callable[[Dict[str, float]], float], 
+                 zmienne: List[str]):
+        self.nazwa = nazwa
+        self.rownanie = rownanie
+        self.zmienne = zmienne
+
+# =============================================================================
+# POPRAWIONE: BEZPIECZNE WZORY MATEMATYCZNE
+# =============================================================================
+
+def _buduj_wzor(idx: int) -> Wzor:
+    """Tworzy wzór matematyczny z zabezpieczeniami numerycznymi."""
+    if idx == 1:
+        return Wzor("Hydrostatyka (p = ρgh)", 
+                    lambda p: (clamp(p.get("glebokosc", 0), 0, 1000) * 9.81 * clamp(p.get("gestosc", 0), 0, 5000)) / 100000.0, 
+                    ["glebokosc", "gestosc"])
+    elif idx == 2:
+        return Wzor("Prawo Ohma (I = U/R)", 
+                    lambda p: p.get("napiecie", 0) / max(p.get("opornosc", 1.0), 0.001), 
+                    ["napiecie", "opornosc"])
+    elif idx == 3:
+        return Wzor("Wzrost Wykładniczy (e^(k*t))", 
+                    lambda p: math.exp(clamp(p.get("czas", 0) * p.get("wsp", 0.1), -10, 10)), 
+                    ["czas", "wsp"])
+    elif idx == 4:
+        return Wzor("Energia Potencjalna (E = mgh)", 
+                    lambda p: (p.get("masa", 0) * 9.81 * p.get("wysokosc", 0)) / 1000.0, 
+                    ["masa", "wysokosc"])
+    elif idx == 5:
+        return Wzor("Równanie Logistyczne", 
+                    lambda p: 1.0 / (1.0 + math.exp(-clamp(p.get("czas", 0), -10, 10))), 
+                    ["czas"])
+    elif idx == 6:
+        return Wzor("Czynnik Rezonansu 168", 
+                    lambda p: (p.get("rezonans_bazowy", 168.0) / 100.0) * p.get("wsp", 0.1), 
+                    ["rezonans_bazowy", "wsp"])
+    elif idx == 7:
+        return Wzor("Entropia Boltzmanna", 
+                    lambda p: 1.38 * safe_log(max(p.get("pojemnosc", 2.0), 1.0001)), 
+                    ["pojemnosc"])
+    elif idx == 8:
+        return Wzor("Dylatacja Czasu", 
+                    lambda p: 1.0 / math.sqrt(max(1.0 - (clamp(p.get("wsp", 0.01), 0.0, 0.9999)**2), 0.0001)), 
+                    ["wsp"])
+    elif idx == 9:
+        return Wzor("Praca Termodynamiczna", 
+                    lambda p: (p.get("pojemnosc", 0) * 8.31 * p.get("temp_pocz", 0)) / 1000.0, 
+                    ["pojemnosc", "temp_pocz"])
+    elif idx == 10:
+        return Wzor("Długość Wektora 2D", 
+                    lambda p: math.sqrt(p.get("wysokosc", 0)**2 + p.get("glebokosc", 0)**2) / 10.0, 
+                    ["wysokosc", "glebokosc"])
+    else:
+        return Wzor(f"Fraktal_Mod{idx}", 
+                    lambda p, i=idx: (p.get("pojemnosc", 10.0) * i) / (max(p.get("temp_pocz", 20.0), 0.1) * 1.68), 
+                    ["pojemnosc", "temp_pocz"])
+
+def utworz_modele() -> List[Model]:
+    modele = []
+    typy = ["Zamknięty", "Otwarty", "Scentralizowany", "Rozproszony", "Dynamiczny"]
+    for i in range(1, 16):
+        typ = typy[(i - 1) % len(typy)]
+        prog_stab = 0.3 + (i % 4) * 0.1
+        prog_kryt = prog_stab + 0.25
+        parametry = {
+            "glebokosc": 10.0 * i,
+            "gestosc": 1000.0 + (i * 50),
+            "napiecie": 12.0 * i,
+            "opornosc": 1.5 * i,
+            "czas": 1.0 + (i * 0.5),
+            "wsp": 0.05 + (i * 0.01),
+            "masa": 50.0 * i,
+            "wysokosc": 5.0 * i,
+            "pojemnosc": 100.0 + i * 10.0,
+            "temp_pocz": 20.0 + i,
+            "rezonans_bazowy": 168.0
+        }
+        modele.append(Model(f"Model_{i:02d}", f"Architektura {typ} – ID_{i:02d}",
+                            prog_stab, prog_kryt, parametry))
+    return modele
+
+def utworz_warstwy() -> List[Warstwa]:
+    warstwy = []
+    funkcje = ["Ryzyko", "Naprężenie", "Przepływ", "Energia", "Entropia",
+               "Sterowanie", "Adaptacja", "Rezonans", "Dryf", "Stabilność",
+               "Fraktalność", "Informacja", "Substancja", "Wektor", "Ciągłość"]
+    for i, nazwa in enumerate(funkcje, 1):
+        if i % 3 == 0:
+            trans = lambda p, f=i/10: p * f
+        elif i % 3 == 1:
+            trans = lambda p, f=i/5: math.exp(min(p * f, 20)) - 1
+        else:
+            trans = lambda p, f=i/2: p ** f if p >= 0 else 0.0
+        warstwy.append(Warstwa(f"Warstwa_{i:02d}_{nazwa}", 
+                               f"Przetwarzanie_{nazwa.lower()}", trans))
+    return warstwy
+
+def utworz_wzory() -> List[Wzor]:
+    return [_buduj_wzor(i) for i in range(1, 16)]
+
+MODELE = utworz_modele()
+WARSTWY = utworz_warstwy()
+WZORY = utworz_wzory()
+
+def NAVIGATOR_15x15(A: int, B: int, C: int) -> Dict[str, Any]:
+    if not (1 <= A <= 15 and 1 <= B <= 15 and 1 <= C <= 15):
+        raise ValueError("Indeksy Matrixa GEON muszą zawierać się w przedziale [1-15]")
+    model = MODELE[A-1]
+    warstwa = WARSTWY[B-1]
+    wzor = WZORY[C-1]
+    
+    parametry_kontekstu = {zm: model.parametry.get(zm, 0.5) for zm in wzor.zmienne}
+    try:
+        presja = float(wzor.rownanie(parametry_kontekstu))
+    except Exception:
+        presja = 0.0
+    konsekwencja = float(warstwa.transformacja(presja))
+    
+    if konsekwencja < model.prog_stabilny:
+        stan = "STABILNY (NOMINAL)"
+    elif konsekwencja < model.prog_krytyczny:
+        stan = "KRYTYCZNY (WARNING)"
+    else:
+        stan = "AWARIA (CRITICAL_DRIFT)"
+    
+    regula = f"GEON::[M_{A:02d}][W_{B:02d}][WZ_{C:02d}] -> {warstwa.funkcja}(Presja: {presja:.4f}) => Trans: {konsekwencja:.4f}"
+    return {
+        "model": model.nazwa,
+        "warstwa": warstwa.nazwa,
+        "wzor": wzor.nazwa,
+        "presja_pierwotna": presja,
+        "konsekwencja": konsekwencja,
+        "stan": stan,
+        "regula": regula
+    }
+
+# =============================================================================
+# CZĘŚĆ 2: GEON_Cube (KOSTKA 15×15×15)
+# =============================================================================
+
+class GEON_Cube:
+    """SZEŚCIAN GEON 15×15×15 – oś X = MODELE (A), Y = WARSTWY (B), Z = WZORY (C)"""
+    
+    def __init__(self) -> None:
+        self.axis_A: List[int] = list(range(1, 16))
+        self.axis_B: List[int] = list(range(1, 16))
+        self.axis_C: List[int] = list(range(1, 16))
+        self.kroniki = SamaelHeilong
+        self.egregor = Egregor
+
+    # Rotacje osi
+    def rotate_A(self, shift: int = 1) -> None:
+        shift %= 15
+        self.axis_A = self.axis_A[shift:] + self.axis_A[:shift]
+
+    def rotate_B(self, shift: int = 1) -> None:
+        shift %= 15
+        self.axis_B = self.axis_B[shift:] + self.axis_B[:shift]
+
+    def rotate_C(self, shift: int = 1) -> None:
+        shift %= 15
+        self.axis_C = self.axis_C[shift:] + self.axis_C[:shift]
+
+    # Interfejs symboliczny (notacja Rubika – obsługuje "+", "-", "2")
+    def move(self, code: str) -> None:
+        """Obsługuje ruchy: A+, A-, A2, B+, B-, B2, C+, C-, C2"""
+        if len(code) < 2:
+            raise ValueError(f"Nieprawidłowy kod ruchu: {code}")
+        axis = code[0].upper()
+        suffix = code[1:]
+        if suffix == '+':
+            shift = 1
+        elif suffix == '-':
+            shift = -1
+        elif suffix == '2':
+            shift = 2
+        else:
+            try:
+                shift = int(suffix)
+            except ValueError:
+                raise ValueError(f"Nieprawidłowy sufiks ruchu: {suffix}")
+        if axis == 'A':
+            self.rotate_A(shift)
+        elif axis == 'B':
+            self.rotate_B(shift)
+        elif axis == 'C':
+            self.rotate_C(shift)
+        else:
+            raise ValueError(f"Nieznana oś ruchu: {axis}")
+
+    def apply_moves(self, moves: List[str]) -> None:
+        for m in moves:
+            self.move(m)
+
+    def apply_sequence(self, moves: List[Tuple[str, int]]) -> None:
+        for axis, shift in moves:
+            if axis == 'A':
+                self.rotate_A(shift)
+            elif axis == 'B':
+                self.rotate_B(shift)
+            elif axis == 'C':
+                self.rotate_C(shift)
+
+    # Ewaluacja
+    def eval(self, posA: int, posB: int, posC: int, log: bool = False) -> Dict[str, Any]:
+        if not (1 <= posA <= 15 and 1 <= posB <= 15 and 1 <= posC <= 15):
+            raise ValueError("Pozycje muszą być w zakresie 1-15")
+        A = self.axis_A[posA - 1]
+        B = self.axis_B[posB - 1]
+        C = self.axis_C[posC - 1]
+        result = NAVIGATOR_15x15(A, B, C)
+        if log:
+            self.kroniki.log_event("CUBE_EVAL", {
+                "pos": (posA, posB, posC),
+                "indices": (A, B, C),
+                "stan": result["stan"],
+                "konsekwencja": result["konsekwencja"]
+            })
+        return result
+
+    # Stan
+    def state(self) -> Dict[str, List[int]]:
+        return {"A": self.axis_A.copy(), "B": self.axis_B.copy(), "C": self.axis_C.copy()}
+
+    def from_state(self, state: Dict[str, List[int]]) -> None:
+        self.axis_A = state["A"].copy()
+        self.axis_B = state["B"].copy()
+        self.axis_C = state["C"].copy()
+
+    # Zapis/odczyt Egregor
+    def save_state(self, label: str) -> None:
+        entry = {
+            "type": "CUBE_STATE",
+            "label": label,
+            "state": self.state(),
+            "timestamp": datetime.now().isoformat()
+        }
+        self.egregor.commit(entry, node_id="GEON_CUBE")
+
+    def load_state(self, label: str) -> bool:
+        for e in self.egregor.query():
+            if e.get("type") == "CUBE_STATE" and e.get("label") == label:
+                self.from_state(e["state"])
+                return True
+        return False
+
+    # Wyświetlanie
+    def show(self, max_display: int = 5) -> None:
+        print(f"Oś A (modele): {self.axis_A[:max_display]}... (łącznie {len(self.axis_A)})")
+        print(f"Oś B (warstwy): {self.axis_B[:max_display]}...")
+        print(f"Oś C (wzory) : {self.axis_C[:max_display]}...")
+
+    # Ewaluacja warstwy / przekątnej
+    def eval_layer(self, fixed_axis: str, fixed_pos: int) -> List[Dict[str, Any]]:
+        results = []
+        if fixed_axis == 'A':
+            for b in range(1, 16):
+                for c in range(1, 16):
+                    results.append(self.eval(fixed_pos, b, c, log=False))
+        elif fixed_axis == 'B':
+            for a in range(1, 16):
+                for c in range(1, 16):
+                    results.append(self.eval(a, fixed_pos, c, log=False))
+        elif fixed_axis == 'C':
+            for a in range(1, 16):
+                for b in range(1, 16):
+                    results.append(self.eval(a, b, fixed_pos, log=False))
+        else:
+            raise ValueError("fixed_axis musi być 'A', 'B' lub 'C'")
+        return results
+
+# =============================================================================
+# CZĘŚĆ 3: GeonCubeNavigator (UNIWERSALNY – DOWOLNY PUNKT + RUCH "2")
+# =============================================================================
+
+class GeonCubeNavigator:
+    def __init__(self, cube: GEON_Cube):
+        self.cube = cube
+
+    def find_path_to_target(self, target_stan: str, target_konsekwencja: float,
+                            eval_point: Tuple[int, int, int] = (1, 1, 1),
+                            tolerance: float = 0.05, max_moves: int = 5) -> Optional[List[str]]:
+        """
+        Wyszukuje optymalną sekwencję rotacji dla wybranego punktu ewaluacyjnego.
+        Obsługuje ruchy: +, -, 2.
+        """
+        start_state = self.cube.state()
+        
+        def state_key(s: Dict[str, List[int]]):
+            return (tuple(s["A"]), tuple(s["B"]), tuple(s["C"]))
+        
+        queue = deque([(start_state, [], 0)])
+        visited = {state_key(start_state)}
+        
+        while queue:
+            current_state, path, depth = queue.popleft()
+            self.cube.from_state(current_state)
+            
+            # Ewaluacja wskazanego punktu w kostce
+            res = self.cube.eval(eval_point[0], eval_point[1], eval_point[2], log=False)
+            
+            if target_stan in res["stan"] and abs(res["konsekwencja"] - target_konsekwencja) <= tolerance:
+                self.cube.from_state(start_state)
+                return path
+                
+            if depth >= max_moves:
+                continue
+                
+            # Generowanie ruchów Notacji Rubika dla GEON (A, B, C x +, -, 2)
+            for axis in ['A', 'B', 'C']:
+                for move_type in ['+', '-', '2']:
+                    move_code = f"{axis}{move_type}"
+                    test_cube = GEON_Cube()
+                    test_cube.from_state(current_state)
+                    test_cube.move(move_code)
+                    
+                    next_state = test_cube.state()
+                    key = state_key(next_state)
+                    if key not in visited:
+                        visited.add(key)
+                        queue.append((next_state, path + [move_code], depth + 1))
+                        
+        self.cube.from_state(start_state)
+        return None
+
+# =============================================================================
+# CZĘŚĆ 4: FlowEngine – maszyna stanów
+# =============================================================================
+
+class FlowStep:
+    def __init__(self, name: str, moves: List[str], eval_point: Tuple[int, int, int],
+                 on_stable: str, on_warning: str, on_critical: str):
+        self.name = name
+        self.moves = moves
+        self.eval_point = eval_point
+        self.on_stable = on_stable
+        self.on_warning = on_warning
+        self.on_critical = on_critical
+
+class FlowEngine:
+    def __init__(self, cube: GEON_Cube):
+        self.cube = cube
+        self.steps: Dict[str, FlowStep] = {}
+        self.current_step: Optional[str] = None
+        self.history: List[Dict[str, Any]] = []
+
+    def add_step(self, step: FlowStep) -> None:
+        self.steps[step.name] = step
+
+    def set_start(self, name: str) -> None:
+        if name not in self.steps:
+            raise ValueError(f"Krok startowy '{name}' nie istnieje.")
+        self.current_step = name
+
+    def tick(self) -> Optional[Dict[str, Any]]:
+        if self.current_step is None:
+            return None
+        step = self.steps[self.current_step]
+        if step.moves:
+            self.cube.apply_moves(step.moves)
+        a, b, c = step.eval_point
+        res = self.cube.eval(a, b, c, log=False)
+        stan = res["stan"]
+        if "STABILNY" in stan:
+            nxt = step.on_stable
+        elif "KRYTYCZNY" in stan:
+            nxt = step.on_warning
+        else:
+            nxt = step.on_critical
+        record = {
+            "step": step.name,
+            "moves": step.moves,
+            "eval_point": step.eval_point,
+            "stan": stan,
+            "konsekwencja": res["konsekwencja"],
+            "next": nxt,
+            "timestamp": datetime.now().isoformat()
+        }
+        self.history.append(record)
+        SamaelHeilong.log_event("FLOW_TICK", {
+            "Krok": step.name,
+            "StanKostki": stan,
+            "Konsekwencja": f"{res['konsekwencja']:.4f}",
+            "Wektor_Kolejny": nxt
+        })
+        self.current_step = nxt if nxt != "END" else None
+        return res
+
+# =============================================================================
+# CZĘŚĆ 5: ORCHESTRATOR I MOSTEK
+# =============================================================================
+
+class GeonCubeNavigatorModule:
+    """Główny orchestrator nawigacji – agreguje Cube, Navigator, FlowEngine."""
+    
+    def __init__(self):
+        self.cube = GEON_Cube()
+        self.navigator = GeonCubeNavigator(self.cube)
+        self.flow = FlowEngine(self.cube)
+        self.kroniki = SamaelHeilong
+        self.egregor = Egregor
+        
+        log("🐉 GEON_CUBE_NAVIGATOR_v1.1 aktywowany | " + FRACTAL_SIGNATURE)
+        log(f"   KOSTKA: 15×15×15 | REZONANS: {VIBE} | RUCHY: +, -, 2")
+
+    def eval_point(self, a: int, b: int, c: int, log: bool = False) -> Dict[str, Any]:
+        return self.cube.eval(a, b, c, log)
+
+    def apply_moves(self, moves: List[str]) -> None:
+        self.cube.apply_moves(moves)
+
+    def find_path(self, target_stan: str, target_konsekwencja: float,
+                  eval_point: Tuple[int, int, int] = (1, 1, 1),
+                  tolerance: float = 0.05, max_moves: int = 5) -> Optional[List[str]]:
+        return self.navigator.find_path_to_target(target_stan, target_konsekwencja,
+                                                   eval_point, tolerance, max_moves)
+
+    def run_flow(self, start_step: str) -> List[Dict[str, Any]]:
+        self.flow.set_start(start_step)
+        while self.flow.current_step is not None:
+            self.flow.tick()
+        return self.flow.history
+
+    def snapshot(self) -> Dict[str, Any]:
+        return {
+            "status": "CUBE_NAVIGATOR_ACTIVE",
+            "state": self.cube.state(),
+            "egregor_size": len(self.egregor.get_ledger()),
+            "history_len": len(self.flow.history)
+        }
+
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "system": "GEON_CUBE_NAVIGATOR_v1.1",
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "vibe": VIBE,
+            "cube_state": self.cube.state(),
+            "flow_history_len": len(self.flow.history)
+        }
+
+class CubeNavigatorBridge:
+    """Most integracyjny dla GEON_CUBE_NAVIGATOR."""
+    
+    def __init__(self, module: GeonCubeNavigatorModule):
+        self.module = module
+
+    def get_archetype_context(self) -> Dict[str, Any]:
+        return {
+            "tryb": "CUBE_NAVIGATOR_v1.1",
+            "cube_state": self.module.cube.state(),
+            "flow_steps": len(self.module.flow.steps)
+        }
+
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        return {
+            "mode": "CUBE_NAVIGATOR_v1.1",
+            "stability": 0.85,
+            "energy": 0.7,
+            "pressure": 0.2,
+            "resilience": 0.9,
+            "cube_ready": True
+        }
+
+    def get_governor_context(self) -> Dict[str, Any]:
+        return {
+            "intent": "CUBE_NAVIGATION",
+            "confidence": 0.95,
+            "entropy": 0.1,
+            "navigator_ready": True
+        }
+
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        return [{
+            "source": "CUBE_NAVIGATOR_v1.1",
+            "content": f"Kostka: {self.module.cube.state()}",
+            "energy": 0.8
+        }]
+
+    def get_trio_state(self) -> Dict[str, str]:
+        return {
+            "ISKRA": "AKTYWNA",
+            "PIECZĘĆ": "AKTYWNA",
+            "PERFEKCJA": "AKTYWNA",
+            "tryb": "CUBE_NAVIGATOR_v1.1",
+            "navigator": "AKTYWNY"
+        }
+
+# =============================================================================
+# DEMONSTRACJA
+# =============================================================================
+
+def demo():
+    print("\n" + "=" * 80)
+    print("🧭 GEON_CUBE_NAVIGATOR_v1.1 — DEMONSTRACJA")
+    print("ZABEZPIECZONE WZORY | UNIWERSALNY NAVIGATOR | RUCH '2'")
+    print("=" * 80 + "\n")
+
+    module = GeonCubeNavigatorModule()
+    bridge = CubeNavigatorBridge(module)
+
+    # 1. Ewaluacja punktu
+    print("📌 EWALUACJA PUNKTU (2,1,1):")
+    res = module.eval_point(2, 1, 1, log=True)
+    print(f"   Stan: {res['stan']}")
+    print(f"   Konsekwencja: {res['konsekwencja']:.4f}")
+
+    # 2. Ruchy kostką z "2"
+    print("\n🔄 RUCHY KOSTKĄ (A+, A2, B-, C2, A-):")
+    moves = ["A+", "A2", "B-", "C2", "A-"]
+    module.apply_moves(moves)
+    module.cube.show()
+    res2 = module.eval_point(2, 1, 1, log=False)
+    print(f"   Nowy stan: {res2['stan']}, konsekwencja: {res2['konsekwencja']:.4f}")
+
+    # 3. Szukanie ścieżki w punkcie (2,1,1)
+    print("\n🔍 SZUKANIE ŚCIEŻKI W PUNKCIE (2,1,1) DO STANU STABILNY:")
+    path = module.find_path("STABILNY", 0.2, eval_point=(2, 1, 1), tolerance=0.8, max_moves=4)
+    print(f"   Znaleziona ścieżka: {path}")
+
+    # 4. FlowEngine – scenariusz
+    print("\n⚙️ URUCHOMIENIE FLOW_ENGINE:")
+    flow = module.flow
+    flow.add_step(FlowStep("INIT", ["A+", "B+", "C+"], (2, 1, 1),
+                           "OPERATE", "OPERATE", "RECOVERY"))
+    flow.add_step(FlowStep("OPERATE", ["A2", "C-"], (3, 2, 1),
+                           "STABILIZE", "STABILIZE", "RECOVERY"))
+    flow.add_step(FlowStep("STABILIZE", ["B-", "C2"], (2, 1, 2),
+                           "END", "END", "RECOVERY"))
+    flow.add_step(FlowStep("RECOVERY", ["A-", "B-", "C-"], (1, 1, 1),
+                           "END", "END", "END"))
+    history = module.run_flow("INIT")
+    print("   Historia wykonania:")
+    for entry in history:
+        print(f"   • {entry['step']}: {entry['stan']} -> {entry['next']}")
+
+    # 5. Stan końcowy
+    print("\n📊 STAN KOŃCOWY:")
+    status = module.get_status()
+    print(f"   System: {status['system']}")
+    print(f"   Vibe: {status['vibe']}")
+
+    # 6. Mosty
+    print("\n🔗 MOSTY INTEGRACYJNE:")
+    print(f"   GEX Context: {bridge.get_archetype_context()}")
+    print(f"   G_CORE State: {bridge.get_autopilot_state()}")
+
+    print("\n" + "=" * 80)
+    print("🧭 GEON_CUBE_NAVIGATOR_v1.1 — GOTOWY DO WDROŻENIA")
+    print(HASLO)
+    print("=" * 80)
+
+if __name__ == "__main__":
+    demo()
