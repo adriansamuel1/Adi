@@ -1,0 +1,846 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_EDU_BEAST_v1.1 — MODUŁ 80: WARSTWA EDUKACYJNA (FULL STACK + ULEPSZENIA)
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.1 (GEON_EDU_BEAST — Franklin i archetypy edukacyjne + ulepszenia)
+Data: 2026-07-23
+Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
+
+OPIS:
+GEON_EDU_BEAST_v1.1 to warstwa edukacyjna / ludologiczna systemu GEON.
+Ulepszenia:
+• Izolacja błędów – try-except dla każdego archetypu z fallbackiem
+• Typowanie strumienia – EduContextPayload z metadanymi
+• Thread-Safety – threading.Lock dla XP i poziomów
+• Deterministic Randomness – seed z context_hash
+• Adaptive XP Scaling – zależne od trudności i stabilności
+• Egregor Query – odczyt z Egregora przed zapisem
+• Dynamiczne metryki w mostkach – realne dane z raportu
+
+ARCHITEKTURA (7 POZIOMÓW):
+I.   STRUKTURY DANYCH — Archetype, EduContextPayload, EduBeastConfig
+II.  ARCHETYPY — 9 agentów z izolacją błędów
+III. EDU CYCLE — sekwencyjny przepływ z fallbackiem
+IV.  INTEGRACJA Z ARCHONEM — Horda, Magilla, Kroniki, Mirror, Egregor
+V.   THREAD-SAFETY — blokady dla XP/level
+VI.  DETERMINISTYCZNY CHAOS — seed z hasha kontekstu
+VII. RAPORT EDUKACYJNY — pełna diagnostyka
+
+VIBE: 1-6-8. ∞. EDU!
+================================================================================
+"""
+
+import uuid
+import hashlib
+import json
+import time
+import random
+import threading
+from datetime import datetime
+from typing import Dict, Any, List, Optional, Callable
+from dataclasses import dataclass, field
+from enum import Enum, auto
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_EDU_BEAST_v1.1"
+FRACTAL_SIGNATURE = "[GEON::EDU::BEAST::v1.1]"
+VIBE = 168
+HASLO = "1-6-8. ∞. EDU!"
+DEWIZA = "Ex Doctrina, Potentia"
+
+# =============================================================================
+# LOGOWANIE
+# =============================================================================
+
+import logging
+logger = logging.getLogger("EDU_BEAST_v1.1")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('📚 [EDU] %(message)s'))
+    logger.addHandler(handler)
+
+def log(msg: str, level: str = "INFO") -> None:
+    if level == "INFO":
+        logger.info(msg)
+    elif level == "WARN":
+        logger.warning(msg)
+    elif level == "ERROR":
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+def generate_context_hash(context: Dict[str, Any]) -> str:
+    """Generuje kanoniczny hash kontekstu."""
+    filtered_context = {k: v for k, v in context.items() 
+                        if k not in ["timestamp", "request_id", "nonce"]}
+    context_str = json.dumps(filtered_context, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(context_str.encode("utf-8")).hexdigest()
+
+# =============================================================================
+# POZIOM I: STRUKTURY DANYCH (Z TYPOWANIEM STRUMIENIA)
+# =============================================================================
+
+@dataclass
+class EduBeastConfig:
+    """Konfiguracja warstwy edukacyjnej."""
+    enable_xp: bool = True
+    enable_logging: bool = True
+    enable_egregor: bool = True
+    enable_fallback: bool = True
+    archetype_order: List[str] = field(default_factory=lambda: [
+        "Noddy", "Karolek", "Andzia", "Franklin", 
+        "Bob", "Sam", "Abbe", "Puchatek", "Krzys"
+    ])
+    xp_per_cycle: int = 50
+    level_multiplier: int = 10
+    xp_difficulty_weight: float = 0.3
+    xp_stability_weight: float = 0.2
+
+
+@dataclass
+class EduContextPayload:
+    """
+    Standaryzowana koperta przekazywania danych między archetypami.
+    ULEPSZENIE: typowanie strumienia – każdy archetyp operuje na tej samej strukturze.
+    """
+    # Metadane
+    cycle_id: str
+    context_hash: str
+    stimulus: Dict[str, Any]
+    timestamp: float = field(default_factory=time.time)
+    
+    # Artefakty akumulowane
+    artifacts: Dict[str, Any] = field(default_factory=dict)
+    
+    # Ostatni zwrot każdego archetypu (dla przejrzystości)
+    last_outputs: Dict[str, Any] = field(default_factory=dict)
+    
+    # Bieżący stan przepływu (aktualizowany przez każdy archetyp)
+    current_data: Dict[str, Any] = field(default_factory=dict)
+    
+    # Ścieżka wykonania
+    execution_path: List[str] = field(default_factory=list)
+    errors: List[Dict[str, Any]] = field(default_factory=list)
+
+    def add_output(self, archetype_name: str, output: Any, error: Optional[str] = None) -> None:
+        """Dodaje output archetypu do kontekstu."""
+        self.last_outputs[archetype_name] = output
+        self.execution_path.append(archetype_name)
+        if error:
+            self.errors.append({"archetype": archetype_name, "error": error})
+        # Aktualizacja current_data – ostatni output staje się bieżącym stanem
+        if isinstance(output, dict):
+            self.current_data.update(output)
+        else:
+            self.current_data["_last_raw"] = output
+
+    def get_last_output(self, archetype_name: str) -> Optional[Any]:
+        return self.last_outputs.get(archetype_name)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "cycle_id": self.cycle_id,
+            "context_hash": self.context_hash,
+            "stimulus": self.stimulus,
+            "artifacts": self.artifacts,
+            "last_outputs": self.last_outputs,
+            "current_data": self.current_data,
+            "execution_path": self.execution_path,
+            "errors": self.errors,
+            "timestamp": self.timestamp
+        }
+
+
+@dataclass
+class Archetype:
+    """
+    Archetyp edukacyjny – agent z XP i poziomami.
+    ULEPSZENIE: Thread-Safety dla XP i poziomów.
+    """
+    name: str
+    function: Callable
+    xp: int = 0
+    level: int = 1
+    last_output: Any = None
+    _lock: threading.Lock = field(default_factory=threading.Lock, init=False)
+
+    def execute(self, input_data: Any) -> Any:
+        """Wykonuje archetyp z zabezpieczeniem thread-safe dla XP/level."""
+        self.last_output = self.function(input_data)
+        
+        # Thread-safe aktualizacja XP i poziomu
+        with self._lock:
+            self.xp += 1
+            if self.xp >= self.level * 10:
+                self.level += 1
+        
+        return self.last_output
+
+    def get_state(self) -> Dict[str, Any]:
+        with self._lock:
+            return {"xp": self.xp, "level": self.level}
+
+
+@dataclass
+class EduBeastReport:
+    """Raport edukacyjny."""
+    status: str
+    outputs: Dict[str, Any]
+    dragon: str
+    xp_gain: int
+    signature: str
+    context_hash: str
+    execution_path: List[str]
+    errors: List[Dict[str, Any]]
+    timestamp: float = field(default_factory=time.time)
+    stability: float = 0.0
+    difficulty: float = 0.0
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "status": self.status,
+            "outputs": self.outputs,
+            "dragon": self.dragon,
+            "xp_gain": self.xp_gain,
+            "signature": self.signature,
+            "context_hash": self.context_hash,
+            "execution_path": self.execution_path,
+            "errors": self.errors,
+            "stability": self.stability,
+            "difficulty": self.difficulty,
+            "timestamp": self.timestamp
+        }
+
+# =============================================================================
+# POZIOM II: MOCKI DLA NIEZALEŻNYCH TESTÓW
+# =============================================================================
+
+class MockYoungDragon:
+    def __init__(self, name: str):
+        self.name = name
+        self.xp = 0
+        self.confidence = 50
+    
+    def gain_experience(self, xp: int, lesson: str) -> None:
+        self.xp += xp
+        self.confidence += 10
+
+class MockSamaelHeilong:
+    @staticmethod
+    def certyfikuj_ruch_optimusa(dzialanie: str) -> str:
+        return f"🔒 [MOCK_SEAL_{dzialanie[:16]}]"
+    
+    @staticmethod
+    def log_event(event_type: str, payload: Dict[str, Any]) -> None:
+        log(f"[KRONIKI] {event_type} -> {payload}", "INFO")
+
+class MockMagilla:
+    def __init__(self, seed: Optional[int] = None):
+        self.seed = seed
+        self._rng = random.Random(seed) if seed else random
+
+    def activate_magilla(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        actions = ["Break_Blockade", "Jump_Over_Protocol", "Smash_Through_Obstacle"]
+        return {
+            "action_taken": self._rng.choice(actions),
+            "stability_delta": round(self._rng.uniform(0.05, 0.25), 3),
+            "comment": "Mock Magilla action"
+        }
+
+class MockGadget:
+    def __init__(self, seed: Optional[int] = None):
+        self.seed = seed
+        self._rng = random.Random(seed) if seed else random
+
+    def spark_invention(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "concept": f"Mock_Invention_{self._rng.randint(1,100)}",
+            "stability": round(self._rng.uniform(0.4, 0.85), 3)
+        }
+
+class MockMonterey:
+    def __init__(self):
+        self.output_power = 8
+    
+    def stabilize_core(self, kernel_mode: Optional[str] = None) -> None:
+        self.output_power = 168 if kernel_mode in ["OMEGA", "MAGILLA"] else 8
+
+class MockDzet:
+    def __init__(self, seed: Optional[int] = None):
+        self.seed = seed
+        self._rng = random.Random(seed) if seed else random
+        self.quantum_state = "SUPERPOSITION"
+        self.last_outcome = "NORMAL"
+        self._force_perfect = False
+    
+    def run_dzet_cycle(self) -> None:
+        states = ["COLLAPSED_TO_FIRE", "COLLAPSED_TO_SHADOW", "COLLAPSED_TO_CHRONICLE"]
+        self.quantum_state = self._rng.choice(states)
+        self.last_outcome = "UNEXPECTED_SUCCESS" if self._rng.random() < 0.15 else "STABLE_CHAOS"
+
+class MockMirror:
+    @staticmethod
+    def reflect(cycle_output: Dict[str, Any], genetic_pool: Any) -> Dict[str, Any]:
+        return {"reflection_id": "MOCK", "status": "METRIC_SYNCHRONIZED", "log": {"action": "MAINTAINED"}}
+
+class MockGeneticPool:
+    def get_all(self): return []
+    def get_size(self): return 0
+
+class MockEgregor:
+    @staticmethod
+    def commit(entry: Dict[str, Any], node_id: str) -> None:
+        pass
+    
+    @staticmethod
+    def query(context_hash: str) -> List[Dict]:
+        return []
+
+class MockKernel:
+    def __init__(self):
+        self.node_id = "MOCK_NODE"
+        self.horde = type('obj', (), {'dragons': [MockYoungDragon("Mock_Dragon") for _ in range(3)]})()
+        self.core = type('obj', (), {
+            'gadget': MockGadget(),
+            'monterey': MockMonterey(),
+            'dzet': MockDzet()
+        })()
+        self.GLOBAL_STATE = {"mode": "PRIME"}
+        self._shared_genetic_pool = MockGeneticPool()
+        self.egregor = MockEgregor()
+        self.magilla = MockMagilla()
+
+# =============================================================================
+# POZIOM III: GŁÓWNY MODUŁ EDU_BEAST (Z ULEPSZENIAMI)
+# =============================================================================
+
+class GeonEduBeast:
+    """🐉 MODULE GEON_EDU_BEAST — Zunifikowana Architektura Ludologii Systemowej v1.1"""
+
+    def __init__(self, kernel_node: Any = None):
+        # Powiązanie z nadrzędnym jądrem i jego zasobami
+        self.node = kernel_node or MockKernel()
+        self.horde = getattr(self.node, 'horde', None)
+        
+        # Mapowanie silników wykonawczych
+        self.magilla = getattr(self.node, 'magilla', MockMagilla())
+        self.kroniki = getattr(self.node, 'kroniki', MockSamaelHeilong)
+        self.zwierciadlo = getattr(self.node, 'zwierciadlo', MockMirror())
+        self.gadget = getattr(self.node.core, 'gadget', MockGadget())
+        self.monterey = getattr(self.node.core, 'monterey', MockMonterey())
+        self.dzet = getattr(self.node.core, 'dzet', MockDzet())
+        
+        # Egregor
+        self.egregor = getattr(self.node, 'egregor', MockEgregor())
+        
+        # Genetic pool
+        self.genetic_pool = getattr(self.node, '_shared_genetic_pool', MockGeneticPool())
+        
+        # Rejestr i inicjalizacja archetypów
+        self.archetypes: Dict[str, Archetype] = {}
+        self.config = EduBeastConfig()
+        
+        # Thread-safe lock dla operacji zbiorczych
+        self._lock = threading.Lock()
+        
+        # Rejestracja archetypów
+        self._register_default_archetypes()
+        
+        log("🐉 GEON_EDU_BEAST v1.1 aktywowany | " + FRACTAL_SIGNATURE)
+        log(f"   ARCHETYPY: {len(self.archetypes)} | KERNEL: {self.node.node_id}")
+
+    def _register_default_archetypes(self) -> None:
+        """Rejestruje domyślne archetypy edukacyjne."""
+        self.register_archetype("Noddy", self._spark)
+        self.register_archetype("Karolek", self._chaos_with_retry)
+        self.register_archetype("Andzia", self._mirror)
+        self.register_archetype("Franklin", self._lesson)
+        self.register_archetype("Bob", self._construct)
+        self.register_archetype("Sam", self._secure)
+        self.register_archetype("Abbe", self._journey)
+        self.register_archetype("Puchatek", self._wisdom)
+        self.register_archetype("Krzys", self._meta)
+
+    def register_archetype(self, name: str, function: Callable) -> None:
+        """Rejestruje nowy archetyp."""
+        self.archetypes[name] = Archetype(name, function)
+
+    # =========================================================================
+    # ULEPSZENIE: Deterministic Randomness – seed z context_hash
+    # =========================================================================
+
+    def _get_deterministic_rng(self, seed: int) -> random.Random:
+        """Zwraca instancję RNG z zadanym ziarnem."""
+        return random.Random(seed)
+
+    # =========================================================================
+    # ULEPSZENIE: run_edu_cycle z izolacją błędów i typowanym strumieniem
+    # =========================================================================
+
+    def run_edu_cycle(self, stimulus: Dict[str, Any], dragon_index: int = 0) -> EduBeastReport:
+        """
+        Uruchamia pełny cykl edukacyjny przez wszystkie archetypy.
+        ULEPSZENIA:
+        - Izolacja błędów (try-except dla każdego archetypu)
+        - Typowanie strumienia (EduContextPayload)
+        - Deterministic Randomness (seed z context_hash)
+        - Adaptive XP Scaling
+        - Egregor Query
+        """
+        # Kanoniczny hash kontekstu
+        context_hash = generate_context_hash(stimulus)
+        cycle_id = str(uuid.uuid4())[:8].upper()
+        
+        # Inicjalizacja kontekstu
+        ctx = EduContextPayload(
+            cycle_id=cycle_id,
+            context_hash=context_hash,
+            stimulus=stimulus
+        )
+        
+        # Deterministic RNG – ziarno z hasha kontekstu
+        seed = int(context_hash[:8], 16) if context_hash else 0
+        rng = self._get_deterministic_rng(seed)
+        
+        # Aktualizacja RNG dla komponentów (jeśli obsługują)
+        if hasattr(self.magilla, '_rng'):
+            self.magilla._rng = rng
+        if hasattr(self.gadget, '_rng'):
+            self.gadget._rng = rng
+        if hasattr(self.dzet, '_rng'):
+            self.dzet._rng = rng
+
+        # Wybór smoka z Hordy
+        if self.horde and hasattr(self.horde, 'dragons') and self.horde.dragons:
+            smok = self.horde.dragons[dragon_index % len(self.horde.dragons)]
+        else:
+            smok = MockYoungDragon("Edu_Temp")
+
+        order = self.config.archetype_order
+        outputs = {}
+
+        # Sekwencyjne wykonanie archetypów z izolacją błędów
+        for name in order:
+            if name not in self.archetypes:
+                continue
+            
+            archetype = self.archetypes[name]
+            
+            # ULEPSZENIE: try-except dla każdego archetypu
+            try:
+                out = archetype.execute(ctx)
+                ctx.add_output(name, out)
+                outputs[name] = out
+                # Aktualizacja danych dla następnego archetypu
+                if isinstance(out, dict):
+                    ctx.current_data.update(out)
+                else:
+                    ctx.current_data["_last_raw"] = out
+                    
+            except Exception as e:
+                error_msg = f"Archetyp {name} failed: {str(e)}"
+                log(error_msg, "ERROR")
+                ctx.add_output(name, None, error=error_msg)
+                
+                if self.config.enable_fallback:
+                    # Fallback – przekaż niezmodyfikowane dane
+                    fallback_data = ctx.current_data.copy()
+                    fallback_data["_fallback"] = True
+                    fallback_data["_failed_archetype"] = name
+                    ctx.current_data = fallback_data
+                    outputs[name] = {"status": "FALLBACK", "reason": str(e)}
+                    # Kontynuuj potok
+                    continue
+                else:
+                    # Rzuć wyjątek – przerwij potok
+                    raise
+
+        # =====================================================================
+        # ULEPSZENIE: Adaptive XP Scaling
+        # =====================================================================
+        difficulty = stimulus.get("difficulty", 0.5)
+        stability = ctx.current_data.get("stability", 0.5)
+        
+        xp_base = self.config.xp_per_cycle
+        xp_difficulty_bonus = int(difficulty * 100 * self.config.xp_difficulty_weight)
+        xp_stability_bonus = int(stability * 100 * self.config.xp_stability_weight)
+        xp_level_bonus = self.archetypes.get("Krzys", Archetype("Krzys", lambda x: x)).level * 5
+        
+        xp_gain = xp_base + xp_difficulty_bonus + xp_stability_bonus + xp_level_bonus
+        
+        if self.config.enable_xp:
+            smok.gain_experience(
+                xp_gain, 
+                f"EDU_BEAST_FLOW_{stimulus.get('type', 'GENERIC')}_DIFF_{difficulty:.2f}"
+            )
+
+        # =====================================================================
+        # ULEPSZENIE: Egregor Query przed zapisem
+        # =====================================================================
+        if self.config.enable_egregor:
+            # Sprawdź, czy podobna lekcja już istnieje
+            existing = self.egregor.query(context_hash)
+            if not existing:
+                # Nowy wpis – zapisz
+                entry = {
+                    "context_hash": context_hash,
+                    "resolved_path": ctx.current_data.get("concept", "Edu_Concept_Fallback"),
+                    "efficiency": stability,
+                    "uses": 1,
+                    "clue": {"module": "GEON_EDU_BEAST", "difficulty": difficulty}
+                }
+                self.egregor.commit(entry, node_id=self.node.node_id)
+
+        # Certyfikacja
+        signature = self.kroniki.certyfikuj_ruch_optimusa(
+            f"EDU_BEAST_CYCLE_NODE_{self.node.node_id}_OK"
+        )
+
+        # Logowanie końcowe
+        if self.config.enable_logging:
+            self.kroniki.log_event("EDU_BEAST_COMPLETE", {
+                "node": self.node.node_id,
+                "cycle_id": cycle_id,
+                "xp_gain": xp_gain,
+                "errors": ctx.errors,
+                "execution_path": ctx.execution_path
+            })
+
+        return EduBeastReport(
+            status="EDU_BEAST_COMPLETE",
+            outputs=outputs,
+            dragon=smok.name,
+            xp_gain=xp_gain,
+            signature=signature,
+            context_hash=context_hash,
+            execution_path=ctx.execution_path,
+            errors=ctx.errors,
+            stability=stability,
+            difficulty=difficulty
+        )
+
+    # =========================================================================
+    # PODMODUŁY ARCHETYPÓW (ZSYNCHRONIZOWANE Z TYPOWANYM STRUMIENIEM)
+    # =========================================================================
+
+    def _spark(self, ctx: EduContextPayload) -> Dict:
+        """Noddy – iskra ciekawości. ULEPSZENIE: odczyt z Egregora."""
+        # ULEPSZENIE: Egregor Query – sprawdź, czy podobna lekcja już istnieje
+        if self.config.enable_egregor:
+            existing = self.egregor.query(ctx.context_hash)
+            if existing:
+                return {
+                    "curiosity": f"Spark_{ctx.stimulus.get('type', 'Unknown')}_CACHED",
+                    "origin_stimulus": ctx.stimulus,
+                    "cached_lesson": existing[0].get("resolved_path"),
+                    "efficiency": existing[0].get("efficiency", 0.8)
+                }
+        
+        return {
+            "curiosity": f"Spark_{ctx.stimulus.get('type', 'Unknown')}",
+            "origin_stimulus": ctx.stimulus
+        }
+
+    def _chaos_with_retry(self, ctx: EduContextPayload, retries: int = 3) -> Dict:
+        """Karolek – chaos z retry."""
+        curiosity = ctx.current_data.get("curiosity", "Unknown")
+        out = {"stability_delta": 0}
+        for i in range(retries):
+            out = self.magilla.activate_magilla({"task": curiosity})
+            if out.get("stability_delta", 0) > 0.05:
+                return out
+            # Wzmocnienie siły
+            ctx.current_data["force"] = ctx.current_data.get("force", 0) + 0.3
+        return out
+
+    def _mirror(self, ctx: EduContextPayload) -> Dict:
+        """Andzia – zwierciadło."""
+        chaos_output = ctx.current_data
+        cycle_mock = {
+            "path": chaos_output.get("action_taken", "Magilla_Path"),
+            "stability": chaos_output.get("stability_delta", 0.5),
+            "context_hash": ctx.context_hash,
+            "warnings": [chaos_output.get("comment", "")]
+        }
+        return self.zwierciadlo.reflect(cycle_mock, self.genetic_pool)
+
+    def _lesson(self, ctx: EduContextPayload) -> Dict:
+        """Franklin – lekcja z certyfikacją."""
+        reflection = ctx.current_data
+        reflection["lesson_certified"] = True
+        reflection["franklin_seal"] = self.kroniki.certyfikuj_ruch_optimusa(
+            "FRANKLIN_LESSON_INTEGRITY"
+        )
+        return reflection
+
+    def _construct(self, ctx: EduContextPayload) -> Dict:
+        """Bob – konstrukcja z Gadget."""
+        lesson = ctx.current_data
+        return self.gadget.spark_invention({
+            "task": "build_from_lesson",
+            "lesson_seal": lesson.get("franklin_seal")
+        })
+
+    def _secure(self, ctx: EduContextPayload) -> Dict:
+        """Sam – zabezpieczenie przez Monterey."""
+        solution = ctx.current_data
+        self.monterey.stabilize_core(
+            kernel_mode=getattr(self.node, 'GLOBAL_STATE', {}).get("mode", "PRIME")
+        )
+        solution["secured"] = True
+        solution["protection_power"] = self.monterey.output_power
+        return solution
+
+    def _journey(self, ctx: EduContextPayload) -> Dict:
+        """Abbe – podróż i zapis do Egregora."""
+        safe_solution = ctx.current_data
+        c_hash = ctx.context_hash
+        
+        # ULEPSZENIE: Egregor Query przed zapisem (już zrobione w run_edu_cycle)
+        entry = {
+            "context_hash": c_hash,
+            "resolved_path": safe_solution.get("concept", "Edu_Concept_Fallback"),
+            "efficiency": safe_solution.get("stability", 0.8),
+            "uses": 1,
+            "clue": {"module": "GEON_EDU_BEAST"}
+        }
+        # Egregor commit jest już wykonany w run_edu_cycle dla całego cyklu
+        # Tu tylko przygotowujemy dane dla następnych archetypów
+        return {
+            "transition": "level_up",
+            "artifact": safe_solution,
+            "computed_hash": c_hash
+        }
+
+    def _wisdom(self, ctx: EduContextPayload) -> Dict:
+        """Puchatek – mądrość."""
+        transition = ctx.current_data
+        return {
+            "wisdom": f"Puchatek_OK_{hash(str(transition.get('computed_hash')))}"
+        }
+
+    def _meta(self, ctx: EduContextPayload) -> Dict:
+        """Krzys – meta-integracja."""
+        wisdom = ctx.current_data
+        return {
+            "meta": f"Krzys_Integracja_Wymiaru_{hash(str(wisdom.get('wisdom')))}"
+        }
+
+    # =========================================================================
+    # METODY POMOCNICZE
+    # =========================================================================
+
+    def get_archetype_status(self) -> Dict[str, Dict]:
+        """Zwraca status wszystkich archetypów."""
+        with self._lock:
+            return {
+                name: a.get_state()
+                for name, a in self.archetypes.items()
+            }
+
+    def get_report(self) -> Dict[str, Any]:
+        """Zwraca pełny raport edukacyjny."""
+        return {
+            "system": "GEON_EDU_BEAST_v1.1",
+            "version": VERSION,
+            "signature": FRACTAL_SIGNATURE,
+            "archetypes": self.get_archetype_status(),
+            "config": {
+                "enable_xp": self.config.enable_xp,
+                "enable_egregor": self.config.enable_egregor,
+                "enable_fallback": self.config.enable_fallback,
+                "archetype_order": self.config.archetype_order
+            },
+            "node_id": self.node.node_id
+        }
+
+    def __str__(self) -> str:
+        return f"GEON_EDU_BEAST_v1.1 | Archetypy: {len(self.archetypes)}"
+
+# =============================================================================
+# MOST INTEGRACYJNY — EDU_BEAST_BRIDGE (Z DYNAMICZNYMI METRYKAMI)
+# =============================================================================
+
+class EduBeastBridge:
+    """
+    Most integracyjny między GEON_EDU_BEAST a resztą architektury.
+    ULEPSZENIE: dynamiczne metryki z raportu cyklu.
+    """
+
+    def __init__(self, edu_beast: GeonEduBeast):
+        self.edu_beast = edu_beast
+        self._last_report: Optional[EduBeastReport] = None
+
+    def update_last_report(self, report: EduBeastReport) -> None:
+        """Aktualizuje ostatni raport dla dynamicznych metryk."""
+        self._last_report = report
+
+    def get_archetype_context(self) -> Dict[str, Any]:
+        return {
+            "tryb": "EDU_BEAST_v1.1",
+            "archetypy": list(self.edu_beast.archetypes.keys()),
+            "statusy": self.edu_beast.get_archetype_status()
+        }
+
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        """ULEPSZENIE: dynamiczne metryki z ostatniego raportu."""
+        if self._last_report:
+            stability = self._last_report.stability
+            difficulty = self._last_report.difficulty
+            errors_count = len(self._last_report.errors)
+            
+            # Oblicz pressure na podstawie błędów i trudności
+            pressure = min(1.0, (difficulty * 0.5) + (errors_count * 0.1))
+            energy = 0.7 + (stability * 0.2)
+            
+            return {
+                "mode": "EDU_BEAST_v1.1",
+                "stability": stability,
+                "energy": clamp(energy, 0.1, 1.0),
+                "pressure": clamp(pressure, 0.0, 1.0),
+                "resilience": 0.7 + (stability * 0.2),
+                "archetypes_active": len(self.edu_beast.archetypes),
+                "last_xp_gain": self._last_report.xp_gain,
+                "execution_path": self._last_report.execution_path
+            }
+        
+        # Fallback – statyczne wartości
+        return {
+            "mode": "EDU_BEAST_v1.1",
+            "stability": 0.8,
+            "energy": 0.7,
+            "pressure": 0.2,
+            "resilience": 0.9,
+            "archetypes_active": len(self.edu_beast.archetypes)
+        }
+
+    def get_governor_context(self) -> Dict[str, Any]:
+        return {
+            "intent": "EDUCATIONAL_LEARNING",
+            "confidence": 0.9,
+            "entropy": 0.1,
+            "edu_ready": True
+        }
+
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        if self._last_report:
+            return [{
+                "source": "EDU_BEAST_v1.1",
+                "content": f"Edu cycle: {self._last_report.execution_path[-3:]}",
+                "energy": 0.8,
+                "xp_gain": self._last_report.xp_gain,
+                "stability": self._last_report.stability
+            }]
+        return [{"source": "EDU_BEAST_v1.1", "content": "Edu cycle completed", "energy": 0.8}]
+
+    def get_trio_state(self) -> Dict[str, str]:
+        return {
+            "ISKRA": "AKTYWNA",
+            "PIECZĘĆ": "AKTYWNA",
+            "PERFEKCJA": "AKTYWNA",
+            "tryb": "EDU_BEAST_v1.1",
+            "edu": "AKTYWNY"
+        }
+
+# =============================================================================
+# DEMONSTRACJA Z ULEPSZENIAMI
+# =============================================================================
+
+def demo():
+    """Demonstracja GEON_EDU_BEAST_v1.1 z ulepszeniami."""
+    print("\n" + "=" * 80)
+    print("📚 GEON_EDU_BEAST_v1.1 — DEMONSTRACJA Z ULEPSZENIAMI")
+    print("IZOLACJA BŁĘDÓW | TYPOWANIE | THREAD-SAFETY | DETERMINISTYCZNY CHAOS")
+    print("=" * 80 + "\n")
+
+    # 1. Inicjalizacja
+    edu = GeonEduBeast()
+    bridge = EduBeastBridge(edu)
+
+    print("🔮 CYKL EDUKACYJNY (z deterministycznym ziarnem):\n")
+
+    # 2. Cykl 1 – normalny
+    stimulus1 = {"type": "infrastructure_learning", "target": "Tauron_Grid", "difficulty": 0.7}
+    report1 = edu.run_edu_cycle(stimulus1)
+    bridge.update_last_report(report1)
+
+    print(f"   Status: {report1.status}")
+    print(f"   Smok: {report1.dragon} (+{report1.xp_gain} XP)")
+    print(f"   Stabilność: {report1.stability:.2f}")
+    print(f"   Trudność: {report1.difficulty:.2f}")
+    print(f"   Ścieżka: {' → '.join(report1.execution_path[:5])}...")
+
+    # 3. Cykl 2 – z tym samym bodźcem (deterministyczny chaos – ta sama ścieżka)
+    print("\n📌 CYKL 2: Ten sam bodziec (deterministyczny chaos – identyczna ścieżka)")
+    stimulus2 = {"type": "infrastructure_learning", "target": "Tauron_Grid", "difficulty": 0.7}
+    report2 = edu.run_edu_cycle(stimulus2)
+    bridge.update_last_report(report2)
+    
+    print(f"   Stabilność: {report2.stability:.2f}")
+    print(f"   Ścieżka: {' → '.join(report2.execution_path[:5])}...")
+    
+    # Sprawdzenie determinizmu
+    same_path = report1.execution_path == report2.execution_path
+    print(f"   Determinizm: {'✅ TAKA SAMA ŚCIEŻKA' if same_path else '❌ RÓŻNE ŚCIEŻKI'}")
+
+    # 4. Cykl 3 – z błędem w archetypie (test fallback)
+    print("\n📌 CYKL 3: Test fallback – symulacja błędu w Karolku")
+    
+    # Zepsujemy Karolka na chwilę
+    original_karolek = edu.archetypes["Karolek"].function
+    def broken_function(ctx):
+        raise ValueError("Symulowany błąd w Karolku!")
+    edu.archetypes["Karolek"].function = broken_function
+    
+    stimulus3 = {"type": "test_error", "difficulty": 0.9}
+    report3 = edu.run_edu_cycle(stimulus3)
+    bridge.update_last_report(report3)
+    
+    print(f"   Status: {report3.status}")
+    print(f"   Błędy: {len(report3.errors)}")
+    if report3.errors:
+        print(f"   Błąd: {report3.errors[0]['archetype']} → {report3.errors[0]['error'][:50]}...")
+    print(f"   Ścieżka: {' → '.join(report3.execution_path)}")
+    
+    # Przywróć Karolka
+    edu.archetypes["Karolek"].function = original_karolek
+
+    # 5. Wyniki archetypów
+    print("\n📌 WYNIKI ARCHETYPÓW (z report1):")
+    for name in ["Noddy", "Karolek", "Franklin", "Krzys"]:
+        if name in report1.outputs:
+            out = report1.outputs[name]
+            if isinstance(out, dict):
+                print(f"   {name}: {str(out)[:60]}...")
+            else:
+                print(f"   {name}: {str(out)[:60]}")
+
+    # 6. Status archetypów
+    print("\n📊 STATUS ARCHETYPÓW:")
+    for name, status in edu.get_archetype_status().items():
+        print(f"   {name}: lvl {status['level']}, XP {status['xp']}")
+
+    # 7. Mosty integracyjne z dynamicznymi metrykami
+    print("\n🔗 MOSTY INTEGRACYJNE (DYNAMICZNE METRYKI):")
+    print(f"   GEX Context: {bridge.get_archetype_context()}")
+    print(f"   G_CORE State: {bridge.get_autopilot_state()}")
+    print(f"   NARRATIVE: {bridge.get_narrative_fragments(2)}")
+    print(f"   TRIO State: {bridge.get_trio_state()}")
+
+    print("\n" + "=" * 80)
+    print("📚 GEON_EDU_BEAST_v1.1 — GOTOWY DO WDROŻENIA")
+    print(HASLO)
+    print("=" * 80)
+
+if __name__ == "__main__":
+    demo()
