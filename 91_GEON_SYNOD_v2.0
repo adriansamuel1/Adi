@@ -2,26 +2,22 @@
 # -*- coding: utf-8 -*-
 """
 ================================================================================
-🐉 GEON_SYNOD_v2.0 — MODUŁ 91: WIELOSYSTEMOWA RADA EPOK (FULL OPTIMIZED)
+🐉 GEON_SYNOD_v3.0 — MODUŁ 91: WIELOSYSTEMOWA RADA EPOK + AFC INTEGRATION
 ================================================================================
-Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
-Wersja: v2.0 (Synod Class – Full Integration, SPI, Drift Map, Era Vector)
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ULTIMA | AFC_INTEGRATED
+Wersja: v3.0 (Full AFC Integration: Stability, Decision, Policy in Synod)
 Data: 2026-07-24
 Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
 
-NOWOŚCI v2.0:
-• Walidacja raportów (Sanity Check)
-• Synod Pressure Index (SPI)
-• Waga epoki Oracle (ERA_WEIGHTS)
-• Certyfikacja z kontekstem
-• Fraktalny konsensus (lokalny/regionalny/globalny)
-• Synod Drift Map (min, max, median, std)
-• Era Vector (stabilność, transformacja, kryzys)
-• Indeksowany Egregor (szybkie zapytania)
-• Tryb dry-run
-• Thread-safe convene()
+ZMIANY:
+  1. Integracja z AFC – afc_stability, afc_decision, afc_policy w SystemReport
+  2. Nowe pola w SynodReport – afc_average_stability, afc_dominant_decision, policy
+  3. Uwzględnienie AFC w SPI – niska stabilność lub ALERT podnoszą SPI
+  4. Uwzględnienie AFC w głosowaniu – AFC_boost dla OMEGA/BETA
+  5. Rozszerzony SynodBridge – get_afc_context(), get_full_status()
 
-VIBE: 1-6-8. ∞. SYNOD!
+VIBE: 1-6-8. ∞. SYNOD! 🜀
+DEWIZA: "Ex Unione, Consilium. Ex Fractali, Vis."
 ================================================================================
 """
 
@@ -42,11 +38,11 @@ from enum import Enum
 # WERSJA I STAŁE
 # =============================================================================
 
-VERSION = "GEON_SYNOD_v2.0"
-FRACTAL_SIGNATURE = "[GEON::SYNOD::v2.0]"
+VERSION = "GEON_SYNOD_v3.0"
+FRACTAL_SIGNATURE = "[GEON::SYNOD::v3.0::AFC_INTEGRATED]"
 VIBE = 168
-HASLO = "1-6-8. ∞. SYNOD!"
-DEWIZA = "Ex Unione, Consilium"
+HASLO = "1-6-8. ∞. SYNOD! 🜀"
+DEWIZA = "Ex Unione, Consilium. Ex Fractali, Vis."
 
 MEMORY_LIMIT = 512
 
@@ -61,6 +57,11 @@ HEALTH_CRISIS_THRESHOLD = 0.4
 
 SPI_OMEGA_THRESHOLD = 1.2
 SPI_BETA_THRESHOLD = 0.7
+
+# ===== NOWE STAŁE AFC =====
+AFC_CRISIS_STABILITY_THRESHOLD = 0.35
+AFC_SPI_BOOST = 0.15
+AFC_ALERT_BOOST = 0.2
 
 ERA_WEIGHTS = {
     "ERA_KRYZYSU": 0.25,
@@ -80,7 +81,7 @@ ERA_VECTOR = {
 # LOGOWANIE
 # =============================================================================
 
-logger = logging.getLogger("GEON_SYNOD_v2.0")
+logger = logging.getLogger("GEON_SYNOD_v3.0")
 logger.setLevel(logging.INFO)
 if not logger.handlers:
     handler = logging.StreamHandler()
@@ -140,6 +141,10 @@ class SystemReport:
     dominion_status: str
     crisis_vectors_count: int
     signatures: List[str]
+    # ===== NOWE POLA AFC =====
+    afc_stability: float = 0.0
+    afc_decision: Optional[str] = None
+    afc_policy: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -154,7 +159,11 @@ class SystemReport:
             "dominion_substance_index": round(self.dominion_substance_index, 4),
             "dominion_status": self.dominion_status,
             "crisis_vectors_count": self.crisis_vectors_count,
-            "signatures": self.signatures
+            "signatures": self.signatures,
+            # Nowe pola AFC
+            "afc_stability": round(self.afc_stability, 4),
+            "afc_decision": self.afc_decision,
+            "afc_policy": self.afc_policy
         }
 
 
@@ -177,6 +186,10 @@ class SynodReport:
     certificate: str = ""
     oracle_era_aggregated: Optional[str] = None
     pressure_index: float = 0.0
+    # ===== NOWE POLA AFC =====
+    afc_average_stability: float = 0.0
+    afc_dominant_decision: Optional[str] = None
+    afc_dominant_policy: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -198,6 +211,10 @@ class SynodReport:
             "pressure_index": round(self.pressure_index, 4),
             "oracle_era_aggregated": self.oracle_era_aggregated,
             "certificate": self.certificate,
+            # Nowe pola AFC
+            "afc_average_stability": round(self.afc_average_stability, 4),
+            "afc_dominant_decision": self.afc_dominant_decision,
+            "afc_dominant_policy": self.afc_dominant_policy,
             "timestamp": datetime.fromtimestamp(self.timestamp).isoformat()
         }
 
@@ -254,12 +271,12 @@ class SamaelHeilong:
         log(f"[KRONIKI SAMAELA] {ts} | {event_type} -> {payload}", "INFO")
 
 # =============================================================================
-# GŁÓWNY MODUŁ: GEON_SYNOD v2.0
+# GŁÓWNY MODUŁ: GEON_SYNOD v3.0
 # =============================================================================
 
 class GeonSynod:
     """
-    🜀 GEON_SYNOD v2.0 – Wielosystemowa Rada Epok z pełnymi metrykami.
+    🜀 GEON_SYNOD v3.0 – Wielosystemowa Rada Epok z pełnymi metrykami + AFC.
     """
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
@@ -277,11 +294,17 @@ class GeonSynod:
         self.spi_omega_threshold = self.config.get("spi_omega_threshold", SPI_OMEGA_THRESHOLD)
         self.spi_beta_threshold = self.config.get("spi_beta_threshold", SPI_BETA_THRESHOLD)
         
+        # ===== NOWE PROGI AFC =====
+        self.afc_crisis_stability_threshold = self.config.get("afc_crisis_stability_threshold", AFC_CRISIS_STABILITY_THRESHOLD)
+        self.afc_spi_boost = self.config.get("afc_spi_boost", AFC_SPI_BOOST)
+        self.afc_alert_boost = self.config.get("afc_alert_boost", AFC_ALERT_BOOST)
+        
         log(f"🐉 {VERSION} aktywowany | {FRACTAL_SIGNATURE}")
         log(f"   META_OMEGA: ≥{self.meta_omega_required} OMEGA | SPI_OMEGA: {self.spi_omega_threshold}")
+        log(f"   AFC INTEGRACJA: AKTYWNA | AFC_SPI_BOOST: {self.afc_spi_boost}")
 
     # -------------------------------------------------------------------------
-    # WALIDACJA RAPORTÓW
+    # WALIDACJA RAPORTÓW (ROZSZERZONA O AFC)
     # -------------------------------------------------------------------------
 
     def _validate_report(self, rep: Dict[str, Any]) -> None:
@@ -299,6 +322,11 @@ class GeonSynod:
         valid_eras = ["ERA_STABILNOŚCI", "ERA_TRANSFORMACJI", "ERA_KRYZYSU", "ERA_NIEOKRESLONA"]
         if rep.get("oracle_era") not in valid_eras:
             raise ValueError(f"Nieznana epoka Oracle: {rep.get('oracle_era')}")
+        
+        # Nowa walidacja AFC (opcjonalna)
+        afc_stab = rep.get("afc_stability", 0.0)
+        if afc_stab < 0 or afc_stab > 1:
+            raise ValueError(f"afc_stability poza zakresem 0–1: {afc_stab}")
 
     # -------------------------------------------------------------------------
     # GŁÓWNA METODA – ZWOŁANIE SYNODU (THREAD-SAFE)
@@ -325,6 +353,10 @@ class GeonSynod:
         confidences = []
         eras = []
         crisis_counts = []
+        # ===== NOWE LISTY AFC =====
+        afc_stabilities = []
+        afc_decisions = []
+        afc_policies = []
 
         for rep in system_reports:
             system_id = rep.get("system_id", "UNKNOWN")
@@ -339,6 +371,11 @@ class GeonSynod:
             dominion_status = rep.get("dominion_status", "KONSOLIDACJA_NOMINALNA")
             crisis_vectors_count = rep.get("crisis_vectors_count", 0)
             signatures = rep.get("signatures", [f"SIG_{system_id}"])
+            
+            # ===== EKSTRAKCJA AFC =====
+            afc_stability = rep.get("afc_stability", 0.0)
+            afc_decision = rep.get("afc_decision")
+            afc_policy = rep.get("afc_policy")
 
             system_report = SystemReport(
                 system_id=system_id,
@@ -352,7 +389,11 @@ class GeonSynod:
                 dominion_substance_index=dominion_substance,
                 dominion_status=dominion_status,
                 crisis_vectors_count=crisis_vectors_count,
-                signatures=signatures
+                signatures=signatures,
+                # ===== NOWE POLA AFC =====
+                afc_stability=afc_stability,
+                afc_decision=afc_decision,
+                afc_policy=afc_policy
             )
             parsed_reports.append(system_report)
             signatures_all.extend(signatures)
@@ -362,6 +403,17 @@ class GeonSynod:
             confidences.append(council_confidence)
             eras.append(oracle_era)
             crisis_counts.append(crisis_vectors_count)
+            # ===== ZBIERANIE AFC =====
+            afc_stabilities.append(afc_stability)
+            if afc_decision:
+                afc_decisions.append(afc_decision)
+            if afc_policy:
+                afc_policies.append(afc_policy)
+
+        # ===== AGRAGACJA AFC =====
+        afc_avg_stability = sum(afc_stabilities) / len(afc_stabilities) if afc_stabilities else 0.0
+        afc_dominant_decision = max(set(afc_decisions), key=afc_decisions.count) if afc_decisions else None
+        afc_dominant_policy = max(set(afc_policies), key=afc_policies.count) if afc_policies else None
 
         # 3. Statystyki podstawowe
         avg_drift = sum(drifts) / len(drifts) if drifts else 0.0
@@ -402,17 +454,25 @@ class GeonSynod:
             vec_sum[2] += vec[2]
         era_vector = tuple(v / len(eras) for v in vec_sum) if eras else (0.33, 0.33, 0.33)
         
-        # 9. SPI (Synod Pressure Index)
+        # 9. SPI (Synod Pressure Index) z uwzględnieniem AFC
         crisis_pressure = sum(crisis_counts) * 0.05
-        spi = avg_drift + (1 - avg_health) + era_pressure + crisis_pressure
+        
+        # ===== KOREKTA SPI ZA POMOCĄ AFC =====
+        afc_spi_boost = 0.0
+        if afc_avg_stability < self.afc_crisis_stability_threshold:
+            afc_spi_boost += self.afc_spi_boost
+        if afc_dominant_decision in ["ALERT", "HARD_ALERT"]:
+            afc_spi_boost += self.afc_alert_boost
+        
+        spi = avg_drift + (1 - avg_health) + era_pressure + crisis_pressure + afc_spi_boost
         spi = clamp(spi, 0.0, 2.0)
         
-        # 10. Pressure Index
-        pressure_index = (avg_drift * 0.3) + ((1 - avg_health) * 0.3) + (era_pressure * 0.2) + (crisis_pressure * 0.2)
+        # 10. Pressure Index (z AFC)
+        pressure_index = (avg_drift * 0.25) + ((1 - avg_health) * 0.25) + (era_pressure * 0.15) + (crisis_pressure * 0.15) + (afc_spi_boost * 0.2)
         pressure_index = clamp(pressure_index, 0.0, 1.0)
         
-        # 11. Meta‑Dekret (z SPI)
-        meta_decree = self._vote_meta_with_spi(decrees, drifts, healths, eras, spi)
+        # 11. Meta‑Dekret (z SPI i AFC)
+        meta_decree = self._vote_meta_with_spi(decrees, drifts, healths, eras, spi, afc_avg_stability, afc_dominant_decision)
         
         # 12. Fraktalny konsensus
         fractal_consensus = self._compute_fractal_consensus(decrees, drifts, healths)
@@ -423,11 +483,12 @@ class GeonSynod:
             "avg_drift": avg_drift,
             "avg_health": avg_health,
             "era": aggregated_era,
-            "spi": spi
+            "spi": spi,
+            "afc_avg_stability": afc_avg_stability
         })
         cert = self.kroniki.certyfikuj_synod(f"META_{meta_decree.value}", signatures_all, context_hash)
         
-        # 14. Raport
+        # 14. Raport z AFC
         report = SynodReport(
             meta_decree=meta_decree,
             system_reports=parsed_reports,
@@ -444,7 +505,11 @@ class GeonSynod:
             fractal_consensus=fractal_consensus,
             pressure_index=pressure_index,
             oracle_era_aggregated=aggregated_era,
-            certificate=cert
+            certificate=cert,
+            # ===== NOWE POLA AFC =====
+            afc_average_stability=afc_avg_stability,
+            afc_dominant_decision=afc_dominant_decision,
+            afc_dominant_policy=afc_dominant_policy
         )
 
         # 15. Zapis (chyba że dry-run)
@@ -454,32 +519,38 @@ class GeonSynod:
             
             if meta_decree in [MetaDecree.OMEGA, MetaDecree.BETA] or len(self.history) % 5 == 0:
                 entry = {
-                    "type": "SYNOD_DECREE",
+                    "type": "SYNOD_DECREE_AFC",
                     "report": report.to_dict(),
                     "certificate": cert,
                     "spi": spi,
                     "systems_count": len(system_reports),
+                    "afc_avg_stability": afc_avg_stability,
+                    "afc_dominant_decision": afc_dominant_decision,
                     "timestamp": datetime.now().isoformat()
                 }
-                self.egregor.commit(entry, node_id="GEON_SYNOD")
+                self.egregor.commit(entry, node_id="GEON_SYNOD_AFC")
 
-        self.kroniki.log_event("SYNOD_CONVENED", {
+        self.kroniki.log_event("SYNOD_CONVENED_AFC", {
             "meta_decree": meta_decree.value,
             "spi": round(spi, 4),
             "systems": len(system_reports),
             "omega": omega_count,
             "beta": beta_count,
-            "alpha": alpha_count
+            "alpha": alpha_count,
+            "afc_avg_stability": round(afc_avg_stability, 4),
+            "afc_dominant_decision": afc_dominant_decision
         })
 
         return report
 
     # -------------------------------------------------------------------------
-    # META‑GŁOSOWANIE Z SPI
+    # META‑GŁOSOWANIE Z SPI I AFC
     # -------------------------------------------------------------------------
 
     def _vote_meta_with_spi(self, decrees: List[str], drifts: List[float],
-                           healths: List[float], eras: List[str], spi: float) -> MetaDecree:
+                           healths: List[float], eras: List[str], spi: float,
+                           afc_avg_stability: float = 0.0,
+                           afc_dominant_decision: Optional[str] = None) -> MetaDecree:
         omega_count = decrees.count("DEKRET_OMEGA")
         beta_count = decrees.count("DEKRET_BETA")
         alpha_count = decrees.count("DEKRET_ALPHA")
@@ -487,6 +558,13 @@ class GeonSynod:
 
         avg_drift = sum(drifts) / len(drifts) if drifts else 0.0
         avg_health = sum(healths) / len(healths) if healths else 0.0
+
+        # ===== AFC BOOST =====
+        afc_omega_boost = 0
+        if afc_avg_stability < self.afc_crisis_stability_threshold:
+            afc_omega_boost += 1
+        if afc_dominant_decision in ["ALERT", "HARD_ALERT"]:
+            afc_omega_boost += 1
 
         # 1. SPI – OMEGA
         if spi > self.spi_omega_threshold:
@@ -496,8 +574,8 @@ class GeonSynod:
         if spi > self.spi_beta_threshold:
             return MetaDecree.BETA
 
-        # 3. OMEGA z Rad
-        if omega_count >= self.meta_omega_required:
+        # 3. OMEGA z Rad + AFC
+        if omega_count >= self.meta_omega_required or afc_omega_boost >= 1:
             return MetaDecree.OMEGA
         
         # 4. Ekstremalny dryf lub niskie zdrowie
@@ -506,7 +584,7 @@ class GeonSynod:
         if avg_health < self.health_crisis_threshold:
             return MetaDecree.OMEGA
 
-        # 5. BETA z głosowania
+        # 5. BETA z głosowania + AFC
         if beta_count > 0:
             beta_ratio = beta_count / total
             if beta_ratio >= self.meta_beta_threshold:
@@ -561,6 +639,8 @@ class GeonSynod:
             "status": "SIMULATION",
             "meta_decree": report.meta_decree.value,
             "spi": report.spi,
+            "afc_avg_stability": report.afc_average_stability,
+            "afc_dominant_decision": report.afc_dominant_decision,
             "would_be_saved": False,
             "timestamp": datetime.now().isoformat()
         }
@@ -597,24 +677,36 @@ class GeonSynod:
                 "drift_omega_threshold": self.drift_omega_threshold,
                 "health_crisis_threshold": self.health_crisis_threshold,
                 "spi_omega_threshold": self.spi_omega_threshold,
-                "spi_beta_threshold": self.spi_beta_threshold
+                "spi_beta_threshold": self.spi_beta_threshold,
+                "afc_crisis_stability_threshold": self.afc_crisis_stability_threshold,
+                "afc_spi_boost": self.afc_spi_boost,
+                "afc_alert_boost": self.afc_alert_boost
+            },
+            "integration": {
+                "AFC": True,
+                "ORACLE": True,
+                "GRID": True,
+                "COUNCIL": True
             }
         }
 
 # =============================================================================
-# MOST INTEGRACYJNY
+# MOST INTEGRACYJNY (ROZSZERZONY)
 # =============================================================================
 
 class SynodBridge:
     def __init__(self, synod: GeonSynod):
         self.synod = synod
 
+    # ===== ORYGINALNE METODY (ZACHOWANE) =====
+    
     def get_archetype_context(self) -> Dict[str, Any]:
         status = self.synod.get_status()
         return {
             "tryb": VERSION,
             "historia": status["history_size"],
-            "thresholds": status["thresholds"]
+            "thresholds": status["thresholds"],
+            "integration": status["integration"]
         }
 
     def get_autopilot_state(self) -> Dict[str, Any]:
@@ -627,6 +719,8 @@ class SynodBridge:
                 "systems": last.get("systems_count", 0),
                 "spi": last.get("spi", 0.0),
                 "pressure_index": last.get("pressure_index", 0.0),
+                "afc_avg_stability": last.get("afc_average_stability", 0.0),
+                "afc_dominant_decision": last.get("afc_dominant_decision", "UNKNOWN"),
                 "synod_ready": True
             }
         return {"mode": VERSION, "meta_decree": "NO_DATA", "synod_ready": True}
@@ -641,6 +735,7 @@ class SynodBridge:
                 "meta_decree": last.get("meta_decree", "UNKNOWN"),
                 "spi": last.get("spi", 0.0),
                 "pressure_index": last.get("pressure_index", 0.0),
+                "afc_avg_stability": last.get("afc_average_stability", 0.0),
                 "synod_ready": True
             }
         return {"intent": "SYNOD_DECISION", "confidence": 0.5, "synod_ready": True}
@@ -651,7 +746,7 @@ class SynodBridge:
             "PIECZĘĆ": "AKTYWNA",
             "PERFEKCJA": "AKTYWNA",
             "tryb": VERSION,
-            "synod": "AKTYWNY_V2.0"
+            "synod": "AKTYWNY_V3.0_AFC"
         }
 
     def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
@@ -660,12 +755,37 @@ class SynodBridge:
         for entry in history:
             fragments.append({
                 "source": VERSION,
-                "content": f"Synod: {entry.get('meta_decree', 'UNKNOWN')} | SPI: {entry.get('spi', 0):.3f} | systems: {entry.get('systems_count', 0)}",
+                "content": f"Synod: {entry.get('meta_decree', 'UNKNOWN')} | SPI: {entry.get('spi', 0):.3f} | afc_stab: {entry.get('afc_average_stability', 0):.3f}",
                 "meta_decree": entry.get("meta_decree", "UNKNOWN"),
                 "spi": entry.get("spi", 0.0),
-                "pressure": entry.get("pressure_index", 0.0)
+                "pressure": entry.get("pressure_index", 0.0),
+                "afc_stability": entry.get("afc_average_stability", 0.0)
             })
         return fragments
+
+    # ===== NOWE METODY AFC =====
+
+    def get_afc_context(self) -> Dict[str, Any]:
+        """Zwraca kontekst AFC z ostatniego posiedzenia Synodu."""
+        history = self.synod.get_history(1)
+        if history:
+            last = history[-1]
+            return {
+                "afc_average_stability": last.get("afc_average_stability", 0.0),
+                "afc_dominant_decision": last.get("afc_dominant_decision", "UNKNOWN"),
+                "afc_dominant_policy": last.get("afc_dominant_policy", "UNKNOWN"),
+                "meta_decree": last.get("meta_decree", "UNKNOWN"),
+                "spi": last.get("spi", 0.0)
+            }
+        return {"afc_average_stability": 0.0, "afc_dominant_decision": "UNKNOWN"}
+
+    def get_full_status(self) -> Dict[str, Any]:
+        """Zwraca pełny status – Synod + AFC."""
+        return {
+            "synod": self.synod.get_status(),
+            "afc_context": self.get_afc_context(),
+            "last_report": self.synod.get_history(1)[0] if self.synod.get_history(1) else None
+        }
 
 # =============================================================================
 # DEMONSTRACJA
@@ -673,80 +793,69 @@ class SynodBridge:
 
 def demo():
     print("\n" + "=" * 80)
-    print(f"🜀 {VERSION} — DEMONSTRACJA Z ULEPSZENIAMI")
-    print("SPI | DRIFT MAP | ERA VECTOR | FRAKTALNY KONSENSUS")
+    print(f"🜀 {VERSION} — DEMONSTRACJA Z INTEGRACJĄ AFC")
+    print("SPI | DRIFT MAP | ERA VECTOR | AFC INTEGRATION")
     print("=" * 80 + "\n")
 
     synod = GeonSynod()
     bridge = SynodBridge(synod)
 
-    # Symulacja raportów z 3 systemów
-    system_1 = {
-        "system_id": "DOMINION_PLZ_CORE",
-        "council_decree": "DEKRET_ALPHA",
-        "council_confidence": 0.85,
-        "council_drift": 0.12,
-        "grid_health": 0.92,
-        "anomaly_score": 0.05,
-        "oracle_era": "ERA_STABILNOŚCI",
-        "maya_phase": 3,
-        "dominion_substance_index": 0.72,
-        "dominion_status": "KONSOLIDACJA_NOMINALNA",
-        "crisis_vectors_count": 0,
-        "signatures": ["SIG_PLZ_01"]
-    }
+    # Symulacja raportów z AFC
+    def create_report(system_id, decree, drift, health, era, afc_stab=0.0, afc_dec=None):
+        return {
+            "system_id": system_id,
+            "council_decree": decree,
+            "council_confidence": 0.8,
+            "council_drift": drift,
+            "grid_health": health,
+            "anomaly_score": 0.1,
+            "oracle_era": era,
+            "maya_phase": 3,
+            "dominion_substance_index": 0.7,
+            "dominion_status": "NOMINAL",
+            "crisis_vectors_count": 0,
+            "signatures": [f"SIG_{system_id}"],
+            # ===== AFC DATA =====
+            "afc_stability": afc_stab,
+            "afc_decision": afc_dec,
+            "afc_policy": "MAINTAIN"
+        }
 
-    system_2 = {
-        "system_id": "DOMINION_UGANDA_ZERO",
-        "council_decree": "DEKRET_BETA",
-        "council_confidence": 0.70,
-        "council_drift": 0.38,
-        "grid_health": 0.65,
-        "anomaly_score": 0.35,
-        "oracle_era": "ERA_TRANSFORMACJI",
-        "maya_phase": 5,
-        "dominion_substance_index": 0.45,
-        "dominion_status": "DEFICYT_SUBSTANCJI",
-        "crisis_vectors_count": 1,
-        "signatures": ["SIG_UGA_01"]
-    }
+    print("🔍 TEST 1: SYSTEMY STABILNE + AFC STABILNY → ALPHA")
+    reports1 = [
+        create_report("PLZ", "DEKRET_ALPHA", 0.1, 0.9, "ERA_STABILNOŚCI", 0.8, "NORMAL"),
+        create_report("UGA", "DEKRET_ALPHA", 0.15, 0.85, "ERA_STABILNOŚCI", 0.75, "NORMAL"),
+        create_report("CRI", "DEKRET_ALPHA", 0.12, 0.88, "ERA_STABILNOŚCI", 0.82, "NORMAL")
+    ]
+    report1 = synod.convene(reports1)
+    print(f"   Meta-Dekret: {report1.meta_decree.value} | SPI: {report1.spi:.3f} | AFC avg stab: {report1.afc_average_stability:.3f}")
 
-    system_3 = {
-        "system_id": "DOMINION_CRISTAL_GLOBAL",
-        "council_decree": "DEKRET_OMEGA",
-        "council_confidence": 0.60,
-        "council_drift": 0.55,
-        "grid_health": 0.40,
-        "anomaly_score": 0.78,
-        "oracle_era": "ERA_KRYZYSU",
-        "maya_phase": 6,
-        "dominion_substance_index": 0.28,
-        "dominion_status": "KRYZYS_ZASOBOWY",
-        "crisis_vectors_count": 3,
-        "signatures": ["SIG_CRI_01", "SIG_CRI_02"]
-    }
+    print("\n🔍 TEST 2: SYSTEMY STABILNE + AFC NIESTABILNY (ALERT) → OMEGA")
+    reports2 = [
+        create_report("PLZ", "DEKRET_ALPHA", 0.1, 0.9, "ERA_STABILNOŚCI", 0.2, "ALERT"),
+        create_report("UGA", "DEKRET_ALPHA", 0.15, 0.85, "ERA_STABILNOŚCI", 0.25, "ALERT"),
+        create_report("CRI", "DEKRET_ALPHA", 0.12, 0.88, "ERA_STABILNOŚCI", 0.18, "HARD_ALERT")
+    ]
+    report2 = synod.convene(reports2)
+    print(f"   Meta-Dekret: {report2.meta_decree.value} | SPI: {report2.spi:.3f} | AFC avg stab: {report2.afc_average_stability:.3f}")
 
-    print("🔍 SYMULACJA 3 SYSTEMÓW:")
-    print("   System 1 (PLZ): ALPHA – stabilny")
-    print("   System 2 (Uganda): BETA – transformacja")
-    print("   System 3 (Cristal): OMEGA – kryzys\n")
-
-    report = synod.convene([system_1, system_2, system_3])
-
-    print(f"📊 META‑DEKRET: {report.meta_decree.value}")
-    print(f"   SPI: {report.spi:.3f}")
-    print(f"   Pressure Index: {report.pressure_index:.3f}")
-    print(f"   Drift Map: min={report.drift_map['min']:.3f}, max={report.drift_map['max']:.3f}, median={report.drift_map['median']:.3f}")
-    print(f"   Era Vector: ({report.era_vector[0]:.3f}, {report.era_vector[1]:.3f}, {report.era_vector[2]:.3f})")
-    print(f"   Fraktalny konsensus: {report.fractal_consensus['global']['decisive_factor']}")
-    print(f"   Certyfikat: {report.certificate[:50]}...")
+    print("\n🔍 TEST 3: SYSTEMY MIESZANE + AFC MIESZANE")
+    reports3 = [
+        create_report("PLZ", "DEKRET_ALPHA", 0.1, 0.9, "ERA_STABILNOŚCI", 0.7, "NORMAL"),
+        create_report("UGA", "DEKRET_BETA", 0.35, 0.65, "ERA_TRANSFORMACJI", 0.4, "NORMAL"),
+        create_report("CRI", "DEKRET_OMEGA", 0.55, 0.45, "ERA_KRYZYSU", 0.25, "ALERT")
+    ]
+    report3 = synod.convene(reports3)
+    print(f"   Meta-Dekret: {report3.meta_decree.value} | SPI: {report3.spi:.3f}")
+    print(f"   AFC avg stab: {report3.afc_average_stability:.3f} | AFC dominant decision: {report3.afc_dominant_decision}")
 
     print("\n🔍 TEST DRY-RUN:")
-    dry = synod._simulate([system_1, system_2, system_3])
+    dry = synod._simulate(reports3)
     print(f"   Status: {dry['status']}")
-    print(f"   Predykcja: {dry['meta_decree']} | SPI: {dry['spi']:.3f}")
+    print(f"   Predykcja: {dry['meta_decree']} | SPI: {dry['spi']:.3f} | AFC stab: {dry['afc_avg_stability']:.3f}")
 
-    print("\n🔗 MOSTY INTEGRACYJNE:")
+    print("\n🔗 MOSTY INTEGRACYJNE (AFC):")
+    print(f"   AFC Context: {bridge.get_afc_context()}")
     print(f"   Autopilot: {bridge.get_autopilot_state()}")
     print(f"   Governor: {bridge.get_governor_context()}")
 
