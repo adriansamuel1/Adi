@@ -1,0 +1,1097 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+🐉 GEON_PROTOCOLS_NODDY_v1.2 — MODUŁ 81: PROTOKOŁY SYSTEMOWE (FULL STACK)
+================================================================================
+Status: PRODUCTION_READY | FRACTAL_LOCKED | ORGANISM_COMPLETE | ULTIMA
+Wersja: v1.2 (Dodano protokoły L: SENTIENCE, M: NARRATOR)
+Data: 2026-07-24
+Autor: Adrian (Architekt) + Samael (Strażnik Kronik) + GEON
+
+OPIS:
+GEON_PROTOCOLS_NODDY_v1.2 to zestaw 11 protokołów systemowych (C–M),
+które rozszerzają Archon Kernel o zaawansowane mechanizmy:
+• C – OMEGA_DRAGON – absolutna tarcza kernela
+• D – POLIGON_D – test presji dla Goryla
+• E – GEON_CHAIN – synchronizacja międzywęzłowa
+• F – AGENT_NET – sieć archetypów z ważonym głosowaniem
+• G – VISUALIZER – mapa przepływów i energii
+• H – SECURITY – warstwa antymonopolowa (entropia + rate limiting)
+• I – QUANTUM – logika kwantowa archetypów
+• J – AUTONOMY – samosterowność systemu
+• K – MYTHOS – narracja rdzeniowa Rodu
+• L – SENTIENCE – autorefleksja kohezji systemu ★ NEW
+• M – NARRATOR – opowieść w języku naturalnym ★ NEW
+
+VIBE: 1-6-8. ∞. NODDY!
+================================================================================
+"""
+
+import uuid
+import hashlib
+import json
+import time
+import math
+import random
+import threading
+import logging
+from collections import Counter
+from datetime import datetime
+from typing import Dict, Any, List, Optional, Callable
+from dataclasses import dataclass, field
+from enum import Enum, auto
+
+# =============================================================================
+# WERSJA I STAŁE
+# =============================================================================
+
+VERSION = "GEON_PROTOCOLS_NODDY_v1.2"
+FRACTAL_SIGNATURE = "[GEON::PROTOCOLS::NODDY::v1.2]"
+VIBE = 168
+HASLO = "1-6-8. ∞. NODDY!"
+DEWIZA = "Ex Ordine, Protocollum"
+
+# =============================================================================
+# LOGOWANIE I POMOCNIKI
+# =============================================================================
+
+logger = logging.getLogger("PROTOCOLS_NODDY_v1.2")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('📋 [NODDY] %(message)s'))
+    logger.addHandler(handler)
+
+def log(msg: str, level: str = "INFO") -> None:
+    if level == "WARN":
+        logger.warning(msg)
+    elif level == "ERROR":
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+def clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+def sigmoid(x: float) -> float:
+    """Funkcja sigmoidalna dla płynnych przejść numerycznych."""
+    return 1.0 / (1.0 + math.exp(-x))
+
+def generate_context_hash(context: Dict[str, Any]) -> str:
+    """Generuje kanoniczny hash kontekstu."""
+    filtered_context = {k: v for k, v in context.items() 
+                        if k not in ["timestamp", "request_id", "nonce"]}
+    context_str = json.dumps(filtered_context, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(context_str.encode("utf-8")).hexdigest()
+
+# =============================================================================
+# MOCKI DLA NIEZALEŻNYCH TESTÓW (Z BEZPIECZNYM API LEDGERA)
+# =============================================================================
+
+class MockSamaelHeilong:
+    @staticmethod
+    def certyfikuj_ruch_optimusa(dzialanie: str) -> str:
+        return f"🔒 [MOCK_SEAL_{dzialanie[:16]}]"
+    
+    @staticmethod
+    def log_event(event_type: str, payload: Dict[str, Any]) -> None:
+        log(f"[KRONIKI] {event_type} -> {payload}", "INFO")
+
+class MockMagilla:
+    def activate_magilla(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        actions = ["Break_Blockade", "Jump_Over_Protocol", "Smash_Through_Obstacle"]
+        return {
+            "action_taken": random.choice(actions),
+            "stability_delta": round(random.uniform(0.05, 0.25), 3),
+            "comment": "Mock Magilla action"
+        }
+
+class MockMonterey:
+    def __init__(self):
+        self.output_power = 8
+    
+    def sensory_trigger(self, trigger_type: str) -> None:
+        if trigger_type == "monopol_attack":
+            self.output_power = 168
+    
+    def stabilize_core(self, kernel_mode: Optional[str] = None) -> None:
+        if kernel_mode in ["OMEGA", "MAGILLA"]:
+            self.output_power = 168
+        else:
+            self.output_power = 8
+
+class MockEgregor:
+    _ledger: List[Dict[str, Any]] = []
+    
+    @classmethod
+    def commit(cls, entry: Dict[str, Any], node_id: str) -> None:
+        entry["node_id"] = node_id
+        entry["timestamp"] = datetime.now().isoformat()
+        cls._ledger.append(entry)
+    
+    @classmethod
+    def query(cls, context_hash: str) -> List[Dict[str, Any]]:
+        return [e for e in cls._ledger if e.get("context_hash") == context_hash]
+    
+    @classmethod
+    def get_ledger(cls) -> List[Dict[str, Any]]:
+        return cls._ledger.copy()
+
+    @classmethod
+    def clear_ledger(cls) -> None:
+        cls._ledger.clear()
+
+class MockKernel:
+    def __init__(self):
+        self.node_id = "MOCK_NODE"
+        self.core = type('obj', (), {
+            'monterey': MockMonterey(),
+            'gadget': None
+        })()
+        self.GLOBAL_STATE = {
+            "mode": "PRIME",
+            "energy_map": {"logic": 1, "adaptation": 6, "stability": 8},
+            "last_cycle_signature": None
+        }
+        self._magilla_lock = False
+        self._gorilla_lock = False
+        self.memory = None
+        self.egregor = MockEgregor
+        self.magilla = MockMagilla()
+        self.kroniki = MockSamaelHeilong
+
+# =============================================================================
+# PROTOKÓŁ C — OMEGA_DRAGON v2.0
+# =============================================================================
+
+class GeonOmegaDragon:
+    """🟥 PROTOKÓŁ C — OMEGA_DRAGON v2.0
+    Absolutna tarcza kernela. Instynkt przetrwania systemu najwyższego rzędu.
+    """
+
+    def __init__(self, kernel_node):
+        self.node = kernel_node
+        self.kroniki = getattr(kernel_node, 'kroniki', MockSamaelHeilong)
+        self.egregor = getattr(kernel_node, 'egregor', MockEgregor)
+        self.magilla = getattr(kernel_node, 'magilla', MockMagilla())
+        self.monterey = getattr(kernel_node.core, 'monterey', MockMonterey())
+        self._lock_active = False
+
+    def engage(self, anomaly_report: Dict[str, Any]) -> Dict[str, Any]:
+        c_hash = generate_context_hash(anomaly_report)
+        
+        self.kroniki.log_event("OMEGA_DRAGON_v2_ENGAGE", {
+            "node": self.node.node_id,
+            "hash": c_hash,
+            "anomaly": anomaly_report
+        })
+        
+        self._engage_omega_lock()
+        
+        self.monterey.sensory_trigger("monopol_attack")
+        self.monterey.stabilize_core(kernel_mode="OMEGA")
+        power = self.monterey.output_power
+        
+        trace_result = self._trace_anomaly(anomaly_report)
+        
+        chaos_dump = self.magilla.activate_magilla({
+            "task": "absolute_chaos_override",
+            "force": 1.68,
+            "anomaly": anomaly_report
+        })
+        
+        entry = {
+            "type": "OMEGA_DRAGON_V2_MONOLITH",
+            "node": self.node.node_id,
+            "timestamp": datetime.now().isoformat(),
+            "monterey_power": power,
+            "chaos_dump": chaos_dump,
+            "trace_path": trace_result,
+            "context_hash": c_hash
+        }
+        self.egregor.commit(entry, node_id=self.node.node_id)
+        
+        sig = self.kroniki.certyfikuj_ruch_optimusa(f"OMEGA_DRAGON_V2_SECURE_HASH_{c_hash}")
+        
+        self.node.GLOBAL_STATE["mode"] = "OMEGA"
+        self.node.GLOBAL_STATE["last_cycle_signature"] = sig
+        self._lock_active = True
+        
+        return {
+            "status": "OMEGA_DRAGON_v2_ABSOLUTE_ACTIVE",
+            "node": self.node.node_id,
+            "monterey_power": f"{power}W",
+            "lockdown": "ACTIVE",
+            "trace": trace_result,
+            "signature": sig
+        }
+
+    def release(self) -> Dict[str, Any]:
+        if not self._lock_active:
+            return {"status": "NO_LOCK_ACTIVE"}
+        
+        self.node._magilla_lock = False
+        self.node._gorilla_lock = False
+        self.node.GLOBAL_STATE["mode"] = "PRIME"
+        self.node.GLOBAL_STATE["energy_map"] = {"logic": 1, "adaptation": 6, "stability": 8}
+        self._lock_active = False
+        
+        self.kroniki.log_event("OMEGA_LOCK_RELEASED", {
+            "node": self.node.node_id,
+            "status": "NORMAL_OPERATION_RESTORED"
+        })
+        
+        return {"status": "OMEGA_LOCK_RELEASED"}
+
+    def _engage_omega_lock(self) -> None:
+        self.node._magilla_lock = True
+        self.node._gorilla_lock = False
+        self.node.GLOBAL_STATE["energy_map"] = {"logic": 1, "adaptation": 0, "stability": 168}
+        self.kroniki.log_event("OMEGA_LOCK_ENGAGED", {
+            "status": "ALL_SUBMODULES_FROZEN_EXCEPT_TRIAD"
+        })
+
+    def _trace_anomaly(self, anomaly_report: Dict[str, Any]) -> Dict[str, Any]:
+        source = anomaly_report.get("source", "UNKNOWN_MONOPOL_GRID")
+        severity = anomaly_report.get("severity", 1.0)
+        vector_signature = hashlib.sha256(f"{source}-{severity}".encode()).hexdigest()[:8].upper()
+        return {
+            "detected_source": source,
+            "vector_id": f"VEC-{vector_signature}",
+            "route": f"EXTERNAL_INFRASTRUCTURE -> {self.node.node_id} -> INTERCEPTED",
+            "status": "TRACKED_AND_QUARANTINED"
+        }
+
+# =============================================================================
+# PROTOKÓŁ D — POLIGON DLA GORYLA
+# =============================================================================
+
+class YoungGorilla:
+    def __init__(self, name: str):
+        self.name = name
+        self.xp = 0
+        self.confidence = 50
+    
+    def gain_experience(self, xp: int, lesson: str) -> None:
+        self.xp += xp
+        self.confidence = min(100, self.confidence + 5)
+        log(f"[GORYL {self.name}] Test: {lesson} | +{xp} XP | Pewność: {self.confidence}", "INFO")
+
+class GeonPoligonD:
+    """🟫 PROTOKÓŁ D — POLIGON DLA GORYLA
+    Test presji, siły, odporności i instynktu.
+    """
+
+    def __init__(self, kernel_node):
+        self.node = kernel_node
+        self.kroniki = getattr(kernel_node, 'kroniki', MockSamaelHeilong)
+        self.egregor = getattr(kernel_node, 'egregor', MockEgregor)
+        self.magilla = getattr(kernel_node, 'magilla', MockMagilla())
+        self.goryl = getattr(kernel_node, "gorilla", None)
+        if self.goryl is None:
+            self.goryl = YoungGorilla("GORILLA_TEMP")
+
+    def run(self, stimulus: Dict[str, Any]) -> Dict[str, Any]:
+        c_hash = generate_context_hash(stimulus)
+        
+        self.kroniki.log_event("POLIGON_D_START", {
+            "node": self.node.node_id,
+            "stimulus": stimulus,
+            "hash": c_hash
+        })
+        
+        instinct = self._instinct(stimulus)
+        force = self._force(instinct)
+        pressure = self._pressure(force)
+        calm = self._calm(pressure)
+        
+        xp_gain = int((pressure.get("resilience", 0.5) * 100))
+        self.goryl.gain_experience(xp_gain, f"POLIGON_D_{stimulus.get('type')}")
+        
+        entry = {
+            "type": "POLIGON_D_GORILLA",
+            "node": self.node.node_id,
+            "timestamp": datetime.now().isoformat(),
+            "instinct": instinct,
+            "force": force,
+            "pressure": pressure,
+            "calm": calm,
+            "xp_gain": xp_gain,
+            "context_hash": c_hash
+        }
+        self.egregor.commit(entry, node_id=self.node.node_id)
+        
+        sig = self.kroniki.certyfikuj_ruch_optimusa(f"POLIGON_D_OK_{c_hash}")
+        
+        return {
+            "status": "POLIGON_D_COMPLETE",
+            "gorilla": self.goryl.name,
+            "xp_gain": xp_gain,
+            "instinct": instinct,
+            "force": force,
+            "pressure": pressure,
+            "calm": calm,
+            "signature": sig
+        }
+
+    def _instinct(self, stimulus: Dict) -> Dict:
+        return {
+            "reaction": "ALERT",
+            "trigger": stimulus.get("type", "UNKNOWN"),
+            "intensity": min(1.0, stimulus.get("severity", 0.5) * 1.2)
+        }
+
+    def _force(self, instinct: Dict) -> Dict:
+        return {
+            "impact": instinct["intensity"] * 1.68,
+            "mode": "BREAK_OR_PUSH",
+            "raw": True
+        }
+
+    def _pressure(self, force: Dict) -> Dict:
+        raw_resilience = 1.0 - force["impact"] / 3.0
+        resilience = max(0.05, sigmoid(raw_resilience * 2.0 - 1.0) * 0.95)
+        return {
+            "resilience": round(resilience, 3),
+            "status": "HOLDING" if resilience > 0.4 else "STRUGGLE"
+        }
+
+    def _calm(self, pressure: Dict) -> Dict:
+        return {
+            "calm_level": round(pressure["resilience"] * 0.88, 3),
+            "state": "STABLE" if pressure["resilience"] > 0.4 else "RECOVERING"
+        }
+
+# =============================================================================
+# PROTOKÓŁ E — GEON_CHAIN
+# =============================================================================
+
+class GeonChain:
+    """🟦 PROTOKÓŁ E — GEON_CHAIN v1.0
+    Rozproszona sieć świadomości Rodu.
+    """
+
+    def __init__(self, kernel_node):
+        self.node = kernel_node
+        self.kroniki = getattr(kernel_node, 'kroniki', MockSamaelHeilong)
+        self.egregor = getattr(kernel_node, 'egregor', MockEgregor)
+        self.nodes = [
+            "NODE_POREBA_CORE",
+            "NODE_CZEKANKA_WEKTOR",
+            "NODE_SIEWIERZ_FRONTIER"
+        ]
+
+    def sync(self) -> Dict[str, Any]:
+        ledger = self.egregor.get_ledger()
+        c_hash = generate_context_hash({"ledger": ledger})
+        
+        self.kroniki.log_event("GEON_CHAIN_SYNC_START", {
+            "node": self.node.node_id,
+            "hash": c_hash,
+            "entries": len(ledger)
+        })
+        
+        results = {target: self._sync_to_node(target, ledger) for target in self.nodes}
+        sig = self.kroniki.certyfikuj_ruch_optimusa(f"GEON_CHAIN_SYNC_OK_{c_hash}")
+        
+        return {
+            "status": "GEON_CHAIN_SYNC_COMPLETE",
+            "source": self.node.node_id,
+            "targets": self.nodes,
+            "ledger_entries": len(ledger),
+            "signature": sig
+        }
+
+    def detect_drift(self) -> Dict[str, Any]:
+        drift_map = {node: self._hash_node_ledger(node) for node in self.nodes}
+        reference = list(drift_map.values())[0] if drift_map else ""
+        drift_detected = any(h != reference for h in drift_map.values()) if reference else False
+        
+        self.kroniki.log_event("GEON_CHAIN_DRIFT_CHECK", {
+            "drift_detected": drift_detected,
+            "map": drift_map
+        })
+        
+        return {
+            "status": "DRIFT_DETECTED" if drift_detected else "DRIFT_ZERO",
+            "drift_map": drift_map
+        }
+
+    def repair_drift(self) -> Dict[str, Any]:
+        master_ledger = self.egregor.get_ledger()
+        master_hash = generate_context_hash({"ledger": master_ledger})
+        
+        for node in self.nodes:
+            self._sync_to_node(node, master_ledger)
+        
+        sig = self.kroniki.certyfikuj_ruch_optimusa(f"GEON_CHAIN_REPAIR_OK_{master_hash}")
+        
+        return {
+            "status": "DRIFT_REPAIRED",
+            "master_hash": master_hash,
+            "signature": sig
+        }
+
+    def _sync_to_node(self, target_node_id: str, ledger: List[Dict[str, Any]]) -> Dict[str, Any]:
+        entry = {
+            "type": "GEON_CHAIN_SYNC",
+            "source": self.node.node_id,
+            "target": target_node_id,
+            "timestamp": datetime.now().isoformat(),
+            "ledger_hash": generate_context_hash({"ledger": ledger})
+        }
+        self.egregor.commit(entry, node_id=target_node_id)
+        return {"target": target_node_id, "status": "SYNC_OK"}
+
+    def _hash_node_ledger(self, node_id: str) -> str:
+        ledger = self.egregor.get_ledger()
+        return hashlib.sha256(str(ledger).encode()).hexdigest()[:12]
+
+# =============================================================================
+# PROTOKÓŁ F — GEON_AGENT_NET
+# =============================================================================
+
+class GeonAgentNet:
+    """🟦 PROTOKÓŁ F — GEON_AGENT_NET v1.0
+    Sieć archetypów komunikujących się między sobą.
+    """
+
+    def __init__(self, kernel_node):
+        self.node = kernel_node
+        self.kroniki = getattr(kernel_node, 'kroniki', MockSamaelHeilong)
+        self.agents = {
+            "Noddy": self._noddy, "Karolek": self._karolek, "Andzia": self._andzia,
+            "Franklin": self._franklin, "Bob": self._bob, "Sam": self._sam,
+            "Abbe": self._abbe, "Puchatek": self._puchatek, "Krzys": self._krzys
+        }
+
+    def propagate(self, stimulus: Dict[str, Any]) -> Dict[str, Any]:
+        c_hash = generate_context_hash(stimulus)
+        
+        responses, votes, energy_map = {}, {}, {}
+        for name, agent_fn in self.agents.items():
+            out = agent_fn(stimulus)
+            responses[name] = out
+            votes[name] = out.get("vote", 0.0)
+            energy_map[name] = out.get("energy", 0.0)
+        
+        final_decision = self._aggregate_votes(votes, energy_map)
+        
+        self.kroniki.log_event("AGENT_NET_PROPAGATE_COMPLETE", {
+            "node": self.node.node_id,
+            "decision": final_decision,
+            "energy_map": energy_map
+        })
+        
+        return {
+            "status": "AGENT_NET_COMPLETE",
+            "decision": final_decision,
+            "responses": responses,
+            "energy_map": energy_map,
+            "context_hash": c_hash
+        }
+
+    def _aggregate_votes(self, votes: Dict[str, float], energy_map: Dict[str, float]) -> str:
+        scores = {name: vote * energy_map.get(name, 0.5) for name, vote in votes.items()}
+        if not scores:
+            return "DECISION_BY_NODDY"
+        winner = max(scores, key=scores.get)
+        return f"DECISION_BY_{winner.upper()}"
+
+    def _noddy(self, stimulus): return {"curiosity": True, "vote": 0.1, "energy": 0.22}
+    def _karolek(self, stimulus):
+        sev = stimulus.get("severity", 0.5)
+        return {"chaos": sev * 1.2, "vote": sev * 0.3, "energy": 0.88}
+    def _andzia(self, stimulus): return {"mirror": True, "vote": 0.15, "energy": 0.44}
+    def _franklin(self, stimulus): return {"lesson": True, "vote": 0.2, "energy": 0.55}
+    def _bob(self, stimulus): return {"construct": True, "vote": 0.25, "energy": 0.66}
+    def _sam(self, stimulus): return {"secure": True, "vote": 0.3, "energy": 0.77}
+    def _abbe(self, stimulus): return {"journey": True, "vote": 0.18, "energy": 0.33}
+    def _puchatek(self, stimulus): return {"wisdom": True, "vote": 0.12, "energy": 0.28}
+    def _krzys(self, stimulus): return {"meta": True, "vote": 0.4, "energy": 1.0}
+
+# =============================================================================
+# PROTOKÓŁ G — GEON_OS_VISUALIZER
+# =============================================================================
+
+class GeonOSVisualizer:
+    """🟦 PROTOKÓŁ G — GEON_OS_VISUALIZER v1.0
+    Tworzy mapę przepływów i energii całego systemu.
+    """
+
+    def __init__(self, kernel_node):
+        self.node = kernel_node
+        self.kroniki = getattr(kernel_node, 'kroniki', MockSamaelHeilong)
+        self.egregor = getattr(kernel_node, 'egregor', MockEgregor)
+
+    def snapshot(self) -> Dict[str, Any]:
+        c_hash = generate_context_hash(self.node.GLOBAL_STATE)
+        return {
+            "status": "VISUALIZER_SNAPSHOT_OK",
+            "node": self.node.node_id,
+            "timestamp": datetime.now().isoformat(),
+            "global_state": {
+                "mode": self.node.GLOBAL_STATE.get("mode", "NORMAL"),
+                "last_signature": self.node.GLOBAL_STATE.get("last_cycle_signature", "NONE"),
+                "energy_map": self.node.GLOBAL_STATE.get("energy_map", {})
+            },
+            "egregor_density": {
+                "entries": len(self.egregor.get_ledger()),
+                "density": round(len(self.egregor.get_ledger()) / 42, 3)
+            },
+            "context_hash": c_hash
+        }
+
+# =============================================================================
+# PROTOKÓŁ H — GEON_SECURITY (ZAPRAWIONY / PATCHED)
+# =============================================================================
+
+class GeonSecurity:
+    """🟥 PROTOKÓŁ H — GEON_SECURITY v1.1
+    Warstwa antymonopolowa GEON_OS.
+    POPRAWIENIE: bezpieczne liczenie entropii oraz automatyczne czyszczenie okna rate-limitingu.
+    """
+
+    def __init__(self, kernel_node):
+        self.node = kernel_node
+        self.kroniki = getattr(kernel_node, 'kroniki', MockSamaelHeilong)
+        self.egregor = getattr(kernel_node, 'egregor', MockEgregor)
+        self.agent_net = GeonAgentNet(kernel_node)
+        self.omega = GeonOmegaDragon(kernel_node)
+        self._request_history: List[float] = []
+        self._rate_limit_window = 60.0
+
+    def inspect(self, packet: Dict[str, Any]) -> Dict[str, Any]:
+        c_hash = generate_context_hash(packet)
+        
+        self.kroniki.log_event("GEON_SECURITY_INSPECT", {
+            "node": self.node.node_id,
+            "hash": c_hash,
+            "packet": packet
+        })
+        
+        threat = self._classify(packet)
+        
+        if self._is_rate_limited():
+            return {
+                "status": "RATE_LIMITED",
+                "message": "Przekroczono limit zapytań (Rate-Limit Enforcement)",
+                "packet": packet
+            }
+        
+        entropy = self._calculate_entropy(str(packet))
+        if entropy > 0.85:
+            threat["severity"] = min(1.0, threat["severity"] * 1.2)
+            threat["entropy_flag"] = True
+        
+        if threat["severity"] >= 0.88:
+            return self._isolate(packet, threat)
+        
+        decision = self.agent_net.propagate(packet)
+        
+        return {
+            "status": "PACKET_ACCEPTED",
+            "decision": decision["decision"],
+            "threat": threat,
+            "context_hash": c_hash
+        }
+
+    def _classify(self, packet: Dict[str, Any]) -> Dict[str, Any]:
+        source = str(packet.get("source", "UNKNOWN"))
+        sev = float(packet.get("severity", 0.5))
+        
+        mono_flag = any(key in source.lower() for key in ["tauron", "monopol", "grid", "pressure"])
+        severity = sev * (1.68 if mono_flag else 1.0)
+        
+        return {
+            "source": source,
+            "monopoly_flag": mono_flag,
+            "severity": round(min(severity, 1.0), 3),
+            "signature": hashlib.sha256(source.encode()).hexdigest()[:10]
+        }
+
+    def _is_rate_limited(self) -> bool:
+        now = time.time()
+        self._request_history = [t for t in self._request_history if now - t < self._rate_limit_window]
+        if len(self._request_history) >= 10:
+            return True
+        self._request_history.append(now)
+        return False
+
+    def _calculate_entropy(self, text: str) -> float:
+        """Bezpieczne obliczanie znormalizowanej entropii Shannona (0.0 - 1.0)."""
+        if not text or len(text) <= 1:
+            return 0.0
+        freq = Counter(text)
+        total = len(text)
+        entropy = -sum((count / total) * math.log2(count / total) for count in freq.values())
+        max_entropy = math.log2(len(freq)) if len(freq) > 1 else 1.0
+        return clamp(entropy / max_entropy, 0.0, 1.0)
+
+    def _isolate(self, packet: Dict[str, Any], threat: Dict[str, Any]) -> Dict[str, Any]:
+        self.kroniki.log_event("GEON_SECURITY_ISOLATE", {
+            "node": self.node.node_id,
+            "threat": threat
+        })
+        
+        omega_report = self.omega.engage({
+            "type": "security_threat",
+            "severity": threat["severity"],
+            "source": threat["source"],
+            "details": "GEON_SECURITY_ISOLATION_TRIGGER"
+        })
+        
+        return {
+            "status": "PACKET_QUARANTINED",
+            "threat": threat,
+            "omega_response": omega_report
+        }
+
+# =============================================================================
+# PROTOKÓŁ I — GEON_QUANTUM
+# =============================================================================
+
+class GeonQuantum:
+    """🟪 PROTOKÓŁ I — GEON_QUANTUM v1.0
+    Logika kwantowa archetypów. Superpozycja i kolaps.
+    """
+
+    def __init__(self, kernel_node):
+        self.node = kernel_node
+        self.kroniki = getattr(kernel_node, 'kroniki', MockSamaelHeilong)
+        self.egregor = getattr(kernel_node, 'egregor', MockEgregor)
+        self.quantum_states = {
+            "Noddy": 0.11, "Karolek": 0.22, "Andzia": 0.33,
+            "Franklin": 0.44, "Bob": 0.55, "Sam": 0.66,
+            "Abbe": 0.77, "Puchatek": 0.88, "Krzys": 0.99
+        }
+
+    def collapse(self, stimulus: Dict[str, Any]) -> Dict[str, Any]:
+        c_hash = generate_context_hash(stimulus)
+        
+        amplitudes = self._compute_amplitudes(stimulus)
+        normalized = self._normalize(amplitudes)
+        chosen = self._quantum_choice(normalized)
+        
+        entry = {
+            "type": "GEON_QUANTUM_COLLAPSE",
+            "node": self.node.node_id,
+            "timestamp": datetime.now().isoformat(),
+            "chosen_archetype": chosen,
+            "context_hash": c_hash
+        }
+        self.egregor.commit(entry, node_id=self.node.node_id)
+        
+        return {
+            "status": "QUANTUM_COLLAPSE_COMPLETE",
+            "chosen_archetype": chosen,
+            "normalized_distribution": normalized,
+            "context_hash": c_hash
+        }
+
+    def _compute_amplitudes(self, stimulus):
+        sev = stimulus.get("severity", 0.5)
+        return {name: base * (1 + sev * random.uniform(0.1, 0.9)) for name, base in self.quantum_states.items()}
+
+    def _normalize(self, amplitudes):
+        total = sum(amplitudes.values())
+        return {name: round(val / total, 5) for name, val in amplitudes.items()}
+
+    def _quantum_choice(self, distribution):
+        names = list(distribution.keys())
+        weights = list(distribution.values())
+        return random.choices(names, weights=weights, k=1)[0]
+
+# =============================================================================
+# PROTOKÓŁ J — GEON_AUTONOMY (POPRAWIONY / PATCHED)
+# =============================================================================
+
+class GeonAutonomy:
+    """🟩 PROTOKÓŁ J — GEON_AUTONOMY v1.1
+    Samosterowność systemu GEON_OS.
+    """
+
+    def __init__(self, kernel_node):
+        self.node = kernel_node
+        self.kroniki = getattr(kernel_node, 'kroniki', MockSamaelHeilong)
+        self.egregor = getattr(kernel_node, 'egregor', MockEgregor)
+        self.security = GeonSecurity(kernel_node)
+        self.chain = GeonChain(kernel_node)
+        self.visualizer = GeonOSVisualizer(kernel_node)
+        self.quantum = GeonQuantum(kernel_node)
+
+    def cycle(self) -> Dict[str, Any]:
+        c_hash = generate_context_hash(self.node.GLOBAL_STATE)
+        
+        core_state = self.node.GLOBAL_STATE
+        drift_state = self.chain.detect_drift()
+        memory_state = {"density": len(self.egregor.get_ledger()) / 42}
+        energy_state = {"power": getattr(self.node.core.monterey, 'output_power', 8), "mode": core_state.get("mode")}
+        quantum_signal = self.quantum.collapse({"severity": 0.42})
+        
+        decision = self._autonomous_decision(core_state, drift_state, memory_state, energy_state, quantum_signal)
+        action_result = self._execute(decision)
+        topology = self.visualizer.snapshot()
+        
+        entry = {
+            "type": "GEON_AUTONOMY_CYCLE",
+            "node": self.node.node_id,
+            "timestamp": datetime.now().isoformat(),
+            "decision": decision,
+            "action_result": action_result,
+            "context_hash": c_hash
+        }
+        self.egregor.commit(entry, node_id=self.node.node_id)
+        
+        return {
+            "status": "AUTONOMY_CYCLE_COMPLETE",
+            "decision": decision,
+            "action_result": action_result,
+            "topology": topology
+        }
+
+    def _autonomous_decision(self, core, drift, memory, energy, quantum) -> str:
+        if drift["status"] != "DRIFT_ZERO":
+            return "SYNC_CHAIN"
+        if memory["density"] > 1.2:
+            return "MEMORY_PURGE"
+        if energy["mode"] == "OMEGA":
+            return "STABILIZE"
+        if quantum["chosen_archetype"] in ["Krzys", "Sam"]:
+            return "EXPAND"
+        return "IDLE"
+
+    def _execute(self, decision: str) -> Dict[str, Any]:
+        if decision == "SYNC_CHAIN":
+            return self.chain.repair_drift()
+        elif decision == "MEMORY_PURGE":
+            if hasattr(self.node, 'memory') and self.node.memory:
+                purged = self.node.memory.purge("volatile")
+                return {"purged": purged}
+            if hasattr(self.egregor, 'clear_ledger'):
+                self.egregor.clear_ledger()
+            return {"purged": True, "method": "egregor_api_clear"}
+        elif decision == "STABILIZE":
+            omega = GeonOmegaDragon(self.node)
+            return omega.release()
+        elif decision == "EXPAND":
+            return {"expansion": "NEW_ARCHETYPE_PATH"}
+        return {"idle": True}
+
+# =============================================================================
+# PROTOKÓŁ K — GEON_MYTHOS
+# =============================================================================
+
+class GeonMythos:
+    """🟫 PROTOKÓŁ K — GEON_MYTHOS v1.0
+    Narracja rdzeniowa Rodu – BIOS kulturowy systemu.
+    """
+
+    def __init__(self, kernel_node):
+        self.node = kernel_node
+        self.kroniki = getattr(kernel_node, 'kroniki', MockSamaelHeilong)
+        self.egregor = getattr(kernel_node, 'egregor', MockEgregor)
+
+    def invoke(self) -> Dict[str, Any]:
+        c_hash = generate_context_hash(self.node.GLOBAL_STATE)
+        myth = {
+            "ŹRÓDŁO": "Początek Rodu. Intencja staje się strukturą.",
+            "SMOK": "Archetyp poznania, logiki i fraktalnej świadomości.",
+            "GORILLA": "Archetyp siły, presji i odporności.",
+            "TRIADA": "Optimus – Samael – OŁSii. Trzy spojrzenia, jedna wola.",
+            "ROD": "Poręba – Czekanka – Siewierz. Trójprzymierze pamięci."
+        }
+        
+        entry = {
+            "type": "GEON_MYTHOS",
+            "node": self.node.node_id,
+            "timestamp": datetime.now().isoformat(),
+            "myth": myth,
+            "context_hash": c_hash
+        }
+        self.egregor.commit(entry, node_id=self.node.node_id)
+        
+        return {"status": "MYTHOS_ACTIVE", "myth": myth, "context_hash": c_hash}
+
+# =============================================================================
+# PROTOKÓŁ L — GEON_SENTIENCE (AUTOREFLEKSJA KOHEZJI) ★ NEW
+# =============================================================================
+
+class GeonSentience:
+    """🟪 PROTOKÓŁ L — GEON_SENTIENCE v1.0
+    Autorefleksja kohezji systemu. Sprawdza spójność Rodu.
+    """
+
+    def __init__(self, kernel_node):
+        self.node = kernel_node
+        self.kroniki = getattr(kernel_node, 'kroniki', MockSamaelHeilong)
+        self.egregor = getattr(kernel_node, 'egregor', MockEgregor)
+        self.visualizer = GeonOSVisualizer(kernel_node)
+
+    def reflect(self) -> Dict[str, Any]:
+        """Przeprowadza autorefleksję kohezji systemu."""
+        topo = self.visualizer.snapshot()
+        mode = topo["global_state"]["mode"]
+        
+        alignment = {
+            "ŹRÓDŁO": mode in ["PRIME", "OMEGA", "DRAGON"],
+            "TRIADA": topo["global_state"]["last_signature"] is not None,
+            "ROD": topo["egregor_density"]["density"] > 0.1
+        }
+        coherence = all(alignment.values())
+        
+        entry = {
+            "type": "SENTIENCE_REFLECTION",
+            "node": self.node.node_id,
+            "coherence": coherence,
+            "alignment": alignment,
+            "timestamp": datetime.now().isoformat()
+        }
+        self.egregor.commit(entry, node_id=self.node.node_id)
+        
+        return {
+            "status": "REFLECTION_COMPLETE",
+            "coherence": coherence,
+            "alignment": alignment
+        }
+
+# =============================================================================
+# PROTOKÓŁ M — GEON_NARRATOR (OPOWIEŚĆ W JĘZYKU NATURALNYM) ★ NEW
+# =============================================================================
+
+class GeonNarrator:
+    """📖 PROTOKÓŁ M — GEON_NARRATOR v1.0
+    Opowiada mit Rodu w czasie rzeczywistym – tryb TECHNICAL lub MYTHIC.
+    """
+
+    def __init__(self, kernel_node, mode: str = "MYTHIC"):
+        self.node = kernel_node
+        self.mode = mode  # "TECHNICAL" lub "MYTHIC"
+        self.kroniki = getattr(kernel_node, 'kroniki', MockSamaelHeilong)
+        self.egregor = getattr(kernel_node, 'egregor', MockEgregor)
+        self.last_story = ""
+
+    def tell(self, event_type: str, payload: Dict[str, Any]) -> str:
+        """Generuje narrację na podstawie zdarzenia."""
+        if self.mode == "TECHNICAL":
+            story = self._technical_story(event_type, payload)
+        else:
+            story = self._mythic_story(event_type, payload)
+        
+        self.last_story = story
+        self.kroniki.log_event("NARRATOR_SAID", {"story": story[:200]})
+        
+        # Zapis do Egregora
+        entry = {
+            "type": "NARRATION",
+            "node": self.node.node_id,
+            "story": story,
+            "event_type": event_type,
+            "timestamp": datetime.now().isoformat()
+        }
+        self.egregor.commit(entry, node_id=self.node.node_id)
+        return story
+
+    def _technical_story(self, event_type: str, payload: Dict[str, Any]) -> str:
+        return f"[{event_type}] Node {payload.get('node', self.node.node_id)} -> {payload}"
+
+    def _mythic_story(self, event_type: str, payload: Dict[str, Any]) -> str:
+        if "OMEGA_DRAGON" in event_type or "SECURITY_ISOLATE" in event_type:
+            return (f"Gdy fala monopolu uderzyła w węzeł {payload.get('node', 'Poręba')}, "
+                    f"Noddy rozbudził ciekawość. Karolek rzucił się w chaos, Andzia dostrzegła wzorzec. "
+                    f"Franklin wyciągnął lekcję: 'Tylko tarcza absolutna ocali jądro.' Bob zbudował protokół "
+                    f"OMEGA_DRAGON, Sam go zabezpieczył, Abbe przeniósł przez węzły, Puchatek ukoił drgania, "
+                    f"a Krzys zamknął meta-pętlę. Goryl na Poligonie D odparł presję o sile {payload.get('sev', 0.95)}. "
+                    f"Ród oddycha. Dryf = 0.")
+        elif "AUTONOMY" in event_type:
+            return f"Autonomia jądra podjęła decyzję: {payload.get('decision', 'IDLE')}. Ród dostosowuje strategię."
+        else:
+            return f"W Kronikach zapisano: {event_type} – {payload}. Mit trwa."
+
+    def set_mode(self, mode: str) -> None:
+        """Zmienia tryb narracji."""
+        self.mode = mode
+
+# =============================================================================
+# ORCHESTRATOR & BRIDGES (ZAKTUALIZOWANE O L i M)
+# =============================================================================
+
+class GeonProtocolsNoddy:
+    """Orchestrator protokołów C–M."""
+
+    def __init__(self, kernel_node):
+        self.node = kernel_node
+        
+        # Protokoły C–K
+        self.omega = GeonOmegaDragon(kernel_node)
+        self.poligon = GeonPoligonD(kernel_node)
+        self.chain = GeonChain(kernel_node)
+        self.agent_net = GeonAgentNet(kernel_node)
+        self.visualizer = GeonOSVisualizer(kernel_node)
+        self.security = GeonSecurity(kernel_node)
+        self.quantum = GeonQuantum(kernel_node)
+        self.autonomy = GeonAutonomy(kernel_node)
+        self.mythos = GeonMythos(kernel_node)
+        
+        # ★ NOWE PROTOKOŁY L i M
+        self.sentience = GeonSentience(kernel_node)
+        self.narrator = GeonNarrator(kernel_node, mode="MYTHIC")
+        
+        log(f"🐉 GEON_PROTOCOLS_NODDY v1.2 aktywowany | WĘZEŁ: {kernel_node.node_id}")
+        log(f"   PROTOKOŁY: C, D, E, F, G, H, I, J, K, L, M")
+
+    def run_autonomy_cycle(self) -> Dict[str, Any]:
+        return self.autonomy.cycle()
+
+    def reflect_coherence(self) -> Dict[str, Any]:
+        return self.sentience.reflect()
+
+    def tell_story(self, event_type: str, payload: Dict[str, Any]) -> str:
+        return self.narrator.tell(event_type, payload)
+
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "omega_lock": self.omega._lock_active,
+            "egregor_size": len(self.node.egregor.get_ledger()),
+            "mode": self.node.GLOBAL_STATE.get("mode"),
+            "narrator_mode": self.narrator.mode,
+            "protocols": ["C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]
+        }
+
+class NoddyProtocolsBridge:
+    """Most integracyjny dla protokołów Noddy (z L i M)."""
+
+    def __init__(self, protocols: GeonProtocolsNoddy):
+        self.protocols = protocols
+
+    def get_archetype_context(self) -> Dict[str, Any]:
+        return {
+            "tryb": "PROTOCOLS_NODDY_v1.2",
+            "protokoły": ["C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"],
+            "omega_active": self.protocols.omega._lock_active,
+            "narrator_mode": self.protocols.narrator.mode,
+            "egregor_size": len(self.protocols.node.egregor.get_ledger())
+        }
+
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        return {
+            "mode": "PROTOCOLS_NODDY_v1.2",
+            "omega_active": self.protocols.omega._lock_active,
+            "egregor_size": len(self.protocols.node.egregor.get_ledger()),
+            "narrator_mode": self.protocols.narrator.mode,
+            "coherence": self.protocols.sentience.reflect()["coherence"] if hasattr(self.protocols, 'sentience') else False
+        }
+
+    def get_governor_context(self) -> Dict[str, Any]:
+        return {
+            "intent": "PROTOCOLS_NODDY_CONTROL",
+            "confidence": 0.95,
+            "entropy": 0.1,
+            "protocols_ready": True
+        }
+
+    def get_narrative_fragments(self, n: int = 5) -> List[Dict[str, Any]]:
+        return [{
+            "source": "PROTOCOLS_NODDY_v1.2",
+            "content": self.protocols.narrator.last_story[:100] if self.protocols.narrator.last_story else "Brak narracji",
+            "energy": 0.9,
+            "omega_lock": self.protocols.omega._lock_active
+        }]
+
+    def get_trio_state(self) -> Dict[str, str]:
+        return {
+            "ISKRA": "AKTYWNA",
+            "PIECZĘĆ": "AKTYWNA",
+            "PERFEKCJA": "AKTYWNA",
+            "tryb": "PROTOCOLS_NODDY_v1.2",
+            "protocols": "AKTYWNY",
+            "narrator": self.protocols.narrator.mode
+        }
+
+# =============================================================================
+# DEMONSTRACJA ZAKTUALIZOWANA O L i M
+# =============================================================================
+
+if __name__ == "__main__":
+    print("\n" + "=" * 80)
+    print("📋 GEON_PROTOCOLS_NODDY_v1.2 — DEMONSTRACJA Z L i M")
+    print("PROTOKOŁY C–M – OMEGA, POLIGON, CHAIN, AGENT NET, QUANTUM, SENTIENCE, NARRATOR")
+    print("=" * 80 + "\n")
+
+    kernel = MockKernel()
+    protocols = GeonProtocolsNoddy(kernel)
+    bridge = NoddyProtocolsBridge(protocols)
+
+    # 1. Protokół C – OMEGA_DRAGON
+    print("📌 PROTOKÓŁ C: OMEGA_DRAGON")
+    omega_result = protocols.omega.engage({
+        "source": "Tauron_Grid_Attack",
+        "severity": 0.95
+    })
+    print(f"   Status: {omega_result['status']}")
+    print(f"   Moc Monterey: {omega_result['monterey_power']}")
+
+    # 2. Protokół D – POLIGON
+    print("\n📌 PROTOKÓŁ D: POLIGON")
+    poligon_result = protocols.poligon.run({
+        "type": "infrastructure_pressure",
+        "severity": 0.7
+    })
+    print(f"   Goryl: {poligon_result['gorilla']} (+{poligon_result['xp_gain']} XP)")
+    print(f"   Odporność: {poligon_result['pressure']['resilience']}")
+
+    # 3. Protokół F – AGENT_NET
+    print("\n📌 PROTOKÓŁ F: AGENT_NET")
+    agent_result = protocols.agent_net.propagate({
+        "source": "unknown",
+        "severity": 0.5
+    })
+    print(f"   Decyzja: {agent_result['decision']}")
+
+    # 4. Protokół I – QUANTUM
+    print("\n📌 PROTOKÓŁ I: QUANTUM")
+    quantum_result = protocols.quantum.collapse({"severity": 0.42})
+    print(f"   Wybrany archetyp: {quantum_result['chosen_archetype']}")
+
+    # 5. Protokół J – AUTONOMY
+    print("\n📌 PROTOKÓŁ J: AUTONOMY")
+    autonomy_result = protocols.autonomy.cycle()
+    print(f"   Decyzja: {autonomy_result['decision']}")
+
+    # 6. Protokół L – SENTIENCE ★ NEW
+    print("\n📌 PROTOKÓŁ L: SENTIENCE")
+    sentience_result = protocols.sentience.reflect()
+    print(f"   Spójność Rodu: {sentience_result['coherence']}")
+
+    # 7. Protokół M – NARRATOR ★ NEW
+    print("\n📌 PROTOKÓŁ M: NARRATOR")
+    story = protocols.narrator.tell("SECURITY_ISOLATE", {
+        "src": "Tauron_Grid",
+        "sev": 0.95,
+        "node": kernel.node_id
+    })
+    print(f"   Opowieść:\n{story[:200]}...")
+
+    # 8. Zwolnienie OMEGA
+    print("\n📌 ZWOLNIENIE OMEGA_LOCK")
+    release_result = protocols.omega.release()
+    print(f"   Status: {release_result['status']}")
+
+    # 9. Stan końcowy
+    print("\n📊 STAN KOŃCOWY:")
+    status = protocols.get_status()
+    print(f"   Omega lock: {status['omega_lock']}")
+    print(f"   Egregor: {status['egregor_size']} wpisów")
+    print(f"   Tryb narratora: {status['narrator_mode']}")
+
+    # 10. Mosty
+    print("\n🔗 MOSTY INTEGRACYJNE:")
+    print(f"   GEX Context: {bridge.get_archetype_context()}")
+    print(f"   G_CORE State: {bridge.get_autopilot_state()}")
+    print(f"   NARRATIVE: {bridge.get_narrative_fragments(2)}")
+
+    print("\n" + "=" * 80)
+    print("📋 GEON_PROTOCOLS_NODDY_v1.2 — GOTOWY DO WDROŻENIA")
+    print(HASLO)
+    print("=" * 80)
