@@ -1,0 +1,357 @@
+import asyncio
+import hashlib
+import json
+import logging
+import math
+import time
+import threading
+import heapq
+from collections import deque
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
+from typing import Dict, List, Any, Optional, Tuple, Union
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] (Autostrada33) %(message)s")
+logger = logging.getLogger("Autostrada33")
+
+
+class Autostrada33Engine:
+    def __init__(
+        self,
+        arms_config: Dict[str, Any],
+        pipeline_order: Optional[List[str]] = None,
+        max_shadow_traces: int = 10000,
+        max_dead_letter_size: int = 200,
+        max_queue_size: int = 1000,
+        breaker_threshold: float = 0.5,
+        breaker_cooldown_ticks: int = 50,
+        arm_timeout_sec: float = 2.0,
+        dead_letter_file: str = "dead_letter_backup.json"
+    ):
+        self.arms: Dict[str, Any] = arms_config
+        self.pipeline_order: List[str] = pipeline_order or ["C", "B", "F", "ARM", "H"]
+        self.arm_timeout_sec = float(arm_timeout_sec)
+
+        self._validate_arms_contracts()
+
+        self._state_lock = threading.Lock()
+        self._file_lock = threading.Lock()
+        
+        # Pula wątków do wykonywania synchronicznych ramion z timeoutem
+        self._executor = ThreadPoolExecutor(max_workers=8, thread_name_prefix="Autostrada33_Arm")
+
+        # Kolejki i struktury danych
+        self.intent_heap: List[Tuple[int, float, Dict[str, Any]]] = []
+        self.emergency_queue: deque = deque(maxlen=max_queue_size)
+        self.retry_queue: deque = deque(maxlen=max_queue_size)
+        self.pending_queue: deque = deque(maxlen=max_queue_size)
+
+        self.dead_letter_queue: deque = deque(maxlen=max_dead_letter_size)
+        self.shadow_traces: deque = deque(maxlen=max_shadow_traces)
+        self.cb_history: deque = deque(maxlen=100)
+
+        # Konfiguracja Circuit Breaker
+        self.breaker_threshold = breaker_threshold
+        self.breaker_cooldown_ticks = breaker_cooldown_ticks
+        self.is_circuit_open = False
+        self._clean_ticks_counter = 0
+
+        # Metryki wydajnościowe
+        self.avg_latency_ms: float = 0.0
+        self.processed_count: int = 0
+        self.failed_count: int = 0
+        self.dead_letter_file = dead_letter_file
+
+    def _validate_arms_contracts(self) -> None:
+        """Weryfikuje poprawność przekazanej konfiguracji ramion i kontraktów metod."""
+        for arm_key, arm_obj in self.arms.items():
+            if arm_obj is None:
+                raise ValueError(f"[Config Error] Ramię '{arm_key}' w arms_config jest None.")
+
+        for stage in self.pipeline_order:
+            if stage not in self.arms and stage not in ["ARM", "H"]:
+                raise KeyError(f"[Config Error] Etap potoku '{stage}' w pipeline_order nie istnieje w arms_config.")
+
+        required_contracts = {
+            "C": ["prefilter_intent"],
+            "B": ["run_cycle"],
+            "F": ["stabilize"]
+        }
+        for arm_key, methods in required_contracts.items():
+            if arm_key in self.arms:
+                module = self.arms[arm_key]
+                for method in methods:
+                    if not hasattr(module, method):
+                        raise AttributeError(f"[Contract Error] Ramię '{arm_key}' nie posiada wymaganej metody '{method}'")
+        logger.info("✅ Weryfikacja kontraktów i potoku v2.5 zakończona pomyślnie.")
+
+    def _payload_fingerprint(self, payload: Dict[str, Any]) -> str:
+        """Generuje unikalny odcisk cyfrowy SHA-256 dla ładunku intencji."""
+        try:
+            serialized = json.dumps(payload, sort_keys=True, default=str)
+        except (TypeError, ValueError):
+            serialized = str(payload)
+        return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+    def submit_intent_request(self, payload: Any, priority: int = 5, is_emergency: bool = False) -> bool:
+        """Przyjmuje intencję do obsłużenia w magistrali."""
+        if not isinstance(payload, dict):
+            logger.warning(f"Odrzucono intencję: payload musi być dict, odebrano {type(payload)}")
+            return False
+
+        try:
+            priority = int(priority)
+        except (ValueError, TypeError):
+            priority = 5
+
+        intent_data = {
+            "id": self._payload_fingerprint(payload),
+            "payload": payload,
+            "priority": priority,
+            "created_at": time.time(),
+            "retry_count": 0,
+            "override_retries": 0
+        }
+
+        with self._state_lock:
+            if is_emergency:
+                self.emergency_queue.append(intent_data)
+            else:
+                heapq.heappush(self.intent_heap, (-priority, intent_data["created_at"], intent_data))
+
+        return True
+
+    def _save_dead_letter_sync(self, item: Dict[str, Any]) -> None:
+        """Thread-safe synchroniczny zapis uszkodzonych lub przekroczonych intencji do pliku JSON."""
+        with self._file_lock:
+            try:
+                data_to_append = []
+                try:
+                    with open(self.dead_letter_file, "r", encoding="utf-8") as f:
+                        data_to_append = json.load(f)
+                        if not isinstance(data_to_append, list):
+                            data_to_append = []
+                except (FileNotFoundError, json.JSONDecodeError):
+                    data_to_append = []
+
+                data_to_append.append(item)
+
+                with open(self.dead_letter_file, "w", encoding="utf-8") as f:
+                    json.dump(data_to_append, f, indent=2, default=str)
+            except PermissionError:
+                logger.error(f"❌ PermissionError przy zapisie dead-letter: {self.dead_letter_file}")
+            except OSError as os_err:
+                logger.error(f"❌ Błąd I/O ({os_err.strerror}) przy zapisie dead-letter.")
+            except Exception as e:
+                logger.error(f"❌ Nieoczekiwany błąd przy zapisie Dead-Letter: {e}")
+
+    async def _save_dead_letter_async(self, item: Dict[str, Any]) -> None:
+        """Asynchroniczne przekierowanie zapisu plikowego do osobnego wątku."""
+        await asyncio.to_thread(self._save_dead_letter_sync, item)
+
+    def export_state(self) -> Dict[str, Any]:
+        """Eksportuje migawkę bieżącego stanu silnika."""
+        with self._state_lock:
+            return {
+                "timestamp": time.time(),
+                "shadow_traces": list(self.shadow_traces),
+                "cb_history": list(self.cb_history),
+                "is_circuit_open": self.is_circuit_open,
+                "avg_latency_ms": self.avg_latency_ms,
+                "processed_count": self.processed_count,
+                "failed_count": self.failed_count
+            }
+
+    def import_state(self, state_data: Dict[str, Any]) -> None:
+        """Odztwarza stan magistrali z dostarczonej migawki."""
+        with self._state_lock:
+            if "shadow_traces" in state_data:
+                self.shadow_traces = deque(state_data["shadow_traces"], maxlen=self.shadow_traces.maxlen)
+            if "cb_history" in state_data:
+                self.cb_history = deque(state_data["cb_history"], maxlen=self.cb_history.maxlen)
+            self.is_circuit_open = state_data.get("is_circuit_open", False)
+            self.avg_latency_ms = state_data.get("avg_latency_ms", 0.0)
+            self.processed_count = state_data.get("processed_count", 0)
+            self.failed_count = state_data.get("failed_count", 0)
+            logger.info("💾 Stan Autostrada33 v2.5 został zaimportowany.")
+
+    def _execute_arm_with_timeout(self, func, *args, **kwargs) -> Any:
+        """Wykonuje funkcję ramienia w puli wątków z twardym limitem czasu."""
+        future = self._executor.submit(func, *args, **kwargs)
+        try:
+            return future.result(timeout=self.arm_timeout_sec)
+        except FutureTimeoutError:
+            logger.error(f"⏱️ Timeout {self.arm_timeout_sec}s dla ramienia {func}.")
+            raise TimeoutError(f"Arm execution timed out after {self.arm_timeout_sec}s")
+
+    def _evaluate_circuit_breaker(self, failed: bool) -> None:
+        """Ewaluuje metryki błędów i w razie potrzeby otwiera/zamyka obwód ochronny."""
+        with self._state_lock:
+            self.cb_history.append(1 if failed else 0)
+
+            if not failed:
+                self._clean_ticks_counter += 1
+            else:
+                self._clean_ticks_counter = 0
+
+            if self.is_circuit_open and self._clean_ticks_counter >= self.breaker_cooldown_ticks:
+                self.is_circuit_open = False
+                logger.info(f"🔄 CircuitBreaker reset po {self.breaker_cooldown_ticks} czystych tickach.")
+
+            if len(self.cb_history) >= 10:
+                failure_ratio = sum(self.cb_history) / len(self.cb_history)
+                logger.debug(f"[CircuitBreaker] Ratio={failure_ratio:.2f} | Open={self.is_circuit_open}")
+                if failure_ratio > self.breaker_threshold:
+                    if not self.is_circuit_open:
+                        logger.error(f"🚨 CircuitBreaker AKTYWOWANY! Błędy: {failure_ratio:.2%}")
+                    self.is_circuit_open = True
+                elif failure_ratio <= (self.breaker_threshold / 2):
+                    self.is_circuit_open = False
+
+    def _collect_batch(self, max_batch_size: int = 4) -> List[Dict[str, Any]]:
+        """Pobiera paczkę intencji z uwzględnieniem priorytetów: Emergency -> Retry -> Normal Heap."""
+        batch = []
+        with self._state_lock:
+            # 1. Priorytet absolutny: Kolejka awaryjna
+            while self.emergency_queue and len(batch) < max_batch_size:
+                batch.append(self.emergency_queue.popleft())
+
+            # 2. Priorytet wtórny: Ponowienia (Retry)
+            while self.retry_queue and len(batch) < max_batch_size:
+                batch.append(self.retry_queue.popleft())
+
+            # 3. Standardowy Heap (zbieranie jednorodnych typów w ramach jednej paczki)
+            while self.intent_heap and len(batch) < max_batch_size:
+                _, _, item = heapq.heappop(self.intent_heap)
+                if batch:
+                    first_type = batch[0]["payload"].get("type")
+                    current_type = item["payload"].get("type")
+                    if first_type != current_type:
+                        # Odłóż na heap jeśli typ ładunku różni się od pozostałych w paczce
+                        heapq.heappush(self.intent_heap, (-item["priority"], item["created_at"], item))
+                        break
+                batch.append(item)
+
+        return batch
+
+    def _update_latency(self, elapsed_ms: float) -> None:
+        """Wylicza wygładzoną wykładniczo średnią latencję cyklu (EMA)."""
+        if math.isnan(elapsed_ms) or math.isinf(elapsed_ms) or elapsed_ms < 0:
+            elapsed_ms = 0.0
+
+        with self._state_lock:
+            self.processed_count += 1
+            alpha = 0.1
+            self.avg_latency_ms = (alpha * elapsed_ms) + ((1 - alpha) * self.avg_latency_ms)
+
+    def execute_pipeline_cycle(self) -> Dict[str, Any]:
+        """Pojedynczy, synchroniczny cykl wykonawczy potoku Autostrada33."""
+        if self.is_circuit_open:
+            self._evaluate_circuit_breaker(failed=False)
+            return {"status": "CIRCUIT_OPEN", "processed": 0}
+
+        batch = self._collect_batch()
+        if not batch:
+            self._evaluate_circuit_breaker(failed=False)
+            return {"status": "IDLE", "processed": 0}
+
+        start_time = time.time()
+        processed_in_cycle = 0
+        has_failure = False
+
+        for item in batch:
+            # Kontrola limity retries przy trybie nadpisania
+            if item.get("override_active", False):
+                item["override_retries"] = item.get("override_retries", 0) + 1
+                if item["override_retries"] > 5:
+                    logger.error(f"Przekroczono limit override retry (max 5) dla ID {item['id']}. Zrzut do Dead-Letter.")
+                    self._save_dead_letter_sync(item)
+                    has_failure = True
+                    with self._state_lock:
+                        self.failed_count += 1
+                    continue
+
+            current_payload = item["payload"]
+            pipeline_success = True
+
+            # Przejście przez wszystkie zdefiniowane etapy
+            for stage in self.pipeline_order:
+                arm = self.arms.get(stage)
+
+                if arm is None and stage not in ["ARM", "H"]:
+                    continue
+
+                try:
+                    if current_payload is None:
+                        logger.warning(f"Potok przerwany: Ramię '{stage}' otrzymało None dla ID {item['id']}.")
+                        pipeline_success = False
+                        break
+
+                    if stage == "C":
+                        current_payload = self._execute_arm_with_timeout(arm.prefilter_intent, current_payload)
+                    elif stage == "B":
+                        current_payload = self._execute_arm_with_timeout(arm.run_cycle, current_payload)
+                    elif stage == "F":
+                        meta_info = {"source": "Autostrada33_v2.5", "priority": item["priority"]}
+                        res_f = self._execute_arm_with_timeout(arm.stabilize, current_payload, meta=meta_info)
+
+                        if isinstance(res_f, dict):
+                            current_payload["f_stabilized"] = res_f.get("stabilized_text", "")
+                            current_payload["f_metrics"] = res_f.get("metrics", {})
+                        elif isinstance(res_f, str):
+                            current_payload["f_stabilized"] = res_f
+                        else:
+                            current_payload = res_f
+
+                    elif stage == "ARM":
+                        if isinstance(current_payload, dict):
+                            current_payload["armillaria_validated"] = True
+                    elif stage == "H":
+                        if isinstance(current_payload, dict):
+                            current_payload["heilong_executed"] = True
+
+                except Exception as ex:
+                    logger.error(f"Błąd/Timeout w ramieniu '{stage}' dla ID {item['id']}: {ex}")
+                    pipeline_success = False
+                    break
+
+            # Obsługa wyników przetworzenia
+            if pipeline_success and current_payload is not None:
+                processed_in_cycle += 1
+                item["final_payload"] = current_payload
+                with self._state_lock:
+                    self.shadow_traces.append(item)
+            else:
+                has_failure = True
+                with self._state_lock:
+                    self.failed_count += 1
+                item["retry_count"] += 1
+                if item["retry_count"] <= 3:
+                    with self._state_lock:
+                        self.retry_queue.append(item)
+                else:
+                    self._save_dead_letter_sync(item)
+
+        elapsed_ms = (time.time() - start_time) * 1000.0
+        self._update_latency(elapsed_ms)
+        self._evaluate_circuit_breaker(failed=has_failure)
+
+        return {
+            "status": "OK",
+            "processed": processed_in_cycle,
+            "failed": self.failed_count,
+            "latency_ms": elapsed_ms
+        }
+
+    async def run_async_loop(self, interval_sec: float = 0.05):
+        """Asynchroniczna pętla magistrali uruchamiająca cykle w podanym interwale."""
+        if interval_sec <= 0:
+            logger.warning(f"Nieprawidłowy interval_sec ({interval_sec}). Ustawiono 0.05s.")
+            interval_sec = 0.05
+
+        logger.info(f"🚀 Autostrada33 v2.5 uruchomiona (interval={interval_sec}s).")
+        try:
+            while True:
+                await asyncio.to_thread(self.execute_pipeline_cycle)
+                await asyncio.sleep(interval_sec)
+        except asyncio.CancelledError:
+            logger.info("🛑 Zatrzymano pętlę async Autostrada33.")
